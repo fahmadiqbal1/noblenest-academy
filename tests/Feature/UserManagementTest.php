@@ -12,7 +12,14 @@ class UserManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Disable CSRF middleware for feature tests
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
     public function parent_can_register_and_add_child_profile()
     {
         // Register as parent

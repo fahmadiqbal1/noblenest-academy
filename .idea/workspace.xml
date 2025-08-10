@@ -5,94 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7bac15c-2441-4a7d-8b98-d98e73fe097c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copilotDiffState.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.junie/guidelines.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/noblenest-academy/app/Http/Controllers/AuthController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/noblenest-academy/app/Http/Controllers/Parent/ChildController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/noblenest-academy/app/Models/User.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/noblenest-academy/database/migrations/2025_08_10_000000_add_role_parent_id_to_users_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/noblenest-academy/routes/web.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/noblenest-academy/tests/Feature/UserManagementTest.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/ActivityController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/Admin/ActivityController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/Admin/CurriculumController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/Admin/ModuleController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/Admin/QuestionController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/Admin/QuizController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/AuthController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/PaymentController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/QuizController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Controllers/SettingsController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Http/Middleware/EnsureSubscriptionActive.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Activity.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Module.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Option.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Payment.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Question.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Quiz.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/QuizAnswer.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/QuizAttempt.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Subscription.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/User.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/factories/ActivityFactory.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_100000_create_users_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_200000_add_age_preferred_language_to_users_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_210000_create_activities_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_220000_create_modules_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_230000_create_activity_module_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_240000_create_activity_user_progress_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_250000_create_assessment_tables.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/migrations/2025_08_09_260000_create_subscriptions_payments_table.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/database/seeders/SampleActivitySeeder.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/activities/drawing.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/activities/index.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/activities/puzzle.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/activities/tracing.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/_form.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/analytics.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/create.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/curriculum.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/edit.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/index.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/partials/form.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/activities/report_email.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/modules/_form.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/modules/create.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/modules/edit.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/modules/index.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/questions/_form.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/questions/create.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/questions/edit.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/quizzes/_form.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/quizzes/create.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/quizzes/edit.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/quizzes/index.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/auth/login.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/auth/register.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/checkout.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/parent/children.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/parent/edit_child.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/privacy.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/profile.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/quizzes/result.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/quizzes/take.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/terms.blade.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/Feature/ActivityManagementTest.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/noblenest-academy/README_CI.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/noblenest-academy/phpunit.xml.dist" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/noblenest-academy/tests/Feature/SmokeTest.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/app/Models/Course.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/app/Models/Course.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/_form.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/_form.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/create.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/create.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/edit.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/edit.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/index.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/admin/courses/index.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/resources/views/home.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/home.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/resources/views/layouts/app.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/resources/views/layouts/app.blade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scaffolding/lms/routes/web.append.php" beforeDir="false" afterPath="$PROJECT_DIR$/scaffolding/lms/routes/web.append.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/Feature/UserManagementTest.php" beforeDir="false" afterPath="$PROJECT_DIR$/tests/Feature/UserManagementTest.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -412,7 +326,7 @@
       <workItem from="1754739123969" duration="365000" />
       <workItem from="1754739500391" duration="6943000" />
       <workItem from="1754755374179" duration="20360000" />
-      <workItem from="1754794679464" duration="2330000" />
+      <workItem from="1754794679464" duration="4054000" />
     </task>
     <servers />
   </component>

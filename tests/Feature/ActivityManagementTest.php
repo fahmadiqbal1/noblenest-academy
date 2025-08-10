@@ -12,7 +12,7 @@ class ActivityManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function activities_can_be_listed_and_filtered()
     {
         Activity::factory()->create([
@@ -50,4 +50,3 @@ class ActivityManagementTest extends TestCase
         $response->assertDontSee('Counting with Abacus');
     }
 }
-
