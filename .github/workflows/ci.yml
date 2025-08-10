@@ -1,0 +1,219 @@
+name: CI
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            noblenest-academy/vendor
+            ~/.composer/cache
+          key: ${{ runner.os }}-php-${{ hashFiles('noblenest-academy/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install PHP dependencies
+        working-directory: noblenest-academy
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare environment
+        working-directory: noblenest-academy
+        run: |
+          cp -n .env.testing .env || cp -n .env.example .env || true
+          php artisan key:generate --ansi
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --no-interaction --force
+
+      - name: Run backend tests
+        working-directory: noblenest-academy
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test --no-interaction
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: noblenest-academy/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('noblenest-academy/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install NPM dependencies
+        working-directory: noblenest-academy
+        run: npm ci
+
+      - name: Build frontend assets
+        working-directory: noblenest-academy
+        run: npm run build
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+      # Uses GitHub's checkout action to clone the repository
+      # so we can run Composer, NPM, and tests.
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            noblenest-academy/vendor
+            ~/.composer/cache
+          key: ${{ runner.os }}-php-${{ hashFiles('noblenest-academy/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install PHP dependencies
+        working-directory: noblenest-academy
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare environment
+        working-directory: noblenest-academy
+        run: |
+          cp -n .env.testing .env || cp -n .env.example .env || true
+          php artisan key:generate --ansi
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --no-interaction --force
+
+      - name: Run backend tests
+        working-directory: noblenest-academy
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test --no-interaction
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: noblenest-academy/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('noblenest-academy/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install NPM dependencies
+        working-directory: noblenest-academy
+        run: npm ci
+
+      - name: Build frontend assets
+        working-directory: noblenest-academy
+        run: npm run build
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            noblenest-academy/vendor
+            ~/.composer/cache
+          key: ${{ runner.os }}-php-${{ hashFiles('noblenest-academy/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install PHP dependencies
+        working-directory: noblenest-academy
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare environment
+        working-directory: noblenest-academy
+        run: |
+          cp -n .env.testing .env || cp -n .env.example .env || true
+          php artisan key:generate --ansi
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --no-interaction --force
+
+      - name: Run backend tests
+        working-directory: noblenest-academy
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test --no-interaction
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: noblenest-academy/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('noblenest-academy/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install NPM dependencies
+        working-directory: noblenest-academy
+        run: npm ci
+
+      - name: Build frontend assets
+        working-directory: noblenest-academy
+        run: npm run build

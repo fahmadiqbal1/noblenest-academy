@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+// Root-level artisan shim for Noble Nest Academy
+// Allows running `php artisan ...` from the repository root by delegating
+// to the Laravel app located in ./noblenest-academy
+
+$laravelDir = __DIR__ . DIRECTORY_SEPARATOR . 'noblenest-academy';
+$artisanPath = $laravelDir . DIRECTORY_SEPARATOR . 'artisan';
+
+if (!is_dir($laravelDir) || !file_exists($artisanPath)) {
+    fwrite(STDERR, "Laravel app not found at $laravelDir.\n".
+        "Make sure the Laravel app exists (composer create-project) or run scripts/install_lms_scaffold.php.\n");
+    exit(1);
+}
+
+chdir($laravelDir);
+require $artisanPath;
