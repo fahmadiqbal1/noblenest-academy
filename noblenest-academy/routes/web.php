@@ -18,6 +18,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class);
 });
 
+// Admin Curriculum Explorer
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'index'])->name('curriculum');
+});
+
+// Add admin analytics routes
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::post('analytics/report', [\App\Http\Controllers\Admin\AnalyticsController::class, 'reportEmail'])->name('analytics.reportEmail');
+    Route::get('analytics/most-liked', [\App\Http\Controllers\Admin\AnalyticsController::class, 'mostLiked'])->name('analytics.mostLiked');
+    Route::get('analytics/monthly-completions', [\App\Http\Controllers\Admin\AnalyticsController::class, 'monthlyCompletions'])->name('analytics.monthlyCompletions');
+});
+
 // Authentication routes
 Route::get('/register', [\App\Http\Controllers\AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register']);
@@ -99,3 +112,8 @@ Route::post('/theme-toggle', function () {
     return response()->noContent();
 })->name('theme.toggle');
 // === Noble Nest LMS routes END ===
+
+// In routes/web.php, add resourceful routes for admin activity management
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('activities', \App\Http\Controllers\Admin\ActivityController::class)->except(['show', 'index']);
+});
