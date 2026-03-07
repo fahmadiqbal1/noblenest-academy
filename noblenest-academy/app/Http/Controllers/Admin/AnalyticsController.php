@@ -54,9 +54,9 @@ class AnalyticsController extends Controller
     public function monthlyCompletions(Request $request)
     {
         $rows = \DB::table('activity_user_progress')
-            ->selectRaw("strftime('%Y-%m', completed_at) as month, count(*) as completions")
+            ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
             ->whereNotNull('completed_at')
-            ->groupByRaw("strftime('%Y-%m', completed_at)")
+            ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
             ->orderBy('month')
             ->get();
 
@@ -87,9 +87,9 @@ class AnalyticsController extends Controller
         $totalActivities  = Activity::count();
 
         $monthlyCompletions = \DB::table('activity_user_progress')
-            ->selectRaw("strftime('%Y-%m', completed_at) as month, count(*) as completions")
+            ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
             ->whereNotNull('completed_at')
-            ->groupByRaw("strftime('%Y-%m', completed_at)")
+            ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
             ->orderBy('month')
             ->get();
 

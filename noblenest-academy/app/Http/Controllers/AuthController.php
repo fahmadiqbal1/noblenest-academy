@@ -20,20 +20,29 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in(['Parent', 'Admin'])],
+            'role'     => ['required', Rule::in(['Parent', 'Admin', 'Teacher', 'Student'])],
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'role'     => $validated['role'],
         ]);
 
         Auth::login($user);
+
+        // Role-based redirect after registration
+        if ($user->role === 'Teacher') {
+            return redirect()->route('teacher.dashboard');
+        }
+        if ($user->role === 'Student') {
+            return redirect()->route('marketplace.index');
+        }
+
         return redirect('/');
     }
 
@@ -53,6 +62,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            $user = Auth::user();
+            if ($user->role === 'Teacher') {
+                return redirect()->route('teacher.dashboard');
+            }
+            if ($user->role === 'Student') {
+                return redirect()->route('marketplace.index');
+            }
             return redirect('/');
         }
 

@@ -24,7 +24,9 @@
         <div class="mb-3">
             <label for="role" class="form-label">{{ I18n::get('register_as') }}</label>
             <select class="form-select" id="role" name="role" required>
-                <option value="Parent" {{ old('role') == 'Parent' ? 'selected' : '' }}>{{ I18n::get('parent') }}</option>
+                <option value="Parent" {{ old('role') == 'Parent' ? 'selected' : '' }}>{{ I18n::get('parent') }} — Monitor my child's learning</option>
+                <option value="Teacher" {{ old('role', request('role')) == 'Teacher' ? 'selected' : '' }}>Teacher — Offer online courses</option>
+                <option value="Student" {{ old('role', request('role')) == 'Student' ? 'selected' : '' }}>Student — Find &amp; join courses</option>
                 <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>{{ I18n::get('admin') }}</option>
             </select>
         </div>

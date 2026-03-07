@@ -49,4 +49,41 @@ class User extends Authenticatable
             'age' => 'integer',
         ];
     }
+
+    // ------------------------------------------------------------------
+    // Teacher relationships
+    // ------------------------------------------------------------------
+
+    public function teacherCourses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\TeacherCourse::class, 'teacher_id');
+    }
+
+    // ------------------------------------------------------------------
+    // Student relationships
+    // ------------------------------------------------------------------
+
+    public function teacherEnrollments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\TeacherEnrollment::class, 'student_id');
+    }
+
+    public function enrolledCourses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            \App\Models\TeacherCourse::class,
+            'teacher_enrollments',
+            'student_id',
+            'teacher_course_id'
+        )->wherePivot('status', 'active');
+    }
+
+    // ------------------------------------------------------------------
+    // Children (existing)
+    // ------------------------------------------------------------------
+
+    public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\User::class, 'parent_id');
+    }
 }

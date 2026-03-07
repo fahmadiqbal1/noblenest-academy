@@ -50,6 +50,7 @@
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="/noble">{{ I18n::get('welcome') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('marketplace.index') }}"><i class="bi bi-shop"></i> Marketplace</a></li>
                 <li class="nav-item"><a class="nav-link" href="/admin/courses">{{ I18n::get('admin_courses') }}</a></li>
                 @auth
                     <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-circle"></i> {{ I18n::get('profile') }}</a></li>
@@ -58,6 +59,15 @@
                         <li class="nav-item"><a class="nav-link" href="/admin/courses/create">{{ I18n::get('add_course') }}</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.analytics.index') }}"><i class="bi bi-bar-chart-line"></i> Analytics</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.orchestrator.index') }}"><i class="bi bi-robot"></i> Orchestrator</a></li>
+                    @endif
+                    @if(auth()->user()->role === 'Teacher')
+                        <li class="nav-item"><a class="nav-link" href="{{ route('teacher.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('teacher.courses.index') }}"><i class="bi bi-book"></i> My Courses</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('teacher.courses.create') }}"><i class="bi bi-plus-circle"></i> New Course</a></li>
+                    @endif
+                    @if(auth()->user()->role === 'Student')
+                        <li class="nav-item"><a class="nav-link" href="{{ route('marketplace.index') }}"><i class="bi bi-shop"></i> Browse Courses</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('student.my-courses') }}"><i class="bi bi-book-open"></i> My Learning</a></li>
                     @endif
                     {{-- Teacher/Student course sections are not implemented yet; hiding to avoid 404s --}}
                     {{--
