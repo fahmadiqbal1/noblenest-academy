@@ -16,9 +16,10 @@ This repository contains two things in the same directory tree:
 
 ### Prerequisites
 
-- PHP 8.2+ with extensions: `pdo`, `pdo_sqlite`, `openssl`, `mbstring`, `tokenizer`,
+- PHP 8.2+ with extensions: `pdo`, `pdo_mysql`, `openssl`, `mbstring`, `tokenizer`,
   `xml`, `ctype`, `json`, `bcmath`, `fileinfo`
 - [Composer](https://getcomposer.org) 2.x
+- **MySQL 8.0+** (or MariaDB 10.6+)
 - Node.js 18+ & npm (for front-end assets)
 
 ### Setup (from the repo root)
@@ -28,12 +29,32 @@ This repository contains two things in the same directory tree:
 cd noblenest-academy
 composer install
 
-# 2. Create your environment file (SQLite – zero config, no DB server required)
+# 2. Create your environment file
 cp .env.example .env
 php artisan key:generate
+```
 
-# 3. Create the SQLite database file and run all migrations + seeds
-touch database/database.sqlite
+Edit `noblenest-academy/.env` and set your MySQL credentials:
+
+```dotenv
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=noblenest
+DB_USERNAME=noblenest
+DB_PASSWORD=your_password
+```
+
+Create the database in MySQL first:
+
+```sql
+CREATE DATABASE noblenest CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'noblenest'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON noblenest.* TO 'noblenest'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+```bash
+# 3. Run all migrations and seed demo users
 php artisan migrate --seed
 
 # 4. Build front-end assets (optional – skip if you don't need Vite dev assets)
@@ -42,8 +63,6 @@ npm install && npm run build
 # 5. Start the dev server — open http://localhost:8000 in your browser
 php artisan serve
 ```
-
-> On Windows (PowerShell) use `New-Item database\database.sqlite` instead of `touch`.
 
 ### Default login credentials
 
@@ -69,21 +88,6 @@ php artisan serve
 # Same as running inside noblenest-academy/
 cd noblenest-academy && php artisan migrate
 ```
-
-### Using MySQL instead of SQLite
-
-Edit `noblenest-academy/.env` and replace the SQLite block with:
-
-```dotenv
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=noblenest
-DB_USERNAME=noblenest
-DB_PASSWORD=noblenest_secret
-```
-
-Create the database and user in MySQL first, then re-run `php artisan migrate --seed`.
 
 ---
 

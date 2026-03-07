@@ -87,27 +87,19 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Retrieve monthly completion counts in a DB-agnostic way.
-     * MySQL uses DATE_FORMAT; SQLite uses strftime.
+     * Retrieve monthly completion counts grouped by YYYY-MM.
+     * Grouping is done in PHP so the query works on both MySQL (production)
+     * and SQLite (test environment) without any DB-specific raw SQL.
      */
     private function queryMonthlyCompletions(): \Illuminate\Support\Collection
     {
-        $driver = \DB::getDriverName();
-
-        if ($driver === 'sqlite') {
-            return \DB::table('activity_user_progress')
-                ->selectRaw("strftime('%Y-%m', completed_at) as month, count(*) as completions")
-                ->whereNotNull('completed_at')
-                ->groupByRaw("strftime('%Y-%m', completed_at)")
-                ->orderBy('month')
-                ->get();
-        }
-
         return \DB::table('activity_user_progress')
-            ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
             ->whereNotNull('completed_at')
-            ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
-            ->orderBy('month')
-            ->get();
+            ->pluck('completed_at')
+            ->map(fn ($ts) => \Illuminate\Support\Carbon::parse($ts)->format('Y-m'))
+            ->countBy()
+            ->sortKeys()
+            ->map(fn ($count, $month) => (object) ['month' => $month, 'completions' => $count])
+            ->values();
     }
 }

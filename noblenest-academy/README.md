@@ -2,16 +2,45 @@
 
 ## Quick Start
 
+### Prerequisites
+
+- PHP 8.2+ (extensions: `pdo`, `pdo_mysql`, `openssl`, `mbstring`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`)
+- [Composer](https://getcomposer.org) 2.x
+- MySQL 8.0+ (or MariaDB 10.6+)
+- Node.js 18+ & npm (for front-end assets)
+
+### Setup
+
 ```bash
 # 1. Install PHP dependencies
 composer install
 
-# 2. Create environment file (SQLite — zero config, no DB server required)
+# 2. Create and configure your environment file
 cp .env.example .env
 php artisan key:generate
+```
 
-# 3. Create the SQLite database and run all migrations + seeds
-touch database/database.sqlite   # Windows: New-Item database\database.sqlite
+Edit `.env` and set your MySQL credentials:
+
+```dotenv
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=noblenest
+DB_USERNAME=noblenest
+DB_PASSWORD=your_password
+```
+
+Create the database in MySQL first:
+
+```sql
+CREATE DATABASE noblenest CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'noblenest'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON noblenest.* TO 'noblenest'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+```bash
+# 3. Run all migrations and seed demo users
 php artisan migrate --seed
 
 # 4. (Optional) Build front-end assets
@@ -31,21 +60,6 @@ All passwords are **`Password1!`**
 | Teacher | teacher@noblenest.test      |
 | Parent  | parent@noblenest.test       |
 | Student | student@noblenest.test      |
-
-## Using MySQL instead of SQLite
-
-Edit `.env` and replace the `DB_CONNECTION=sqlite` line with:
-
-```dotenv
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=noblenest
-DB_USERNAME=noblenest
-DB_PASSWORD=noblenest_secret
-```
-
-Then re-run `php artisan migrate --seed`.
 
 ---
 
