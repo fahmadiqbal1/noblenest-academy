@@ -4,13 +4,56 @@
 // Allows running `php artisan ...` from the repository root by delegating
 // to the Laravel app located in ./noblenest-academy
 
-$laravelDir = __DIR__ . DIRECTORY_SEPARATOR . 'noblenest-academy';
-$artisanPath = $laravelDir . DIRECTORY_SEPARATOR . 'artisan';
+$laravelDir   = __DIR__ . DIRECTORY_SEPARATOR . 'noblenest-academy';
+$artisanPath  = $laravelDir . DIRECTORY_SEPARATOR . 'artisan';
+$vendorPath   = $laravelDir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 if (!is_dir($laravelDir) || !file_exists($artisanPath)) {
     fwrite(STDERR, "Laravel app not found at $laravelDir.\n".
         "Make sure the Laravel app exists (composer create-project) or run scripts/install_lms_scaffold.php.\n");
     exit(1);
+}
+
+// -----------------------------------------------------------------------
+// Ensure Composer dependencies are installed before delegating.
+// Without vendor/autoload.php PHP would throw a cryptic fatal error.
+// -----------------------------------------------------------------------
+if (!file_exists($vendorPath)) {
+    fwrite(STDOUT, "\n");
+    fwrite(STDOUT, "  Noble Nest Academy — Composer dependencies not yet installed.\n");
+    fwrite(STDOUT, "  Installing now (this only happens once)...\n\n");
+
+    $composerBin = 'composer';
+    // On Windows, check for composer.bat / composer.phar on PATH as well
+    if (PHP_OS_FAMILY === 'Windows') {
+        $composerBin = trim(shell_exec('where composer 2>NUL') ?: '') !== '' ? 'composer' : null;
+    } else {
+        $composerBin = trim(shell_exec('which composer 2>/dev/null') ?: '') !== '' ? 'composer' : null;
+    }
+
+    if ($composerBin === null) {
+        fwrite(STDERR, "  ERROR: Composer is not installed or not on your PATH.\n\n");
+        fwrite(STDERR, "  Please install Composer from https://getcomposer.org, then run:\n\n");
+        fwrite(STDERR, "      cd noblenest-academy\n");
+        fwrite(STDERR, "      composer install\n\n");
+        fwrite(STDERR, "  After that, re-run your artisan command.\n\n");
+        exit(1);
+    }
+
+    $oldDir = getcwd();
+    chdir($laravelDir);
+    passthru("$composerBin install", $exitCode);
+    chdir($oldDir);
+
+    if ($exitCode !== 0 || !file_exists($vendorPath)) {
+        fwrite(STDERR, "\n  ERROR: composer install failed.\n\n");
+        fwrite(STDERR, "  Please run the following manually, then retry:\n\n");
+        fwrite(STDERR, "      cd noblenest-academy\n");
+        fwrite(STDERR, "      composer install\n\n");
+        exit(1);
+    }
+
+    fwrite(STDOUT, "\n  Dependencies installed successfully.\n\n");
 }
 
 chdir($laravelDir);

@@ -1,13 +1,69 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Noble Nest Academy — Laravel Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Quick Start
 
-## About Laravel
+### Prerequisites
+
+- PHP 8.2+ (extensions: `pdo`, `pdo_mysql`, `openssl`, `mbstring`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`)
+- [Composer](https://getcomposer.org) 2.x
+- MySQL 8.0+ (or MariaDB 10.6+)
+- Node.js 18+ & npm (for front-end assets)
+
+### Setup
+
+```bash
+# 1. Install PHP dependencies
+composer install
+
+# 2. Create and configure your environment file
+cp .env.example .env
+php artisan key:generate
+```
+
+Edit `.env` and set your MySQL credentials:
+
+```dotenv
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=noblenest
+DB_USERNAME=noblenest
+DB_PASSWORD=your_password
+```
+
+Create the database in MySQL first:
+
+```sql
+CREATE DATABASE noblenest CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'noblenest'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON noblenest.* TO 'noblenest'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+```bash
+# 3. Run all migrations and seed demo users
+php artisan migrate --seed
+
+# 4. (Optional) Build front-end assets
+npm install && npm run build
+
+# 5. Start the dev server — visit http://localhost:8000
+php artisan serve
+```
+
+## Default Login Credentials
+
+All passwords are **`Password1!`**
+
+| Role    | Email                       |
+|---------|-----------------------------|
+| Admin   | admin@noblenest.test        |
+| Teacher | teacher@noblenest.test      |
+| Parent  | parent@noblenest.test       |
+| Student | student@noblenest.test      |
+
+---
+
+
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
