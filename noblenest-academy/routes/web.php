@@ -14,7 +14,7 @@ Route::post('/ai/assistant/message', [\App\Http\Controllers\ChatController::clas
     ->name('ai.assistant.message');
 
 // Admin — Course management (basic CRUD)
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class);
 });
 
@@ -113,7 +113,77 @@ Route::post('/theme-toggle', function () {
 })->name('theme.toggle');
 // === Noble Nest LMS routes END ===
 
-// In routes/web.php, add resourceful routes for admin activity management
+// Admin activity management
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('activities', \App\Http\Controllers\Admin\ActivityController::class)->except(['show', 'index']);
+});
+
+// Onboarding
+Route::middleware(['auth'])->group(function () {
+    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
+// AI Orchestrator
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('orchestrator', [\App\Http\Controllers\Admin\OrchestratorController::class, 'index'])->name('orchestrator.index');
+    Route::post('orchestrator/dispatch', [\App\Http\Controllers\Admin\OrchestratorController::class, 'dispatchJob'])->name('orchestrator.dispatch');
+    Route::post('orchestrator/providers', [\App\Http\Controllers\Admin\OrchestratorController::class, 'storeProvider'])->name('orchestrator.storeProvider');
+    Route::delete('orchestrator/providers/{provider}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyProvider'])->name('orchestrator.destroyProvider');
+    Route::post('orchestrator/providers/{provider}/toggle', [\App\Http\Controllers\Admin\OrchestratorController::class, 'toggleProvider'])->name('orchestrator.toggleProvider');
+    Route::post('orchestrator/jobs/{job}/approve', [\App\Http\Controllers\Admin\OrchestratorController::class, 'approve'])->name('orchestrator.approve');
+    Route::post('orchestrator/jobs/{job}/reject', [\App\Http\Controllers\Admin\OrchestratorController::class, 'reject'])->name('orchestrator.reject');
+    Route::post('orchestrator/jobs/{job}/retry', [\App\Http\Controllers\Admin\OrchestratorController::class, 'retryJob'])->name('orchestrator.retry');
+    Route::delete('orchestrator/jobs/{job}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyJob'])->name('orchestrator.destroyJob');
+    Route::get('orchestrator/scan', [\App\Http\Controllers\Admin\OrchestratorController::class, 'scanCurriculum'])->name('orchestrator.scan');
+});
+
+// ===========================================================================
+// TEACHER & STUDENT MARKETPLACE EXTENSION
+// ===========================================================================
+
+// --- Public: marketplace (no auth needed) ---
+Route::get('/marketplace', [\App\Http\Controllers\Student\MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/{course:slug}', [\App\Http\Controllers\Student\MarketplaceController::class, 'show'])->name('marketplace.show');
+
+// --- Invite link (auth redirects to register if not logged in) ---
+Route::get('/invite/{token}', [\App\Http\Controllers\Student\EnrollmentController::class, 'joinViaInvite'])->name('invite.join');
+
+// --- Student routes ---
+Route::middleware(['auth', 'role:Student'])->prefix('student')->name('student.')->group(function () {
+    Route::get('my-courses', [\App\Http\Controllers\Student\EnrollmentController::class, 'myCourses'])->name('my-courses');
+    Route::get('courses/{course:slug}', [\App\Http\Controllers\Student\MarketplaceController::class, 'show'])->name('course.show');
+    Route::get('courses/{course:slug}/checkout', [\App\Http\Controllers\Student\EnrollmentController::class, 'checkout'])->name('enroll.checkout');
+    Route::post('courses/{course:slug}/enroll', [\App\Http\Controllers\Student\EnrollmentController::class, 'enroll'])->name('enroll');
+});
+
+// --- Teacher routes ---
+Route::middleware(['auth', 'role:Teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    Route::get('dashboard', [\App\Http\Controllers\Teacher\DashboardController::class, 'index'])->name('dashboard');
+
+    // Course CRUD
+    Route::get('courses', [\App\Http\Controllers\Teacher\CourseController::class, 'index'])->name('courses.index');
+    Route::get('courses/create', [\App\Http\Controllers\Teacher\CourseController::class, 'create'])->name('courses.create');
+    Route::post('courses', [\App\Http\Controllers\Teacher\CourseController::class, 'store'])->name('courses.store');
+    Route::get('courses/{course}', [\App\Http\Controllers\Teacher\CourseController::class, 'show'])->name('courses.show');
+    Route::get('courses/{course}/edit', [\App\Http\Controllers\Teacher\CourseController::class, 'edit'])->name('courses.edit');
+    Route::put('courses/{course}', [\App\Http\Controllers\Teacher\CourseController::class, 'update'])->name('courses.update');
+    Route::delete('courses/{course}', [\App\Http\Controllers\Teacher\CourseController::class, 'destroy'])->name('courses.destroy');
+    Route::post('courses/{course}/publish', [\App\Http\Controllers\Teacher\CourseController::class, 'togglePublish'])->name('courses.publish');
+
+    // Sessions
+    Route::post('courses/{course}/sessions', [\App\Http\Controllers\Teacher\SessionController::class, 'store'])->name('sessions.store');
+    Route::post('sessions/{session}/start', [\App\Http\Controllers\Teacher\SessionController::class, 'start'])->name('sessions.start');
+    Route::post('sessions/{session}/end', [\App\Http\Controllers\Teacher\SessionController::class, 'end'])->name('sessions.end');
+    Route::post('sessions/{session}/cancel', [\App\Http\Controllers\Teacher\SessionController::class, 'cancel'])->name('sessions.cancel');
+
+    // Invite links
+    Route::post('courses/{course}/invite-links', [\App\Http\Controllers\Teacher\InviteLinkController::class, 'store'])->name('invite-links.store');
+    Route::delete('invite-links/{link}', [\App\Http\Controllers\Teacher\InviteLinkController::class, 'destroy'])->name('invite-links.destroy');
+});
+
+// --- Classroom (Teacher + enrolled Student) ---
+Route::middleware(['auth'])->prefix('classroom')->name('classroom.')->group(function () {
+    Route::get('{roomId}', [\App\Http\Controllers\ClassroomController::class, 'room'])->name('room');
+    Route::get('{roomId}/participants', [\App\Http\Controllers\ClassroomController::class, 'participants'])->name('participants');
 });

@@ -15,12 +15,24 @@ class RoleMiddleware
      * @param  string  $role
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, string ...$roles)
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
+        if (!Auth::check()) {
             abort(403, 'Unauthorized action.');
         }
-        return $next($request);
+
+        $userRole = Auth::user()->role;
+
+        // Accept a single role string or comma-separated list via pipe separator
+        foreach ($roles as $role) {
+            foreach (explode('|', $role) as $r) {
+                if ($userRole === trim($r)) {
+                    return $next($request);
+                }
+            }
+        }
+
+        abort(403, 'Unauthorized action.');
     }
 }
 

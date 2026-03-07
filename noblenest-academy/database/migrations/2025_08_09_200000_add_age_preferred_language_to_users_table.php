@@ -10,10 +10,10 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'age')) {
-                $table->unsignedTinyInteger('age')->nullable()->after('parent_id');
+                $table->unsignedTinyInteger('age')->nullable();
             }
             if (!Schema::hasColumn('users', 'preferred_language')) {
-                $table->string('preferred_language', 10)->nullable()->after('age');
+                $table->string('preferred_language', 10)->nullable();
             }
         });
     }

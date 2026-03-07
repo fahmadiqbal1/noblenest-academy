@@ -25,5 +25,10 @@ class Module extends Model
     {
         return $this->belongsToMany(Activity::class, 'activity_module');
     }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class)->orderBy('order');
+    }
 }
 
