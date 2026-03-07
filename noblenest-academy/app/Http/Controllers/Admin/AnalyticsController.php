@@ -88,11 +88,23 @@ class AnalyticsController extends Controller
 
     /**
      * Retrieve monthly completion counts grouped by YYYY-MM.
-     * Grouping is done in PHP so the query works on both MySQL (production)
-     * and SQLite (test environment) without any DB-specific raw SQL.
+     *
+     * MySQL (production) — aggregation is pushed to the database for efficiency.
+     * Any other driver (e.g. SQLite in tests) — timestamps are grouped in PHP,
+     * avoiding driver-specific raw SQL.
      */
     private function queryMonthlyCompletions(): \Illuminate\Support\Collection
     {
+        if (\DB::getDriverName() === 'mysql') {
+            return \DB::table('activity_user_progress')
+                ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
+                ->whereNotNull('completed_at')
+                ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
+                ->orderBy('month')
+                ->get();
+        }
+
+        // Fallback for non-MySQL drivers: group in PHP.
         return \DB::table('activity_user_progress')
             ->whereNotNull('completed_at')
             ->pluck('completed_at')
