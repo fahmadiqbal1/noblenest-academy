@@ -53,12 +53,7 @@ class AnalyticsController extends Controller
 
     public function monthlyCompletions(Request $request)
     {
-        $rows = \DB::table('activity_user_progress')
-            ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
-            ->whereNotNull('completed_at')
-            ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
-            ->orderBy('month')
-            ->get();
+        $rows = $this->queryMonthlyCompletions();
 
         return response()->json($rows);
     }
@@ -86,13 +81,33 @@ class AnalyticsController extends Controller
         $totalSkills      = $skills->count();
         $totalActivities  = Activity::count();
 
-        $monthlyCompletions = \DB::table('activity_user_progress')
+        $monthlyCompletions = $this->queryMonthlyCompletions();
+
+        return [$coverage, $topLiked, $totalSkills, $totalActivities, $monthlyCompletions];
+    }
+
+    /**
+     * Retrieve monthly completion counts in a DB-agnostic way.
+     * MySQL uses DATE_FORMAT; SQLite uses strftime.
+     */
+    private function queryMonthlyCompletions(): \Illuminate\Support\Collection
+    {
+        $driver = \DB::getDriverName();
+
+        if ($driver === 'sqlite') {
+            return \DB::table('activity_user_progress')
+                ->selectRaw("strftime('%Y-%m', completed_at) as month, count(*) as completions")
+                ->whereNotNull('completed_at')
+                ->groupByRaw("strftime('%Y-%m', completed_at)")
+                ->orderBy('month')
+                ->get();
+        }
+
+        return \DB::table('activity_user_progress')
             ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
             ->whereNotNull('completed_at')
             ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
             ->orderBy('month')
             ->get();
-
-        return [$coverage, $topLiked, $totalSkills, $totalActivities, $monthlyCompletions];
     }
 }

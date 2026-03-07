@@ -1,13 +1,55 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Noble Nest Academy — Laravel Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Quick Start
 
-## About Laravel
+```bash
+# 1. Install PHP dependencies
+composer install
+
+# 2. Create environment file (SQLite — zero config, no DB server required)
+cp .env.example .env
+php artisan key:generate
+
+# 3. Create the SQLite database and run all migrations + seeds
+touch database/database.sqlite   # Windows: New-Item database\database.sqlite
+php artisan migrate --seed
+
+# 4. (Optional) Build front-end assets
+npm install && npm run build
+
+# 5. Start the dev server — visit http://localhost:8000
+php artisan serve
+```
+
+## Default Login Credentials
+
+All passwords are **`Password1!`**
+
+| Role    | Email                       |
+|---------|-----------------------------|
+| Admin   | admin@noblenest.test        |
+| Teacher | teacher@noblenest.test      |
+| Parent  | parent@noblenest.test       |
+| Student | student@noblenest.test      |
+
+## Using MySQL instead of SQLite
+
+Edit `.env` and replace the `DB_CONNECTION=sqlite` line with:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=noblenest
+DB_USERNAME=noblenest
+DB_PASSWORD=noblenest_secret
+```
+
+Then re-run `php artisan migrate --seed`.
+
+---
+
+
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 

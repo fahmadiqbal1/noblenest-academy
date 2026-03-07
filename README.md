@@ -1,6 +1,95 @@
-# Noble Nest Academy: GitHub Repo Fetcher
+# Noble Nest Academy LMS
 
-This project provides a minimal PHP CLI script to fetch (download) an entire GitHub repository and place it into a local directory while preserving the original structure.
+## Quick Start (for developers)
+
+This repository contains two things in the same directory tree:
+
+1. **Root meta-layer** – a shim `artisan` and helper scripts that let you run
+   `php artisan <command>` from the repo root without `cd`-ing into the app folder.
+2. **`noblenest-academy/` subfolder** – the actual Laravel 12 application.
+
+> **Why the nested folder?**  
+> The outer layer is a scaffolding/fetch wrapper (see *GitHub Repo Fetcher* section
+> below). The real app lives inside `noblenest-academy/`. The root-level `artisan`
+> shim automatically delegates every command to `noblenest-academy/artisan`, so you
+> never need to change directory manually.
+
+### Prerequisites
+
+- PHP 8.2+ with extensions: `pdo`, `pdo_sqlite`, `openssl`, `mbstring`, `tokenizer`,
+  `xml`, `ctype`, `json`, `bcmath`, `fileinfo`
+- [Composer](https://getcomposer.org) 2.x
+- Node.js 18+ & npm (for front-end assets)
+
+### Setup (from the repo root)
+
+```bash
+# 1. Install PHP dependencies
+cd noblenest-academy
+composer install
+
+# 2. Create your environment file (SQLite – zero config, no DB server required)
+cp .env.example .env
+php artisan key:generate
+
+# 3. Create the SQLite database file and run all migrations + seeds
+touch database/database.sqlite
+php artisan migrate --seed
+
+# 4. Build front-end assets (optional – skip if you don't need Vite dev assets)
+npm install && npm run build
+
+# 5. Start the dev server — open http://localhost:8000 in your browser
+php artisan serve
+```
+
+> On Windows (PowerShell) use `New-Item database\database.sqlite` instead of `touch`.
+
+### Default login credentials
+
+All passwords are **`Password1!`**
+
+| Role    | Email                       |
+|---------|-----------------------------|
+| Admin   | admin@noblenest.test        |
+| Teacher | teacher@noblenest.test      |
+| Parent  | parent@noblenest.test       |
+| Student | student@noblenest.test      |
+
+### Running artisan from the repo root (shortcut)
+
+The root `artisan` shim proxies every command into the inner app, so these are
+equivalent:
+
+```bash
+# From repo root
+php artisan migrate
+php artisan serve
+
+# Same as running inside noblenest-academy/
+cd noblenest-academy && php artisan migrate
+```
+
+### Using MySQL instead of SQLite
+
+Edit `noblenest-academy/.env` and replace the SQLite block with:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=noblenest
+DB_USERNAME=noblenest
+DB_PASSWORD=noblenest_secret
+```
+
+Create the database and user in MySQL first, then re-run `php artisan migrate --seed`.
+
+---
+
+## GitHub Repo Fetcher (meta-layer)
+
+This project also provides a minimal PHP CLI script to fetch (download) an entire GitHub repository and place it into a local directory while preserving the original structure.
 
 By default, it fetches the public repository:
 
