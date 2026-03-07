@@ -75,7 +75,7 @@
         <canvas id="coverageChart" height="120"></canvas>
     </div>
 </div>
-@push('scripts')
+@section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 const ctx = document.getElementById('coverageChart').getContext('2d');
@@ -99,5 +99,5 @@ new Chart(ctx, {
     }
 });
 </script>
-@endpush
+@endsection
 @endsection

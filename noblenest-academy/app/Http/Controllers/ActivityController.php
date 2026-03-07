@@ -104,6 +104,14 @@ class ActivityController extends Controller
         return view('activities.tracing', compact('activity'));
     }
 
+    public function showDrawing(Activity $activity)
+    {
+        if ($activity->activity_type !== 'drawing') {
+            abort(404);
+        }
+        return view('activities.drawing', compact('activity'));
+    }
+
     public function showPuzzle(Activity $activity)
     {
         if ($activity->activity_type !== 'puzzle') {

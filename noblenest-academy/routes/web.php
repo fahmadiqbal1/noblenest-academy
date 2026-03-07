@@ -113,7 +113,27 @@ Route::post('/theme-toggle', function () {
 })->name('theme.toggle');
 // === Noble Nest LMS routes END ===
 
-// In routes/web.php, add resourceful routes for admin activity management
+// Admin activity management
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('activities', \App\Http\Controllers\Admin\ActivityController::class)->except(['show', 'index']);
+});
+
+// Onboarding
+Route::middleware(['auth'])->group(function () {
+    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
+// AI Orchestrator
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('orchestrator', [\App\Http\Controllers\Admin\OrchestratorController::class, 'index'])->name('orchestrator.index');
+    Route::post('orchestrator/dispatch', [\App\Http\Controllers\Admin\OrchestratorController::class, 'dispatchJob'])->name('orchestrator.dispatch');
+    Route::post('orchestrator/providers', [\App\Http\Controllers\Admin\OrchestratorController::class, 'storeProvider'])->name('orchestrator.storeProvider');
+    Route::delete('orchestrator/providers/{provider}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyProvider'])->name('orchestrator.destroyProvider');
+    Route::post('orchestrator/providers/{provider}/toggle', [\App\Http\Controllers\Admin\OrchestratorController::class, 'toggleProvider'])->name('orchestrator.toggleProvider');
+    Route::post('orchestrator/jobs/{job}/approve', [\App\Http\Controllers\Admin\OrchestratorController::class, 'approve'])->name('orchestrator.approve');
+    Route::post('orchestrator/jobs/{job}/reject', [\App\Http\Controllers\Admin\OrchestratorController::class, 'reject'])->name('orchestrator.reject');
+    Route::post('orchestrator/jobs/{job}/retry', [\App\Http\Controllers\Admin\OrchestratorController::class, 'retryJob'])->name('orchestrator.retry');
+    Route::delete('orchestrator/jobs/{job}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyJob'])->name('orchestrator.destroyJob');
+    Route::get('orchestrator/scan', [\App\Http\Controllers\Admin\OrchestratorController::class, 'scanCurriculum'])->name('orchestrator.scan');
 });

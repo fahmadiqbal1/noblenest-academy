@@ -56,6 +56,8 @@
                     @if(auth()->user()->role === 'Admin')
                         <li class="nav-item"><a class="nav-link" href="/admin/users">{{ I18n::get('admin_users') }}</a></li>
                         <li class="nav-item"><a class="nav-link" href="/admin/courses/create">{{ I18n::get('add_course') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.analytics.index') }}"><i class="bi bi-bar-chart-line"></i> Analytics</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.orchestrator.index') }}"><i class="bi bi-robot"></i> Orchestrator</a></li>
                     @endif
                     {{-- Teacher/Student course sections are not implemented yet; hiding to avoid 404s --}}
                     {{--
