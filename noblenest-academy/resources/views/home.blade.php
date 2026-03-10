@@ -1,12 +1,142 @@
 @extends('layouts.app')
 
+@section('meta_title', 'NobleNest Global Academy | Family-First Learning Platform')
+@section('meta_description', 'Explore NobleNest Global Academy: a family-first learning platform with adaptive courses, onboarding guidance, and AI support for parents, students, teachers, and admins.')
+@section('meta_image', asset('og-home.png'))
+
 @section('content')
-<div class="p-5 mb-4 bg-white rounded-3 shadow-sm hero">
-  <div class="container py-5">
-    <h1 class="display-5 fw-bold">{{ I18n::get('home_title') }}</h1>
-    <p class="col-lg-8 fs-5 mt-3">{{ I18n::get('home_subtitle') }}</p>
-    <div class="d-flex gap-2 mt-3 flex-wrap">
-      <a class="btn btn-primary btn-lg" href="#assistantModal" data-bs-toggle="modal">{{ I18n::get('get_weekly_plan') }}</a>
+<style>
+  .hero-stage {
+    position: relative;
+    overflow: hidden;
+    border-radius: 2rem;
+    padding: clamp(1.75rem, 3vw, 3rem);
+    background:
+      radial-gradient(circle at 16% 18%, rgba(242, 165, 65, 0.24), transparent 18%),
+      radial-gradient(circle at 86% 14%, rgba(13, 92, 99, 0.18), transparent 24%),
+      linear-gradient(145deg, rgba(255,255,255,0.90), rgba(239,244,246,0.88));
+    border: 1px solid rgba(24, 34, 47, 0.08);
+    box-shadow: 0 28px 70px rgba(24, 34, 47, 0.12);
+  }
+  .hero-stage::after {
+    content: '';
+    position: absolute;
+    inset: auto -8% -22% auto;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(13,92,99,0.14), transparent 70%);
+  }
+  .hero-metric,
+  .spotlight-card,
+  .dashboard-card {
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(24, 34, 47, 0.08);
+    box-shadow: 0 22px 44px rgba(24, 34, 47, 0.08);
+  }
+  .hero-metric {
+    border-radius: 1.25rem;
+    padding: 1rem 1.1rem;
+  }
+  .hero-orbit {
+    position: relative;
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .hero-orbit__core {
+    width: 280px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.94);
+    color: #18222f;
+    border: 1px solid rgba(24, 34, 47, 0.08);
+    box-shadow: 0 28px 60px rgba(13, 92, 99, 0.14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+  .hero-orbit__ring,
+  .hero-orbit__dot {
+    position: absolute;
+    border-radius: 50%;
+  }
+  .hero-orbit__ring {
+    inset: 7%;
+    border: 1px dashed rgba(13, 92, 99, 0.20);
+  }
+  .hero-orbit__dot {
+    width: 68px;
+    height: 68px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 18px 36px rgba(24,34,47,0.10);
+    border: 1px solid rgba(24, 34, 47, 0.08);
+    font-size: 1.35rem;
+  }
+  .hero-orbit__dot--one { top: 8%; left: 12%; }
+  .hero-orbit__dot--two { top: 18%; right: 2%; }
+  .hero-orbit__dot--three { bottom: 12%; left: 4%; }
+  .hero-orbit__dot--four { bottom: 4%; right: 14%; }
+  .hero-brand-mark {
+    width: 116px;
+    height: 116px;
+    border-radius: 1.75rem;
+    box-shadow: 0 18px 36px rgba(24,34,47,0.10);
+    margin-bottom: 1rem;
+  }
+  .spotlight-card,
+  .dashboard-card {
+    border-radius: 1.4rem;
+    padding: 1.25rem;
+    height: 100%;
+  }
+  .spotlight-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 92, 99, 0.08);
+    color: #0d5c63;
+    font-size: 1.4rem;
+  }
+  .section-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0d5c63;
+  }
+  .dashboard-kpi {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1;
+  }
+  .subscription-shell {
+    border-radius: 1.25rem;
+    border: 1px solid rgba(24, 34, 47, 0.08);
+    box-shadow: 0 18px 36px rgba(24, 34, 47, 0.08);
+  }
+  @media (max-width: 991.98px) {
+    .hero-orbit { margin-top: 2rem; }
+    .hero-orbit__core { width: 220px; }
+  }
+</style>
+
+<div class="hero-stage hero mb-5">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7 position-relative">
+      <div class="section-eyebrow mb-3">Adaptive learning platform</div>
+      <h1 class="display-4 fw-bold mb-3">{{ I18n::get('home_title') }}</h1>
+      <p class="col-lg-10 fs-5 text-muted mt-3 mb-4">{{ I18n::get('home_subtitle') }}</p>
+      <div class="d-flex gap-2 mt-3 flex-wrap">
+      <button class="btn btn-primary btn-lg" type="button" onclick="openAIModal()">{{ I18n::get('get_weekly_plan') }}</button>
       @auth
         @if(auth()->user()->role === 'Admin')
           <a class="btn btn-outline-secondary btn-lg" href="{{ route('admin.courses.index') }}">{{ I18n::get('manage_courses') }}</a>
@@ -16,6 +146,45 @@
       @else
         <a class="btn btn-outline-secondary btn-lg" href="{{ route('register') }}"><i class="bi bi-person-plus"></i> Register Free</a>
       @endauth
+      </div>
+      <div class="row g-3 mt-4">
+        <div class="col-sm-4">
+          <div class="hero-metric">
+            <div class="section-eyebrow mb-2">Coverage</div>
+            <div class="dashboard-kpi">1200+</div>
+            <div class="text-muted small">activities across early years, language, and STEM tracks</div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="hero-metric">
+            <div class="section-eyebrow mb-2">Languages</div>
+            <div class="dashboard-kpi">6</div>
+            <div class="text-muted small">locales supported for child-friendly delivery and parent guidance</div>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="hero-metric">
+            <div class="section-eyebrow mb-2">AI loop</div>
+            <div class="dashboard-kpi">Live</div>
+            <div class="text-muted small">assistant, job orchestration, review, and publishing in one workflow</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="hero-orbit">
+        <div class="hero-orbit__ring"></div>
+        <div class="hero-orbit__core">
+          <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="hero-brand-mark">
+          <div class="section-eyebrow mb-2">NobleNest Global Academy</div>
+          <h3 class="fw-bold mb-2">Next-gen family learning</h3>
+          <p class="mb-0 small text-muted">A single workspace for curriculum, onboarding, AI support, and role-aware learning journeys.</p>
+        </div>
+        <div class="hero-orbit__dot hero-orbit__dot--one"><i class="bi bi-translate"></i></div>
+        <div class="hero-orbit__dot hero-orbit__dot--two"><i class="bi bi-robot"></i></div>
+        <div class="hero-orbit__dot hero-orbit__dot--three"><i class="bi bi-palette2"></i></div>
+        <div class="hero-orbit__dot hero-orbit__dot--four"><i class="bi bi-puzzle"></i></div>
+      </div>
     </div>
   </div>
 </div>
@@ -42,8 +211,8 @@
     </div>
     <div class="col-6 col-md-3">
       <a href="{{ route('admin.courses.index') }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0 text-center h-100">
-          <div class="card-body">
+        <div class="dashboard-card text-center h-100">
+          <div>
             <div class="fs-1 text-primary fw-bold">{{ $courseCount }}</div>
             <div class="text-muted small">Courses</div>
           </div>
@@ -52,8 +221,8 @@
     </div>
     <div class="col-6 col-md-3">
       <a href="/admin/activities" class="text-decoration-none">
-        <div class="card shadow-sm border-0 text-center h-100">
-          <div class="card-body">
+        <div class="dashboard-card text-center h-100">
+          <div>
             <div class="fs-1 text-success fw-bold">{{ $activityCount }}</div>
             <div class="text-muted small">Activities</div>
           </div>
@@ -62,8 +231,8 @@
     </div>
     <div class="col-6 col-md-3">
       <a href="{{ route('admin.analytics.index') }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0 text-center h-100">
-          <div class="card-body">
+        <div class="dashboard-card text-center h-100">
+          <div>
             <div class="fs-1 text-info fw-bold">{{ $userCount }}</div>
             <div class="text-muted small">Users</div>
           </div>
@@ -72,8 +241,8 @@
     </div>
     <div class="col-6 col-md-3">
       <a href="{{ route('admin.orchestrator.index') }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0 text-center h-100">
-          <div class="card-body">
+        <div class="dashboard-card text-center h-100">
+          <div>
             <div class="fs-1 fw-bold {{ $pendingJobs > 0 ? 'text-warning' : 'text-secondary' }}">{{ $jobCount + $pendingJobs }}</div>
             <div class="text-muted small">AI Jobs{{ $pendingJobs > 0 ? ' ('.$pendingJobs.' need review)' : '' }}</div>
           </div>
@@ -98,8 +267,8 @@
       $children = \App\Models\User::where('parent_id', $user->id)->where('role', 'Child')->get();
     @endphp
     <div class="col-md-6">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
+      <div class="dashboard-card h-100">
+        <div>
           <h4 class="card-title mb-3"><i class="bi bi-people text-primary"></i> My Children</h4>
           @forelse($children as $child)
             <div class="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded">
@@ -121,8 +290,8 @@
       </div>
     </div>
     <div class="col-md-6">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
+      <div class="dashboard-card h-100">
+        <div>
           <h4 class="card-title mb-3"><i class="bi bi-bell text-info"></i> What's New</h4>
           <ul class="list-unstyled mb-0">
             <li class="mb-2"><i class="bi bi-star-fill text-warning me-2"></i> New STEM robotics activities added!</li>
@@ -141,8 +310,8 @@
 @if($user && ($role === 'Student' || $role === 'Child'))
   <div class="row g-4 mb-4">
     <div class="col-12">
-      <div class="card shadow-lg border-0 h-100 text-center playful-font" style="background:linear-gradient(120deg,#ffe6fa 0%,#e0f7fa 100%);">
-        <div class="card-body">
+      <div class="dashboard-card h-100 text-center playful-font" style="background:linear-gradient(120deg,rgba(255,255,255,0.84) 0%,rgba(229,246,247,0.84) 100%);">
+        <div>
           <h2 class="mb-3"><i class="bi bi-emoji-smile text-warning"></i> Welcome, {{ $user->name }}!</h2>
           <div class="mb-3">
             <span class="badge bg-warning text-dark me-2"><i class="bi bi-star-fill"></i> Keep going!</span>
@@ -167,7 +336,7 @@
       }
     } catch (\Throwable $e) { }
   @endphp
-  <div class="alert {{ $subscription ? 'alert-success' : 'alert-warning' }} mt-4">
+  <div class="alert {{ $subscription ? 'alert-success' : 'alert-warning' }} subscription-shell mt-4">
     @if($subscription)
       <i class="bi bi-check-circle-fill me-2"></i> Subscription active until <strong>{{ optional($subscription->ends_at)->format('F j, Y') }}</strong>.
     @else
@@ -180,106 +349,34 @@
 {{-- Course Category Cards (visible to all) --}}
 @if(!$user || in_array($role, ['Parent', 'Admin', null]))
 <div class="row g-4 mt-4">
-  <div class="col-12"><h4 class="fw-bold text-secondary">Platform Highlights</h4></div>
+  <div class="col-12">
+    <div class="section-eyebrow mb-2">Platform highlights</div>
+    <h4 class="fw-bold text-secondary">Built to feel alive, guided, and role-aware</h4>
+  </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm border-0">
-      <div class="card-body text-center">
-        <div class="fs-1 mb-2">👶</div>
+    <div class="spotlight-card text-center">
+      <div class="spotlight-icon mx-auto mb-3"><i class="bi bi-people-fill"></i></div>
         <h5 class="card-title">Parent Academy</h5>
         <p class="text-muted small">{{ I18n::get('parent_academy_desc') }}</p>
         <span class="badge bg-light text-dark border">6 courses · 57 modules</span>
-      </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm border-0">
-      <div class="card-body text-center">
-        <div class="fs-1 mb-2">🌱</div>
+    <div class="spotlight-card text-center">
+      <div class="spotlight-icon mx-auto mb-3"><i class="bi bi-flower1"></i></div>
         <h5 class="card-title">Early Years (0–6)</h5>
         <p class="text-muted small">{{ I18n::get('early_years_desc') }}</p>
         <span class="badge bg-light text-dark border">1200+ activities · 72 monthly units</span>
-      </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm border-0">
-      <div class="card-body text-center">
-        <div class="fs-1 mb-2">🤖</div>
+    <div class="spotlight-card text-center">
+      <div class="spotlight-icon mx-auto mb-3"><i class="bi bi-cpu-fill"></i></div>
         <h5 class="card-title">STEM (7–10)</h5>
         <p class="text-muted small">{{ I18n::get('stem_desc') }}</p>
         <span class="badge bg-light text-dark border">Robotics · Coding · Web</span>
-      </div>
     </div>
   </div>
 </div>
 @endif
-
-<!-- AI Assistant Modal -->
-<div class="modal fade" id="assistantModal" tabindex="-1" aria-labelledby="assistantLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="assistantLabel">{{ I18n::get('ai_onboarding_assistant') }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="assistant-chat" class="mb-3" style="max-height:300px;overflow-y:auto;background:#f8f9fa;padding:1rem;border-radius:8px;min-height:120px;"></div>
-        <form id="assistant-form" class="d-flex gap-2">
-          <input type="text" id="assistant-input" class="form-control" placeholder="{{ I18n::get('ask_ai_placeholder') }}" autocomplete="off" required>
-          <button type="submit" class="btn btn-primary">{{ I18n::get('send') }}</button>
-        </form>
-        <div id="assistant-suggestions" class="mt-3"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ I18n::get('close') }}</button>
-      </div>
-    </div>
-  </div>
-</div>
-@endsection
-
-@section('scripts')
-<script>
-(function() {
-  const chat = document.getElementById('assistant-chat');
-  const form = document.getElementById('assistant-form');
-  const input = document.getElementById('assistant-input');
-  const suggestions = document.getElementById('assistant-suggestions');
-  function appendMessage(msg, sender) {
-    const div = document.createElement('div');
-    div.className = sender === 'user' ? 'text-end mb-2' : 'text-start mb-2';
-    div.innerHTML = `<span class="badge bg-${sender==='user'?'primary':'info'}">${sender==='user'?'You':'AI'}</span> <span>${msg}</span>`;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-  }
-  form.onsubmit = function(e) {
-    e.preventDefault();
-    const msg = input.value.trim();
-    if (!msg) return;
-    appendMessage(msg, 'user');
-    input.value = '';
-    fetch('/ai/assistant/message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ message: msg })
-    })
-    .then(r => r.json())
-    .then(data => {
-      appendMessage(data.reply, 'ai');
-      if (data.suggestions) {
-        suggestions.innerHTML = data.suggestions.map(s => `<button type='button' class='btn btn-sm btn-outline-secondary m-1'>${s}</button>`).join('');
-        Array.from(suggestions.querySelectorAll('button')).forEach(btn => {
-          btn.onclick = () => {
-            input.value = btn.textContent;
-            form.dispatchEvent(new Event('submit'));
-          };
-        });
-      }
-    });
-  };
-})();
-</script>
 @endsection

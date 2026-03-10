@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AIJob;
 use App\Models\AIProviderConfig;
 use App\Models\Activity;
-use App\Models\Course;
+use App\Services\AIProviderGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\Log;
  */
 class OrchestratorController extends Controller
 {
+    public function __construct(protected AIProviderGateway $gateway)
+    {
+    }
+
     // ------------------------------------------------------------------
     // Dashboard
     // ------------------------------------------------------------------
@@ -72,6 +76,7 @@ class OrchestratorController extends Controller
         $data = $request->validate([
             'name'         => 'required|string|max:100',
             'slug'         => 'required|string|max:60|unique:ai_provider_configs,slug',
+            'driver'       => 'nullable|string|in:openai,anthropic,gemini,github',
             'api_base_url' => 'nullable|url|max:255',
             'api_key'      => 'nullable|string|max:500',
             'model'        => 'nullable|string|max:100',
@@ -79,7 +84,7 @@ class OrchestratorController extends Controller
             'repo_url'     => 'nullable|url|max:255',
         ]);
 
-        AIProviderConfig::create([
+        $provider = AIProviderConfig::create([
             'name'             => $data['name'],
             'slug'             => $data['slug'],
             'api_base_url'     => $data['api_base_url'] ?? null,
@@ -88,11 +93,17 @@ class OrchestratorController extends Controller
                                     : null,
             'model'            => $data['model'] ?? null,
             'is_active'        => true,
+            'connection_status'=> 'unchecked',
             'capabilities'     => $data['capabilities'] ?? [],
-            'extra_config'     => $data['repo_url'] ? ['repo_url' => $data['repo_url']] : null,
+            'extra_config'     => array_filter([
+                'driver' => $data['driver'] ?? null,
+                'repo_url' => $data['repo_url'] ?? null,
+            ]),
         ]);
 
-        return back()->with('status', 'Provider "' . $data['name'] . '" added.');
+        $health = $this->syncProviderStatus($provider);
+
+        return back()->with('status', 'Provider "' . $data['name'] . '" added. Status: ' . $health['message']);
     }
 
     public function destroyProvider(AIProviderConfig $provider)
@@ -105,6 +116,13 @@ class OrchestratorController extends Controller
     {
         $provider->update(['is_active' => ! $provider->is_active]);
         return back()->with('status', 'Provider ' . ($provider->is_active ? 'enabled' : 'disabled') . '.');
+    }
+
+    public function verifyProvider(AIProviderConfig $provider)
+    {
+        $health = $this->syncProviderStatus($provider);
+
+        return back()->with('status', 'Provider "' . $provider->name . '" check complete. ' . $health['message']);
     }
 
     // ------------------------------------------------------------------
@@ -252,47 +270,15 @@ class OrchestratorController extends Controller
                                   ->first();
 
         if ($config && $config->api_key_encrypted) {
-            $apiKey  = Crypt::decryptString($config->api_key_encrypted);
-            $baseUrl = $config->api_base_url ?? 'https://api.openai.com/v1';
-            $model   = $config->model ?? 'gpt-4o-mini';
-
-            return $this->callOpenAICompatible($baseUrl, $apiKey, $model, $prompt, $job->locale);
+            return $this->gateway->chat($config, $prompt, [
+                'system_prompt' => "You are Noble Nest Academy's expert curriculum designer. Generate age-appropriate, safe, and pedagogically sound educational content. Output in {$job->locale} unless instructed otherwise. Keep content free of violence, adult themes, or harmful material.",
+                'max_tokens' => 1200,
+                'temperature' => 0.5,
+            ]);
         }
 
         // Mock fallback
         return $this->mockGenerate($job->type, $prompt, $job->locale);
-    }
-
-    protected function callOpenAICompatible(
-        string $baseUrl, string $apiKey, string $model,
-        string $prompt, string $locale
-    ): array {
-        $systemPrompt = "You are Noble Nest Academy's expert curriculum designer. "
-            . "Generate age-appropriate, safe, and pedagogically sound educational content. "
-            . "Output in {$locale} unless instructed otherwise. "
-            . "Keep content free of violence, adult themes, or harmful material.";
-
-        $response = Http::withToken($apiKey)
-            ->timeout(60)
-            ->post("{$baseUrl}/chat/completions", [
-                'model'    => $model,
-                'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user',   'content' => $prompt],
-                ],
-                'max_tokens' => 1200,
-            ]);
-
-        if (! $response->successful()) {
-            throw new \RuntimeException('API error: ' . $response->status() . ' ' . $response->body());
-        }
-
-        $data = $response->json();
-        return [
-            'content' => $data['choices'][0]['message']['content'] ?? '',
-            'model'   => $data['model'] ?? $model,
-            'tokens'  => $data['usage']['total_tokens'] ?? null,
-        ];
     }
 
     protected function extractFromGithub(string $repoUrl, string $prompt): array
@@ -362,5 +348,20 @@ class OrchestratorController extends Controller
                 'age_max'       => 10,
             ]);
         }
+    }
+
+    protected function syncProviderStatus(AIProviderConfig $provider): array
+    {
+        $health = $this->gateway->verify($provider);
+        $now = now();
+
+        $provider->update([
+            'connection_status' => $health['status'],
+            'connection_message' => $health['message'],
+            'last_checked_at' => $now,
+            'last_live_at' => $health['status'] === 'live' ? $now : $provider->last_live_at,
+        ]);
+
+        return $health;
     }
 }

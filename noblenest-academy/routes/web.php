@@ -52,8 +52,12 @@ Route::middleware(['auth', 'role:Parent'])->group(function () {
 Route::post('/set-language', [\App\Http\Controllers\SettingsController::class, 'setLanguage'])->name('set-language');
 Route::post('/dismiss-onboarding', [\App\Http\Controllers\SettingsController::class, 'dismissOnboarding'])->name('dismiss-onboarding');
 
-// Language switcher route
+// Language switcher route (with security allowlist)
 Route::get('/lang/{lang}', function ($lang) {
+    $allowed = ['en', 'fr', 'ru', 'zh', 'es', 'ko', 'ur', 'ar'];
+    if (!in_array($lang, $allowed, true)) {
+        abort(400, 'Invalid language code');
+    }
     session(['lang' => $lang]);
     return redirect()->back();
 })->name('lang.switch');
@@ -129,6 +133,7 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     Route::get('orchestrator', [\App\Http\Controllers\Admin\OrchestratorController::class, 'index'])->name('orchestrator.index');
     Route::post('orchestrator/dispatch', [\App\Http\Controllers\Admin\OrchestratorController::class, 'dispatchJob'])->name('orchestrator.dispatch');
     Route::post('orchestrator/providers', [\App\Http\Controllers\Admin\OrchestratorController::class, 'storeProvider'])->name('orchestrator.storeProvider');
+    Route::post('orchestrator/providers/{provider}/verify', [\App\Http\Controllers\Admin\OrchestratorController::class, 'verifyProvider'])->name('orchestrator.verifyProvider');
     Route::delete('orchestrator/providers/{provider}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyProvider'])->name('orchestrator.destroyProvider');
     Route::post('orchestrator/providers/{provider}/toggle', [\App\Http\Controllers\Admin\OrchestratorController::class, 'toggleProvider'])->name('orchestrator.toggleProvider');
     Route::post('orchestrator/jobs/{job}/approve', [\App\Http\Controllers\Admin\OrchestratorController::class, 'approve'])->name('orchestrator.approve');

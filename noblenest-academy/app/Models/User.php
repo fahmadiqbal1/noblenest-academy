@@ -79,11 +79,70 @@ class User extends Authenticatable
     }
 
     // ------------------------------------------------------------------
-    // Children (existing)
+    // Child Profiles (COPPA-compliant - separated from users)
     // ------------------------------------------------------------------
 
+    /**
+     * Get child profiles managed by this parent user.
+     * This is the COPPA-compliant way to manage children.
+     */
+    public function childProfiles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\ChildProfile::class, 'parent_id');
+    }
+
+    // ------------------------------------------------------------------
+    // Legacy: Children as Users (deprecated - use childProfiles instead)
+    // ------------------------------------------------------------------
+
+    /**
+     * @deprecated Use childProfiles() instead for COPPA compliance
+     */
     public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\App\Models\User::class, 'parent_id');
+    }
+
+    // ------------------------------------------------------------------
+    // Role helpers
+    // ------------------------------------------------------------------
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function isParent(): bool
+    {
+        return $this->role === 'Parent';
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->role === 'Teacher';
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role === 'Student';
+    }
+
+    /**
+     * Get subscriptions for this user.
+     */
+    public function subscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Subscription::class);
+    }
+
+    /**
+     * Check if user has an active subscription.
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->where('active', true)
+            ->where('ends_at', '>', now())
+            ->exists();
     }
 }

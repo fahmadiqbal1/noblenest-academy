@@ -107,10 +107,15 @@ class EnrollmentController extends Controller
         }
 
         if (! Auth::check()) {
-            // Save intended destination, redirect to register
-            session(['invite_token' => $token]);
+            session(['url.intended' => route('invite.join', $token)]);
+
             return redirect()->route('register')
                              ->with('status', 'Please register or log in to join "' . $course->title . '".');
+        }
+
+        if (Auth::user()->role !== 'Student') {
+            return redirect()->route('marketplace.show', $course)
+                             ->with('error', 'Invite links can only be claimed with a Student account.');
         }
 
         // Already enrolled

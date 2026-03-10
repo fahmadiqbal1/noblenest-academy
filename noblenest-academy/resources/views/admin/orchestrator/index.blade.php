@@ -1,20 +1,148 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h1 class="mb-0 text-primary"><i class="bi bi-robot"></i> AI Orchestrator</h1>
-            <p class="text-muted small mb-0">Your AI agent for curriculum design, content generation, and quality control.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-info btn-sm" id="scanBtn" onclick="scanCurriculum()">
+<style>
+    .orch-hero,
+    .orch-card,
+    .provider-card,
+    .job-card,
+    .stat-card {
+        background: rgba(255,255,255,0.82);
+        border: 1px solid rgba(24, 34, 47, 0.08);
+        box-shadow: 0 24px 48px rgba(24, 34, 47, 0.10);
+    }
+    .orch-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.75rem;
+        padding: 1.8rem;
+        margin-bottom: 1.5rem;
+        background:
+            radial-gradient(circle at 14% 20%, rgba(242,165,65,0.16), transparent 20%),
+            radial-gradient(circle at 92% 12%, rgba(13,92,99,0.16), transparent 24%),
+            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
+    }
+    .orch-hero::after {
+        content: '';
+        position: absolute;
+        inset: auto -10% -22% auto;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(13,92,99,0.16), transparent 70%);
+    }
+    .orch-card,
+    .provider-card,
+    .job-card,
+    .stat-card {
+        border-radius: 1.4rem;
+    }
+    .orch-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .stat-card {
+        padding: 1.1rem 1.2rem;
+        height: 100%;
+    }
+    .stat-card__value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .provider-stack {
+        display: grid;
+        gap: 1rem;
+    }
+    .provider-card {
+        padding: 1rem;
+    }
+    .provider-card__top {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    .provider-card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.85rem;
+    }
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-radius: 999px;
+        padding: 0.38rem 0.75rem;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .status-pill--live { background: rgba(22, 134, 107, 0.12); color: #16866b; }
+    .status-pill--failed { background: rgba(196, 69, 54, 0.12); color: #c44536; }
+    .status-pill--unchecked,
+    .status-pill--configured { background: rgba(13, 92, 99, 0.10); color: #0d5c63; }
+    .provider-helper {
+        color: #5f6c7b;
+        font-size: 0.9rem;
+        line-height: 1.55;
+    }
+    .job-feed {
+        display: grid;
+        gap: 1rem;
+    }
+    .job-card {
+        padding: 1.15rem;
+    }
+    .job-card__result {
+        white-space: pre-wrap;
+        max-height: 150px;
+        overflow-y: auto;
+        background: rgba(241, 247, 248, 0.86);
+        border-radius: 1rem;
+        padding: 0.9rem;
+        border: 1px solid rgba(24, 34, 47, 0.06);
+    }
+    .orch-form .form-control,
+    .orch-form .form-select {
+        border-radius: 1rem;
+        border-color: rgba(24, 34, 47, 0.12);
+        min-height: 48px;
+    }
+    .orch-form textarea.form-control {
+        min-height: 130px;
+    }
+    .orch-section-title {
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: #0d5c63;
+    }
+</style>
+
+<div class="container-fluid py-2 py-lg-3">
+    <div class="orch-hero">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap position-relative" style="z-index: 1;">
+            <div class="col-12 col-xl-7 px-0">
+                <div class="orch-section-title mb-2">AI control center</div>
+                <h1 class="mb-2 text-primary"><i class="bi bi-robot"></i> AI Orchestrator</h1>
+                <p class="text-muted mb-0">Connect providers, validate whether they are truly reachable, dispatch generation jobs, and keep moderation and publishing in one place.</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-info btn-sm" id="scanBtn" onclick="scanCurriculum()">
                 <i class="bi bi-search"></i> Scan Curriculum Gaps
             </button>
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProviderModal">
                 <i class="bi bi-plug"></i> Add AI Provider
             </button>
         </div>
+    </div>
     </div>
 
     @if(session('status'))
@@ -27,40 +155,40 @@
     {{-- Stats Row --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-2">
-            <div class="card text-center border-secondary">
-                <div class="card-body py-2">
+            <div class="stat-card text-center">
+                <div>
                     <div class="fs-4 fw-bold text-secondary">{{ $stats['queued'] }}</div>
                     <div class="small text-muted">Queued</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-2">
-            <div class="card text-center border-primary">
-                <div class="card-body py-2">
+            <div class="stat-card text-center">
+                <div>
                     <div class="fs-4 fw-bold text-primary">{{ $stats['running'] }}</div>
                     <div class="small text-muted">Running</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-2">
-            <div class="card text-center border-success">
-                <div class="card-body py-2">
+            <div class="stat-card text-center">
+                <div>
                     <div class="fs-4 fw-bold text-success">{{ $stats['completed'] }}</div>
                     <div class="small text-muted">Completed</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-2">
-            <div class="card text-center border-danger">
-                <div class="card-body py-2">
+            <div class="stat-card text-center">
+                <div>
                     <div class="fs-4 fw-bold text-danger">{{ $stats['failed'] }}</div>
                     <div class="small text-muted">Failed</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-2">
-            <div class="card text-center border-warning">
-                <div class="card-body py-2">
+            <div class="stat-card text-center">
+                <div>
                     <div class="fs-4 fw-bold text-warning">{{ $stats['pending_moderation'] }}</div>
                     <div class="small text-muted">Needs Review</div>
                 </div>
@@ -73,35 +201,63 @@
         <div class="col-lg-4">
 
             {{-- Connected Providers --}}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header fw-bold"><i class="bi bi-plug-fill text-success"></i> Connected AI Providers</div>
-                <div class="card-body p-0">
+            <div class="orch-card p-3 mb-4">
+                <div class="orch-card-header">
+                    <div>
+                        <div class="orch-section-title mb-1">Providers</div>
+                        <div class="fw-bold"><i class="bi bi-plug-fill text-success"></i> Connected AI Providers</div>
+                    </div>
+                    <span class="badge text-bg-light border">{{ $providers->count() }} total</span>
+                </div>
+                <div class="provider-stack">
                     @forelse($providers as $p)
-                    <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
-                        <div>
-                            <span class="fw-semibold">{{ $p->name }}</span>
-                            <span class="badge bg-secondary ms-1 small">{{ $p->slug }}</span>
-                            @if($p->model)
-                                <span class="text-muted small ms-1">· {{ $p->model }}</span>
-                            @endif
-                            <br>
-                            <span class="text-muted small">
-                                @foreach($p->capabilities ?? [] as $cap)
-                                    <span class="badge bg-light text-dark border me-1">{{ $cap }}</span>
-                                @endforeach
-                            </span>
-                        </div>
-                        <div class="d-flex gap-1">
-                            <form method="POST" action="{{ route('admin.orchestrator.toggleProvider', $p) }}" style="display:inline">
-                                @csrf
-                                <button class="btn btn-xs btn-{{ $p->is_active ? 'success' : 'outline-secondary' }} btn-sm py-0 px-1" title="{{ $p->is_active ? 'Disable' : 'Enable' }}">
-                                    <i class="bi bi-{{ $p->is_active ? 'toggle-on' : 'toggle-off' }}"></i>
-                                </button>
-                            </form>
-                            <form method="POST" action="{{ route('admin.orchestrator.destroyProvider', $p) }}" onsubmit="return confirm('Remove provider?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-xs btn-outline-danger btn-sm py-0 px-1"><i class="bi bi-trash"></i></button>
-                            </form>
+                    <div class="provider-card">
+                        <div class="provider-card__top">
+                            <div>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <span class="fw-semibold">{{ $p->name }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ $p->slug }}</span>
+                                    <span class="status-pill status-pill--{{ in_array($p->connection_status, ['live', 'failed', 'configured'], true) ? $p->connection_status : 'unchecked' }}">
+                                        <i class="bi bi-{{ $p->connection_status === 'live' ? 'broadcast-pin' : ($p->connection_status === 'failed' ? 'x-octagon' : 'activity') }}"></i>
+                                        {{ $p->connection_status ?? 'unchecked' }}
+                                    </span>
+                                </div>
+                                <div class="provider-helper mt-2">{{ $p->connection_message ?: 'Provider added, but no verification details are available yet.' }}</div>
+                                <div class="provider-card__meta">
+                                    <span class="badge bg-light text-dark border">Driver: {{ strtoupper(data_get($p->extra_config, 'driver', 'auto')) }}</span>
+                                    @if($p->model)
+                                        <span class="badge bg-light text-dark border">Model: {{ $p->model }}</span>
+                                    @endif
+                                    <span class="badge {{ $p->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $p->is_active ? 'Active' : 'Disabled' }}</span>
+                                    @if($p->last_checked_at)
+                                        <span class="badge bg-light text-dark border">Checked {{ $p->last_checked_at->diffForHumans() }}</span>
+                                    @endif
+                                    @if($p->last_live_at)
+                                        <span class="badge bg-light text-dark border">Last live {{ $p->last_live_at->diffForHumans() }}</span>
+                                    @endif
+                                    @foreach($p->capabilities ?? [] as $cap)
+                                        <span class="badge bg-light text-dark border">{{ $cap }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 flex-wrap justify-content-end">
+                                <form method="POST" action="{{ route('admin.orchestrator.verifyProvider', $p) }}">
+                                    @csrf
+                                    <button class="btn btn-outline-primary btn-sm" title="Verify live status">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.orchestrator.toggleProvider', $p) }}" style="display:inline">
+                                    @csrf
+                                    <button class="btn btn-sm {{ $p->is_active ? 'btn-success' : 'btn-outline-secondary' }}" title="{{ $p->is_active ? 'Disable' : 'Enable' }}">
+                                        <i class="bi bi-{{ $p->is_active ? 'toggle-on' : 'toggle-off' }}"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.orchestrator.destroyProvider', $p) }}" onsubmit="return confirm('Remove provider?')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     @empty
@@ -111,10 +267,15 @@
             </div>
 
             {{-- Dispatch Job --}}
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold"><i class="bi bi-send text-primary"></i> Generate Content</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('admin.orchestrator.dispatch') }}">
+            <div class="orch-card p-3">
+                <div class="orch-card-header">
+                    <div>
+                        <div class="orch-section-title mb-1">Dispatch</div>
+                        <div class="fw-bold"><i class="bi bi-send text-primary"></i> Generate Content</div>
+                    </div>
+                </div>
+                <div>
+                    <form method="POST" action="{{ route('admin.orchestrator.dispatch') }}" class="orch-form">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label small">Job Type</label>
@@ -129,7 +290,7 @@
                             <select name="provider" class="form-select form-select-sm">
                                 <option value="mock">Mock (no API key needed)</option>
                                 @foreach($providers->where('is_active', true) as $p)
-                                    <option value="{{ $p->slug }}">{{ $p->name }}</option>
+                                    <option value="{{ $p->slug }}">{{ $p->name }} @if($p->connection_status) · {{ $p->connection_status }} @endif</option>
                                 @endforeach
                             </select>
                         </div>
@@ -162,14 +323,17 @@
 
         {{-- Right: Job Queue --}}
         <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list-task"></i> Job Queue</span>
+            <div class="orch-card p-3">
+                <div class="orch-card-header">
+                    <div>
+                        <div class="orch-section-title mb-1">Queue</div>
+                        <span class="fw-bold"><i class="bi bi-list-task"></i> Job Queue</span>
+                    </div>
                     <span class="badge bg-secondary">{{ $jobs->total() }} total</span>
                 </div>
-                <div class="card-body p-0" style="max-height: 75vh; overflow-y: auto;">
+                <div class="job-feed" style="max-height: 75vh; overflow-y: auto; padding-right: 0.25rem;">
                     @forelse($jobs as $job)
-                    <div class="border-bottom p-3">
+                    <div class="job-card">
                         <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
                             <div>
                                 <span class="badge bg-{{
@@ -196,7 +360,7 @@
 
                         {{-- Result --}}
                         @if($job->result)
-                        <div class="mt-2 bg-light rounded p-2 small" style="white-space:pre-wrap;max-height:120px;overflow-y:auto;">{{ $job->result['content'] ?? json_encode($job->result) }}</div>
+                        <div class="job-card__result mt-2 small">{{ $job->result['content'] ?? json_encode($job->result) }}</div>
                         @endif
 
                         {{-- Error --}}
@@ -236,7 +400,7 @@
                     @endforelse
                 </div>
                 @if($jobs->hasPages())
-                <div class="card-footer">{{ $jobs->links() }}</div>
+                <div class="pt-3">{{ $jobs->links() }}</div>
                 @endif
             </div>
         </div>
@@ -259,6 +423,16 @@
             <form method="POST" action="{{ route('admin.orchestrator.storeProvider') }}">
                 @csrf
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Provider Family</label>
+                        <select name="driver" class="form-select">
+                            <option value="openai">OpenAI compatible</option>
+                            <option value="anthropic">Anthropic Claude</option>
+                            <option value="gemini">Google Gemini</option>
+                            <option value="github">GitHub repository source</option>
+                        </select>
+                        <div class="form-text">Pick the provider family so health checks and chat requests use the correct API contract.</div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Display Name <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control" placeholder="e.g. OpenAI GPT-4o" required>

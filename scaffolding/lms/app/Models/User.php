@@ -55,4 +55,36 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'parent_id');
     }
+
+    /**
+     * Get child profiles (COPPA-compliant separate model).
+     */
+    public function childProfiles()
+    {
+        return $this->hasMany(ChildProfile::class, 'parent_id');
+    }
+
+    /**
+     * Check if user is a parent.
+     */
+    public function isParent(): bool
+    {
+        return $this->role === 'Parent';
+    }
+
+    /**
+     * Check if user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'Admin';
+    }
+
+    /**
+     * Check if user is a teacher.
+     */
+    public function isTeacher(): bool
+    {
+        return $this->role === 'Teacher';
+    }
 }

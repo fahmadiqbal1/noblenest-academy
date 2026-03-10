@@ -17,8 +17,16 @@ use PayPal\Api\RedirectUrls;
 use PayPal\Api\Transaction;
 use PayPal\Rest\ApiContext;
 use PayPal\Auth\OAuthTokenCredential;
-use Carbon\Carbon;
 
+/**
+ * Payment Controller for Stripe and PayPal integration.
+ * 
+ * Note: This is scaffolding/template code. Requires packages:
+ * - stripe/stripe-php
+ * - paypal/rest-api-sdk-php (or srmklive/paypal for Laravel 10+)
+ * 
+ * @phpstan-ignore-file
+ */
 class PaymentController extends Controller
 {
     // Stripe checkout
@@ -45,11 +53,135 @@ class PaymentController extends Controller
         return redirect($session->url);
     }
 
-    // Stripe webhook
+    /**
+     * Handle Stripe webhook with proper signature verification.
+     */
     public function stripeWebhook(Request $request)
     {
-        // Handle webhook logic here (e.g., update payment status)
-        // ...
+        $payload = $request->getContent();
+        $sigHeader = $request->header('Stripe-Signature');
+        $webhookSecret = config('services.stripe.webhook_secret');
+
+        if (!$webhookSecret) {
+            Log::error('Stripe webhook secret not configured');
+            return response()->json(['error' => 'Webhook secret not configured'], 500);
+        }
+
+        try {
+            $event = \Stripe\Webhook::constructEvent(
+                $payload,
+                $sigHeader,
+                $webhookSecret
+            );
+        } catch (\UnexpectedValueException $e) {
+            Log::warning('Invalid Stripe webhook payload', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Invalid payload'], 400);
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+            Log::warning('Stripe webhook signature verification failed', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
+
+        // Handle the event
+        switch ($event->type) {
+            case 'checkout.session.completed':
+                $session = $event->data->object;
+                $this->handleSuccessfulCheckout($session);
+                break;
+
+            case 'invoice.payment_succeeded':
+                $invoice = $event->data->object;
+                $this->handleInvoicePaid($invoice);
+                break;
+
+            case 'customer.subscription.deleted':
+                $subscription = $event->data->object;
+                $this->handleSubscriptionCancelled($subscription);
+                break;
+
+            default:
+                Log::info('Unhandled Stripe event type: ' . $event->type);
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Handle successful checkout session.
+     */
+    protected function handleSuccessfulCheckout($session): void
+    {
+        $customerEmail = $session->customer_email ?? null;
+        if (!$customerEmail) {
+            Log::warning('Checkout session missing customer email', ['session_id' => $session->id]);
+            return;
+        }
+
+        $user = \App\Models\User::where('email', $customerEmail)->first();
+        if (!$user) {
+            Log::warning('User not found for checkout session', ['email' => $customerEmail]);
+            return;
+        }
+
+        // Activate subscription
+        Subscription::updateOrCreate(
+            ['user_id' => $user->id, 'plan' => 'individual'],
+            [
+                'provider' => 'stripe',
+                'stripe_session_id' => $session->id,
+                'amount' => ($session->amount_total ?? 0) / 100,
+                'currency' => strtoupper($session->currency ?? 'USD'),
+                'starts_at' => now(),
+                'ends_at' => now()->addMonth(),
+                'active' => true,
+            ]
+        );
+
+        Log::info('Subscription activated via Stripe webhook', ['user_id' => $user->id]);
+    }
+
+    /**
+     * Handle invoice payment success (for recurring subscriptions).
+     */
+    protected function handleInvoicePaid($invoice): void
+    {
+        $customerEmail = $invoice->customer_email ?? null;
+        if (!$customerEmail) {
+            return;
+        }
+
+        $user = \App\Models\User::where('email', $customerEmail)->first();
+        if (!$user) {
+            return;
+        }
+
+        // Extend subscription
+        $subscription = Subscription::where('user_id', $user->id)->first();
+        if ($subscription) {
+            $subscription->update([
+                'ends_at' => now()->addMonth(),
+                'active' => true,
+            ]);
+            Log::info('Subscription extended via invoice payment', ['user_id' => $user->id]);
+        }
+    }
+
+    /**
+     * Handle subscription cancellation.
+     */
+    protected function handleSubscriptionCancelled($stripeSubscription): void
+    {
+        $customerEmail = $stripeSubscription->customer_email ?? null;
+        // Note: May need to fetch customer from Stripe API if email not on subscription object
+        if (!$customerEmail) {
+            Log::info('Subscription cancelled but no email available');
+            return;
+        }
+
+        $user = \App\Models\User::where('email', $customerEmail)->first();
+        if ($user) {
+            Subscription::where('user_id', $user->id)->update(['active' => false]);
+            Log::info('Subscription deactivated', ['user_id' => $user->id]);
+        }
     }
 
     // PayPal checkout
@@ -99,7 +231,7 @@ class PaymentController extends Controller
         $plan = 'individual';
         $amount = 100; // Should be dynamic in production
         $currency = 'USD';
-        $now = Carbon::now();
+        $now = now();
         $endsAt = $now->copy()->addMonth();
         // Create or update subscription
         $subscription = Subscription::updateOrCreate(

@@ -12,7 +12,7 @@ class UserManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function parent_can_register_and_add_child_profile(): void
     {
         // Register as parent

@@ -243,6 +243,57 @@ class TeacherStudentMarketplaceTest extends TestCase
         ]);
     }
 
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function guest_invite_flow_redirects_back_after_student_registration(): void
+    {
+        $teacher = User::factory()->create(['role' => 'Teacher']);
+        $course  = TeacherCourse::create([
+            'teacher_id' => $teacher->id, 'title' => 'Invite Flow Course', 'slug' => 'invite-flow',
+            'level' => 'beginner', 'language' => 'en', 'price' => 0, 'status' => 'published',
+        ]);
+        $link = InviteLink::create([
+            'teacher_course_id' => $course->id,
+            'token' => 'invite-flow-token',
+        ]);
+
+        $this->get(route('invite.join', $link->token))
+            ->assertRedirect(route('register'));
+
+        $response = $this->post('/register', [
+            'name' => 'Invited Student',
+            'email' => 'invited-student@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => 'Student',
+        ]);
+
+        $response->assertRedirect(route('invite.join', $link->token));
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function non_student_cannot_claim_invite_link(): void
+    {
+        $teacher = User::factory()->create(['role' => 'Teacher']);
+        $course  = TeacherCourse::create([
+            'teacher_id' => $teacher->id, 'title' => 'Invite Restricted Course', 'slug' => 'invite-restricted',
+            'level' => 'beginner', 'language' => 'en', 'price' => 0, 'status' => 'published',
+        ]);
+        $link = InviteLink::create([
+            'teacher_course_id' => $course->id,
+            'token' => 'invite-restricted-token',
+        ]);
+        $parent = User::factory()->create(['role' => 'Parent']);
+
+        $this->actingAs($parent)
+            ->get(route('invite.join', $link->token))
+            ->assertRedirect(route('marketplace.show', $course));
+
+        $this->assertDatabaseMissing('teacher_enrollments', [
+            'teacher_course_id' => $course->id,
+            'student_id' => $parent->id,
+        ]);
+    }
+
     // ------------------------------------------------------------------
     // Class sessions
     // ------------------------------------------------------------------

@@ -18,6 +18,10 @@ class AIProviderConfig extends Model
         'api_key_encrypted',
         'model',
         'is_active',
+        'connection_status',
+        'connection_message',
+        'last_checked_at',
+        'last_live_at',
         'capabilities',
         'extra_config',
     ];
@@ -30,6 +34,8 @@ class AIProviderConfig extends Model
         'is_active'    => 'boolean',
         'capabilities' => 'array',
         'extra_config' => 'array',
+        'last_checked_at' => 'datetime',
+        'last_live_at' => 'datetime',
     ];
 
     public function jobs(): \Illuminate\Database\Eloquent\Relations\HasMany

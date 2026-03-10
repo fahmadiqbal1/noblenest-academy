@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\AIAssistantService;
+use App\Services\AIProviderGateway;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +14,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register AI Provider Gateway as singleton
+        $this->app->singleton(AIProviderGateway::class, function ($app) {
+            return new AIProviderGateway();
+        });
+
+        // Register AI Assistant Service
+        $this->app->singleton(AIAssistantService::class, function ($app) {
+            return new AIAssistantService($app->make(AIProviderGateway::class));
+        });
     }
 
     /**

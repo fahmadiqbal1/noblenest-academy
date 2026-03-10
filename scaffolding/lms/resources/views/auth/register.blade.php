@@ -25,8 +25,10 @@
             <label for="role" class="form-label">{{ I18n::get('register_as') }}</label>
             <select class="form-select" id="role" name="role" required>
                 <option value="Parent" {{ old('role') == 'Parent' ? 'selected' : '' }}>{{ I18n::get('parent') }}</option>
-                <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>{{ I18n::get('admin') }}</option>
+                <option value="Teacher" {{ old('role') == 'Teacher' ? 'selected' : '' }}>{{ I18n::get('teacher') ?? 'Teacher' }}</option>
+                <option value="Student" {{ old('role') == 'Student' ? 'selected' : '' }}>{{ I18n::get('student') ?? 'Student' }}</option>
             </select>
+            {{-- Admin accounts are created via seeder or artisan command only --}}
         </div>
         <button type="submit" class="btn btn-primary">{{ I18n::get('register') }}</button>
     </form>

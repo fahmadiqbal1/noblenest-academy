@@ -1,6 +1,50 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .course-shell,
+    .course-panel,
+    .course-sidebar {
+        background: rgba(255,255,255,0.84);
+        border: 1px solid rgba(24,34,47,0.08);
+        box-shadow: 0 24px 48px rgba(24,34,47,0.10);
+        border-radius: 1.5rem;
+    }
+    .course-shell {
+        padding: 1.4rem;
+        margin-bottom: 1.25rem;
+        background:
+            radial-gradient(circle at 12% 18%, rgba(242,165,65,0.16), transparent 18%),
+            radial-gradient(circle at 82% 16%, rgba(13,92,99,0.16), transparent 22%),
+            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
+    }
+    .course-cover {
+        width: 100%;
+        max-height: 360px;
+        object-fit: cover;
+        border-radius: 1.4rem;
+    }
+    .course-panel,
+    .course-sidebar { overflow: hidden; }
+    .course-badge-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .course-teacher-card,
+    .course-feature-list li,
+    .course-session-row {
+        border-radius: 1rem;
+        background: rgba(241,247,248,0.86);
+        border: 1px solid rgba(24,34,47,0.06);
+    }
+    .course-teacher-card { padding: 0.85rem; }
+    .course-feature-list { list-style: none; padding-left: 0; }
+    .course-feature-list li { padding: 0.7rem 0.8rem; margin-bottom: 0.6rem; }
+    .course-session-row { padding: 1rem; margin-bottom: 0.75rem; }
+</style>
+
 <div class="container py-4">
     <a href="{{ route('marketplace.index') }}" class="btn btn-sm btn-outline-secondary mb-3">
         <i class="bi bi-arrow-left"></i> Back to Marketplace
@@ -17,16 +61,17 @@
         {{-- Left: Course info --}}
         <div class="col-lg-8">
             {{-- Hero --}}
+            <div class="course-shell">
             @if($course->thumbnail)
-                <img src="{{ \Illuminate\Support\Facades\Storage::url($course->thumbnail) }}" class="img-fluid rounded mb-4" style="max-height:320px;width:100%;object-fit:cover;">
+                <img src="{{ \Illuminate\Support\Facades\Storage::url($course->thumbnail) }}" class="course-cover mb-4">
             @else
-                <div class="rounded mb-4 d-flex align-items-center justify-content-center" style="height:220px;background:linear-gradient(135deg,#6f42c1,#0d6efd)">
+                <div class="rounded mb-4 d-flex align-items-center justify-content-center" style="height:260px;background:linear-gradient(135deg,#0d5c63,#1f7a8c 58%, #f2a541)">
                     <i class="bi bi-book-half text-white" style="font-size:5rem"></i>
                 </div>
             @endif
 
             <h1 class="fw-bold">{{ $course->title }}</h1>
-            <div class="d-flex flex-wrap gap-2 mb-3">
+            <div class="course-badge-grid">
                 @if($course->subject)<span class="badge bg-light text-dark border">{{ $course->subject }}</span>@endif
                 <span class="badge bg-light text-dark border">{{ ucfirst($course->level) }}</span>
                 @if($course->age_min || $course->age_max)
@@ -36,9 +81,10 @@
             </div>
 
             <p class="lead">{{ $course->description }}</p>
+            </div>
 
             @if($course->what_you_learn)
-            <div class="card shadow-sm mb-4">
+            <div class="course-panel mb-4">
                 <div class="card-header fw-bold"><i class="bi bi-check-circle text-success"></i> What You'll Learn</div>
                 <div class="card-body">
                     <ul class="list-unstyled mb-0">
@@ -54,7 +100,7 @@
 
             {{-- Curriculum --}}
             @if($course->sections->isNotEmpty())
-            <div class="card shadow-sm mb-4">
+            <div class="course-panel mb-4">
                 <div class="card-header fw-bold"><i class="bi bi-list-ol"></i> Curriculum</div>
                 <div class="accordion" id="curriculumAccordion">
                     @foreach($course->sections as $sec)
@@ -77,11 +123,11 @@
 
             {{-- Upcoming sessions --}}
             @if($course->classSessions->isNotEmpty())
-            <div class="card shadow-sm mb-4">
+            <div class="course-panel mb-4">
                 <div class="card-header fw-bold"><i class="bi bi-calendar-event"></i> Upcoming Live Sessions</div>
-                <div class="card-body p-0">
+                <div class="card-body">
                     @foreach($course->classSessions as $session)
-                    <div class="d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
+                    <div class="course-session-row d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div>
                             <div class="fw-semibold">{{ $session->title }}</div>
                             <div class="text-muted small"><i class="bi bi-clock"></i> {{ $session->starts_at->format('D, M j, Y · g:i A') }} · {{ $session->duration_minutes }} min</div>
@@ -102,7 +148,7 @@
 
         {{-- Right: Enrol card --}}
         <div class="col-lg-4">
-            <div class="card shadow border-0 sticky-top" style="top:80px">
+            <div class="course-sidebar sticky-top" style="top:80px">
                 <div class="card-body p-4">
                     {{-- Price --}}
                     <div class="text-center mb-3">
@@ -114,7 +160,7 @@
                     </div>
 
                     {{-- Teacher info --}}
-                    <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded">
+                    <div class="course-teacher-card d-flex align-items-center gap-3 mb-3">
                         <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ $course->teacher_id }}" style="width:48px;height:48px;border-radius:50%">
                         <div>
                             <div class="fw-semibold">{{ $course->teacher->name ?? 'Teacher' }}</div>
@@ -155,14 +201,14 @@
                         </a>
                     @endif
 
-                    <ul class="list-unstyled mt-3 text-muted small">
-                        <li class="mb-1"><i class="bi bi-camera-video text-primary me-2"></i> Live online classes</li>
-                        <li class="mb-1"><i class="bi bi-people text-primary me-2"></i> Small group sessions</li>
+                    <ul class="course-feature-list mt-3 text-muted small">
+                        <li><i class="bi bi-camera-video text-primary me-2"></i> Live online classes</li>
+                        <li><i class="bi bi-people text-primary me-2"></i> Small group sessions</li>
                         @if($course->syllabus_file)
-                        <li class="mb-1"><i class="bi bi-file-earmark-pdf text-primary me-2"></i> Curriculum included</li>
+                        <li><i class="bi bi-file-earmark-pdf text-primary me-2"></i> Curriculum included</li>
                         @endif
                         @if($course->max_students)
-                        <li class="mb-1"><i class="bi bi-people-fill text-warning me-2"></i> Max {{ $course->max_students }} students</li>
+                        <li><i class="bi bi-people-fill text-warning me-2"></i> Max {{ $course->max_students }} students</li>
                         @endif
                     </ul>
                 </div>

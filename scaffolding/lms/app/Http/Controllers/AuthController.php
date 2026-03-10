@@ -10,6 +10,13 @@ use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    /**
+     * Allowed roles for self-registration.
+     * NOTE: Admin is intentionally excluded - Admin accounts must be
+     * created via seeder or artisan command for security.
+     */
+    protected const ALLOWED_REGISTRATION_ROLES = ['Parent', 'Teacher', 'Student'];
+
     // Show registration form
     public function showRegister()
     {
@@ -20,21 +27,35 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in(['Parent', 'Admin'])],
+            'role'     => ['required', Rule::in(self::ALLOWED_REGISTRATION_ROLES)],
         ]);
 
+        // Double-check Admin is never self-registered (defense in depth)
+        if (strtolower($validated['role']) === 'admin') {
+            abort(403, 'Admin accounts cannot be self-registered.');
+        }
+
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'role'     => $validated['role'],
         ]);
 
         Auth::login($user);
-        return redirect()->route('dashboard');
+
+        // Role-based redirect
+        if ($user->role === 'Teacher') {
+            return redirect()->route('teacher.dashboard');
+        }
+        if ($user->role === 'Student') {
+            return redirect()->route('marketplace.index');
+        }
+
+        return redirect('/');
     }
 
     // Show login form
@@ -53,7 +74,15 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard');
+            $user = Auth::user();
+
+            if ($user->role === 'Teacher') {
+                return redirect()->route('teacher.dashboard');
+            }
+            if ($user->role === 'Student') {
+                return redirect()->route('marketplace.index');
+            }
+            return redirect('/');
         }
 
         return back()->withErrors([

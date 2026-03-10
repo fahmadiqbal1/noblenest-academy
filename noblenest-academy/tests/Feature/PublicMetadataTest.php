@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class PublicMetadataTest extends TestCase
+{
+    use RefreshDatabase;
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function home_page_exposes_route_specific_metadata(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('<title>NobleNest Global Academy | Family-First Learning Platform</title>', false);
+        $response->assertSee('content="Explore NobleNest Global Academy: a family-first learning platform with adaptive courses, onboarding guidance, and AI support for parents, students, teachers, and admins."', false);
+        $response->assertSee('content="' . asset('og-home.png') . '"', false);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function marketplace_page_exposes_route_specific_metadata(): void
+    {
+        $response = $this->get('/marketplace');
+
+        $response->assertOk();
+        $response->assertSee('<title>Find a Teacher | NobleNest Global Academy</title>', false);
+        $response->assertSee('content="Browse live online courses from expert teachers on NobleNest Global Academy. Compare subjects, age fit, pricing, and enrolment options in one marketplace."', false);
+        $response->assertSee('content="' . asset('og-marketplace.png') . '"', false);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function auth_pages_expose_route_specific_metadata(): void
+    {
+        $loginResponse = $this->get('/login');
+        $registerResponse = $this->get('/register');
+
+        $loginResponse->assertOk();
+        $loginResponse->assertSee('<title>Login | NobleNest Global Academy</title>', false);
+        $loginResponse->assertSee('content="' . asset('og-login.png') . '"', false);
+
+        $registerResponse->assertOk();
+        $registerResponse->assertSee('<title>Create Your Account | NobleNest Global Academy</title>', false);
+        $registerResponse->assertSee('content="' . asset('og-register.png') . '"', false);
+    }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function generated_social_preview_assets_exist(): void
+    {
+        $this->assertFileExists(public_path('og-home.png'));
+        $this->assertFileExists(public_path('og-marketplace.png'));
+        $this->assertFileExists(public_path('og-login.png'));
+        $this->assertFileExists(public_path('og-register.png'));
+        $this->assertFileExists(public_path('og-image.png'));
+        $this->assertFileExists(public_path('social-preview.png'));
+    }
+}

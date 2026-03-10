@@ -1,9 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .teacher-hero,
+    .teacher-card,
+    .teacher-stat {
+        background: rgba(255,255,255,0.84);
+        border: 1px solid rgba(24,34,47,0.08);
+        box-shadow: 0 24px 48px rgba(24,34,47,0.10);
+        border-radius: 1.5rem;
+    }
+    .teacher-hero {
+        padding: 1.7rem;
+        margin-bottom: 1.5rem;
+        background:
+            radial-gradient(circle at 12% 18%, rgba(242,165,65,0.16), transparent 18%),
+            radial-gradient(circle at 82% 16%, rgba(13,92,99,0.16), transparent 22%),
+            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
+    }
+    .teacher-stat { padding: 1rem; height: 100%; }
+    .teacher-card { overflow: hidden; }
+</style>
+
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="teacher-hero d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
+            <div class="text-uppercase fw-bold small text-primary mb-2" style="letter-spacing:0.14em;">Teaching workspace</div>
             <h1 class="mb-0 fw-bold"><i class="bi bi-person-video3 text-primary"></i> Teacher Dashboard</h1>
             <p class="text-muted mb-0">Welcome back, <strong>{{ $teacher->name }}</strong>!</p>
         </div>
@@ -19,32 +41,32 @@
     {{-- Stats --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0 bg-primary text-white">
-                <div class="card-body py-3">
+            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c);">
+                <div class="py-3">
                     <div class="fs-2 fw-bold">{{ $courses->count() }}</div>
                     <div class="small">Courses</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0 bg-success text-white">
-                <div class="card-body py-3">
+            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#16866b,#3aa17c);">
+                <div class="py-3">
                     <div class="fs-2 fw-bold">{{ $totalStudents }}</div>
                     <div class="small">Students</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0 bg-info text-white">
-                <div class="card-body py-3">
+            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#1f7a8c,#4aa3b5);">
+                <div class="py-3">
                     <div class="fs-2 fw-bold">{{ $upcomingSessions->count() }}</div>
                     <div class="small">Upcoming Sessions</div>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0 bg-warning text-dark">
-                <div class="card-body py-3">
+            <div class="teacher-stat text-center text-dark" style="background:linear-gradient(135deg,#f2a541,#f7bf65);">
+                <div class="py-3">
                     <div class="fs-2 fw-bold">${{ number_format($totalEarnings, 0) }}</div>
                     <div class="small">Total Earned</div>
                 </div>
@@ -55,7 +77,7 @@
     <div class="row g-4">
         {{-- My Courses --}}
         <div class="col-lg-8">
-            <div class="card shadow-sm">
+            <div class="teacher-card">
                 <div class="card-header fw-bold d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-book"></i> My Courses</span>
                     <a href="{{ route('teacher.courses.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
@@ -93,7 +115,7 @@
 
         {{-- Upcoming Sessions --}}
         <div class="col-lg-4">
-            <div class="card shadow-sm">
+            <div class="teacher-card">
                 <div class="card-header fw-bold"><i class="bi bi-calendar-event"></i> Upcoming Sessions</div>
                 <div class="card-body p-0">
                     @forelse($upcomingSessions as $session)

@@ -1,0 +1,60 @@
+# Noble Nest Academy Root .gitignore
+
+# =============================================================================
+# IDE / Editors
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# Dependencies
+# =============================================================================
+node_modules/
+vendor/
+
+# =============================================================================
+# Environment Files
+# =============================================================================
+.env
+.env.backup
+.env.production
+.env.local
+
+# =============================================================================
+# Laravel Specific
+# =============================================================================
+/noblenest-academy/storage/*.key
+/noblenest-academy/vendor/
+/noblenest-academy/node_modules/
+/noblenest-academy/public/hot
+/noblenest-academy/public/storage
+/noblenest-academy/storage/app/public
+/noblenest-academy/storage/logs/*.log
+/noblenest-academy/bootstrap/cache/*
+!noblenest-academy/bootstrap/cache/.gitkeep
+
+# =============================================================================
+# Build Files
+# =============================================================================
+/noblenest-academy/public/build/
+npm-debug.log
+yarn-error.log
+
+# =============================================================================
+# Testing
+# =============================================================================
+.phpunit.result.cache
+.phpunit.cache/
+coverage/
+.coverage
+
+# =============================================================================
+# Misc
+# =============================================================================
+*.log
+*.cache

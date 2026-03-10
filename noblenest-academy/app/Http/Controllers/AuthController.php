@@ -10,6 +10,13 @@ use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
+    /**
+     * Allowed roles for self-registration.
+     * NOTE: Admin is intentionally excluded - Admin accounts must be
+     * created via seeder or artisan command for security.
+     */
+    protected const ALLOWED_REGISTRATION_ROLES = ['Parent', 'Teacher', 'Student'];
+
     // Show registration form
     public function showRegister()
     {
@@ -23,8 +30,13 @@ class AuthController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => ['required', Rule::in(['Parent', 'Admin', 'Teacher', 'Student'])],
+            'role'     => ['required', Rule::in(self::ALLOWED_REGISTRATION_ROLES)],
         ]);
+
+        // Double-check Admin is never self-registered (defense in depth)
+        if (strtolower($validated['role']) === 'admin') {
+            abort(403, 'Admin accounts cannot be self-registered.');
+        }
 
         $user = User::create([
             'name'     => $validated['name'],
@@ -34,6 +46,11 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+
+        $intended = session()->pull('url.intended');
+        if ($intended) {
+            return redirect()->to($intended);
+        }
 
         // Role-based redirect after registration
         if ($user->role === 'Teacher') {
@@ -63,6 +80,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $user = Auth::user();
+            $intended = session()->pull('url.intended');
+
+            if ($intended) {
+                return redirect()->to($intended);
+            }
+
             if ($user->role === 'Teacher') {
                 return redirect()->route('teacher.dashboard');
             }
