@@ -37,6 +37,7 @@ class ChildProfile extends Model
         'nickname',
         'date_of_birth',
         'gender',
+        'is_muslim',
         'preferred_language',
         'avatar_url',
         'preferences',
@@ -45,6 +46,7 @@ class ChildProfile extends Model
 
     protected $casts = [
         'date_of_birth'   => 'date',
+        'is_muslim'       => 'boolean',
         'preferences'     => 'array',
         'learning_goals'  => 'array',
     ];
@@ -113,6 +115,7 @@ class ChildProfile extends Model
 
     /**
      * Get activities appropriate for this child's age.
+     * Automatically gates Quran/Islamic-studies content to Muslim children only.
      */
     public function appropriateActivities()
     {
@@ -121,8 +124,17 @@ class ChildProfile extends Model
             return Activity::query();
         }
 
-        return Activity::where('age_min', '<=', $ageMonths)
-                       ->where('age_max', '>=', $ageMonths);
+        $ageYears = $ageMonths / 12; // age_min/age_max stored in years
+
+        $query = Activity::where('age_min', '<=', $ageYears)
+                         ->where('age_max', '>=', $ageYears);
+
+        // Hide Quran, Arabic & Islamic-studies activities unless child is in a Muslim household
+        if (!$this->is_muslim) {
+            $query->whereNotIn('subject', ['quran', 'islamic_studies', 'arabic']);
+        }
+
+        return $query;
     }
 
     /**

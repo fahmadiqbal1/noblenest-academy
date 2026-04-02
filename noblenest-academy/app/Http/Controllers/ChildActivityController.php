@@ -26,6 +26,12 @@ class ChildActivityController extends Controller
             ->where('age_max', '>=', $child->age_months / 12)
             ->where('language', $child->preferred_language ?? 'en');
 
+        // Gate Quran & Islamic-studies activities to Muslim children only.
+        // If is_muslim is null (not answered) or false, hide islamic-gated subjects.
+        if (!$child->is_muslim) {
+            $query->whereNotIn('subject', ['quran', 'islamic_studies']);
+        }
+
         // Free tier: first 30 activities always accessible
         $completed = ChildActivityProgress::where('child_profile_id', $child->id)
             ->count();

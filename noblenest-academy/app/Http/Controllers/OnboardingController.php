@@ -68,8 +68,9 @@ class OnboardingController extends Controller
     public function storeStep2(Request $request)
     {
         $data = $request->validate([
-            'child_name'   => 'required|string|max:100',
+            'child_name'    => 'required|string|max:100',
             'date_of_birth' => 'required|date|before:today|after:' . now()->subYears(11)->format('Y-m-d'),
+            'is_muslim'     => 'nullable|in:yes,no,skip',
         ]);
 
         /** @var \App\Models\User $user */
@@ -85,11 +86,19 @@ class OnboardingController extends Controller
             default          => 'school',
         };
 
+        // Convert radio answer to nullable boolean (null = not answered / skip)
+        $isMuslim = match($data['is_muslim'] ?? 'skip') {
+            'yes'   => true,
+            'no'    => false,
+            default => null,
+        };
+
         ChildProfile::create([
-            'parent_id'     => $user->id,
-            'name'          => $data['child_name'],
-            'date_of_birth' => $data['date_of_birth'],
-            'age_tier'      => $ageTier,
+            'parent_id'          => $user->id,
+            'name'               => $data['child_name'],
+            'date_of_birth'      => $data['date_of_birth'],
+            'age_tier'           => $ageTier,
+            'is_muslim'          => $isMuslim,
             'preferred_language' => $user->preferred_language ?? 'en',
         ]);
 
