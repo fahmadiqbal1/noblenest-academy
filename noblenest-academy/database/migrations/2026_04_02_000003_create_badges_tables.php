@@ -12,9 +12,11 @@ return new class extends Migration
             $table->id();
             $table->string('slug', 100)->unique();
             $table->string('name', 150);
+            $table->string('emoji', 10)->nullable();
             $table->text('description')->nullable();
             $table->string('icon_url')->nullable();
-            $table->enum('badge_type', ['milestone', 'streak', 'course', 'social', 'special'])->default('milestone');
+            $table->enum('badge_type', ['milestone', 'streak', 'course', 'social', 'special', 'subject'])->default('milestone');
+            $table->json('criteria')->nullable();
             $table->unsignedInteger('required_value')->default(1); // e.g., complete N activities
             $table->boolean('is_active')->default(true);
             $table->timestamps();

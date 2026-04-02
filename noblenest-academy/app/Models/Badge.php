@@ -10,9 +10,11 @@ class Badge extends Model
     protected $fillable = [
         'slug',
         'name',
+        'emoji',
         'description',
         'icon_url',
         'badge_type',
+        'criteria',
         'required_value',
         'is_active',
     ];
@@ -20,6 +22,7 @@ class Badge extends Model
     protected $casts = [
         'is_active'      => 'boolean',
         'required_value' => 'integer',
+        'criteria'       => 'array',
     ];
 
     public function childProfiles(): BelongsToMany

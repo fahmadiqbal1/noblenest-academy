@@ -20,7 +20,7 @@ return new class extends Migration
         });
 
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->index(['user_id', 'status', 'ends_at'], 'subscriptions_user_status_idx');
+            $table->index(['user_id', 'active', 'ends_at'], 'subscriptions_user_active_idx');
         });
     }
 
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->dropIndex('cap_child_completed_idx');
         });
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->dropIndex('subscriptions_user_status_idx');
+            $table->dropIndex('subscriptions_user_active_idx');
         });
     }
 };

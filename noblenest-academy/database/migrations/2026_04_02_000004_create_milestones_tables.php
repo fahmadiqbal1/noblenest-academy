@@ -10,12 +10,12 @@ return new class extends Migration
     {
         Schema::create('milestones', function (Blueprint $table) {
             $table->id();
-            $table->string('slug', 100)->unique();
+            $table->string('slug', 100)->nullable()->unique();
             $table->string('title', 200);
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('age_months_min')->default(0);
             $table->unsignedTinyInteger('age_months_max')->default(120);
-            $table->enum('domain', ['cognitive', 'motor', 'language', 'social', 'creative'])->default('cognitive');
+            $table->enum('domain', ['cognitive', 'motor', 'language', 'social', 'creative', 'literacy', 'numeracy'])->default('cognitive');
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
