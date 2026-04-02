@@ -7,7 +7,7 @@
 /* Custom variables following Bootstrap conventions */
 :root {
     --nn-font-sans: 'Instrument Sans', var(--bs-font-sans-serif);
-    --nn-primary: #6366f1;
+    --nn-primary: #0d5c63;
     --nn-secondary: #8b5cf6;
     --nn-success: #22c55e;
     --nn-warning: #f59e0b;

@@ -146,23 +146,23 @@ class ActivityAgeFilteringTest extends TestCase
             'preferred_language' => 'en',
         ]);
 
-        // Create activities
+        // Create activities — age_min/age_max are stored in years
         Activity::factory()->create([
             'title'   => 'Infant Activity',
             'age_min' => 0,
-            'age_max' => 12,
+            'age_max' => 1,
         ]);
 
         $toddlerActivity = Activity::factory()->create([
             'title'   => 'Toddler Activity',
-            'age_min' => 12,
-            'age_max' => 36,
+            'age_min' => 1,
+            'age_max' => 3,
         ]);
 
         Activity::factory()->create([
             'title'   => 'Preschool Activity',
-            'age_min' => 37,
-            'age_max' => 60,
+            'age_min' => 3,
+            'age_max' => 5,
         ]);
 
         // Get appropriate activities

@@ -10,15 +10,12 @@ Flow:
 
 from __future__ import annotations
 
-import json
 import os
-import pathlib
 from typing import Any
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 
 from retrieval.pageindex_retriever import get_existing_activity_summaries
 
@@ -80,7 +77,7 @@ _chain = _prompt | _llm | JsonOutputParser()
 
 async def generate_batch(
     subject: str,
-    age_tier: str,
+    age_group: str,
     language: str,
     is_free: bool,
     count: int,
@@ -89,21 +86,20 @@ async def generate_batch(
     Generate `count` activities. Each call is independent so PageIndex
     coherence context is refreshed between them.
     """
-    existing_context = get_existing_activity_summaries(age_tier, subject)
+    existing_context = get_existing_activity_summaries(age_group, subject)
     activities = []
-    total_tokens = 0
 
     for _ in range(count):
         result = await _chain.ainvoke({
             "existing_context": existing_context or "None yet — this is the first activity.",
-            "age_tier": age_tier,
+            "age_tier": age_group,
             "subject": subject,
             "language": language,
             "is_free_json": "true" if is_free else "false",
         })
 
         # Add required fields if model omitted them
-        result.setdefault("age_tier", age_tier)
+        result.setdefault("age_group", age_group)
         result.setdefault("subject", subject)
         result.setdefault("language", language)
         result.setdefault("is_free", is_free)

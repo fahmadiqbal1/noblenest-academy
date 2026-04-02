@@ -21,16 +21,16 @@ class ActivityManagementTest extends TestCase
             'title' => 'Tracing Letters',
             'age_min' => 3,
             'age_max' => 5,
-            'skill' => 'literacy',
-            'duration' => 10,
+            'subject' => 'literacy',
+            'duration_minutes' => 10,
             'language' => 'en',
         ]);
         Activity::factory()->create([
             'title' => 'Counting with Abacus',
             'age_min' => 4,
             'age_max' => 6,
-            'skill' => 'math',
-            'duration' => 15,
+            'subject' => 'math',
+            'duration_minutes' => 15,
             'language' => 'en',
         ]);
 
@@ -49,7 +49,7 @@ class ActivityManagementTest extends TestCase
         $response->assertSee('Tracing Letters');
         $response->assertSee('Counting with Abacus');
         // Filter by skill
-        $response = $this->get('/activities?skill=math');
+        $response = $this->get('/activities?subject=math');
         $response->assertSee('Counting with Abacus');
         $response->assertDontSee('Tracing Letters');
         // Filter by age
@@ -57,7 +57,7 @@ class ActivityManagementTest extends TestCase
         $response->assertSee('Tracing Letters');
         $response->assertDontSee('Counting with Abacus');
         // Filter by duration
-        $response = $this->get('/activities?duration=10');
+        $response = $this->get('/activities?duration_minutes=10');
         $response->assertSee('Tracing Letters');
         $response->assertDontSee('Counting with Abacus');
     }
