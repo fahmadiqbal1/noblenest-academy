@@ -199,15 +199,15 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default'],
+            'queue' => ['high', 'default', 'low'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
             'maxProcesses' => 1,
             'maxTime' => 0,
             'maxJobs' => 0,
             'memory' => 128,
-            'tries' => 1,
-            'timeout' => 60,
+            'tries' => 3,
+            'timeout' => 90,
             'nice' => 0,
         ],
     ],
@@ -215,14 +215,20 @@ return [
     'environments' => [
         'production' => [
             'supervisor-1' => [
-                'maxProcesses' => 10,
+                'queue' => ['high', 'default', 'low'],
+                'balance' => 'auto',
+                'minProcesses' => 2,
+                'maxProcesses' => 20,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
+                'tries' => 3,
+                'timeout' => 90,
             ],
         ],
 
         'local' => [
             'supervisor-1' => [
+                'queue' => ['high', 'default', 'low'],
                 'maxProcesses' => 3,
             ],
         ],
