@@ -15,18 +15,25 @@ class Activity extends Model
         'age_min',
         'age_max',
         'skill',
+        'subject',
         'duration',
         'language',
         'activity_type',
         'media_url',
         'is_rtl',
+        'emoji',
+        'age_tier',
+        'is_free',
+        'like_count',
     ];
 
     protected $casts = [
-        'age_min'  => 'integer',
-        'age_max'  => 'integer',
-        'duration' => 'integer',
-        'is_rtl'   => 'boolean',
+        'age_min'    => 'integer',
+        'age_max'    => 'integer',
+        'duration'   => 'integer',
+        'is_rtl'     => 'boolean',
+        'is_free'    => 'boolean',
+        'like_count' => 'integer',
     ];
 
     /**

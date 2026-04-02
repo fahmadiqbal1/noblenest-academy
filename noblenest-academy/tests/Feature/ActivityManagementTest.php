@@ -7,6 +7,8 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Activity;
+use App\Models\User;
+use App\Models\Subscription;
 
 class ActivityManagementTest extends TestCase
 {
@@ -31,6 +33,16 @@ class ActivityManagementTest extends TestCase
             'duration' => 15,
             'language' => 'en',
         ]);
+
+        // Create an authenticated user with an active subscription
+        $user = User::factory()->create(['role' => 'Parent']);
+        Subscription::factory()->create([
+            'user_id'  => $user->id,
+            'active'   => true,
+            'ends_at'  => now()->addMonth(),
+        ]);
+        $this->actingAs($user);
+
         // List all
         $response = $this->get('/activities');
         $response->assertStatus(200);

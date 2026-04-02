@@ -23,7 +23,7 @@ class UserManagementTest extends TestCase
             'password_confirmation' => 'password123',
             'role' => 'Parent',
         ]);
-        $response->assertRedirect('/');
+        $response->assertRedirect(route('onboarding'));
         $parent = User::where('email', 'parent@example.com')->first();
         $this->assertNotNull($parent);
         $this->assertEquals('Parent', $parent->role);

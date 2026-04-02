@@ -1,0 +1,53 @@
+/* =========================================================
+   Age Tier: BABY (0–23 months)
+   Palette: warm orange & cream — soft, high contrast for infants
+   ========================================================= */
+
+:root {
+    --tier-primary: #FF8C42;
+    --tier-primary-dark: #E07035;
+    --tier-accent: #FFF4E3;
+    --tier-text: #3D2B1F;
+    --tier-radius: 24px;
+    --tier-font-scale: 1.25;
+}
+
+body.age-baby {
+    background: #FFF8F0;
+    color: var(--tier-text);
+    font-size: calc(1rem * var(--tier-font-scale));
+}
+
+body.age-baby .child-nav {
+    background: var(--tier-primary);
+    color: #fff;
+}
+
+body.age-baby .child-nav .navbar-brand,
+body.age-baby .child-nav a {
+    color: #fff !important;
+}
+
+body.age-baby .child-badge {
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+body.age-baby .card {
+    border-radius: var(--tier-radius) !important;
+    border: 3px solid var(--tier-accent) !important;
+}
+
+body.age-baby .btn-primary {
+    background: var(--tier-primary) !important;
+    border-color: var(--tier-primary) !important;
+    border-radius: 50px !important;
+    font-size: 1.1rem !important;
+    padding: 0.6rem 1.5rem !important;
+}
+
+body.age-baby .btn-primary:hover {
+    background: var(--tier-primary-dark) !important;
+}

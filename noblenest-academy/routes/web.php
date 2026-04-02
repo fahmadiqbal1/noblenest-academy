@@ -122,10 +122,18 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('activities', \App\Http\Controllers\Admin\ActivityController::class)->except(['show', 'index']);
 });
 
-// Onboarding
+// Onboarding — 3-step MiroFish fast flow
 Route::middleware(['auth'])->group(function () {
-    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');
+    // Legacy single-page onboarding (backward compat)
+    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding');
     Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+    // New 3-step flow
+    Route::get('/onboarding/step/1', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.step1');
+    Route::post('/onboarding/step/1', [\App\Http\Controllers\OnboardingController::class, 'storeStep1'])->name('onboarding.step1.store');
+    Route::get('/onboarding/step/2', [\App\Http\Controllers\OnboardingController::class, 'showStep2'])->name('onboarding.step2');
+    Route::post('/onboarding/step/2', [\App\Http\Controllers\OnboardingController::class, 'storeStep2'])->name('onboarding.step2.store');
+    Route::get('/onboarding/step/3', [\App\Http\Controllers\OnboardingController::class, 'showStep3'])->name('onboarding.step3');
+    Route::post('/onboarding/step/3', [\App\Http\Controllers\OnboardingController::class, 'storeStep3'])->name('onboarding.step3.store');
 });
 
 // AI Orchestrator
@@ -192,3 +200,73 @@ Route::middleware(['auth'])->prefix('classroom')->name('classroom.')->group(func
     Route::get('{roomId}', [\App\Http\Controllers\ClassroomController::class, 'room'])->name('room');
     Route::get('{roomId}/participants', [\App\Http\Controllers\ClassroomController::class, 'participants'])->name('participants');
 });
+
+// ===========================================================================
+// PHASE 1+ NEW ROUTES
+// ===========================================================================
+
+// --- Public pages ---
+Route::view('/for-schools', 'pages.for-schools')->name('for-schools');
+Route::post('/school-inquiry', [\App\Http\Controllers\SchoolInquiryController::class, 'store'])->name('school-inquiry.store');
+Route::get('/ref/{code}', [\App\Http\Controllers\ReferralController::class, 'track'])->name('referral.track');
+
+// --- Parent dashboard + child experience ---
+Route::middleware(['auth', 'role:Parent'])->prefix('parent')->name('parent.')->group(function () {
+    Route::get('dashboard', [\App\Http\Controllers\Parent\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('child/{child}', [\App\Http\Controllers\Parent\DashboardController::class, 'child'])->name('child');
+    Route::get('milestones', [\App\Http\Controllers\Parent\MilestoneController::class, 'index'])->name('milestones');
+    Route::post('child/{child}/milestone/{milestone}/toggle', [\App\Http\Controllers\Parent\MilestoneController::class, 'toggle'])->name('milestone.toggle');
+    Route::get('share-card/{child}', [\App\Http\Controllers\ShareCardController::class, 'show'])->name('share-card');
+});
+
+// --- Child activity feed (parent views on behalf of child) ---
+Route::middleware(['auth'])->group(function () {
+    Route::get('/child/{child}/activities', [\App\Http\Controllers\ChildActivityController::class, 'index'])->name('child.activities');
+    Route::post('/child/{child}/activities/{activity}/complete', [\App\Http\Controllers\ChildActivityController::class, 'complete'])->name('child.activity.complete');
+    Route::post('/activities/{activity}/like', [\App\Http\Controllers\ActivityLikeController::class, 'toggle'])->name('activity.like');
+});
+
+// --- Notifications ---
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+    Route::post('{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('read');
+    Route::post('read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('read-all');
+});
+
+// --- Admin: teacher vetting & payouts ---
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('teachers', [\App\Http\Controllers\Admin\TeacherVettingController::class, 'index'])->name('teacher-vetting');
+    Route::get('teachers/{teacherProfile}', [\App\Http\Controllers\Admin\TeacherVettingController::class, 'show'])->name('teacher-vetting.show');
+    Route::post('teachers/{teacherProfile}/approve', [\App\Http\Controllers\Admin\TeacherVettingController::class, 'approve'])->name('teacher-vetting.approve');
+    Route::post('teachers/{teacherProfile}/reject', [\App\Http\Controllers\Admin\TeacherVettingController::class, 'reject'])->name('teacher-vetting.reject');
+    Route::get('payouts', [\App\Http\Controllers\Admin\PayoutController::class, 'index'])->name('payouts');
+    Route::post('payouts/{payoutRequest}/approve', [\App\Http\Controllers\Admin\PayoutController::class, 'approve'])->name('payouts.approve');
+    Route::post('payouts/{payoutRequest}/reject', [\App\Http\Controllers\Admin\PayoutController::class, 'reject'])->name('payouts.reject');
+    Route::get('schools', [\App\Http\Controllers\Admin\SchoolInquiryController::class, 'index'])->name('school-inquiries');
+    Route::get('schools/{schoolInquiry}', [\App\Http\Controllers\Admin\SchoolInquiryController::class, 'show'])->name('school-inquiries.show');
+    Route::post('schools/{schoolInquiry}/assign', [\App\Http\Controllers\Admin\SchoolInquiryController::class, 'assign'])->name('school-inquiries.assign');
+    Route::post('schools/{schoolInquiry}/close', [\App\Http\Controllers\Admin\SchoolInquiryController::class, 'close'])->name('school-inquiries.close');
+    Route::get('scholarships', [\App\Http\Controllers\Admin\ScholarshipController::class, 'index'])->name('scholarships.index');
+    Route::post('scholarships', [\App\Http\Controllers\Admin\ScholarshipController::class, 'store'])->name('scholarships.store');
+    // Horizon dashboard (admin only)
+    Route::get('horizon', function () {
+        return redirect('/horizon');
+    })->name('horizon');
+});
+
+// --- Teacher: profile + payout requests ---
+Route::middleware(['auth', 'role:Teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    Route::get('profile', [\App\Http\Controllers\Teacher\ProfileController::class, 'show'])->name('profile');
+    Route::put('profile', [\App\Http\Controllers\Teacher\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('payouts', [\App\Http\Controllers\Teacher\PayoutController::class, 'index'])->name('payouts');
+    Route::post('payouts/request', [\App\Http\Controllers\Teacher\PayoutController::class, 'request'])->name('payouts.request');
+});
+
+// --- Referral program ---
+Route::middleware(['auth'])->prefix('referrals')->name('referrals.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ReferralController::class, 'index'])->name('index');
+});
+
+// --- Pricing (geo-detected, public) ---
+Route::get('/pricing', [\App\Http\Controllers\PricingController::class, 'index'])->name('pricing');
+
