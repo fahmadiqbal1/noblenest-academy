@@ -36,7 +36,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
     <meta name="msapplication-TileColor" content="#0d5c63">
     <meta name="theme-color" content="#0d5c63">
@@ -547,5 +547,7 @@ function toggleTheme() {
         .then(()=>window.location.reload());
 }
 </script>
+@include('partials.pwa-install-prompt')
+@include('partials.cookie-consent')
 </body>
 </html>

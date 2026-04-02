@@ -43,7 +43,7 @@ class TeacherStudentMarketplaceTest extends TestCase
             'password'              => 'password123',
             'password_confirmation' => 'password123',
             'role'                  => 'Student',
-        ])->assertRedirect(route('marketplace.index'));
+        ])->assertRedirect(route('onboarding'));
 
         $this->assertDatabaseHas('users', ['email' => 'student@example.com', 'role' => 'Student']);
     }

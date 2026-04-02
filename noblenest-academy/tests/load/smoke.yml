@@ -1,0 +1,61 @@
+# ============================================================
+# SMOKE TEST — quick sanity check (10 users, 60 s)
+# Run: npm run test:smoke
+# ============================================================
+config:
+  target: "http://127.0.0.1:8000"
+  environments:
+    local:
+      target: "http://127.0.0.1:8000"
+    staging:
+      target: "https://staging.noblenest.academy"
+    production:
+      target: "https://noblenest.academy"
+
+  phases:
+    - name: "Smoke"
+      duration: 60
+      arrivalRate: 2
+      maxVusers: 10
+
+  defaults:
+    headers:
+      Accept: "text/html,application/xhtml+xml"
+      Accept-Language: "en"
+
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+  processor: "./helpers.js"
+
+scenarios:
+  - name: "Public pages smoke"
+    weight: 70
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+      - think: 1
+      - get:
+          url: "/marketplace"
+          expect:
+            - statusCode: 200
+      - think: 1
+      - get:
+          url: "/pricing"
+          expect:
+            - statusCode: 200
+
+  - name: "Auth smoke"
+    weight: 30
+    flow:
+      - get:
+          url: "/login"
+          expect:
+            - statusCode: 200
+          capture:
+            - selector: "meta[name=csrf-token]"
+              attr: content
+              as: csrfToken

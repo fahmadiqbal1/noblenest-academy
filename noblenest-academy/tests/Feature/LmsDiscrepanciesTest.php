@@ -115,7 +115,7 @@ class LmsDiscrepanciesTest extends TestCase
                  'preferred_language' => 'fr',
                  'daily_minutes'      => 30,
              ])
-             ->assertRedirect('/');
+             ->assertRedirect(route('onboarding.step2'));
 
         $this->assertEquals('fr', $user->fresh()->preferred_language);
     }

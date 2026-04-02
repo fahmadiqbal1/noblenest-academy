@@ -4,6 +4,58 @@
 <div class="container py-5">
     <h1 class="mb-4 text-center text-primary fw-bold" style="font-size:2.5rem;letter-spacing:1px;">Curriculum Explorer</h1>
     <p class="lead text-center mb-5">Browse our interactive curriculum by age, skill, and activity. Click a skill to see suggested activities and objectives!</p>
+
+    {{-- Dynamic Activity Library (from database) --}}
+    @if($activities->count())
+    <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">Activity Library</h2>
+        <form method="GET" action="{{ route('activities.index') }}" class="row g-2 mb-4">
+            <div class="col-auto">
+                <input type="number" name="age" class="form-control" placeholder="Age (years)" value="{{ request('age') }}">
+            </div>
+            <div class="col-auto">
+                <select name="skill" class="form-select">
+                    <option value="">All Skills</option>
+                    @foreach($skills as $s)
+                    <option value="{{ $s }}" @selected(request('skill')===$s)>{{ ucfirst($s) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-auto">
+                <input type="number" name="duration" class="form-control" placeholder="Max duration (min)" value="{{ request('duration') }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{{ route('activities.index') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+        <div class="row g-3">
+            @foreach($activities as $act)
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ $act->emoji ?? '' }} {{ $act->title }}</h5>
+                        <p class="card-text text-muted small">{{ $act->description ?? '' }}</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            @if($act->skill)
+                            <span class="badge bg-info text-dark">{{ $act->skill }}</span>
+                            @endif
+                            @if($act->duration)
+                            <span class="badge bg-secondary">{{ $act->duration }} min</span>
+                            @endif
+                            @if(isset($act->age_min, $act->age_max))
+                            <span class="badge bg-light text-dark border">Age {{ $act->age_min }}–{{ $act->age_max }}</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        <div class="mt-3">{{ $activities->withQueryString()->links() }}</div>
+    </div>
+    @endif
+
     <div class="accordion" id="curriculumAccordion">
         @php
         $curriculum = [

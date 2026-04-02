@@ -61,6 +61,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             BasicCourseSeeder::class,
+            PricingTierSeeder::class,
+            BadgeSeeder::class,
+            MilestoneSeeder::class,
+            ActivitySeeder::class,
         ]);
     }
 }

@@ -1,0 +1,120 @@
+# ============================================================
+# LOAD TEST — normal production load (500 concurrent users)
+# Tests: public browsing, login flow, child activity feed
+# Run: npm run test:load
+# ============================================================
+config:
+  target: "http://127.0.0.1:8000"
+
+  phases:
+    - name: "Warm-up"
+      duration: 60
+      arrivalRate: 5
+      rampTo: 50
+    - name: "Sustained load"
+      duration: 180
+      arrivalRate: 50
+    - name: "Peak load"
+      duration: 120
+      arrivalRate: 50
+      rampTo: 150
+    - name: "Cool-down"
+      duration: 60
+      arrivalRate: 150
+      rampTo: 10
+
+  # P95 latency must stay under 2 s; error rate under 1 %
+  ensure:
+    thresholds:
+      - http.response_time.p95: 2000
+      - http.request_rate: 50
+    conditions:
+      - expression: "(counters['http.codes.500'] || 0) / counters['http.requests'] < 0.01"
+        strict: true
+
+  defaults:
+    headers:
+      Accept: "text/html,application/xhtml+xml"
+      Accept-Language: "en"
+      Connection: "keep-alive"
+
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+  processor: "./helpers.js"
+
+scenarios:
+  # ---- 40 %: anonymous browsing ----------------------------------
+  - name: "Anonymous browser"
+    weight: 40
+    flow:
+      - get:
+          url: "/"
+      - think: 2
+      - get:
+          url: "/marketplace"
+      - think: 3
+      - get:
+          url: "/pricing"
+      - think: 2
+      - get:
+          url: "/milestones"
+      - think: 1
+
+  # ---- 30 %: full login + parent dashboard -----------------------
+  - name: "Parent login + dashboard"
+    weight: 30
+    flow:
+      - get:
+          url: "/login"
+          capture:
+            - selector: "input[name=_token]"
+              attr: value
+              as: csrfToken
+      - think: 2
+      - post:
+          url: "/login"
+          form:
+            _token: "{{ csrfToken }}"
+            email: "{{ $processEnvironment.TEST_PARENT_EMAIL || 'parent@test.local' }}"
+            password: "{{ $processEnvironment.TEST_PARENT_PASSWORD || 'password' }}"
+          followRedirects: true
+          expect:
+            - statusCode: [200, 302]
+      - think: 3
+      - get:
+          url: "/parent/dashboard"
+          expect:
+            - statusCode: [200, 302]
+      - think: 4
+      - get:
+          url: "/notifications"
+          expect:
+            - statusCode: [200, 302]
+      - think: 2
+
+  # ---- 20 %: marketplace + course detail -------------------------
+  - name: "Marketplace browser"
+    weight: 20
+    flow:
+      - get:
+          url: "/marketplace"
+      - think: 3
+      - function: "pickRandomCourse"
+      - get:
+          url: "/marketplace/{{ courseSlug }}"
+          expect:
+            - statusCode: [200, 404]
+      - think: 5
+
+  # ---- 10 %: static/info pages -----------------------------------
+  - name: "Info pages"
+    weight: 10
+    flow:
+      - get:
+          url: "/for-schools"
+      - think: 2
+      - get:
+          url: "/scholarship/apply"
+      - think: 2

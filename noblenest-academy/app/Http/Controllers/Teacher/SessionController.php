@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClassSession;
 use App\Models\SessionToken;
 use App\Models\TeacherCourse;
+use App\Services\DailyCoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -64,12 +65,31 @@ class SessionController extends Controller
     public function start(ClassSession $session)
     {
         $this->authoriseSession($session);
-        $session->update(['status' => 'live']);
+
+        $updates = ['status' => 'live'];
+
+        // Provision a Daily.co room if not already set and API is configured
+        if (empty($session->daily_room_name)) {
+            $daily = app(DailyCoService::class);
+            $room = $daily->createRoom($session->id, $session->duration_minutes, $session->max_participants);
+            if ($room) {
+                $updates['room_url'] = $room['room_url'];
+                $updates['daily_room_name'] = $room['daily_room_name'];
+            }
+        }
+
+        $session->update($updates);
+        $session->refresh();
 
         // Issue tokens for enrolled students that don't have one yet
         $enrolledStudentIds = $session->course->activeEnrollments()->pluck('student_id');
         foreach ($enrolledStudentIds as $studentId) {
             SessionToken::generate($session->id, $studentId, 'student');
+        }
+
+        // If Daily.co room is provisioned, redirect directly to it
+        if ($session->room_url) {
+            return redirect()->away($session->room_url);
         }
 
         return redirect()->route('classroom.room', $session->room_id);

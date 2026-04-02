@@ -2,4 +2,6 @@
 
 return [
     App\Providers\AppServiceProvider::class,
+    App\Providers\HorizonServiceProvider::class,
+    Laravel\Horizon\HorizonServiceProvider::class,
 ];

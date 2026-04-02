@@ -1,0 +1,97 @@
+{
+  "name": "NobleNest Global Academy",
+  "short_name": "NobleNest",
+  "description": "Family-first adaptive learning for children 0–10 years",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d5c63",
+  "theme_color": "#0d5c63",
+  "lang": "en",
+  "scope": "/",
+  "categories": ["education", "kids"],
+  "icons": [
+    {
+      "src": "/brand/icon-72.png",
+      "type": "image/png",
+      "sizes": "72x72",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-128.png",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-152.png",
+      "type": "image/png",
+      "sizes": "152x152",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/icon-384.png",
+      "type": "image/png",
+      "sizes": "384x384",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/brand/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Child activity dashboard"
+    },
+    {
+      "src": "/brand/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Parent dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Activities",
+      "short_name": "Activities",
+      "description": "Open today's activities",
+      "url": "/activities",
+      "icons": [{ "src": "/brand/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Parent Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your children's progress",
+      "url": "/parent/dashboard",
+      "icons": [{ "src": "/brand/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

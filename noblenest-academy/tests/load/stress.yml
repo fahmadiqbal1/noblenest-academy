@@ -1,0 +1,101 @@
+# ============================================================
+# STRESS TEST — ramp to 5 000 virtual users
+# Goal: find the breaking point before production deploy.
+#
+# Run: npm run test:stress
+# NOTE: Run against a staging server — not XAMPP.
+#       XAMPP/artisan serve tops out at ~50–100 req/s.
+# ============================================================
+config:
+  target: "http://127.0.0.1:8000"
+
+  phases:
+    - name: "Ramp to 500"
+      duration: 120
+      arrivalRate: 10
+      rampTo: 500
+    - name: "Hold 500 — baseline stress"
+      duration: 180
+      arrivalRate: 500
+    - name: "Ramp to 2 000"
+      duration: 120
+      arrivalRate: 500
+      rampTo: 2000
+    - name: "Hold 2 000"
+      duration: 180
+      arrivalRate: 2000
+    - name: "Ramp to 5 000"
+      duration: 120
+      arrivalRate: 2000
+      rampTo: 5000
+    - name: "Hold 5 000 — breaking point"
+      duration: 120
+      arrivalRate: 5000
+    - name: "Recovery"
+      duration: 60
+      arrivalRate: 5000
+      rampTo: 50
+
+  # Stress thresholds — warn, don't fail the run
+  ensure:
+    thresholds:
+      - http.response_time.p99: 10000
+      - http.response_time.p95: 5000
+
+  defaults:
+    headers:
+      Accept: "text/html,application/xhtml+xml"
+      Accept-Language: "en"
+
+  plugins:
+    expect: {}
+    metrics-by-endpoint: {}
+
+  processor: "./helpers.js"
+
+scenarios:
+  # Heavy mix of real-world traffic patterns
+  - name: "Homepage"
+    weight: 35
+    flow:
+      - get:
+          url: "/"
+      - think: 1
+
+  - name: "Marketplace"
+    weight: 30
+    flow:
+      - get:
+          url: "/marketplace"
+      - think: 2
+      - function: "pickRandomCourse"
+      - get:
+          url: "/marketplace/{{ courseSlug }}"
+
+  - name: "Login + parent dashboard"
+    weight: 20
+    flow:
+      - get:
+          url: "/login"
+          capture:
+            - selector: "input[name=_token]"
+              attr: value
+              as: csrfToken
+      - post:
+          url: "/login"
+          form:
+            _token: "{{ csrfToken }}"
+            email: "{{ $processEnvironment.TEST_PARENT_EMAIL || 'parent@test.local' }}"
+            password: "{{ $processEnvironment.TEST_PARENT_PASSWORD || 'password' }}"
+          followRedirects: true
+      - get:
+          url: "/parent/dashboard"
+
+  - name: "Static pages"
+    weight: 15
+    flow:
+      - get:
+          url: "/pricing"
+      - think: 1
+      - get:
+          url: "/milestones"

@@ -1,0 +1,6 @@
+curriculum-index/
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/

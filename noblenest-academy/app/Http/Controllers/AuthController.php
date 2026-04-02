@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -23,7 +24,8 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    // Handle registration
+    // Handle registration — MiroFish 3-field fast onboarding
+    // Fields: email, password, role only. Child details captured in onboarding.
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -38,12 +40,31 @@ class AuthController extends Controller
             abort(403, 'Admin accounts cannot be self-registered.');
         }
 
+        // Detect country from Cloudflare header (safe — client cannot spoof on CF-proxied traffic)
+        $countryCode = strtoupper(substr(preg_replace('/[^A-Z]/', '', $request->header('CF-IPCountry', '')), 0, 2)) ?: null;
+
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role'     => $validated['role'],
+            'name'          => $validated['name'],
+            'email'         => $validated['email'],
+            'password'      => Hash::make($validated['password']),
+            'role'          => $validated['role'],
+            'country_code'  => $countryCode,
+            'referral_code' => Str::upper(Str::random(8)),
         ]);
+
+        // Apply referred-by tracking if referral code present
+        if ($request->filled('ref')) {
+            $referrer = User::where('referral_code', strtoupper($request->ref))->first();
+            if ($referrer && $referrer->id !== $user->id) {
+                \App\Models\Referral::create([
+                    'referrer_id' => $referrer->id,
+                    'referred_id' => $user->id,
+                    'code'        => strtoupper($request->ref),
+                    'status'      => 'signed_up',
+                    'signed_up_at' => now(),
+                ]);
+            }
+        }
 
         Auth::login($user);
 
@@ -52,15 +73,12 @@ class AuthController extends Controller
             return redirect()->to($intended);
         }
 
-        // Role-based redirect after registration
+        // Teachers go to profile setup, others go to onboarding wizard
         if ($user->role === 'Teacher') {
             return redirect()->route('teacher.dashboard');
         }
-        if ($user->role === 'Student') {
-            return redirect()->route('marketplace.index');
-        }
 
-        return redirect('/');
+        return redirect()->route('onboarding');
     }
 
     // Show login form
