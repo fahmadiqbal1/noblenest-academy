@@ -1,0 +1,19 @@
+{
+  "name": "noblenest-load-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Artillery load tests for Noble Nest Academy — 5000+ user stress testing",
+  "scripts": {
+    "test:smoke":   "artillery run smoke.yml --output reports/smoke.json",
+    "test:load":    "artillery run load.yml  --output reports/load.json",
+    "test:stress":  "artillery run stress.yml --output reports/stress.json",
+    "test:spike":   "artillery run spike.yml  --output reports/spike.json",
+    "report:smoke":  "artillery report reports/smoke.json  --output reports/smoke.html",
+    "report:load":   "artillery report reports/load.json   --output reports/load.html",
+    "report:stress": "artillery report reports/stress.json --output reports/stress.html",
+    "report:spike":  "artillery report reports/spike.json  --output reports/spike.html"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.22"
+  }
+}

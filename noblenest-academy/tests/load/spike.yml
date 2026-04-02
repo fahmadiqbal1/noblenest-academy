@@ -1,0 +1,44 @@
+# ============================================================
+# SPIKE TEST — sudden burst (simulates viral / news traffic)
+# 0 → 5 000 users in 30 seconds; holds for 2 min; drops off.
+# ============================================================
+config:
+  target: "http://127.0.0.1:8000"
+
+  phases:
+    - name: "Pre-spike baseline"
+      duration: 60
+      arrivalRate: 20
+    - name: "SPIKE — instant burst"
+      duration: 30
+      arrivalRate: 20
+      rampTo: 5000
+    - name: "Hold spike"
+      duration: 120
+      arrivalRate: 5000
+    - name: "Post-spike recovery"
+      duration: 120
+      arrivalRate: 5000
+      rampTo: 20
+
+  defaults:
+    headers:
+      Accept: "text/html,application/xhtml+xml"
+
+  plugins:
+    metrics-by-endpoint: {}
+
+  processor: "./helpers.js"
+
+scenarios:
+  - name: "Spike — homepage"
+    weight: 60
+    flow:
+      - get:
+          url: "/"
+
+  - name: "Spike — marketplace"
+    weight: 40
+    flow:
+      - get:
+          url: "/marketplace"
