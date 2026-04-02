@@ -379,4 +379,113 @@
   </div>
 </div>
 @endif
+
+{{-- ============================================================
+     VIRAL MARKETING SECTIONS (public-facing, below the fold)
+     ============================================================ --}}
+@guest
+<div class="mt-5 pt-2">
+
+  {{-- Social Proof Numbers --}}
+  <div class="row g-3 text-center mb-5">
+    <div class="col-6 col-md-3">
+      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:2rem;font-weight:800;color:#0d5c63">50K+</div>
+        <div class="text-muted small">Children Learning</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:2rem;font-weight:800;color:#7c3aed">120+</div>
+        <div class="text-muted small">Countries</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:2rem;font-weight:800;color:#f59e0b">4.9★</div>
+        <div class="text-muted small">Parent Rating</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:2rem;font-weight:800;color:#16a34a">8</div>
+        <div class="text-muted small">Languages</div>
+      </div>
+    </div>
+  </div>
+
+  {{-- How It Works --}}
+  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem">Start in 3 Simple Steps</h2>
+  <div class="row g-3 mb-5">
+    <div class="col-md-4">
+      <div class="d-flex gap-3 align-items-start p-3 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:1.8rem;flex-shrink:0">📝</div>
+        <div>
+          <div class="fw-bold">Create Account</div>
+          <div class="text-muted small">Sign up in 30 seconds. No credit card to start.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="d-flex gap-3 align-items-start p-3 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:1.8rem;flex-shrink:0">👶</div>
+        <div>
+          <div class="fw-bold">Add Your Child</div>
+          <div class="text-muted small">Date of birth → instant age-adapted curriculum.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="d-flex gap-3 align-items-start p-3 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+        <div style="font-size:1.8rem;flex-shrink:0">🚀</div>
+        <div>
+          <div class="fw-bold">Start Learning</div>
+          <div class="text-muted small">7 free activities daily. Upgrade anytime.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- Testimonials --}}
+  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem">What Families Say</h2>
+  <div class="row g-3 mb-5">
+    @foreach([
+      ['quote' => 'My daughter went from refusing to read to asking for more activities every day. NobleNest changed everything.', 'author' => 'Amara O.', 'country' => '🇳🇬 Nigeria', 'stars' => 5],
+      ['quote' => 'Finally a platform that works in Arabic and adapts to my 3-year-old\'s pace. Incredible!', 'author' => 'Fatima A.', 'country' => '🇵🇰 Pakistan', 'stars' => 5],
+      ['quote' => 'The teacher marketplace is fantastic. My son\'s tutor is from Indonesia and he loves the sessions.', 'author' => 'Li Wei', 'country' => '🇨🇳 China', 'stars' => 5],
+    ] as $t)
+      <div class="col-md-4">
+        <div class="h-100 p-4 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
+          <div style="color:#f59e0b;font-size:0.8rem;margin-bottom:0.5rem">{{ str_repeat('★', $t['stars']) }}</div>
+          <p class="mb-3 small" style="font-style:italic">"{{ $t['quote'] }}"</p>
+          <div class="fw-bold small">{{ $t['author'] }}</div>
+          <div class="text-muted" style="font-size:0.72rem">{{ $t['country'] }}</div>
+        </div>
+      </div>
+    @endforeach
+  </div>
+
+  {{-- Final CTA --}}
+  <div class="text-center py-5 rounded-4 mb-4" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c);color:#fff">
+    <h2 class="fw-bold mb-2" style="font-size:1.75rem">Start Your Child's Journey Today</h2>
+    <p class="mb-4" style="opacity:0.85">7 free activities. No card required. Cancel anytime.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{{ route('register') }}" class="btn btn-warning rounded-pill px-5 py-2 fw-bold">
+        Get Started Free →
+      </a>
+      <a href="{{ route('pricing') }}" class="btn btn-outline-light rounded-pill px-4 py-2">
+        View Pricing
+      </a>
+    </div>
+    {{-- WhatsApp Share --}}
+    <div class="mt-4">
+      <a href="https://wa.me/?text={{ urlencode('🌟 My kids are learning on NobleNest Academy – world-class early education in 8 languages! Try it free: ' . url('/')) }}"
+         class="btn btn-success btn-sm rounded-pill px-3" target="_blank" rel="noopener">
+        <i class="bi bi-whatsapp me-1"></i> Share on WhatsApp
+      </a>
+    </div>
+  </div>
+
+</div>
+@endguest
 @endsection

@@ -270,3 +270,50 @@ Route::middleware(['auth'])->prefix('referrals')->name('referrals.')->group(func
 // --- Pricing (geo-detected, public) ---
 Route::get('/pricing', [\App\Http\Controllers\PricingController::class, 'index'])->name('pricing');
 
+// ===========================================================================
+// PHASES 2-9: NEW ROUTES
+// ===========================================================================
+
+// --- Scholarship (public) ---
+Route::get('/scholarship/apply', fn() => view('scholarship.apply'))->name('scholarship.apply');
+Route::post('/scholarship/apply', [\App\Http\Controllers\Admin\ScholarshipController::class, 'publicApply'])->name('scholarship.apply.post');
+
+// --- Milestone Wall (public) ---
+Route::get('/milestones', [\App\Http\Controllers\MilestoneWallController::class, 'index'])->name('milestones.wall');
+
+// --- Child dashboard + assessment (parent auth) ---
+Route::middleware(['auth', 'role:Parent'])->group(function () {
+    Route::get('/child/{child}/dashboard', [\App\Http\Controllers\Child\DashboardController::class, 'show'])->name('child.dashboard');
+    Route::get('/child/{child}/assessment', [\App\Http\Controllers\AssessmentController::class, 'index'])->name('child.assessment');
+});
+
+// --- Course reviews (student) ---
+Route::middleware(['auth', 'role:Student'])->group(function () {
+    Route::post('courses/{course}/reviews', [\App\Http\Controllers\Student\CourseReviewController::class, 'store'])->name('course.reviews.store');
+    Route::delete('courses/{course}/reviews', [\App\Http\Controllers\Student\CourseReviewController::class, 'destroy'])->name('course.reviews.destroy');
+});
+
+// --- Teacher analytics ---
+Route::middleware(['auth', 'role:Teacher'])->prefix('teacher')->name('teacher.')->group(function () {
+    Route::get('analytics', [\App\Http\Controllers\Teacher\AnalyticsController::class, 'index'])->name('analytics');
+});
+
+// --- Admin: content batch + review pipeline ---
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('content-batch/create', [\App\Http\Controllers\Admin\ContentBatchController::class, 'create'])->name('content-batch.create');
+    Route::post('content-batch', [\App\Http\Controllers\Admin\ContentBatchController::class, 'store'])->name('content-batch.store');
+    Route::get('content-batch/{job}/preview', [\App\Http\Controllers\Admin\ContentBatchController::class, 'preview'])->name('content-batch.preview');
+    Route::post('content-batch/{job}/publish', [\App\Http\Controllers\Admin\ContentBatchController::class, 'publish'])->name('content-batch.publish');
+    Route::get('content-review', [\App\Http\Controllers\Admin\ContentReviewController::class, 'index'])->name('content-review.index');
+    Route::post('content-review/{activity}/approve', [\App\Http\Controllers\Admin\ContentReviewController::class, 'approve'])->name('content-review.approve');
+    Route::delete('content-review/{activity}', [\App\Http\Controllers\Admin\ContentReviewController::class, 'reject'])->name('content-review.reject');
+    Route::post('content-review/approve-all', [\App\Http\Controllers\Admin\ContentReviewController::class, 'approveAll'])->name('content-review.approve-all');
+});
+
+// --- Privacy + GDPR / COPPA (authenticated) ---
+Route::middleware(['auth'])->prefix('privacy')->name('privacy.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PrivacyController::class, 'index'])->name('dashboard');
+    Route::get('export', [\App\Http\Controllers\PrivacyController::class, 'exportData'])->name('export');
+    Route::delete('delete', [\App\Http\Controllers\PrivacyController::class, 'deleteData'])->name('delete');
+});
+
