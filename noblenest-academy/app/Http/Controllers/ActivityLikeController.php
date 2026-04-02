@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\ActivityLike;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ActivityLikeController extends Controller
 {
@@ -16,20 +17,20 @@ class ActivityLikeController extends Controller
     {
         $userId = Auth::id();
 
-        $liked = \DB::table('activity_likes')
+        $liked = DB::table('activity_likes')
             ->where('user_id', $userId)
             ->where('activity_id', $activity->id)
             ->exists();
 
         if ($liked) {
-            \DB::table('activity_likes')
+            DB::table('activity_likes')
                 ->where('user_id', $userId)
                 ->where('activity_id', $activity->id)
                 ->delete();
             $activity->decrement('like_count');
             $isLiked = false;
         } else {
-            \DB::table('activity_likes')->insert([
+            DB::table('activity_likes')->insert([
                 'user_id'     => $userId,
                 'activity_id' => $activity->id,
                 'created_at'  => now(),

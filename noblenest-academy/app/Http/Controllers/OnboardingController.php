@@ -39,6 +39,7 @@ class OnboardingController extends Controller
             'preferred_language' => 'required|in:en,ar,fr,ur,ru,zh,es,ko',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         if ($user) {
             $user->update(['preferred_language' => $data['preferred_language']]);
@@ -71,6 +72,7 @@ class OnboardingController extends Controller
             'date_of_birth' => 'required|date|before:today|after:' . now()->subYears(11)->format('Y-m-d'),
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $dob = \Carbon\Carbon::parse($data['date_of_birth']);
@@ -116,6 +118,7 @@ class OnboardingController extends Controller
             'goals'         => 'nullable|array',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         if ($user) {
             $user->update([

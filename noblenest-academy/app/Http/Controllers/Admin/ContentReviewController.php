@@ -31,7 +31,7 @@ class ContentReviewController extends Controller
     {
         $activity->update(['published' => true]);
 
-        return back()->with('success', ""{$activity->title}" published.");
+        return back()->with('success', '"' . $activity->title . '" published.');
     }
 
     /**

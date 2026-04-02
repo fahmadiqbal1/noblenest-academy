@@ -22,9 +22,9 @@ class ShareCardController extends Controller
      */
     public function index(Request $request)
     {
-        $childIds = Auth::user()
-            ->childProfiles()
-            ->pluck('id');
+        /** @var \App\Models\User $user */
+        $user     = Auth::user();
+        $childIds = $user->childProfiles()->pluck('id');
 
         $cards = ShareCard::with(['childProfile', 'activity', 'badge'])
             ->whereIn('child_profile_id', $childIds)

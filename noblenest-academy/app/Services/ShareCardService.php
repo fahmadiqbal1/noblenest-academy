@@ -176,6 +176,8 @@ class ShareCardService
             'CacheControl' => 'public, max-age=31536000',
         ]);
 
-        return Storage::disk('s3')->url($path);
+        /** @var \Illuminate\Contracts\Filesystem\Cloud $s3 */
+        $s3 = Storage::disk('s3');
+        return $s3->url($path);
     }
 }

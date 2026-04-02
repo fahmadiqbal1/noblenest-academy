@@ -12,13 +12,9 @@ use Illuminate\Support\Facades\Hash;
 
 class PrivacyController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $children = ChildProfile::where('user_id', $user->id)->withCount('activityProgress')->get();
         $paymentCount = Payment::where('user_id', $user->id)->count();
@@ -64,6 +60,7 @@ class PrivacyController extends Controller
             'confirm'   => 'required|in:DELETE',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if (! Hash::check($request->password, $user->password)) {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CourseReview;
 use App\Models\TeacherCourse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourseReviewController extends Controller
 {
@@ -42,7 +43,7 @@ class CourseReviewController extends Controller
     public function destroy(TeacherCourse $course)
     {
         CourseReview::where('course_id', $course->id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->delete();
 
         return back()->with('success', 'Review removed.');

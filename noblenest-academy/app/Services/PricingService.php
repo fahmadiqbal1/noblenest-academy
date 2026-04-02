@@ -113,7 +113,7 @@ class PricingService
     public function tierForCountry(?string $country): array
     {
         if (!$country) {
-            return array_merge($this->FALLBACK_TIERS['GLOBAL'], ['region_code' => 'GLOBAL']);
+            return array_merge(self::FALLBACK_TIERS['GLOBAL'], ['region_code' => 'GLOBAL']);
         }
 
         // Cache tier lookup for 60 minutes per country

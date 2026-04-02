@@ -30,6 +30,7 @@ class ChildActivityController extends Controller
         $completed = ChildActivityProgress::where('child_profile_id', $child->id)
             ->count();
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $hasSubscription = $user->subscriptions()
             ->where('active', true)

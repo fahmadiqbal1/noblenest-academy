@@ -254,4 +254,40 @@ PROMPT;
     {
         return $this->getProvider()?->name;
     }
+
+    /**
+     * Generate a batch of activities for a content generation job.
+     * Called by ProcessContentBatchJob when an AI provider is available.
+     */
+    public function generateBatch(
+        \App\Models\AIJob $job,
+        string $subject,
+        string $ageTier,
+        int $count,
+        string $language,
+        bool $isFree
+    ): void {
+        for ($i = 1; $i <= $count; $i++) {
+            $prompt = "Create a {$ageTier}-tier {$subject} activity for children in {$language}. Return a JSON object with keys: title, description, instructions, duration_minutes.";
+
+            $result = $this->chat($prompt, [
+                'language' => $language,
+                'subject'  => $subject,
+            ]);
+
+            $parsed = json_decode($result['reply'], true);
+
+            \App\Models\Activity::create([
+                'title'         => $parsed['title']        ?? "{$subject} Activity {$i} ({$ageTier})",
+                'description'   => $parsed['description']  ?? null,
+                'instructions'  => $parsed['instructions'] ?? null,
+                'subject'       => $subject,
+                'age_tier'      => $ageTier,
+                'language'      => $language,
+                'is_free'       => $isFree,
+                'published'     => false,
+                'source_job_id' => $job->id,
+            ]);
+        }
+    }
 }
