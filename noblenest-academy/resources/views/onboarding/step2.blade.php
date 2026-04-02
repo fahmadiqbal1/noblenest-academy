@@ -50,6 +50,36 @@
                     <div class="form-text">We calculate the age automatically — no year-based tracking.</div>
                 </div>
 
+                {{-- Faith-based curriculum (optional) --}}
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Will your child be taught Islamic studies? <span class="text-muted fw-normal">(optional)</span></label>
+                    <p class="text-muted small mb-2">If yes, we'll include Quran memorisation, Arabic alphabet, duas, and Islamic character activities. Non-Muslim families still have full access to all other activities.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="flex-fill">
+                            <input type="radio" class="btn-check" name="is_muslim" id="faith_yes" value="yes"
+                                   {{ old('is_muslim') === 'yes' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-success w-100 rounded-3" for="faith_yes">
+                                ☪️ Yes, Muslim household
+                            </label>
+                        </div>
+                        <div class="flex-fill">
+                            <input type="radio" class="btn-check" name="is_muslim" id="faith_no" value="no"
+                                   {{ old('is_muslim') === 'no' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-secondary w-100 rounded-3" for="faith_no">
+                                🌍 Non-Muslim
+                            </label>
+                        </div>
+                        <div class="flex-fill">
+                            <input type="radio" class="btn-check" name="is_muslim" id="faith_skip" value="skip"
+                                   {{ old('is_muslim', 'skip') === 'skip' ? 'checked' : '' }}>
+                            <label class="btn btn-outline-light text-muted border w-100 rounded-3" for="faith_skip">
+                                Skip for now
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-text mt-1">You can change this anytime in your child's profile settings.</div>
+                </div>
+
                 <button type="submit" class="btn btn-success fw-bold w-100 py-3 rounded-3 fs-5">
                     Next →
                 </button>
