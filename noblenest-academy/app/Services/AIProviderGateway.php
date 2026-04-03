@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AIProviderConfig;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AIProviderGateway
@@ -44,6 +45,19 @@ class AIProviderGateway
 
             if ($driver === 'gemini') {
                 return $this->verifyViaGemini($provider, $apiKey, $baseUrl);
+            }
+
+            if ($driver === 'stability') {
+                return $this->verifyViaStability($apiKey);
+            }
+            if ($driver === 'elevenlabs') {
+                return $this->verifyViaElevenLabs($apiKey);
+            }
+            if ($driver === 'replicate') {
+                return $this->verifyViaReplicate($apiKey);
+            }
+            if ($driver === 'runway') {
+                return $this->verifyViaRunway($apiKey);
             }
 
             $response = Http::withToken($apiKey)
@@ -300,18 +314,26 @@ class AIProviderGateway
     protected function normalizeBaseUrl(?string $baseUrl, string $driver = 'openai'): string
     {
         $default = match ($driver) {
-            'anthropic' => 'https://api.anthropic.com/v1',
-            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
-            default => 'https://api.openai.com/v1',
+            'anthropic'    => 'https://api.anthropic.com/v1',
+            'gemini'       => 'https://generativelanguage.googleapis.com/v1beta',
+            'stability'    => 'https://api.stability.ai',
+            'elevenlabs'   => 'https://api.elevenlabs.io',
+            'replicate'    => 'https://api.replicate.com/v1',
+            'runway'       => 'https://api.dev.runwayml.com/v1',
+            'openai-image' => 'https://api.openai.com/v1',
+            default        => 'https://api.openai.com/v1',
         };
 
         $baseUrl = rtrim($baseUrl ?: $default, '/');
+
+        if (in_array($driver, ['stability', 'elevenlabs', 'replicate', 'runway'], true)) {
+            return $baseUrl;
+        }
 
         if ($driver === 'gemini') {
             if (! Str::contains(parse_url($baseUrl, PHP_URL_PATH) ?: '', '/v1beta')) {
                 $baseUrl .= '/v1beta';
             }
-
             return $baseUrl;
         }
 
@@ -341,24 +363,249 @@ class AIProviderGateway
             $provider->model,
         ])));
 
-        if (Str::contains($haystack, ['anthropic', 'claude'])) {
-            return 'anthropic';
-        }
-
-        if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) {
-            return 'gemini';
-        }
-
+        if (Str::contains($haystack, ['anthropic', 'claude'])) { return 'anthropic'; }
+        if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) { return 'gemini'; }
+        if (Str::contains($haystack, ['stability.ai', 'stable-diffusion', 'stable-image'])) { return 'stability'; }
+        if (Str::contains($haystack, ['elevenlabs', 'eleven_labs', 'eleven-labs'])) { return 'elevenlabs'; }
+        if (Str::contains($haystack, ['replicate.com', 'replicate'])) { return 'replicate'; }
+        if (Str::contains($haystack, ['runwayml', 'runway'])) { return 'runway'; }
+        if (Str::contains($haystack, ['dall-e', 'dalle', 'openai-image'])) { return 'openai-image'; }
         return 'openai';
     }
 
     protected function defaultModelFor(string $driver): string
     {
         return match ($driver) {
-            'anthropic' => 'claude-3-5-haiku-latest',
-            'gemini' => 'gemini-1.5-flash',
-            default => 'gpt-4o-mini',
+            'anthropic'    => 'claude-3-5-haiku-latest',
+            'gemini'       => 'gemini-1.5-flash',
+            'stability'    => 'core',
+            'elevenlabs'   => 'eleven_multilingual_v2',
+            'replicate'    => 'minimax/video-01',
+            'runway'       => 'gen4_turbo',
+            'openai-image' => 'dall-e-3',
+            default        => 'gpt-4o-mini',
         };
+    }
+
+    // ------------------------------------------------------------------
+    // Stability AI — image generation
+    // ------------------------------------------------------------------
+
+    protected function verifyViaStability(string $apiKey): array
+    {
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $apiKey])
+            ->acceptJson()->timeout(15)
+            ->get('https://api.stability.ai/v1/user/account');
+        if ($response->successful()) {
+            return ['status' => 'live', 'message' => 'Stability AI connected. Account: ' . ($response->json('id') ?? 'OK')];
+        }
+        return ['status' => 'failed', 'message' => $this->formatHttpError($response->status(), $response->body())];
+    }
+
+    public function generateImage(AIProviderConfig $provider, string $prompt, array $options = []): array
+    {
+        $apiKey = Crypt::decryptString($provider->api_key_encrypted);
+        $driver = $this->resolveDriver($provider);
+        if (in_array($driver, ['openai', 'openai-image'], true)) {
+            return $this->generateImageViaOpenAI($apiKey, $prompt, $options);
+        }
+        return $this->generateImageViaStability($apiKey, $prompt, $options);
+    }
+
+    protected function generateImageViaStability(string $apiKey, string $prompt, array $options): array
+    {
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $apiKey, 'Accept' => 'application/json'])
+            ->timeout(60)->asMultipart()
+            ->post('https://api.stability.ai/v2beta/stable-image/generate/core', [
+                ['name' => 'prompt',        'contents' => $prompt],
+                ['name' => 'output_format', 'contents' => 'png'],
+                ['name' => 'aspect_ratio',  'contents' => $options['aspect_ratio'] ?? '16:9'],
+            ]);
+        if (! $response->successful()) {
+            throw new \RuntimeException('Stability AI error: ' . $this->formatHttpError($response->status(), $response->body()));
+        }
+        Storage::disk('public')->makeDirectory('ai/images');
+        $path = 'ai/images/' . uniqid('img_', true) . '.png';
+        Storage::disk('public')->put($path, base64_decode($response->json('image')));
+        return ['type' => 'image', 'url' => Storage::disk('public')->url($path), 'content' => "Image generated: {$path}"];
+    }
+
+    protected function generateImageViaOpenAI(string $apiKey, string $prompt, array $options): array
+    {
+        $response = Http::withToken($apiKey)->acceptJson()->timeout(60)
+            ->post('https://api.openai.com/v1/images/generations', [
+                'model'           => $options['model'] ?? 'dall-e-3',
+                'prompt'          => $prompt,
+                'n'               => 1,
+                'size'            => $options['size'] ?? '1024x1024',
+                'response_format' => 'url',
+            ]);
+        if (! $response->successful()) {
+            throw new \RuntimeException('OpenAI image error: ' . $this->formatHttpError($response->status(), $response->body()));
+        }
+        return ['type' => 'image', 'url' => data_get($response->json(), 'data.0.url'), 'content' => 'Image generated via DALL-E.'];
+    }
+
+    // ------------------------------------------------------------------
+    // ElevenLabs — text-to-speech
+    // ------------------------------------------------------------------
+
+    protected function verifyViaElevenLabs(string $apiKey): array
+    {
+        $response = Http::withHeaders(['xi-api-key' => $apiKey])
+            ->acceptJson()->timeout(15)
+            ->get('https://api.elevenlabs.io/v1/user');
+        if ($response->successful()) {
+            $tier = data_get($response->json(), 'subscription.tier', 'free');
+            return ['status' => 'live', 'message' => "ElevenLabs connected. Tier: {$tier}."];
+        }
+        return ['status' => 'failed', 'message' => $this->formatHttpError($response->status(), $response->body())];
+    }
+
+    public function generateAudio(AIProviderConfig $provider, string $text, array $options = []): array
+    {
+        $apiKey  = Crypt::decryptString($provider->api_key_encrypted);
+        $voiceId = $options['voice_id'] ?? data_get($provider->extra_config, 'voice_id', 'JBFqnCBsd6RMkjVDRZzb');
+        $model   = $options['model'] ?? $provider->model ?? 'eleven_multilingual_v2';
+        $response = Http::withHeaders([
+                'xi-api-key'   => $apiKey,
+                'Accept'       => 'audio/mpeg',
+                'Content-Type' => 'application/json',
+            ])
+            ->timeout(60)
+            ->post("https://api.elevenlabs.io/v1/text-to-speech/{$voiceId}", [
+                'text'           => $text,
+                'model_id'       => $model,
+                'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75],
+            ]);
+        if (! $response->successful()) {
+            throw new \RuntimeException('ElevenLabs error: ' . $this->formatHttpError($response->status(), $response->body()));
+        }
+        Storage::disk('public')->makeDirectory('ai/tts');
+        $path = 'ai/tts/' . uniqid('tts_', true) . '.mp3';
+        Storage::disk('public')->put($path, $response->body());
+        return ['type' => 'audio', 'url' => Storage::disk('public')->url($path), 'content' => "Audio generated: {$path}"];
+    }
+
+    // ------------------------------------------------------------------
+    // Replicate — video / image via hosted models
+    // ------------------------------------------------------------------
+
+    protected function verifyViaReplicate(string $apiKey): array
+    {
+        $response = Http::withToken($apiKey)->acceptJson()->timeout(15)
+            ->get('https://api.replicate.com/v1/account');
+        if ($response->successful()) {
+            return ['status' => 'live', 'message' => 'Replicate connected. Account: ' . $response->json('username', 'verified')];
+        }
+        return ['status' => 'failed', 'message' => $this->formatHttpError($response->status(), $response->body())];
+    }
+
+    public function generateVideo(AIProviderConfig $provider, string $prompt, array $options = []): array
+    {
+        $apiKey = Crypt::decryptString($provider->api_key_encrypted);
+        $driver = $this->resolveDriver($provider);
+        if ($driver === 'runway') {
+            return $this->generateVideoViaRunway($apiKey, $prompt, $options);
+        }
+        return $this->generateVideoViaReplicate($apiKey, $provider->model, $prompt, $options);
+    }
+
+    protected function generateVideoViaReplicate(string $apiKey, ?string $model, string $prompt, array $options): array
+    {
+        $model    = $model ?: 'minimax/video-01';
+        $response = Http::withToken($apiKey)->acceptJson()->timeout(30)
+            ->post("https://api.replicate.com/v1/models/{$model}/predictions", [
+                'input' => [
+                    'prompt'     => $prompt,
+                    'num_frames' => $options['num_frames'] ?? 120,
+                    'fps'        => $options['fps'] ?? 24,
+                ],
+            ]);
+        if (! $response->successful()) {
+            throw new \RuntimeException('Replicate error: ' . $this->formatHttpError($response->status(), $response->body()));
+        }
+        $output = $this->pollReplicate($apiKey, $response->json('urls.get'), 300);
+        $url    = is_array($output) ? ($output[0] ?? (string) $output) : (string) $output;
+        return ['type' => 'video', 'url' => $url, 'content' => "Video generated via Replicate: {$url}"];
+    }
+
+    protected function pollReplicate(string $apiKey, string $pollUrl, int $maxSeconds): mixed
+    {
+        $deadline = time() + $maxSeconds;
+        while (time() < $deadline) {
+            sleep(5);
+            $poll   = Http::withToken($apiKey)->acceptJson()->timeout(20)->get($pollUrl);
+            $status = $poll->json('status');
+            if ($status === 'succeeded') {
+                return $poll->json('output');
+            }
+            if (in_array($status, ['failed', 'canceled'], true)) {
+                throw new \RuntimeException("Replicate prediction {$status}: " . ($poll->json('error', 'Unknown error')));
+            }
+        }
+        throw new \RuntimeException('Replicate prediction timed out after ' . $maxSeconds . 's.');
+    }
+
+    // ------------------------------------------------------------------
+    // RunwayML — video generation
+    // ------------------------------------------------------------------
+
+    protected function verifyViaRunway(string $apiKey): array
+    {
+        $response = Http::withHeaders([
+                'Authorization'   => 'Bearer ' . $apiKey,
+                'X-Runway-Version' => '2024-11-06',
+            ])
+            ->acceptJson()->timeout(15)
+            ->get('https://api.dev.runwayml.com/v1/organizations');
+        if ($response->successful()) {
+            return ['status' => 'live', 'message' => 'RunwayML connected.'];
+        }
+        return ['status' => 'failed', 'message' => $this->formatHttpError($response->status(), $response->body())];
+    }
+
+    protected function generateVideoViaRunway(string $apiKey, string $prompt, array $options): array
+    {
+        $response = Http::withHeaders([
+                'Authorization'   => 'Bearer ' . $apiKey,
+                'X-Runway-Version' => '2024-11-06',
+            ])
+            ->acceptJson()->timeout(30)
+            ->post('https://api.dev.runwayml.com/v1/text_to_video', [
+                'model'      => $options['model'] ?? 'gen4_turbo',
+                'promptText' => $prompt,
+                'duration'   => $options['duration'] ?? 5,
+                'ratio'      => $options['ratio'] ?? '1280:720',
+            ]);
+        if (! $response->successful()) {
+            throw new \RuntimeException('RunwayML error: ' . $this->formatHttpError($response->status(), $response->body()));
+        }
+        $url = $this->pollRunway($apiKey, $response->json('id'), 300);
+        $url = is_array($url) ? ($url[0] ?? (string) $url) : (string) $url;
+        return ['type' => 'video', 'url' => $url, 'content' => "Video generated via RunwayML: {$url}"];
+    }
+
+    protected function pollRunway(string $apiKey, string $taskId, int $maxSeconds): mixed
+    {
+        $deadline = time() + $maxSeconds;
+        while (time() < $deadline) {
+            sleep(8);
+            $poll   = Http::withHeaders([
+                    'Authorization'   => 'Bearer ' . $apiKey,
+                    'X-Runway-Version' => '2024-11-06',
+                ])
+                ->acceptJson()->timeout(20)
+                ->get("https://api.dev.runwayml.com/v1/tasks/{$taskId}");
+            $status = $poll->json('status');
+            if ($status === 'SUCCEEDED') {
+                return $poll->json('output');
+            }
+            if (in_array($status, ['FAILED', 'CANCELED'], true)) {
+                throw new \RuntimeException("RunwayML task {$status}: " . ($poll->json('failure', 'Unknown error')));
+            }
+        }
+        throw new \RuntimeException('RunwayML task timed out after ' . $maxSeconds . 's.');
     }
 
     protected function formatHttpError(int $status, string $body): string
