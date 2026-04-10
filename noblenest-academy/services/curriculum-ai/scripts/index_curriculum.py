@@ -39,12 +39,12 @@ def build_index(input_path: str) -> None:
     nodes = []
     for act in activities:
         nodes.append({
-            "title":    act.get("title", "Untitled"),
-            "summary":  act.get("description", ""),
-            "age_tier": act.get("age_tier", ""),
-            "subject":  act.get("subject", ""),
-            "language": act.get("language", "en"),
-            "is_free":  act.get("is_free", True),
+            "title":     act.get("title", "Untitled"),
+            "summary":   act.get("description", ""),
+            "age_group": act.get("age_group", ""),
+            "subject":   act.get("subject", ""),
+            "language":  act.get("language", "en"),
+            "is_free":   act.get("is_free", True),
         })
 
     index = {"nodes": nodes, "total": len(nodes)}

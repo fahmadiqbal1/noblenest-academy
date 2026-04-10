@@ -16,11 +16,11 @@ class ActivityController extends Controller
             $query->where('age_min', '<=', $request->age)
                   ->where('age_max', '>=', $request->age);
         }
-        if ($request->filled('skill')) {
-            $query->where('skill', $request->skill);
+        if ($request->filled('subject')) {
+            $query->where('subject', $request->subject);
         }
-        if ($request->filled('duration')) {
-            $query->where('duration', '<=', $request->duration);
+        if ($request->filled('duration_minutes')) {
+            $query->where('duration_minutes', '<=', $request->duration_minutes);
         }
         if ($request->filled('language')) {
             $query->where('language', $request->language);
@@ -29,7 +29,7 @@ class ActivityController extends Controller
         $activities = $query->orderBy('title')->paginate(20);
 
         // For filter dropdowns
-        $skills = Activity::select('skill')->distinct()->pluck('skill')->filter()->values();
+        $skills = Activity::select('subject')->distinct()->pluck('subject')->filter()->values();
         $languages = Activity::select('language')->distinct()->pluck('language')->filter()->values();
 
         return view('activities.index', compact('activities', 'skills', 'languages'));

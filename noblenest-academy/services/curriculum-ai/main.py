@@ -10,8 +10,6 @@ Start with:
 from __future__ import annotations
 
 import os
-import json
-import pathlib
 from typing import Literal
 
 from dotenv import load_dotenv
@@ -19,7 +17,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from chains.activity_chain import generate_activity, generate_batch
+from chains.activity_chain import generate_batch
 
 load_dotenv()
 
@@ -45,7 +43,7 @@ app.add_middleware(
 
 class GenerateActivityRequest(BaseModel):
     subject: str
-    age_tier: Literal["0-2", "2-4", "4-6", "6-8", "8-12"]
+    age_group: Literal["baby", "preschool", "school"]
     language: str = "en"
     is_free: bool = True
     count: int = 1          # How many activities to generate (1–20)
@@ -58,7 +56,7 @@ class ActivityOut(BaseModel):
     materials: list[str]
     duration_minutes: int
     difficulty: Literal["easy", "medium", "hard"]
-    age_tier: str
+    age_group: str
     subject: str
     language: str
     is_free: bool
@@ -92,7 +90,7 @@ async def generate_activity_endpoint(req: GenerateActivityRequest):
     try:
         result = await generate_batch(
             subject=req.subject,
-            age_tier=req.age_tier,
+            age_group=req.age_group,
             language=req.language,
             is_free=req.is_free,
             count=req.count,

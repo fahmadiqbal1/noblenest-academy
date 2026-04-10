@@ -14,15 +14,15 @@
                 <input type="number" name="age" class="form-control" placeholder="Age (years)" value="{{ request('age') }}">
             </div>
             <div class="col-auto">
-                <select name="skill" class="form-select">
-                    <option value="">All Skills</option>
+                <select name="subject" class="form-select">
+                    <option value="">All Subjects</option>
                     @foreach($skills as $s)
-                    <option value="{{ $s }}" @selected(request('skill')===$s)>{{ ucfirst($s) }}</option>
+                    <option value="{{ $s }}" @selected(request('subject')===$s)>{{ ucfirst($s) }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-auto">
-                <input type="number" name="duration" class="form-control" placeholder="Max duration (min)" value="{{ request('duration') }}">
+                <input type="number" name="duration_minutes" class="form-control" placeholder="Max duration (min)" value="{{ request('duration_minutes') }}">
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Filter</button>
@@ -37,11 +37,11 @@
                         <h5 class="card-title fw-bold">{{ $act->emoji ?? '' }} {{ $act->title }}</h5>
                         <p class="card-text text-muted small">{{ $act->description ?? '' }}</p>
                         <div class="d-flex gap-2 flex-wrap">
-                            @if($act->skill)
-                            <span class="badge bg-info text-dark">{{ $act->skill }}</span>
+                            @if($act->subject)
+                            <span class="badge bg-info text-dark">{{ $act->subject }}</span>
                             @endif
-                            @if($act->duration)
-                            <span class="badge bg-secondary">{{ $act->duration }} min</span>
+                            @if($act->duration_minutes)
+                            <span class="badge bg-secondary">{{ $act->duration_minutes }} min</span>
                             @endif
                             @if(isset($act->age_min, $act->age_max))
                             <span class="badge bg-light text-dark border">Age {{ $act->age_min }}–{{ $act->age_max }}</span>

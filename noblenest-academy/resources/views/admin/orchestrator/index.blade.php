@@ -360,7 +360,22 @@
 
                         {{-- Result --}}
                         @if($job->result)
-                        <div class="job-card__result mt-2 small">{{ $job->result['content'] ?? json_encode($job->result) }}</div>
+                        @php
+                            $res     = $job->result;
+                            $resType = $res['type'] ?? 'text';
+                            $resUrl  = $res['url'] ?? null;
+                            $resTxt  = $res['content'] ?? json_encode($res);
+                        @endphp
+                        <div class="job-card__result mt-2 small">
+                            @if($resType === 'image' && $resUrl)
+                                <img src="{{ $resUrl }}" alt="Generated image" class="img-fluid rounded mb-1" style="max-height:200px">
+                            @elseif($resType === 'audio' && $resUrl)
+                                <audio controls class="w-100 mb-1"><source src="{{ $resUrl }}" type="audio/mpeg"></audio>
+                            @elseif($resType === 'video' && $resUrl)
+                                <video controls class="w-100 mb-1" style="max-height:200px"><source src="{{ $resUrl }}"></video>
+                            @endif
+                            <div style="white-space:pre-wrap">{{ $resTxt }}</div>
+                        </div>
                         @endif
 
                         {{-- Error --}}
@@ -425,13 +440,18 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Provider Family</label>
-                        <select name="driver" class="form-select">
-                            <option value="openai">OpenAI compatible</option>
+                        <select name="driver" id="driverSelect" class="form-select" onchange="onDriverChange(this.value)">
+                            <option value="openai">OpenAI compatible (GPT-4o, etc.)</option>
                             <option value="anthropic">Anthropic Claude</option>
                             <option value="gemini">Google Gemini</option>
                             <option value="github">GitHub repository source</option>
+                            <option value="stability">Stability AI (image generation)</option>
+                            <option value="elevenlabs">ElevenLabs (text-to-speech)</option>
+                            <option value="replicate">Replicate (video / image models)</option>
+                            <option value="runway">RunwayML (video generation)</option>
+                            <option value="openai-image">OpenAI DALL-E (image generation)</option>
                         </select>
-                        <div class="form-text">Pick the provider family so health checks and chat requests use the correct API contract.</div>
+                        <div id="driverHelp" class="form-text mt-1">Pick the provider family so health checks and requests use the correct API contract.</div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Display Name <span class="text-danger">*</span></label>
@@ -484,6 +504,23 @@
 
 @section('scripts')
 <script>
+const DRIVER_META = {
+    openai:       { help: 'OpenAI-compatible: GPT-4o, GPT-4o-mini, etc. API key: sk-... Base URL optional for proxies.', cap: 'text' },
+    anthropic:    { help: 'Anthropic Claude — use key starting with sk-ant-... No base URL needed.', cap: 'text' },
+    gemini:       { help: 'Google Gemini — get key from Google AI Studio (aistudio.google.com).', cap: 'text' },
+    github:       { help: 'GitHub Repo — paste a public repo URL. No API key needed. Extracts README curriculum content.', cap: 'github' },
+    stability:    { help: 'Stability AI — generates images. Key from platform.stability.ai. No base URL needed.', cap: 'image' },
+    elevenlabs:   { help: 'ElevenLabs TTS — text-to-speech mp3. Key from elevenlabs.io. Optionally set voice_id in extra_config.', cap: 'tts' },
+    replicate:    { help: 'Replicate — runs open-source video/image models (e.g. minimax/video-01). Key from replicate.com.', cap: 'video' },
+    runway:       { help: 'RunwayML Gen-4 Turbo — text-to-video. Key from dev.runwayml.com. No base URL needed.', cap: 'video' },
+    'openai-image': { help: 'OpenAI DALL-E 3 — image generation using your existing OpenAI key. No base URL needed.', cap: 'image' },
+};
+
+function onDriverChange(val) {
+    const meta = DRIVER_META[val] || {};
+    document.getElementById('driverHelp').textContent = meta.help || 'Pick the provider family so health checks use the correct API contract.';
+}
+
 function scanCurriculum() {
     const btn = document.getElementById('scanBtn');
     btn.disabled = true;

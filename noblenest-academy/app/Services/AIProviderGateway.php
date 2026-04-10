@@ -3,28 +3,54 @@
 namespace App\Services;
 
 use App\Models\AIProviderConfig;
+use App\Services\Providers\ChatProviderService;
+use App\Services\Providers\ImageGenerationService;
+use App\Services\Providers\MediaGenerationService;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
+/**
+ * AIProviderGateway — Router for multiple AI provider integrations
+ *
+ * Refactored from 707-line monolith into focused services:
+ * - ChatProviderService (Claude, ChatGPT, Gemini)
+ * - ImageGenerationService (Stability, DALL-E, Gemini)
+ * - MediaGenerationService (ElevenLabs, Replicate, RunwayML)
+ *
+ * This class routes to appropriate service based on capability.
+ */
 class AIProviderGateway
 {
+    public function __construct(
+        protected ChatProviderService $chatService,
+        protected ImageGenerationService $imageService,
+        protected MediaGenerationService $mediaService,
+    ) {}
+
+    /**
+     * Verify provider connectivity (routes to appropriate service)
+     */
     public function verify(AIProviderConfig $provider): array
     {
-        if ($this->resolveDriver($provider) === 'github') {
+        $driver = $this->resolveDriver($provider);
+
+        // GitHub provider (no API verification needed)
+        if ($driver === 'github') {
             return [
                 'status' => 'configured',
                 'message' => 'Repository-based provider configured. No live API handshake required.',
             ];
         }
 
-        if (! $provider->api_key_encrypted) {
+        // No API key stored
+        if (!$provider->api_key_encrypted) {
             return [
                 'status' => 'unchecked',
                 'message' => 'No API key stored yet.',
             ];
         }
 
+        // Decrypt API key
         try {
             $apiKey = Crypt::decryptString($provider->api_key_encrypted);
         } catch (\Throwable $e) {
@@ -34,42 +60,21 @@ class AIProviderGateway
             ];
         }
 
-        $driver = $this->resolveDriver($provider);
-        $baseUrl = $this->normalizeBaseUrl($provider->api_base_url, $driver);
-
+        // Route to appropriate service
         try {
-            if ($driver === 'anthropic') {
-                return $this->verifyViaAnthropic($provider, $apiKey, $baseUrl);
-            }
+            return match ($driver) {
+                // Chat providers
+                'anthropic', 'openai', 'gemini' => $this->chatService->verify($provider, $apiKey, $this->normalizeBaseUrl($provider->api_base_url, $driver)),
 
-            if ($driver === 'gemini') {
-                return $this->verifyViaGemini($provider, $apiKey, $baseUrl);
-            }
+                // Image providers
+                'stability', 'openai-image' => $this->imageService->verify($provider, $apiKey),
 
-            $response = Http::withToken($apiKey)
-                ->acceptJson()
-                ->timeout(20)
-                ->get("{$baseUrl}/models");
+                // Media providers
+                'elevenlabs', 'replicate', 'runway' => $this->mediaService->verify($provider, $apiKey),
 
-            if ($response->successful()) {
-                $models = $response->json('data', []);
-
-                return [
-                    'status' => 'live',
-                    'message' => count($models) > 0
-                        ? 'Connected successfully and model discovery is available.'
-                        : 'Connected successfully.',
-                ];
-            }
-
-            if (in_array($response->status(), [404, 405], true)) {
-                return $this->verifyViaChatCompletion($provider, $apiKey, $baseUrl);
-            }
-
-            return [
-                'status' => 'failed',
-                'message' => $this->formatHttpError($response->status(), $response->body()),
-            ];
+                // Default (treat as OpenAI-compatible)
+                default => $this->chatService->verify($provider, $apiKey, $this->normalizeBaseUrl($provider->api_base_url, $driver)),
+            };
         } catch (\Throwable $e) {
             return [
                 'status' => 'failed',
@@ -78,240 +83,38 @@ class AIProviderGateway
         }
     }
 
+    /**
+     * Execute chat completion (delegates to ChatProviderService)
+     */
     public function chat(AIProviderConfig $provider, string $prompt, array $options = []): array
     {
-        if (! $provider->api_key_encrypted) {
-            throw new \RuntimeException('No API key is configured for this provider.');
-        }
-
-        $apiKey = Crypt::decryptString($provider->api_key_encrypted);
-        $driver = $this->resolveDriver($provider);
-        $baseUrl = $this->normalizeBaseUrl($provider->api_base_url, $driver);
-        $model = $options['model'] ?? $provider->model ?? $this->defaultModelFor($driver);
-
-        if ($driver === 'anthropic') {
-            return $this->chatViaAnthropic($apiKey, $baseUrl, $model, $prompt, $options);
-        }
-
-        if ($driver === 'gemini') {
-            return $this->chatViaGemini($apiKey, $baseUrl, $model, $prompt, $options);
-        }
-
-        $response = Http::withToken($apiKey)
-            ->acceptJson()
-            ->timeout($options['timeout'] ?? 60)
-            ->post("{$baseUrl}/chat/completions", [
-                'model' => $model,
-                'messages' => array_values(array_filter([
-                    ! empty($options['system_prompt'])
-                        ? ['role' => 'system', 'content' => $options['system_prompt']]
-                        : null,
-                    ['role' => 'user', 'content' => $prompt],
-                ])),
-                'temperature' => $options['temperature'] ?? 0.6,
-                'max_tokens' => $options['max_tokens'] ?? 600,
-            ]);
-
-        if (! $response->successful()) {
-            throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
-        }
-
-        $data = $response->json();
-
-        return [
-            'content' => trim((string) data_get($data, 'choices.0.message.content', '')),
-            'model' => data_get($data, 'model', $model),
-            'tokens' => data_get($data, 'usage.total_tokens'),
-        ];
+        return $this->chatService->chat($provider, $prompt, $options);
     }
 
-    protected function verifyViaChatCompletion(AIProviderConfig $provider, string $apiKey, string $baseUrl): array
-    {
-        $response = Http::withToken($apiKey)
-            ->acceptJson()
-            ->timeout(20)
-            ->post("{$baseUrl}/chat/completions", [
-                'model' => $provider->model ?? $this->defaultModelFor('openai'),
-                'messages' => [
-                    ['role' => 'system', 'content' => 'Reply with the word OK only.'],
-                    ['role' => 'user', 'content' => 'Health check'],
-                ],
-                'max_tokens' => 5,
-                'temperature' => 0,
-            ]);
-
-        if ($response->successful()) {
-            return [
-                'status' => 'live',
-                'message' => 'Connected successfully using a lightweight completion check.',
-            ];
-        }
-
-        return [
-            'status' => 'failed',
-            'message' => $this->formatHttpError($response->status(), $response->body()),
-        ];
-    }
-
-    protected function verifyViaAnthropic(AIProviderConfig $provider, string $apiKey, string $baseUrl): array
-    {
-        $response = Http::withHeaders([
-                'x-api-key' => $apiKey,
-                'anthropic-version' => '2023-06-01',
-            ])
-            ->acceptJson()
-            ->timeout(20)
-            ->post("{$baseUrl}/messages", [
-                'model' => $provider->model ?? $this->defaultModelFor('anthropic'),
-                'max_tokens' => 8,
-                'temperature' => 0,
-                'messages' => [
-                    ['role' => 'user', 'content' => 'Reply with OK only.'],
-                ],
-            ]);
-
-        if ($response->successful()) {
-            return [
-                'status' => 'live',
-                'message' => 'Connected successfully using Anthropic messages API.',
-            ];
-        }
-
-        return [
-            'status' => 'failed',
-            'message' => $this->formatHttpError($response->status(), $response->body()),
-        ];
-    }
-
-    protected function verifyViaGemini(AIProviderConfig $provider, string $apiKey, string $baseUrl): array
-    {
-        $model = $provider->model ?? $this->defaultModelFor('gemini');
-
-        $response = Http::acceptJson()
-            ->timeout(20)
-            ->post("{$baseUrl}/models/{$model}:generateContent?key={$apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => 'Reply with OK only.'],
-                        ],
-                    ],
-                ],
-                'generationConfig' => [
-                    'temperature' => 0,
-                    'maxOutputTokens' => 8,
-                ],
-            ]);
-
-        if ($response->successful()) {
-            return [
-                'status' => 'live',
-                'message' => 'Connected successfully using Gemini generateContent API.',
-            ];
-        }
-
-        return [
-            'status' => 'failed',
-            'message' => $this->formatHttpError($response->status(), $response->body()),
-        ];
-    }
-
-    protected function chatViaAnthropic(string $apiKey, string $baseUrl, string $model, string $prompt, array $options): array
-    {
-        $response = Http::withHeaders([
-                'x-api-key' => $apiKey,
-                'anthropic-version' => '2023-06-01',
-            ])
-            ->acceptJson()
-            ->timeout($options['timeout'] ?? 60)
-            ->post("{$baseUrl}/messages", [
-                'model' => $model,
-                'system' => $options['system_prompt'] ?? null,
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-                'temperature' => $options['temperature'] ?? 0.6,
-                'max_tokens' => $options['max_tokens'] ?? 600,
-            ]);
-
-        if (! $response->successful()) {
-            throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
-        }
-
-        $data = $response->json();
-        $segments = collect(data_get($data, 'content', []))
-            ->pluck('text')
-            ->filter()
-            ->implode("\n\n");
-
-        return [
-            'content' => trim($segments),
-            'model' => data_get($data, 'model', $model),
-            'tokens' => data_get($data, 'usage.input_tokens', 0) + data_get($data, 'usage.output_tokens', 0),
-        ];
-    }
-
-    protected function chatViaGemini(string $apiKey, string $baseUrl, string $model, string $prompt, array $options): array
-    {
-        $body = [
-            'contents' => [
-                [
-                    'role' => 'user',
-                    'parts' => [
-                        ['text' => $prompt],
-                    ],
-                ],
-            ],
-            'generationConfig' => [
-                'temperature' => $options['temperature'] ?? 0.6,
-                'maxOutputTokens' => $options['max_tokens'] ?? 600,
-            ],
-        ];
-
-        if (! empty($options['system_prompt'])) {
-            $body['systemInstruction'] = [
-                'parts' => [
-                    ['text' => $options['system_prompt']],
-                ],
-            ];
-        }
-
-        $response = Http::acceptJson()
-            ->timeout($options['timeout'] ?? 60)
-            ->post("{$baseUrl}/models/{$model}:generateContent?key={$apiKey}", $body);
-
-        if (! $response->successful()) {
-            throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
-        }
-
-        $data = $response->json();
-        $content = collect(data_get($data, 'candidates.0.content.parts', []))
-            ->pluck('text')
-            ->filter()
-            ->implode("\n\n");
-
-        return [
-            'content' => trim($content),
-            'model' => $model,
-            'tokens' => data_get($data, 'usageMetadata.totalTokenCount'),
-        ];
-    }
 
     protected function normalizeBaseUrl(?string $baseUrl, string $driver = 'openai'): string
     {
         $default = match ($driver) {
-            'anthropic' => 'https://api.anthropic.com/v1',
-            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
-            default => 'https://api.openai.com/v1',
+            'anthropic'    => 'https://api.anthropic.com/v1',
+            'gemini'       => 'https://generativelanguage.googleapis.com/v1beta',
+            'stability'    => 'https://api.stability.ai',
+            'elevenlabs'   => 'https://api.elevenlabs.io',
+            'replicate'    => 'https://api.replicate.com/v1',
+            'runway'       => 'https://api.dev.runwayml.com/v1',
+            'openai-image' => 'https://api.openai.com/v1',
+            default        => 'https://api.openai.com/v1',
         };
 
         $baseUrl = rtrim($baseUrl ?: $default, '/');
+
+        if (in_array($driver, ['stability', 'elevenlabs', 'replicate', 'runway'], true)) {
+            return $baseUrl;
+        }
 
         if ($driver === 'gemini') {
             if (! Str::contains(parse_url($baseUrl, PHP_URL_PATH) ?: '', '/v1beta')) {
                 $baseUrl .= '/v1beta';
             }
-
             return $baseUrl;
         }
 
@@ -341,24 +144,52 @@ class AIProviderGateway
             $provider->model,
         ])));
 
-        if (Str::contains($haystack, ['anthropic', 'claude'])) {
-            return 'anthropic';
-        }
-
-        if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) {
-            return 'gemini';
-        }
-
+        if (Str::contains($haystack, ['anthropic', 'claude'])) { return 'anthropic'; }
+        if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) { return 'gemini'; }
+        if (Str::contains($haystack, ['stability.ai', 'stable-diffusion', 'stable-image'])) { return 'stability'; }
+        if (Str::contains($haystack, ['elevenlabs', 'eleven_labs', 'eleven-labs'])) { return 'elevenlabs'; }
+        if (Str::contains($haystack, ['replicate.com', 'replicate'])) { return 'replicate'; }
+        if (Str::contains($haystack, ['runwayml', 'runway'])) { return 'runway'; }
+        if (Str::contains($haystack, ['dall-e', 'dalle', 'openai-image'])) { return 'openai-image'; }
         return 'openai';
     }
 
     protected function defaultModelFor(string $driver): string
     {
         return match ($driver) {
-            'anthropic' => 'claude-3-5-haiku-latest',
-            'gemini' => 'gemini-1.5-flash',
-            default => 'gpt-4o-mini',
+            'anthropic'    => 'claude-3-5-haiku-latest',
+            'gemini'       => 'gemini-1.5-flash',
+            'stability'    => 'core',
+            'elevenlabs'   => 'eleven_multilingual_v2',
+            'replicate'    => 'minimax/video-01',
+            'runway'       => 'gen4_turbo',
+            'openai-image' => 'dall-e-3',
+            default        => 'gpt-4o-mini',
         };
+    }
+
+    /**
+     * Generate image (delegates to ImageGenerationService)
+     */
+    public function generateImage(AIProviderConfig $provider, string $prompt, array $options = []): array
+    {
+        return $this->imageService->generate($provider, $prompt, $options);
+    }
+
+    /**
+     * Generate audio (delegates to MediaGenerationService)
+     */
+    public function generateAudio(AIProviderConfig $provider, string $text, array $options = []): array
+    {
+        return $this->mediaService->generateAudio($provider, $text, $options);
+    }
+
+    /**
+     * Generate video (delegates to MediaGenerationService)
+     */
+    public function generateVideo(AIProviderConfig $provider, string $prompt, array $options = []): array
+    {
+        return $this->mediaService->generateVideo($provider, $prompt, $options);
     }
 
     protected function formatHttpError(int $status, string $body): string

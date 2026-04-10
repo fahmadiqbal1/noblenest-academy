@@ -20,7 +20,7 @@ INDEX_DIR = pathlib.Path(__file__).parent.parent / "curriculum-index"
 INDEX_DIR.mkdir(exist_ok=True)
 
 
-def get_existing_activity_summaries(age_tier: str, subject: str) -> str:
+def get_existing_activity_summaries(age_group: str, subject: str) -> str:
     """
     Return a plain-text list of existing activity titles for this
     age tier + subject combination.
@@ -47,7 +47,7 @@ def get_existing_activity_summaries(age_tier: str, subject: str) -> str:
         matching = [
             node["title"]
             for node in nodes
-            if node.get("age_tier") == age_tier
+            if node.get("age_group") == age_group
             and node.get("subject", "").lower() == subject.lower()
         ]
 

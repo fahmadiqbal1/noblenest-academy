@@ -76,7 +76,7 @@ class OrchestratorController extends Controller
         $data = $request->validate([
             'name'         => 'required|string|max:100',
             'slug'         => 'required|string|max:60|unique:ai_provider_configs,slug',
-            'driver'       => 'nullable|string|in:openai,anthropic,gemini,github',
+            'driver'       => 'nullable|string|in:openai,anthropic,gemini,github,stability,elevenlabs,replicate,runway,openai-image',
             'api_base_url' => 'nullable|url|max:255',
             'api_key'      => 'nullable|string|max:500',
             'model'        => 'nullable|string|max:100',
@@ -209,7 +209,7 @@ class OrchestratorController extends Controller
 
         foreach ($ageRanges as $age) {
             foreach ($requiredSkills as $skill) {
-                $count = Activity::where('skill', $skill)
+                $count = Activity::where('subject', $skill)
                     ->where('age_min', '<=', $age)
                     ->where('age_max', '>=', $age)
                     ->count();
@@ -264,21 +264,40 @@ class OrchestratorController extends Controller
             return $this->extractFromGithub($payload['repo_url'], $prompt);
         }
 
-        // Try configured provider
+        // Explicit mock
+        if ($providerSlug === 'mock') {
+            return $this->mockGenerate($job->type, $prompt, $job->locale);
+        }
+
+        // Require a configured, active provider
         $config = AIProviderConfig::where('slug', $providerSlug)
                                   ->where('is_active', true)
                                   ->first();
 
-        if ($config && $config->api_key_encrypted) {
-            return $this->gateway->chat($config, $prompt, [
-                'system_prompt' => "You are Noble Nest Academy's expert curriculum designer. Generate age-appropriate, safe, and pedagogically sound educational content. Output in {$job->locale} unless instructed otherwise. Keep content free of violence, adult themes, or harmful material.",
-                'max_tokens' => 1200,
-                'temperature' => 0.5,
-            ]);
+        if (! $config || ! $config->api_key_encrypted) {
+            throw new \RuntimeException("Provider '{$providerSlug}' is not configured or has no API key.");
         }
 
-        // Mock fallback
-        return $this->mockGenerate($job->type, $prompt, $job->locale);
+        $systemPrompt = "You are Noble Nest Academy's expert curriculum designer. Generate age-appropriate, safe, and pedagogically sound educational content. Output in {$job->locale} unless instructed otherwise. Keep content free of violence, adult themes, or harmful material.";
+
+        // Route by job type to correct gateway method
+        if (in_array($job->type, ['image'], true)) {
+            return $this->gateway->generateImage($config, $prompt);
+        }
+
+        if (in_array($job->type, ['tts'], true)) {
+            return $this->gateway->generateAudio($config, $prompt);
+        }
+
+        if (in_array($job->type, ['video', 'video_lesson'], true)) {
+            return $this->gateway->generateVideo($config, $prompt);
+        }
+
+        return $this->gateway->chat($config, $prompt, [
+            'system_prompt' => $systemPrompt,
+            'max_tokens'    => 1200,
+            'temperature'   => 0.5,
+        ]);
     }
 
     protected function extractFromGithub(string $repoUrl, string $prompt): array
@@ -330,24 +349,60 @@ class OrchestratorController extends Controller
 
     protected function publishJobResult(AIJob $job): void
     {
-        $result = $job->result ?? [];
+        $result  = $job->result ?? [];
         $content = $result['content'] ?? null;
+        $type    = $result['type'] ?? 'text';
 
         if (! $content || $job->type === 'github_extract') {
             return;
         }
 
-        // For activity/lesson_plan types, create a draft activity
-        if (in_array($job->type, ['activity', 'lesson_plan', 'quiz'])) {
-            Activity::create([
-                'title'         => 'AI Generated: ' . ucfirst($job->type) . ' #' . $job->id,
-                'description'   => $content,
-                'language'      => $job->locale,
-                'activity_type' => $job->type === 'quiz' ? 'quiz' : 'video',
-                'age_min'       => 0,
-                'age_max'       => 10,
-            ]);
+        if (! in_array($job->type, ['activity', 'lesson_plan', 'quiz', 'image', 'tts', 'video', 'video_lesson'], true)) {
+            return;
         }
+
+        // Try to parse JSON content (LLM may return structured data)
+        $parsed = null;
+        if (str_starts_with(trim($content), '{')) {
+            $parsed = json_decode($content, true);
+        }
+
+        $title = $parsed['title'] ?? ('AI Generated: ' . ucfirst($job->type) . ' #' . $job->id);
+
+        $activityData = [
+            'title'               => $title,
+            'description'         => $parsed['description'] ?? $content,
+            'language'            => $job->locale,
+            'activity_type'       => match($job->type) {
+                'quiz'                    => 'quiz',
+                'video', 'video_lesson'   => 'video',
+                'image'                   => 'image',
+                'tts'                     => 'audio',
+                default                   => 'lesson',
+            },
+            'age_min'             => $parsed['age_min'] ?? 0,
+            'age_max'             => $parsed['age_max'] ?? 10,
+            'subject'             => $parsed['subject'] ?? null,
+            'age_group'           => $parsed['age_tier'] ?? $parsed['age_group'] ?? null,
+            'duration_minutes'    => $parsed['duration_minutes'] ?? null,
+            'difficulty'          => $parsed['difficulty'] ?? null,
+            'instructions'        => $parsed['instructions'] ?? null,
+            'materials_needed'    => isset($parsed['materials']) ? (array) $parsed['materials'] : null,
+            'learning_objectives' => isset($parsed['learning_objectives']) ? (array) $parsed['learning_objectives'] : null,
+            'is_muslim_only'      => $parsed['is_muslim_only'] ?? false,
+            'is_free'             => $parsed['is_free'] ?? true,
+        ];
+
+        // Attach generated media URL if present
+        if (isset($result['url'])) {
+            if ($type === 'image') {
+                $activityData['thumbnail_url'] = $result['url'];
+            } elseif (in_array($type, ['audio', 'video'])) {
+                $activityData['media_url'] = $result['url'];
+            }
+        }
+
+        Activity::create($activityData);
     }
 
     protected function syncProviderStatus(AIProviderConfig $provider): array
