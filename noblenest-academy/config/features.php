@@ -43,6 +43,20 @@ return [
     'phase1_feedback_loop'    => (bool) env('PHASE1_FEEDBACK_LOOP_ENABLED', false),
     'phase1_emotional_intel'  => (bool) env('PHASE1_EMOTIONAL_INTEL_ENABLED', false),
 
+    // Viral Growth & Retention (Phase 1 flags — master plan breezy-honking-squid)
+    'viral_referrals_v2'        => (bool) env('VIRAL_REFERRALS_V2', false),
+    'public_share_pages'        => (bool) env('PUBLIC_SHARE_PAGES', false),
+    'stripe_webhooks_v2'        => (bool) env('STRIPE_WEBHOOKS_V2', true),
+    'notification_engine'       => (bool) env('NOTIFICATION_ENGINE', false),
+    'push_notifications'        => (bool) env('PUSH_NOTIFICATIONS', false),
+    'sidecar_circuit_breaker'   => (bool) env('SIDECAR_CIRCUIT_BREAKER', true),
+    'sidecar_prewarm_pool'      => (bool) env('SIDECAR_PREWARM_POOL', false),
+    'emotional_journey'         => (bool) env('EMOTIONAL_JOURNEY', false),
+    'sms_notifications'         => (bool) env('SMS_NOTIFICATIONS', false),
+    'native_push_apns'          => (bool) env('NATIVE_PUSH_APNS', false),
+    'notification_ab_testing'   => (bool) env('NOTIFICATION_AB_TESTING', false),
+    'paypal_v2'                 => (bool) env('PAYPAL_V2', false),
+
     // Phase 2: Thematic Cross-Curricular
     'phase2_journeys'         => (bool) env('PHASE2_JOURNEYS_ENABLED', false),
     'phase2_orchestration'    => (bool) env('PHASE2_ORCHESTRATION_ENABLED', false),
