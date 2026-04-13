@@ -13,15 +13,17 @@ class DashboardController extends Controller
     {
         /** @var \App\Models\User $user */
         $user     = Auth::user();
-        $children = ChildProfile::where('user_id', $user->id)
+        $children = ChildProfile::where('parent_id', $user->id)
             ->withCount('activityProgress')
             ->get();
 
         // Active subscription check
-        $hasSubscription = $user->subscriptions()
+        $subscription = $user->subscriptions()
             ->where('active', true)
             ->where('ends_at', '>', now())
-            ->exists();
+            ->first();
+
+        $hasSubscription = $subscription !== null;
 
         // Recent activity across all children
         $childIds = $children->pluck('id');
@@ -31,7 +33,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('parent.dashboard', compact('user', 'children', 'hasSubscription', 'recentActivity'));
+        return view('parent.dashboard', compact('user', 'children', 'hasSubscription', 'subscription', 'recentActivity'));
     }
 
     /**

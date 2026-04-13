@@ -9,7 +9,6 @@ use App\Models\TeacherCourse;
 use App\Models\TeacherEnrollment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class EnrollmentController extends Controller
 {

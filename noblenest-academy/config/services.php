@@ -53,4 +53,34 @@ return [
         'mode' => env('PAYPAL_MODE', 'sandbox'), // sandbox or live
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI Provider Services
+    |--------------------------------------------------------------------------
+    */
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
+    'ai' => [
+        'daily_image_limit' => (int) env('AI_DAILY_IMAGE_LIMIT', 200),
+        'daily_audio_limit' => (int) env('AI_DAILY_AUDIO_LIMIT', 50),
+        'daily_video_limit' => (int) env('AI_DAILY_VIDEO_LIMIT', 10),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Curriculum AI Python Sidecar
+    |--------------------------------------------------------------------------
+    | Configuration for the Python-based curriculum generation service.
+    | This service generates activities with full Phase 2 metadata.
+    */
+
+    'curriculum_ai' => [
+        'base_url' => env('CURRICULUM_AI_BASE_URL', 'http://localhost:8001'),
+        'api_key' => env('CURRICULUM_AI_API_KEY', ''),
+        'timeout' => (int) env('CURRICULUM_AI_TIMEOUT', 60),
+    ],
+
 ];

@@ -13,6 +13,10 @@ class Course extends Model
         'title',
         'slug',
         'description',
+        'age_min',
+        'age_max',
+        'color',
+        'emoji',
     ];
 
     public function modules()
@@ -20,9 +24,13 @@ class Course extends Model
         return $this->hasMany(Module::class);
     }
 
-    // Add activities relationship through modules
+    /**
+     * All activities linked to this course's modules (many-to-many through pivot).
+     */
     public function activities()
     {
-        return $this->hasManyThrough(Activity::class, Module::class, 'course_id', 'id', 'id', 'id');
+        return Activity::whereHas('modules', function ($q) {
+            $q->where('modules.course_id', $this->id);
+        });
     }
 }

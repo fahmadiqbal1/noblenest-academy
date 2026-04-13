@@ -16,7 +16,7 @@ class AuthController extends Controller
      * NOTE: Admin is intentionally excluded - Admin accounts must be
      * created via seeder or artisan command for security.
      */
-    protected const ALLOWED_REGISTRATION_ROLES = ['Parent', 'Teacher', 'Student'];
+    protected const ALLOWED_REGISTRATION_ROLES = ['Parent', 'Teacher', 'Student', 'Practitioner'];
 
     // Show registration form
     public function showRegister()
@@ -78,6 +78,10 @@ class AuthController extends Controller
             return redirect()->route('teacher.dashboard');
         }
 
+        if ($user->role === 'Practitioner') {
+            return redirect()->route('practitioner.profile.setup');
+        }
+
         return redirect()->route('onboarding');
     }
 
@@ -104,13 +108,14 @@ class AuthController extends Controller
                 return redirect()->to($intended);
             }
 
-            if ($user->role === 'Teacher') {
-                return redirect()->route('teacher.dashboard');
-            }
-            if ($user->role === 'Student') {
-                return redirect()->route('marketplace.index');
-            }
-            return redirect('/');
+            return match ($user->role) {
+                'Parent'       => redirect()->route('parent.dashboard'),
+                'Teacher'      => redirect()->route('teacher.dashboard'),
+                'Student'      => redirect()->route('marketplace.index'),
+                'Practitioner' => redirect()->route('practitioner.dashboard'),
+                'Admin'        => redirect()->route('home'),
+                default        => redirect('/'),
+            };
         }
 
         return back()->withErrors([

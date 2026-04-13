@@ -16,7 +16,7 @@ class PrivacyController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $children = ChildProfile::where('user_id', $user->id)->withCount('activityProgress')->get();
+        $children = ChildProfile::where('parent_id', $user->id)->withCount('activityProgress')->get();
         $paymentCount = Payment::where('user_id', $user->id)->count();
 
         return view('privacy.dashboard', compact('user', 'children', 'paymentCount'));
@@ -25,7 +25,7 @@ class PrivacyController extends Controller
     public function exportData(Request $request)
     {
         $user = Auth::user();
-        $children = ChildProfile::where('user_id', $user->id)
+        $children = ChildProfile::where('parent_id', $user->id)
             ->with(['activityProgress.activity', 'quizAttempts'])
             ->get();
 
@@ -68,7 +68,7 @@ class PrivacyController extends Controller
         }
 
         // Anonymise child profiles (COPPA: no orphaned child PII)
-        ChildProfile::where('user_id', $user->id)->each(function ($child) {
+        ChildProfile::where('parent_id', $user->id)->each(function ($child) {
             ChildActivityProgress::where('child_profile_id', $child->id)->delete();
             QuizAttempt::where('child_profile_id', $child->id)->delete();
             $child->delete();

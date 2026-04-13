@@ -1,62 +1,126 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-5">
-    <h1 class="mb-4 text-center text-primary fw-bold" style="font-size:2.5rem;letter-spacing:1px;">Curriculum Explorer</h1>
-    <p class="lead text-center mb-5">Browse our interactive curriculum by age, skill, and activity. Click a skill to see suggested activities and objectives!</p>
+@php
+    $subjectEmojis = [
+        'arabic' => '🕌', 'art' => '🎨', 'character' => '💪', 'coding' => '💻',
+        'cognitive' => '🧠', 'creative' => '✨', 'cultural' => '🌍', 'engineering' => '⚙️',
+        'etiquette' => '🎩', 'geography' => '🗺️', 'history' => '📜', 'islamic_studies' => '☪️',
+        'language' => '🗣️', 'literacy' => '📚', 'math' => '🔢', 'motor' => '🏃',
+        'numeracy' => '🔟', 'quran' => '📖', 'robotics' => '🤖', 'routine' => '⏰',
+        'science' => '🔬', 'sensory' => '👐', 'social' => '🤝', 'stem' => '🧪', 'technology' => '📱',
+    ];
+    $subjectColors = [
+        'arabic' => '#7C3AED', 'art' => '#F43F5E', 'character' => '#8B5CF6', 'coding' => '#6366F1',
+        'cognitive' => '#3B82F6', 'creative' => '#EC4899', 'cultural' => '#F59E0B', 'engineering' => '#64748B',
+        'etiquette' => '#A855F7', 'geography' => '#14B8A6', 'history' => '#D97706', 'islamic_studies' => '#7C3AED',
+        'language' => '#3B82F6', 'literacy' => '#10B981', 'math' => '#EF4444', 'motor' => '#EC4899',
+        'numeracy' => '#F97316', 'quran' => '#059669', 'robotics' => '#6366F1', 'routine' => '#F59E0B',
+        'science' => '#10B981', 'sensory' => '#8B5CF6', 'social' => '#06B6D4', 'stem' => '#10B981', 'technology' => '#3B82F6',
+    ];
+    $ageEmojis = ['0–1 year' => '👶', '1–2 years' => '🍼', '2–3 years' => '🧸', '3–4 years' => '🎈', '4–5 years' => '🦋', '5–6 years' => '🌟', '7–8 years' => '🚀', '8–9 years' => '💡', '9–10 years' => '🏆'];
+    $ageColors = ['0–1 year' => '#EC4899', '1–2 years' => '#F97316', '2–3 years' => '#F59E0B', '3–4 years' => '#10B981', '4–5 years' => '#3B82F6', '5–6 years' => '#8B5CF6', '7–8 years' => '#7C3AED', '8–9 years' => '#6366F1', '9–10 years' => '#059669'];
+    $funCtas = ['Let\'s Go! 🚀', 'Play Now! 🎮', 'Explore! 🔍', 'Let\'s Learn! 📚', 'Start Fun! 🎉', 'Jump In! 🐸', 'Ready? Go! ⚡'];
+@endphp
 
-    {{-- Dynamic Activity Library (from database) --}}
+<div class="container py-4">
+
+    {{-- Playful Hero Header --}}
+    <div class="text-center mb-5 nn-hero-bounce">
+        <div class="nn-hero-emoji">🎓</div>
+        <h1 class="nn-playful-title">Hey Explorer! <span class="nn-wave">👋</span></h1>
+        <p class="nn-playful-subtitle">What adventure shall we go on today?</p>
+        <div class="nn-floating-shapes">
+            <span class="nn-shape nn-shape-1">⭐</span>
+            <span class="nn-shape nn-shape-2">🌈</span>
+            <span class="nn-shape nn-shape-3">✨</span>
+            <span class="nn-shape nn-shape-4">🎯</span>
+        </div>
+    </div>
+
+    {{-- Dynamic Activity Library --}}
     @if($activities->count())
     <div class="mb-5">
-        <h2 class="h4 fw-bold mb-3">Activity Library</h2>
-        <form method="GET" action="{{ route('activities.index') }}" class="row g-2 mb-4">
-            <div class="col-auto">
-                <input type="number" name="age" class="form-control" placeholder="Age (years)" value="{{ request('age') }}">
+        <h2 class="nn-section-title"><span class="nn-section-emoji">🗃️</span> Activity Treasure Chest</h2>
+
+        {{-- Playful Filter Bar --}}
+        <form method="GET" action="{{ route('activities.index') }}" class="nn-filter-bar mb-4">
+            <div class="nn-filter-group">
+                <label class="nn-filter-label">🎂 Age</label>
+                <input type="number" name="age" class="nn-filter-input" placeholder="years" value="{{ request('age') }}" min="0" max="12">
             </div>
-            <div class="col-auto">
-                <select name="subject" class="form-select">
-                    <option value="">All Subjects</option>
+            <div class="nn-filter-group nn-filter-subjects">
+                <label class="nn-filter-label">🎯 Subject</label>
+                <div class="nn-subject-pills">
+                    <a href="{{ route('activities.index', array_merge(request()->except('subject','page'), [])) }}"
+                       class="nn-pill {{ !request('subject') ? 'nn-pill-active' : '' }}">🌈 All</a>
                     @foreach($skills as $s)
-                    <option value="{{ $s }}" @selected(request('subject')===$s)>{{ ucfirst($s) }}</option>
+                    <a href="{{ route('activities.index', array_merge(request()->except('page'), ['subject' => $s])) }}"
+                       class="nn-pill {{ request('subject')===$s ? 'nn-pill-active' : '' }}"
+                       style="{{ request('subject')===$s ? 'background:'.($subjectColors[$s] ?? '#7C3AED').';color:#fff;border-color:'.($subjectColors[$s] ?? '#7C3AED') : '' }}">
+                        {{ $subjectEmojis[$s] ?? '📌' }} {{ ucfirst(str_replace('_', ' ', $s)) }}
+                    </a>
                     @endforeach
-                </select>
+                </div>
             </div>
-            <div class="col-auto">
-                <input type="number" name="duration_minutes" class="form-control" placeholder="Max duration (min)" value="{{ request('duration_minutes') }}">
+            <div class="nn-filter-group">
+                <label class="nn-filter-label">⏱️ Max Time</label>
+                <input type="number" name="duration_minutes" class="nn-filter-input" placeholder="min" value="{{ request('duration_minutes') }}" min="1">
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{{ route('activities.index') }}" class="btn btn-outline-secondary">Reset</a>
+            <div class="nn-filter-actions">
+                <button type="submit" class="nn-btn nn-btn-filter">🔍 Find Adventures</button>
+                <a href="{{ route('activities.index') }}" class="nn-btn nn-btn-reset">🔄 Fresh Start</a>
             </div>
         </form>
-        <div class="row g-3">
-            @foreach($activities as $act)
+
+        {{-- Playful Activity Cards --}}
+        <div class="row g-4">
+            @foreach($activities as $idx => $act)
+            @php
+                $color = $subjectColors[$act->subject] ?? '#A78BFA';
+                $emoji = $subjectEmojis[$act->subject] ?? ($act->emoji ?? '🎯');
+                $cta = $funCtas[$idx % count($funCtas)];
+            @endphp
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ $act->emoji ?? '' }} {{ $act->title }}</h5>
-                        <p class="card-text text-muted small">{{ $act->description ?? '' }}</p>
-                        <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('activities.show', $act) }}" class="text-decoration-none">
+                    <div class="nn-activity-card" style="--card-color: {{ $color }};">
+                        <div class="nn-card-ribbon" style="background: {{ $color }};"></div>
+                        <div class="nn-card-emoji">{{ $emoji }}</div>
+                        <h5 class="nn-card-title">{{ $act->title }}</h5>
+                        @if($act->description)
+                        <p class="nn-card-desc">{{ Str::limit($act->description, 80) }}</p>
+                        @endif
+                        <div class="nn-card-badges">
                             @if($act->subject)
-                            <span class="badge bg-info text-dark">{{ $act->subject }}</span>
+                            <span class="nn-badge" style="background: {{ $color }}15; color: {{ $color }}; border-color: {{ $color }}30;">
+                                {{ $subjectEmojis[$act->subject] ?? '' }} {{ ucfirst(str_replace('_', ' ', $act->subject)) }}
+                            </span>
                             @endif
                             @if($act->duration_minutes)
-                            <span class="badge bg-secondary">{{ $act->duration_minutes }} min</span>
+                            <span class="nn-badge nn-badge-time">⏱️ {{ $act->duration_minutes }}m</span>
                             @endif
                             @if(isset($act->age_min, $act->age_max))
-                            <span class="badge bg-light text-dark border">Age {{ $act->age_min }}–{{ $act->age_max }}</span>
+                            <span class="nn-badge nn-badge-age">🎂 {{ $act->age_min }}–{{ $act->age_max }}y</span>
+                            @endif
+                            @if($act->is_free)
+                            <span class="nn-badge nn-badge-free">🎁 Free</span>
                             @endif
                         </div>
+                        <div class="nn-card-cta" style="background: {{ $color }};">{{ $cta }}</div>
                     </div>
-                </div>
+                </a>
             </div>
             @endforeach
         </div>
-        <div class="mt-3">{{ $activities->withQueryString()->links() }}</div>
+        <div class="mt-4">{{ $activities->withQueryString()->links() }}</div>
     </div>
     @endif
 
-    <div class="accordion" id="curriculumAccordion">
+    {{-- Curriculum Roadmap --}}
+    <h2 class="nn-section-title"><span class="nn-section-emoji">🗺️</span> Learning Roadmap</h2>
+    <p class="text-center text-muted mb-4" style="font-family:'Comic Neue',sans-serif;font-size:1.1rem;">Follow the path and unlock new skills at every age!</p>
+
+    <div class="nn-roadmap" id="curriculumAccordion">
         @php
         $curriculum = [
             [
@@ -270,16 +334,7 @@
         @endforeach
     </div>
     <div class="mt-5 text-center">
-        <a href="/profile" class="btn btn-lg btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+        <a href="/profile" class="nn-btn nn-btn-reset"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
     </div>
 </div>
-<style>
-.curriculum-skill-card {
-    transition: box-shadow 0.2s, transform 0.2s;
-}
-.curriculum-skill-card:hover {
-    box-shadow: 0 8px 32px rgba(44,62,80,0.12);
-    transform: translateY(-4px) scale(1.03);
-}
-</style>
 @endsection

@@ -40,12 +40,12 @@ class CourseController extends Controller
 
         // File uploads
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')
-                ->store('teacher-thumbnails', 'public');
+            $f = $request->file('thumbnail');
+            $data['thumbnail'] = $f->storeAs('teacher-thumbnails', \Illuminate\Support\Str::uuid() . '.' . $f->getClientOriginalExtension(), 'public');
         }
         if ($request->hasFile('syllabus_file')) {
-            $data['syllabus_file'] = $request->file('syllabus_file')
-                ->store('teacher-syllabi', 'public');
+            $f = $request->file('syllabus_file');
+            $data['syllabus_file'] = $f->storeAs('teacher-syllabi', \Illuminate\Support\Str::uuid() . '.' . $f->getClientOriginalExtension(), 'public');
         }
 
         $data['teacher_id'] = Auth::id();
@@ -93,15 +93,15 @@ class CourseController extends Controller
             if ($course->thumbnail) {
                 Storage::disk('public')->delete($course->thumbnail);
             }
-            $data['thumbnail'] = $request->file('thumbnail')
-                ->store('teacher-thumbnails', 'public');
+            $f = $request->file('thumbnail');
+            $data['thumbnail'] = $f->storeAs('teacher-thumbnails', \Illuminate\Support\Str::uuid() . '.' . $f->getClientOriginalExtension(), 'public');
         }
         if ($request->hasFile('syllabus_file')) {
             if ($course->syllabus_file) {
                 Storage::disk('public')->delete($course->syllabus_file);
             }
-            $data['syllabus_file'] = $request->file('syllabus_file')
-                ->store('teacher-syllabi', 'public');
+            $f = $request->file('syllabus_file');
+            $data['syllabus_file'] = $f->storeAs('teacher-syllabi', \Illuminate\Support\Str::uuid() . '.' . $f->getClientOriginalExtension(), 'public');
         }
 
         $course->update($data);

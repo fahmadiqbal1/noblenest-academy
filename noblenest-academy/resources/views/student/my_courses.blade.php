@@ -57,7 +57,7 @@
                     @if($course->thumbnail)
                         <img src="{{ \Illuminate\Support\Facades\Storage::url($course->thumbnail) }}" class="learning-thumb">
                     @else
-                        <div class="learning-thumb d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c 58%, #f2a541)">
+                        <div class="learning-thumb d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#7C3AED,#A78BFA 58%, #F59E0B)">
                             <i class="bi bi-book-half text-white fs-4"></i>
                         </div>
                     @endif

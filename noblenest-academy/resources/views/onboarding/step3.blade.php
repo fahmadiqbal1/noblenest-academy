@@ -4,20 +4,20 @@
 
 @section('content')
 <div class="min-vh-100 d-flex align-items-center justify-content-center"
-     style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
-    <div class="card shadow-lg border-0 rounded-4" style="max-width: 520px; width: 100%;">
+     style="background: linear-gradient(135deg, #F5F0FF 0%, #FFFBF0 50%, #FFF7ED 100%);">
+    <div class="card border-0 rounded-4" style="max-width: 520px; width: 100%; background:rgba(255,255,255,0.82); border:2px solid rgba(124,58,237,0.10) !important; box-shadow:8px 8px 16px rgba(124,58,237,0.08), -4px -4px 12px rgba(255,255,255,0.6);">
         <div class="card-body p-5">
 
-            {{-- Step indicator --}}
-            <div class="d-flex justify-content-center gap-2 mb-4">
-                <span class="badge rounded-pill bg-success text-white px-3 py-2">✓ Step 1</span>
-                <span class="badge rounded-pill bg-success text-white px-3 py-2">✓ Step 2</span>
-                <span class="badge rounded-pill bg-warning text-dark px-3 py-2">Step 3 of 3</span>
+            {{-- Progress orbs --}}
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--nn-success, #10B981);color:#fff;font-weight:700;font-size:0.85rem;">✓</div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--nn-success, #10B981);color:#fff;font-weight:700;font-size:0.85rem;">✓</div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--nn-primary, #7C3AED);color:#fff;font-weight:700;font-size:0.85rem;">3</div>
             </div>
 
             <div class="text-center mb-4">
                 <div class="fs-1 mb-2">🎯</div>
-                <h1 class="h3 fw-bold mb-1">What are your goals?</h1>
+                <h1 class="h3 fw-bold mb-1" style="font-family:'Baloo 2',sans-serif; color:var(--nn-text, #1E1B4B);">What are your goals?</h1>
                 <p class="text-muted small">Optional — helps us recommend the best activities.</p>
             </div>
 

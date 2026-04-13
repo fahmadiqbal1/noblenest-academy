@@ -1,0 +1,51 @@
+/* =========================================================
+   Age Tier: PRESCHOOL (48–71 months)
+   Palette: green & peach — nature-inspired, joyful
+   ========================================================= */
+
+:root {
+    --tier-primary: #44BB77;
+    --tier-primary-dark: #33A060;
+    --tier-accent: #F2FFF7;
+    --tier-text: #1A3020;
+    --tier-radius: 16px;
+    --tier-font-scale: 1.1;
+}
+
+body.age-preschool {
+    background: #F5FFF8;
+    color: var(--tier-text);
+    font-size: calc(1rem * var(--tier-font-scale));
+}
+
+body.age-preschool .child-nav {
+    background: var(--tier-primary);
+    color: #fff;
+}
+
+body.age-preschool .child-nav .navbar-brand,
+body.age-preschool .child-nav a {
+    color: #fff !important;
+}
+
+body.age-preschool .child-badge {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+body.age-preschool .card {
+    border-radius: var(--tier-radius) !important;
+    border: 1px solid #C8EED7 !important;
+}
+
+body.age-preschool .btn-primary {
+    background: var(--tier-primary) !important;
+    border-color: var(--tier-primary) !important;
+    border-radius: 30px !important;
+}
+
+body.age-preschool .btn-primary:hover {
+    background: var(--tier-primary-dark) !important;
+}

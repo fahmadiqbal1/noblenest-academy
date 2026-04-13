@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\ChildProfile;
 
 class UserManagementTest extends TestCase
 {
@@ -34,15 +35,14 @@ class UserManagementTest extends TestCase
         // Add child profile
         $response = $this->post('/children', [
             'name' => 'Child User',
-            'age' => 5,
+            'date_of_birth' => now()->subYears(5)->format('Y-m-d'),
+            'gender' => 'female',
             'preferred_language' => 'fr',
         ]);
-        $response->assertSessionHas('success');
-        $child = User::where('name', 'Child User')->first();
+        $response->assertSessionHas('status');
+        $child = ChildProfile::where('name', 'Child User')->first();
         $this->assertNotNull($child);
-        $this->assertEquals('Child', $child->role);
         $this->assertEquals($parent->id, $child->parent_id);
-        $this->assertEquals(5, $child->age);
         $this->assertEquals('fr', $child->preferred_language);
     }
 }

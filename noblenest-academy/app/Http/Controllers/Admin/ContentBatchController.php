@@ -45,7 +45,7 @@ class ContentBatchController extends Controller
         \App\Jobs\ProcessContentBatchJob::dispatch($job);
 
         return redirect()->route('admin.orchestrator.index')
-            ->with('success', "Batch queued: {$validated['count']} {$validated['subject']} activities for {$validated['age_tier']} tier.");
+            ->with('status', "Batch queued: {$validated['count']} {$validated['subject']} activities for {$validated['age_tier']} tier.");
     }
 
     /**
@@ -73,6 +73,6 @@ class ContentBatchController extends Controller
             ->where('source_job_id', $job->id)
             ->update(['published' => true]);
 
-        return back()->with('success', count($ids) . ' activities published.');
+        return back()->with('status', count($ids) . ' activities published.');
     }
 }

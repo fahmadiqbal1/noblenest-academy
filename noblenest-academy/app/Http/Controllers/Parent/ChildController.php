@@ -3,86 +3,78 @@
 namespace App\Http\Controllers\Parent;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\ChildProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class ChildController extends Controller
 {
-    // Show add child form
     public function create()
     {
         return view('parent.add_child');
     }
 
-    // Store new child profile
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'age' => 'required|integer|min:0|max:12',
+            'name'               => 'required|string|max:255',
+            'date_of_birth'      => 'required|date|before:today',
+            'gender'             => 'required|in:male,female,other,prefer_not_to_say',
             'preferred_language' => 'nullable|in:en,fr,ru,zh,es,ko,ur,ar',
-            'email' => 'nullable|email|unique:users,email',
-            'password' => 'nullable|string|min:6',
+            'is_muslim'          => 'nullable|boolean',
         ]);
 
-        $child = User::create([
-            'name' => $validated['name'],
-            'age' => $validated['age'],
-            'preferred_language' => $validated['preferred_language'] ?? null,
-            'email' => $validated['email'] ?? ('child-'.Str::uuid().'@local.test'),
-            'password' => Hash::make($validated['password'] ?? Str::random(12)),
-            'role' => 'Child',
-            'parent_id' => Auth::id(),
+        ChildProfile::create([
+            'parent_id'          => Auth::id(),
+            'name'               => $validated['name'],
+            'date_of_birth'      => $validated['date_of_birth'],
+            'gender'             => $validated['gender'],
+            'preferred_language' => $validated['preferred_language'] ?? 'en',
+            'is_muslim'          => $validated['is_muslim'] ?? false,
         ]);
 
-        // Optionally, store age in a profile table for extensibility
-
-        return redirect()->back()->with('success', 'Child profile added successfully.');
+        return redirect()->route('children.index')->with('status', 'Child profile added successfully.');
     }
 
-    // List all children for the authenticated parent
     public function index()
     {
-        $children = User::where('parent_id', Auth::id())->where('role', 'Child')->get();
+        $children = ChildProfile::where('parent_id', Auth::id())->get();
         return view('parent.children', compact('children'));
     }
 
-    // Show edit child form
-    public function edit(User $child)
+    public function edit(ChildProfile $child)
     {
         $this->authorizeChild($child);
         return view('parent.edit_child', compact('child'));
     }
 
-    // Update child profile
-    public function update(Request $request, User $child)
+    public function update(Request $request, ChildProfile $child)
     {
         $this->authorizeChild($child);
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'age' => 'required|integer|min:0|max:12',
+            'name'               => 'required|string|max:255',
+            'date_of_birth'      => 'required|date|before:today',
+            'gender'             => 'required|in:male,female,other,prefer_not_to_say',
             'preferred_language' => 'nullable|in:en,fr,ru,zh,es,ko,ur,ar',
-            'email' => 'nullable|email|unique:users,email,' . $child->id,
+            'is_muslim'          => 'nullable|boolean',
         ]);
+
         $child->update($validated);
+
         return redirect()->route('children.index')->with('status', 'Child profile updated successfully.');
     }
 
-    // Delete child profile
-    public function destroy(User $child)
+    public function destroy(ChildProfile $child)
     {
         $this->authorizeChild($child);
         $child->delete();
         return redirect()->route('children.index')->with('status', 'Child profile deleted successfully.');
     }
 
-    // Helper to ensure parent can only manage their own children
-    protected function authorizeChild(User $child)
+    protected function authorizeChild(ChildProfile $child): void
     {
-        if ($child->parent_id !== Auth::id() || $child->role !== 'Child') {
+        if ($child->parent_id !== Auth::id()) {
             abort(403);
         }
     }

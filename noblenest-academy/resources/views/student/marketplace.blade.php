@@ -33,15 +33,15 @@
         letter-spacing: 0.14em;
         font-size: 0.78rem;
         font-weight: 800;
-        color: #0d5c63;
+        color: var(--nn-primary);
     }
     .market-filter { padding: 1rem; }
     .market-filter .form-control,
-    .market-filter .form-select { min-height: 48px; border-radius: 1rem; }
+    .market-filter .form-select { min-height: 48px; border-radius: var(--nn-radius-sm); }
     .market-card { overflow: hidden; height: 100%; }
     .market-card__media {
         height: 190px;
-        background: linear-gradient(135deg,#0d5c63,#1f7a8c 58%, #f2a541);
+        background: linear-gradient(135deg, #7C3AED, #A78BFA 58%, #F59E0B);
     }
     .market-card__meta {
         display: flex;

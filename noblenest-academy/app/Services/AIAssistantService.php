@@ -63,9 +63,9 @@ PROMPT;
         // Cache provider lookup for 5 minutes
         $this->provider = Cache::remember('ai_assistant_provider', 300, function () {
             return AIProviderConfig::query()
-                ->where('enabled', true)
-                ->where('health_status', 'live')
-                ->orderByDesc('priority')
+                ->where('is_active', true)
+                ->where('connection_status', 'live')
+                ->latest()
                 ->first();
         });
 
@@ -256,6 +256,46 @@ PROMPT;
     }
 
     /**
+     * Generate a batch of maternal wellness content for a content generation job.
+     * Called by GenerateMaternalContentJob when an AI provider is available.
+     */
+    public function generateMaternalBatch(
+        \App\Models\AIJob $job,
+        string $contentType,
+        string $stage,
+        string $category,
+        ?string $culturalOrigin,
+        int $count,
+        string $language,
+    ): void {
+        for ($i = 1; $i <= $count; $i++) {
+            $prompt = "Create a maternal wellness {$contentType} about {$category} for the {$stage} stage in {$language}. Return JSON with keys: title, description, benefit_explanation, instructions.";
+
+            $result = $this->chat($prompt, [
+                'language' => $language,
+                'stage'    => $stage,
+            ]);
+
+            $parsed = json_decode($result['reply'], true);
+
+            \App\Models\MaternalContent::create([
+                'title'              => $parsed['title']              ?? ucfirst($category) . " {$contentType} {$i} ({$stage})",
+                'slug'               => \Illuminate\Support\Str::slug(($parsed['title'] ?? "{$category}-{$contentType}-{$i}-{$stage}") . '-' . \Illuminate\Support\Str::random(4)),
+                'description'        => $parsed['description']        ?? 'AI-generated — please review.',
+                'benefit_explanation' => $parsed['benefit_explanation'] ?? 'Pending review.',
+                'instructions'       => $parsed['instructions']       ?? null,
+                'content_type'       => $contentType,
+                'stage'              => $stage,
+                'category'           => $category,
+                'cultural_origin'    => $culturalOrigin,
+                'language'           => $language,
+                'is_published'       => false,
+                'moderation_status'  => 'pending',
+            ]);
+        }
+    }
+
+    /**
      * Generate a batch of activities for a content generation job.
      * Called by ProcessContentBatchJob when an AI provider is available.
      */
@@ -267,27 +307,97 @@ PROMPT;
         string $language,
         bool $isFree
     ): void {
+        // Age-tier specific safety requirements for prompt
+        $safetyGuidance = match ($ageTier) {
+            'baby'     => 'CRITICAL: Every activity MUST include safety_warnings about choking hazards and parent_involvement MUST be "collaborative".',
+            'toddler'  => 'Include safety_warnings if the activity involves water, scissors, or objects smaller than a golf ball.',
+            'preschool'=> 'Note safety_warnings for any sharp items, hot surfaces, or situations requiring close adult supervision.',
+            'school'   => 'Include safety_warnings if the activity involves tools, cooking, or outdoor hazards.',
+            default    => '',
+        };
+
+        $cognitiveOptions  = implode(', ', [
+            'attention', 'working_memory', 'inhibitory_control', 'cognitive_flexibility',
+            'pattern_recognition', 'spatial_reasoning', 'sequential_thinking', 'metacognition', 'subitizing',
+        ]);
+        $domainOptions = implode(', ', [
+            'fine_motor', 'gross_motor', 'language', 'numeracy', 'cognitive', 'social_emotional',
+            'creative_arts', 'executive_function', 'sensory', 'emotional_regulation',
+        ]);
+
         for ($i = 1; $i <= $count; $i++) {
-            $prompt = "Create a {$ageTier}-tier {$subject} activity for children in {$language}. Return a JSON object with keys: title, description, instructions, duration_minutes.";
+            $prompt = <<<PROMPT
+Create a {$ageTier}-tier {$subject} activity for children in {$language}.
+
+Return ONLY a valid JSON object with ALL of these exact keys:
+- title: (string) Engaging, age-appropriate activity name
+- description: (string) 2-3 sentences describing the activity and its value
+- instructions: (string) Step-by-step instructions
+- duration_minutes: (integer) Between 5 and 30
+- mess_level: (string) One of: "low", "medium", "high"
+- safety_warnings: (array of strings) Safety warnings to show parents. Empty array [] if none.
+- adaptations: (object) With exactly two keys: {"easier": "...", "harder": "..."}
+- cognitive_domain: (string) Primary cognitive domain. Choose ONE from: {$cognitiveOptions}
+- developmental_domains: (array of strings) All domains this activity targets. Choose from: {$domainOptions}
+- materials_cost: (string) One of: "free", "low", "medium"
+- parent_involvement: (string) One of: "independent", "guided", "collaborative"
+
+{$safetyGuidance}
+
+Return ONLY the JSON object, no markdown, no explanation.
+PROMPT;
 
             $result = $this->chat($prompt, [
                 'language' => $language,
                 'subject'  => $subject,
             ]);
 
-            $parsed = json_decode($result['reply'], true);
+            // Robust JSON parsing — strip markdown fences if AI wraps in them
+            $raw    = trim($result['reply'] ?? '');
+            $raw    = preg_replace('/^```(?:json)?\s*/i', '', $raw);
+            $raw    = preg_replace('/\s*```$/', '', $raw);
+            $parsed = json_decode($raw, true);
 
-            \App\Models\Activity::create([
-                'title'         => $parsed['title']        ?? "{$subject} Activity {$i} ({$ageTier})",
-                'description'   => $parsed['description']  ?? null,
-                'instructions'  => $parsed['instructions'] ?? null,
-                'subject'       => $subject,
-                'age_tier'      => $ageTier,
-                'language'      => $language,
-                'is_free'       => $isFree,
-                'published'     => false,
-                'source_job_id' => $job->id,
-            ]);
+            if (!is_array($parsed)) {
+                // Log and create a placeholder — do not crash the job
+                \Illuminate\Support\Facades\Log::warning('AIAssistantService: JSON parse failed in generateBatch', [
+                    'job_id'  => $job->id,
+                    'subject' => $subject,
+                    'i'       => $i,
+                    'raw'     => substr($raw, 0, 500),
+                ]);
+                $parsed = [];
+            }
+
+            try {
+                \App\Models\Activity::create([
+                    'title'               => $parsed['title']               ?? "{$subject} Activity {$i} ({$ageTier})",
+                    'description'         => $parsed['description']         ?? null,
+                    'instructions'        => $parsed['instructions']        ?? null,
+                    'duration_minutes'    => (int) ($parsed['duration_minutes'] ?? 15),
+                    'mess_level'          => in_array($parsed['mess_level'] ?? '', ['low', 'medium', 'high'])
+                                                ? $parsed['mess_level'] : 'low',
+                    'safety_warnings'     => $parsed['safety_warnings']     ?? [],
+                    'adaptations'         => $parsed['adaptations']         ?? null,
+                    'cognitive_domain'    => $parsed['cognitive_domain']    ?? null,
+                    'developmental_domains' => $parsed['developmental_domains'] ?? [],
+                    'materials_cost'      => in_array($parsed['materials_cost'] ?? '', ['free', 'low', 'medium'])
+                                                ? $parsed['materials_cost'] : 'free',
+                    'parent_involvement'  => in_array($parsed['parent_involvement'] ?? '', ['independent', 'guided', 'collaborative'])
+                                                ? $parsed['parent_involvement'] : 'guided',
+                    'subject'             => $subject,
+                    'language'            => $language,
+                    'is_free'             => $isFree,
+                    'published'           => false,
+                    'source_job_id'       => $job->id,
+                ]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('AIAssistantService: Activity::create failed in generateBatch', [
+                    'job_id' => $job->id,
+                    'error'  => $e->getMessage(),
+                    'parsed' => $parsed,
+                ]);
+            }
         }
     }
 }

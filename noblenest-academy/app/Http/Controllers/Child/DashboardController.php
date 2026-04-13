@@ -8,6 +8,7 @@ use App\Models\ChildActivityProgress;
 use App\Models\ChildProfile;
 use App\Services\MilestoneService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -21,8 +22,7 @@ class DashboardController extends Controller
 
         // Pick 3 age-appropriate activities for today (rotate daily by date seed)
         $todayActivities = $child->appropriateActivities()
-            ->inRandomOrder()
-            ->seed(today()->timestamp)
+            ->inRandomOrder(today()->format('Ymd'))
             ->limit(3)
             ->get();
 
@@ -41,11 +41,11 @@ class DashboardController extends Controller
         });
 
         $totalCompleted = ChildActivityProgress::where('child_profile_id', $child->id)
-            ->where('completed', true)
+            ->whereNotNull('completed_at')
             ->count();
 
-        $badgeCount = $child->achievements()
-            ->where('achievable_type', \App\Models\Badge::class)
+        $badgeCount = DB::table('child_badges')
+            ->where('child_profile_id', $child->id)
             ->count();
 
         $nextTargets = $this->milestoneService->nextTargets($child);

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateActivityMediaJob;
 use App\Models\AIJob;
 use App\Models\AIProviderConfig;
 use App\Models\Activity;
 use App\Services\AIProviderGateway;
+use App\Services\CurriculumHealthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -122,6 +124,14 @@ class OrchestratorController extends Controller
     {
         $health = $this->syncProviderStatus($provider);
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'ok'      => true,
+                'message' => $health['message'] ?? '',
+                'status'  => $health['status'] ?? $provider->connection_status,
+            ]);
+        }
+
         return back()->with('status', 'Provider "' . $provider->name . '" check complete. ' . $health['message']);
     }
 
@@ -200,31 +210,69 @@ class OrchestratorController extends Controller
 
     public function scanCurriculum(Request $request)
     {
-        $gaps        = [];
-        $ageRanges   = range(0, 10);
-        $requiredSkills = [
-            'Language & Literacy', 'Numeracy', 'Cognitive', 'Fine Motor',
-            'Gross Motor', 'Social-Emotional', 'Creative Arts', 'STEM',
-        ];
-
-        foreach ($ageRanges as $age) {
-            foreach ($requiredSkills as $skill) {
-                $count = Activity::where('subject', $skill)
-                    ->where('age_min', '<=', $age)
-                    ->where('age_max', '>=', $age)
-                    ->count();
-                if ($count === 0) {
-                    $gaps[] = ['age' => $age, 'skill' => $skill, 'count' => 0];
-                }
-            }
-        }
+        $service = app(CurriculumHealthService::class);
+        $gaps    = $service->getGaps();
+        $score   = $service->getHealthScore();
 
         return response()->json([
             'gaps'        => $gaps,
             'total_gaps'  => count($gaps),
+            'health'      => $score . '%',
             'suggestion'  => count($gaps)
                 ? 'Run the Orchestrator to generate activities for the identified gaps.'
                 : 'Curriculum looks well-covered! Keep adding more variety.',
+        ]);
+    }
+
+    // ------------------------------------------------------------------
+    // Media Studio — generate images/audio/video for activities
+    // ------------------------------------------------------------------
+
+    public function generateMedia(Request $request)
+    {
+        $data = $request->validate([
+            'activity_id' => 'required|integer|exists:activities,id',
+            'media_type'  => 'required|string|in:thumbnail,audio,video',
+            'provider_id' => 'required|integer|exists:ai_provider_configs,id',
+            'prompt'      => 'nullable|string|max:2000',
+        ]);
+
+        $job = AIJob::create([
+            'type'              => $data['media_type'] === 'thumbnail' ? 'image' : $data['media_type'],
+            'status'            => 'queued',
+            'provider'          => AIProviderConfig::find($data['provider_id'])->slug ?? 'unknown',
+            'locale'            => 'en',
+            'user_id'           => Auth::id(),
+            'moderation_status' => 'pending',
+            'payload'           => [
+                'activity_id' => $data['activity_id'],
+                'media_type'  => $data['media_type'],
+                'prompt'      => $data['prompt'] ?? null,
+            ],
+        ]);
+
+        GenerateActivityMediaJob::dispatch(
+            $data['activity_id'],
+            $data['media_type'],
+            $data['provider_id'],
+            $data['prompt'] ?? null,
+            $job->id,
+        );
+
+        return response()->json([
+            'message' => 'Media generation job dispatched.',
+            'job_id'  => $job->id,
+        ]);
+    }
+
+    public function mediaJobStatus(AIJob $job)
+    {
+        return response()->json([
+            'id'                => $job->id,
+            'status'            => $job->status,
+            'moderation_status' => $job->moderation_status,
+            'result'            => $job->result,
+            'error_message'     => $job->error_message,
         ]);
     }
 

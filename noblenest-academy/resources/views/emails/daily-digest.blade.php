@@ -7,7 +7,7 @@
   <style>
     body { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background: #f8f9fa; margin: 0; padding: 0; color: #1a1a2e; }
     .wrapper { max-width: 580px; margin: 32px auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
-    .header { background: linear-gradient(135deg, #0d5c63, #17a589); padding: 32px 40px; text-align: center; }
+    .header { background: linear-gradient(135deg, #7C3AED, #A78BFA); padding: 32px 40px; text-align: center; }
     .header h1 { color: #fff; font-size: 22px; margin: 0 0 6px; font-weight: 700; }
     .header p { color: rgba(255,255,255,0.85); margin: 0; font-size: 14px; }
     .body { padding: 32px 40px; }
@@ -18,9 +18,9 @@
     .activity-pill { display: inline-block; background: #fff; border: 1px solid #d1fae5; border-radius: 8px; padding: 6px 12px; margin: 4px 4px 4px 0; font-size: 13px; color: #374151; }
     .stats-bar { display: flex; gap: 16px; margin: 24px 0; }
     .stat { flex: 1; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; text-align: center; }
-    .stat .num { font-size: 28px; font-weight: 800; color: #0d5c63; }
+    .stat .num { font-size: 28px; font-weight: 800; color: #7C3AED; }
     .stat .label { font-size: 12px; color: #9ca3af; margin-top: 2px; }
-    .cta { display: block; width: fit-content; margin: 28px auto 0; background: #0d5c63; color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-size: 15px; font-weight: 600; text-align: center; }
+    .cta { display: block; width: fit-content; margin: 28px auto 0; background: #7C3AED; color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-size: 15px; font-weight: 600; text-align: center; }
     .footer { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 20px 40px; text-align: center; font-size: 12px; color: #9ca3af; }
     .footer a { color: #6b7280; text-decoration: underline; }
   </style>

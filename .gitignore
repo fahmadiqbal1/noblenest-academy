@@ -58,3 +58,11 @@ coverage/
 # =============================================================================
 *.log
 *.cache
+
+# gitnexus
+.gitnexus/
+
+# code-review-graph
+.code-review-graph/
+crg-cheatsheet.pdf
+CRG-README.md

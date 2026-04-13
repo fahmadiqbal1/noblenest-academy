@@ -9,14 +9,11 @@
   .hero-stage {
     position: relative;
     overflow: hidden;
-    border-radius: 2rem;
+    border-radius: var(--nn-radius);
     padding: clamp(1.75rem, 3vw, 3rem);
-    background:
-      radial-gradient(circle at 16% 18%, rgba(242, 165, 65, 0.24), transparent 18%),
-      radial-gradient(circle at 86% 14%, rgba(13, 92, 99, 0.18), transparent 24%),
-      linear-gradient(145deg, rgba(255,255,255,0.90), rgba(239,244,246,0.88));
-    border: 1px solid rgba(24, 34, 47, 0.08);
-    box-shadow: 0 28px 70px rgba(24, 34, 47, 0.12);
+    background: linear-gradient(145deg, #F5F0FF 0%, rgba(255,255,255,0.92) 50%, #FFF7ED 100%);
+    border: var(--nn-border-w) solid var(--nn-border);
+    box-shadow: var(--nn-shadow);
   }
   .hero-stage::after {
     content: '';
@@ -25,19 +22,21 @@
     width: 320px;
     height: 320px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(13,92,99,0.14), transparent 70%);
+    background: radial-gradient(circle, rgba(124,58,237,0.10), transparent 70%);
   }
   .hero-metric,
   .spotlight-card,
   .dashboard-card {
-    background: rgba(255,255,255,0.78);
-    border: 1px solid rgba(24, 34, 47, 0.08);
-    box-shadow: 0 22px 44px rgba(24, 34, 47, 0.08);
+    background: rgba(255,255,255,0.88);
+    border: var(--nn-border-w) solid var(--nn-border);
+    box-shadow: var(--nn-shadow);
   }
   .hero-metric {
-    border-radius: 1.25rem;
+    border-radius: var(--nn-radius);
     padding: 1rem 1.1rem;
+    transition: transform 0.2s var(--nn-bounce);
   }
+  .hero-metric:hover { transform: translateY(-4px); }
   .hero-orbit {
     position: relative;
     min-height: 100%;
@@ -49,9 +48,9 @@
     aspect-ratio: 1;
     border-radius: 50%;
     background: rgba(255,255,255,0.94);
-    color: #18222f;
-    border: 1px solid rgba(24, 34, 47, 0.08);
-    box-shadow: 0 28px 60px rgba(13, 92, 99, 0.14);
+    color: var(--nn-text);
+    border: var(--nn-border-w) solid var(--nn-border);
+    box-shadow: var(--nn-shadow);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -66,18 +65,21 @@
   }
   .hero-orbit__ring {
     inset: 7%;
-    border: 1px dashed rgba(13, 92, 99, 0.20);
+    border: 2px dashed rgba(37, 99, 235, 0.18);
   }
   .hero-orbit__dot {
     width: 68px;
     height: 68px;
     display: grid;
     place-items: center;
-    background: rgba(255,255,255,0.92);
-    box-shadow: 0 18px 36px rgba(24,34,47,0.10);
-    border: 1px solid rgba(24, 34, 47, 0.08);
+    background: rgba(255,255,255,0.94);
+    box-shadow: var(--nn-shadow);
+    border: var(--nn-border-w) solid var(--nn-border);
     font-size: 1.35rem;
+    color: var(--nn-primary);
+    transition: transform 0.3s var(--nn-bounce);
   }
+  .hero-orbit__dot:hover { transform: scale(1.12); }
   .hero-orbit__dot--one { top: 8%; left: 12%; }
   .hero-orbit__dot--two { top: 18%; right: 2%; }
   .hero-orbit__dot--three { bottom: 12%; left: 4%; }
@@ -85,25 +87,28 @@
   .hero-brand-mark {
     width: 116px;
     height: 116px;
-    border-radius: 1.75rem;
-    box-shadow: 0 18px 36px rgba(24,34,47,0.10);
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow);
     margin-bottom: 1rem;
   }
   .spotlight-card,
   .dashboard-card {
-    border-radius: 1.4rem;
+    border-radius: var(--nn-radius);
     padding: 1.25rem;
     height: 100%;
+    transition: transform 0.2s var(--nn-bounce);
   }
+  .spotlight-card:hover,
+  .dashboard-card:hover { transform: translateY(-4px); }
   .spotlight-icon {
     width: 56px;
     height: 56px;
-    border-radius: 1rem;
+    border-radius: var(--nn-radius-sm);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(13, 92, 99, 0.08);
-    color: #0d5c63;
+    background: var(--nn-primary-soft);
+    color: var(--nn-primary);
     font-size: 1.4rem;
   }
   .section-eyebrow {
@@ -111,21 +116,57 @@
     letter-spacing: 0.14em;
     font-size: 0.78rem;
     font-weight: 800;
-    color: #0d5c63;
+    color: var(--nn-primary);
+    font-family: 'Baloo 2', sans-serif;
   }
   .dashboard-kpi {
     font-size: clamp(2rem, 4vw, 2.8rem);
     font-weight: 800;
     line-height: 1;
+    font-family: 'Baloo 2', sans-serif;
   }
   .subscription-shell {
-    border-radius: 1.25rem;
-    border: 1px solid rgba(24, 34, 47, 0.08);
-    box-shadow: 0 18px 36px rgba(24, 34, 47, 0.08);
+    border-radius: var(--nn-radius);
+    border: var(--nn-border-w) solid var(--nn-border);
+    box-shadow: var(--nn-shadow);
+  }
+  .clay-stat {
+    background: rgba(255,255,255,0.88);
+    border: var(--nn-border-w) solid var(--nn-border);
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow);
+    padding: 1.5rem 1rem;
+    transition: transform 0.2s var(--nn-bounce);
+  }
+  .clay-stat:hover { transform: translateY(-4px); }
+  .clay-step {
+    background: rgba(255,255,255,0.88);
+    border: var(--nn-border-w) solid var(--nn-border);
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow);
+    transition: transform 0.2s var(--nn-bounce);
+  }
+  .clay-step:hover { transform: translateY(-4px); }
+  .clay-testimonial {
+    background: rgba(255,255,255,0.88);
+    border: var(--nn-border-w) solid var(--nn-border);
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow);
+  }
+  .clay-cta {
+    background: linear-gradient(135deg, #7C3AED, #A78BFA);
+    border: var(--nn-border-w) solid #7C3AED;
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow);
+    color: #fff;
   }
   @media (max-width: 991.98px) {
     .hero-orbit { margin-top: 2rem; }
     .hero-orbit__core { width: 220px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-metric:hover, .spotlight-card:hover, .dashboard-card:hover,
+    .clay-stat:hover, .clay-step:hover, .hero-orbit__dot:hover { transform: none; }
   }
 </style>
 
@@ -133,15 +174,16 @@
   <div class="row align-items-center g-4">
     <div class="col-lg-7 position-relative">
       <div class="section-eyebrow mb-3">Adaptive learning platform</div>
-      <h1 class="display-4 fw-bold mb-3">{{ I18n::get('home_title') }}</h1>
-      <p class="col-lg-10 fs-5 text-muted mt-3 mb-4">{{ I18n::get('home_subtitle') }}</p>
+      <h1 class="display-4 fw-bold mb-2" style="font-family:'Baloo 2',sans-serif; color:var(--nn-text);">{{ I18n::get('home_title') }}</h1>
+      <div class="mb-3" style="font-size:1.6rem; letter-spacing:0.2em;">🎨 📖 🔬 🎵 🧩 ✍️</div>
+      <p class="col-lg-10 fs-5 text-muted mt-2 mb-4">{{ I18n::get('home_subtitle') }}</p>
       <div class="d-flex gap-2 mt-3 flex-wrap">
       <button class="btn btn-primary btn-lg" type="button" onclick="openAIModal()">{{ I18n::get('get_weekly_plan') }}</button>
       @auth
         @if(auth()->user()->role === 'Admin')
           <a class="btn btn-outline-secondary btn-lg" href="{{ route('admin.courses.index') }}">{{ I18n::get('manage_courses') }}</a>
         @else
-          <a class="btn btn-outline-secondary btn-lg" href="{{ route('onboarding.show') }}"><i class="bi bi-rocket-takeoff"></i> Get Started</a>
+          <a class="btn btn-outline-secondary btn-lg" href="{{ route('onboarding') }}"><i class="bi bi-rocket-takeoff"></i> Get Started</a>
         @endif
       @else
         <a class="btn btn-outline-secondary btn-lg" href="{{ route('register') }}"><i class="bi bi-person-plus"></i> Register Free</a>
@@ -264,7 +306,7 @@
 @if($user && $role === 'Parent')
   <div class="row g-4 mb-4">
     @php
-      $children = \App\Models\User::where('parent_id', $user->id)->where('role', 'Child')->get();
+      $children = \App\Models\ChildProfile::where('parent_id', $user->id)->get();
     @endphp
     <div class="col-md-6">
       <div class="dashboard-card h-100">
@@ -275,9 +317,11 @@
               <div>
                 <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ $child->id }}" style="width:36px;height:36px;border-radius:50%;" class="me-2">
                 <span class="fw-semibold">{{ $child->name }}</span>
-                <span class="text-muted small ms-1">· Age {{ $child->age ?? '?' }} · {{ strtoupper($child->preferred_language ?? 'en') }}</span>
+                <span class="text-muted small ms-1">· {{ $child->age_display ?? 'Age unknown' }} · {{ strtoupper($child->preferred_language ?? 'en') }}</span>
               </div>
-              <a href="{{ route('children.edit', $child) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+              <div class="d-flex gap-1">
+                <a href="{{ route('children.edit', $child) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+              </div>
             </div>
           @empty
             <p class="text-muted small">No children added yet.</p>
@@ -299,7 +343,7 @@
             <li class="mb-2"><i class="bi bi-gift text-success me-2"></i> Invite friends and earn rewards.</li>
             <li class="mb-2"><i class="bi bi-robot text-info me-2"></i> AI-generated activity plans ready.</li>
           </ul>
-          <a href="{{ route('onboarding.show') }}" class="btn btn-outline-primary btn-sm mt-3"><i class="bi bi-sliders"></i> Update Preferences</a>
+          <a href="{{ route('onboarding') }}" class="btn btn-outline-primary btn-sm mt-3"><i class="bi bi-sliders"></i> Update Preferences</a>
         </div>
       </div>
     </div>
@@ -310,7 +354,7 @@
 @if($user && ($role === 'Student' || $role === 'Child'))
   <div class="row g-4 mb-4">
     <div class="col-12">
-      <div class="dashboard-card h-100 text-center playful-font" style="background:linear-gradient(120deg,rgba(255,255,255,0.84) 0%,rgba(229,246,247,0.84) 100%);">
+      <div class="dashboard-card h-100 text-center" style="background:linear-gradient(120deg, #F5F0FF 0%, #FFF7ED 100%);">
         <div>
           <h2 class="mb-3"><i class="bi bi-emoji-smile text-warning"></i> Welcome, {{ $user->name }}!</h2>
           <div class="mb-3">
@@ -351,7 +395,7 @@
 <div class="row g-4 mt-4">
   <div class="col-12">
     <div class="section-eyebrow mb-2">Platform highlights</div>
-    <h4 class="fw-bold text-secondary">Built to feel alive, guided, and role-aware</h4>
+    <h4 class="fw-bold" style="font-family:'Baloo 2',sans-serif; color:var(--nn-text);">Built to feel alive, guided, and role-aware</h4>
   </div>
   <div class="col-md-4">
     <div class="spotlight-card text-center">
@@ -389,37 +433,37 @@
   {{-- Social Proof Numbers --}}
   <div class="row g-3 text-center mb-5">
     <div class="col-6 col-md-3">
-      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:2rem;font-weight:800;color:#0d5c63">50K+</div>
+      <div class="clay-stat">
+        <div class="dashboard-kpi" style="color:var(--nn-primary)">50K+</div>
         <div class="text-muted small">Children Learning</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:2rem;font-weight:800;color:#7c3aed">120+</div>
+      <div class="clay-stat">
+        <div class="dashboard-kpi" style="color:#7c3aed">120+</div>
         <div class="text-muted small">Countries</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:2rem;font-weight:800;color:#f59e0b">4.9★</div>
+      <div class="clay-stat">
+        <div class="dashboard-kpi" style="color:var(--nn-accent)">4.9&#9733;</div>
         <div class="text-muted small">Parent Rating</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
-      <div class="rounded-4 py-4 px-2" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:2rem;font-weight:800;color:#16a34a">8</div>
+      <div class="clay-stat">
+        <div class="dashboard-kpi" style="color:var(--nn-success)">8</div>
         <div class="text-muted small">Languages</div>
       </div>
     </div>
   </div>
 
   {{-- How It Works --}}
-  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem">Start in 3 Simple Steps</h2>
+  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem;font-family:'Baloo 2',sans-serif">Start in 3 Simple Steps</h2>
   <div class="row g-3 mb-5">
     <div class="col-md-4">
-      <div class="d-flex gap-3 align-items-start p-3 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:1.8rem;flex-shrink:0">📝</div>
+      <div class="clay-step d-flex gap-3 align-items-start p-3">
+        <div class="spotlight-icon flex-shrink-0"><i class="bi bi-pencil-square"></i></div>
         <div>
           <div class="fw-bold">Create Account</div>
           <div class="text-muted small">Sign up in 30 seconds. No credit card to start.</div>
@@ -427,8 +471,8 @@
       </div>
     </div>
     <div class="col-md-4">
-      <div class="d-flex gap-3 align-items-start p-3 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:1.8rem;flex-shrink:0">👶</div>
+      <div class="clay-step d-flex gap-3 align-items-start p-3">
+        <div class="spotlight-icon flex-shrink-0"><i class="bi bi-person-hearts"></i></div>
         <div>
           <div class="fw-bold">Add Your Child</div>
           <div class="text-muted small">Date of birth → instant age-adapted curriculum.</div>
@@ -436,8 +480,8 @@
       </div>
     </div>
     <div class="col-md-4">
-      <div class="d-flex gap-3 align-items-start p-3 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-        <div style="font-size:1.8rem;flex-shrink:0">🚀</div>
+      <div class="clay-step d-flex gap-3 align-items-start p-3">
+        <div class="spotlight-icon flex-shrink-0"><i class="bi bi-rocket-takeoff"></i></div>
         <div>
           <div class="fw-bold">Start Learning</div>
           <div class="text-muted small">7 free activities daily. Upgrade anytime.</div>
@@ -447,7 +491,7 @@
   </div>
 
   {{-- Testimonials --}}
-  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem">What Families Say</h2>
+  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem;font-family:'Baloo 2',sans-serif">What Families Say</h2>
   <div class="row g-3 mb-5">
     @foreach([
       ['quote' => 'My daughter went from refusing to read to asking for more activities every day. NobleNest changed everything.', 'author' => 'Amara O.', 'country' => '🇳🇬 Nigeria', 'stars' => 5],
@@ -455,8 +499,8 @@
       ['quote' => 'The teacher marketplace is fantastic. My son\'s tutor is from Indonesia and he loves the sessions.', 'author' => 'Li Wei', 'country' => '🇨🇳 China', 'stars' => 5],
     ] as $t)
       <div class="col-md-4">
-        <div class="h-100 p-4 rounded-4" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.06)">
-          <div style="color:#f59e0b;font-size:0.8rem;margin-bottom:0.5rem">{{ str_repeat('★', $t['stars']) }}</div>
+        <div class="clay-testimonial h-100 p-4">
+          <div style="color:var(--nn-accent);font-size:0.8rem;margin-bottom:0.5rem">{{ str_repeat('★', $t['stars']) }}</div>
           <p class="mb-3 small" style="font-style:italic">"{{ $t['quote'] }}"</p>
           <div class="fw-bold small">{{ $t['author'] }}</div>
           <div class="text-muted" style="font-size:0.72rem">{{ $t['country'] }}</div>
@@ -466,14 +510,14 @@
   </div>
 
   {{-- Final CTA --}}
-  <div class="text-center py-5 rounded-4 mb-4" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c);color:#fff">
-    <h2 class="fw-bold mb-2" style="font-size:1.75rem">Start Your Child's Journey Today</h2>
-    <p class="mb-4" style="opacity:0.85">7 free activities. No card required. Cancel anytime.</p>
+  <div class="clay-cta text-center py-5 mb-4">
+    <h2 class="fw-bold mb-2" style="font-size:1.75rem;font-family:'Baloo 2',sans-serif">Start Your Child's Journey Today</h2>
+    <p class="mb-4" style="opacity:0.88">7 free activities. No card required. Cancel anytime.</p>
     <div class="d-flex gap-3 justify-content-center flex-wrap">
-      <a href="{{ route('register') }}" class="btn btn-warning rounded-pill px-5 py-2 fw-bold">
+      <a href="{{ route('register') }}" class="btn btn-warning rounded-pill px-5 py-2 fw-bold" style="border-width:var(--nn-border-w)">
         Get Started Free →
       </a>
-      <a href="{{ route('pricing') }}" class="btn btn-outline-light rounded-pill px-4 py-2">
+      <a href="{{ route('pricing') }}" class="btn btn-outline-light rounded-pill px-4 py-2" style="border-width:var(--nn-border-w)">
         View Pricing
       </a>
     </div>

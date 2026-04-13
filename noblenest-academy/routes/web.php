@@ -2,6 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 
+// ============================================================================
+// HEALTH CHECK ENDPOINTS — NO AUTH REQUIRED
+// Used by load balancers, Kubernetes probes, deployment validation
+// ============================================================================
+Route::get('/health', [\App\Http\Controllers\HealthCheckController::class, 'check'])
+    ->withoutMiddleware(['web', 'auth'])
+    ->name('health.check');
+
+Route::get('/health/detailed', [\App\Http\Controllers\HealthCheckController::class, 'detailed'])
+    ->withoutMiddleware(['web', 'auth'])
+    ->name('health.detailed');
+
 // === Noble Nest LMS routes START ===
 // Routes appended by Noble Nest LMS scaffolder. Safe to re-run; wrapped by installer markers.
 
@@ -16,6 +28,9 @@ Route::post('/ai/assistant/message', [\App\Http\Controllers\ChatController::clas
 // Admin — Course management (basic CRUD)
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class);
+    Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
+    Route::resource('quizzes', \App\Http\Controllers\Admin\QuizController::class)->except(['show']);
+    Route::resource('quizzes.questions', \App\Http\Controllers\Admin\QuestionController::class)->except(['index', 'show']);
 });
 
 // Admin Curriculum Explorer
@@ -32,10 +47,10 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Authentication routes
-Route::get('/register', [\App\Http\Controllers\AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register']);
-Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login']);
+Route::get('/register', [\App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
+Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])->middleware(['guest', 'throttle:3,1']);
+Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
+Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
 // Parent routes for managing children (role-based access will be enforced via middleware)
@@ -69,6 +84,7 @@ Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('h
 Route::middleware(['auth', 'subscription.active'])->group(function () {
     // Activity listing and filtering
     Route::get('/activities', [\App\Http\Controllers\ActivityController::class, 'index'])->name('activities.index');
+    Route::get('/activities/{activity}', [\App\Http\Controllers\ActivityController::class, 'show'])->name('activities.show');
 
     // Tracing activity routes
     Route::get('/activities/{activity}/tracing', [\App\Http\Controllers\ActivityController::class, 'showTracing'])->name('activities.tracing');
@@ -81,6 +97,12 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
     // Puzzle activity routes
     Route::get('/activities/{activity}/puzzle', [\App\Http\Controllers\ActivityController::class, 'showPuzzle'])->name('activities.puzzle');
     Route::post('/activities/{activity}/puzzle/complete', [\App\Http\Controllers\ActivityController::class, 'savePuzzleComplete'])->name('activities.puzzle.complete');
+
+    // Video player route
+    Route::get('/activities/{activity}/video', [\App\Http\Controllers\ActivityController::class, 'showVideo'])->name('activities.video');
+
+    // Slides / simulation viewer route
+    Route::get('/activities/{activity}/slides', [\App\Http\Controllers\ActivityController::class, 'showSlides'])->name('activities.slides');
 });
 
 // Payment routes
@@ -119,7 +141,17 @@ Route::post('/theme-toggle', function () {
 
 // Admin activity management
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('activities', \App\Http\Controllers\Admin\ActivityController::class)->except(['show', 'index']);
+    Route::resource('activities', \App\Http\Controllers\Admin\ActivityController::class)->except(['show']);
+    Route::post('activities/bulk-upload', [\App\Http\Controllers\Admin\ActivityController::class, 'bulkUpload'])->name('activities.bulkUpload');
+    // Curriculum assignment routes
+    Route::post('curriculum/add', [\App\Http\Controllers\Admin\CurriculumController::class, 'add'])->name('curriculum.add');
+    Route::post('curriculum/remove', [\App\Http\Controllers\Admin\CurriculumController::class, 'remove'])->name('curriculum.remove');
+    Route::post('curriculum/drag-assign', [\App\Http\Controllers\Admin\CurriculumController::class, 'dragAssign'])->name('curriculum.dragAssign');
+    Route::post('curriculum/drag-remove', [\App\Http\Controllers\Admin\CurriculumController::class, 'dragRemove'])->name('curriculum.dragRemove');
+    // Admin user & child management
+    Route::get('users', [\App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('users.index');
+    Route::patch('users/{user}/role', [\App\Http\Controllers\Admin\AdminUserController::class, 'updateRole'])->name('users.updateRole');
+    Route::get('children', [\App\Http\Controllers\Admin\AdminChildController::class, 'index'])->name('children.index');
 });
 
 // Onboarding — 3-step MiroFish fast flow
@@ -149,6 +181,8 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     Route::post('orchestrator/jobs/{job}/retry', [\App\Http\Controllers\Admin\OrchestratorController::class, 'retryJob'])->name('orchestrator.retry');
     Route::delete('orchestrator/jobs/{job}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyJob'])->name('orchestrator.destroyJob');
     Route::get('orchestrator/scan', [\App\Http\Controllers\Admin\OrchestratorController::class, 'scanCurriculum'])->name('orchestrator.scan');
+    Route::post('orchestrator/media', [\App\Http\Controllers\Admin\OrchestratorController::class, 'generateMedia'])->name('orchestrator.generateMedia');
+    Route::get('orchestrator/media/{job}/status', [\App\Http\Controllers\Admin\OrchestratorController::class, 'mediaJobStatus'])->name('orchestrator.mediaJobStatus');
 });
 
 // ===========================================================================
@@ -223,7 +257,7 @@ Route::middleware(['auth', 'role:Parent'])->prefix('parent')->name('parent.')->g
 Route::middleware(['auth'])->group(function () {
     Route::get('/child/{child}/activities', [\App\Http\Controllers\ChildActivityController::class, 'index'])->name('child.activities');
     Route::post('/child/{child}/activities/{activity}/complete', [\App\Http\Controllers\ChildActivityController::class, 'complete'])->name('child.activity.complete');
-    Route::post('/activities/{activity}/like', [\App\Http\Controllers\ActivityLikeController::class, 'toggle'])->name('activity.like');
+
 });
 
 // --- Notifications ---
@@ -310,10 +344,119 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     Route::post('content-review/approve-all', [\App\Http\Controllers\Admin\ContentReviewController::class, 'approveAll'])->name('content-review.approve-all');
 });
 
+// --- Password Reset ---
+Route::get('/forgot-password', fn() => view('auth.forgot-password'))->middleware('guest')->name('password.request');
+Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'sendResetLink'])->middleware('guest')->name('password.email');
+Route::get('/reset-password/{token}', fn($token) => view('auth.reset-password', ['token' => $token]))->middleware('guest')->name('password.reset');
+Route::post('/reset-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'reset'])->middleware('guest')->name('password.update');
+
 // --- Privacy + GDPR / COPPA (authenticated) ---
 Route::middleware(['auth'])->prefix('privacy')->name('privacy.')->group(function () {
     Route::get('/', [\App\Http\Controllers\PrivacyController::class, 'index'])->name('dashboard');
     Route::get('export', [\App\Http\Controllers\PrivacyController::class, 'exportData'])->name('export');
     Route::delete('delete', [\App\Http\Controllers\PrivacyController::class, 'deleteData'])->name('delete');
+});
+
+// ===========================================================================
+// MATERNAL WELLNESS MODULE
+// ===========================================================================
+
+// Onboarding (auth only, feature-flagged but no consent required yet)
+Route::middleware(['auth', 'feature:maternal_module'])->prefix('maternal')->name('maternal.')->group(function () {
+    Route::get('onboarding', [\App\Http\Controllers\Maternal\OnboardingController::class, 'create'])->name('onboarding');
+    Route::post('onboarding', [\App\Http\Controllers\Maternal\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
+// All other maternal routes require consent
+Route::middleware(['auth', 'feature:maternal_module', 'maternal.consent'])->prefix('maternal')->name('maternal.')->group(function () {
+    // Dashboard
+    Route::get('/', [\App\Http\Controllers\Maternal\DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile management
+    Route::get('profile', [\App\Http\Controllers\Maternal\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [\App\Http\Controllers\Maternal\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('profile/pause', [\App\Http\Controllers\Maternal\ProfileController::class, 'pause'])->name('profile.pause');
+    Route::post('profile/resume', [\App\Http\Controllers\Maternal\ProfileController::class, 'resume'])->name('profile.resume');
+    Route::post('profile/loss', [\App\Http\Controllers\Maternal\ProfileController::class, 'markLoss'])->name('profile.loss');
+
+    // Journey (week-by-week timeline)
+    Route::get('journey', [\App\Http\Controllers\Maternal\JourneyController::class, 'index'])->name('journey');
+    Route::get('journey/week/{week}', [\App\Http\Controllers\Maternal\JourneyController::class, 'week'])->name('journey.week')->where('week', '[0-9]+');
+
+    // Content browsing
+    Route::get('content', [\App\Http\Controllers\Maternal\ContentController::class, 'index'])->name('content.index');
+    Route::get('content/{maternalContent}', [\App\Http\Controllers\Maternal\ContentController::class, 'show'])->name('content.show');
+    Route::post('content/{maternalContent}/start', [\App\Http\Controllers\Maternal\ContentController::class, 'start'])->name('content.start');
+    Route::post('content/{maternalContent}/complete', [\App\Http\Controllers\Maternal\ContentController::class, 'complete'])->name('content.complete');
+
+    // Exercise plans
+    Route::get('exercises', [\App\Http\Controllers\Maternal\ExerciseController::class, 'index'])->name('exercises.index');
+    Route::get('exercises/{maternalExercisePlan}', [\App\Http\Controllers\Maternal\ExerciseController::class, 'show'])->name('exercises.show');
+
+    // Nutrition & meal plans
+    Route::get('nutrition', [\App\Http\Controllers\Maternal\NutritionController::class, 'index'])->name('nutrition.index');
+    Route::get('nutrition/{maternalMealPlan}', [\App\Http\Controllers\Maternal\NutritionController::class, 'show'])->name('nutrition.show');
+
+    // Herbs & natural remedies
+    Route::get('herbs', [\App\Http\Controllers\Maternal\HerbController::class, 'index'])->name('herbs.index');
+
+    // Breastfeeding education
+    Route::get('breastfeeding', [\App\Http\Controllers\Maternal\BreastfeedingController::class, 'index'])->name('breastfeeding.index');
+
+    // Newborn care & training
+    Route::get('newborn', [\App\Http\Controllers\Maternal\NewbornController::class, 'index'])->name('newborn.index');
+
+    // Cultural techniques
+    Route::get('techniques/{culture}', [\App\Http\Controllers\Maternal\TechniqueController::class, 'index'])->name('techniques.index')
+        ->where('culture', 'chinese|japanese|ayurvedic|general');
+
+    // Journal
+    Route::get('journal', [\App\Http\Controllers\Maternal\JournalController::class, 'index'])->name('journal.index');
+    Route::get('journal/create', [\App\Http\Controllers\Maternal\JournalController::class, 'create'])->name('journal.create');
+    Route::post('journal', [\App\Http\Controllers\Maternal\JournalController::class, 'store'])->name('journal.store');
+    Route::get('journal/{maternalJournal}', [\App\Http\Controllers\Maternal\JournalController::class, 'show'])->name('journal.show');
+
+    // Emergency signs reference
+    Route::get('emergency-signs', [\App\Http\Controllers\Maternal\EmergencySignController::class, 'index'])->name('emergency-signs');
+});
+
+// Admin: maternal content management
+Route::middleware(['auth', 'role:Admin'])->prefix('admin/maternal')->name('admin.maternal.')->group(function () {
+    Route::get('content', [\App\Http\Controllers\Admin\MaternalContentController::class, 'index'])->name('content.index');
+    Route::get('content/create', [\App\Http\Controllers\Admin\MaternalContentController::class, 'create'])->name('content.create');
+    Route::post('content', [\App\Http\Controllers\Admin\MaternalContentController::class, 'store'])->name('content.store');
+    Route::get('content/{maternalContent}/edit', [\App\Http\Controllers\Admin\MaternalContentController::class, 'edit'])->name('content.edit');
+    Route::put('content/{maternalContent}', [\App\Http\Controllers\Admin\MaternalContentController::class, 'update'])->name('content.update');
+    Route::delete('content/{maternalContent}', [\App\Http\Controllers\Admin\MaternalContentController::class, 'destroy'])->name('content.destroy');
+    Route::post('content/{maternalContent}/approve', [\App\Http\Controllers\Admin\MaternalContentController::class, 'approve'])->name('content.approve');
+    Route::post('content/{maternalContent}/reject', [\App\Http\Controllers\Admin\MaternalContentController::class, 'reject'])->name('content.reject');
+    Route::post('content/{maternalContent}/generate-animations', [\App\Http\Controllers\Admin\MaternalContentController::class, 'generateAnimations'])->name('content.generateAnimations');
+});
+
+// ===========================================================================
+// PRACTITIONER PORTAL
+// ===========================================================================
+
+// Practitioner setup (no active check — they need to set up profile first)
+Route::middleware(['auth', 'feature:practitioner_portal'])->prefix('practitioner')->name('practitioner.')->group(function () {
+    Route::get('setup', [\App\Http\Controllers\Practitioner\ProfileController::class, 'setup'])->name('profile.setup');
+    Route::post('setup', [\App\Http\Controllers\Practitioner\ProfileController::class, 'storeSetup'])->name('profile.storeSetup');
+});
+
+// Practitioner protected routes (require active profile)
+Route::middleware(['auth', 'feature:practitioner_portal', 'practitioner.active'])->prefix('practitioner')->name('practitioner.')->group(function () {
+    Route::get('dashboard', [\App\Http\Controllers\Practitioner\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('profile/edit', [\App\Http\Controllers\Practitioner\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [\App\Http\Controllers\Practitioner\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('reviews', [\App\Http\Controllers\Practitioner\ContentReviewController::class, 'index'])->name('reviews.index');
+    Route::get('reviews/{maternalContent}', [\App\Http\Controllers\Practitioner\ContentReviewController::class, 'show'])->name('reviews.show');
+    Route::post('reviews/{maternalContent}', [\App\Http\Controllers\Practitioner\ContentReviewController::class, 'store'])->name('reviews.store');
+});
+
+// Admin: practitioner management
+Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('practitioners', [\App\Http\Controllers\Admin\PractitionerController::class, 'index'])->name('practitioners.index');
+    Route::post('practitioners/{practitionerProfile}/suspend', [\App\Http\Controllers\Admin\PractitionerController::class, 'suspend'])->name('practitioners.suspend');
+    Route::post('practitioners/{practitionerProfile}/unsuspend', [\App\Http\Controllers\Admin\PractitionerController::class, 'unsuspend'])->name('practitioners.unsuspend');
 });
 

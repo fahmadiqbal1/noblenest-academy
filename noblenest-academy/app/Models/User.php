@@ -24,6 +24,10 @@ class User extends Authenticatable
         'parent_id',
         'age',
         'preferred_language',
+        'country_code',
+        'referral_code',
+        'is_onboarded',
+        'terms_accepted_at',
     ];
 
     /**
@@ -47,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'age' => 'integer',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 
@@ -127,6 +132,11 @@ class User extends Authenticatable
         return $this->role === 'Student';
     }
 
+    public function isPractitioner(): bool
+    {
+        return $this->role === 'Practitioner';
+    }
+
     /**
      * Get subscriptions for this user.
      */
@@ -144,5 +154,33 @@ class User extends Authenticatable
             ->where('active', true)
             ->where('ends_at', '>', now())
             ->exists();
+    }
+
+    // ------------------------------------------------------------------
+    // Maternal profile
+    // ------------------------------------------------------------------
+
+    public function maternalProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\MaternalProfile::class);
+    }
+
+    public function hasMaternalProfile(): bool
+    {
+        return $this->maternalProfile()->exists();
+    }
+
+    // ------------------------------------------------------------------
+    // Practitioner profile
+    // ------------------------------------------------------------------
+
+    public function practitionerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\PractitionerProfile::class);
+    }
+
+    public function hasPractitionerProfile(): bool
+    {
+        return $this->practitionerProfile()->exists();
     }
 }

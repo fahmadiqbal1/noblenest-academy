@@ -1,68 +1,323 @@
 /*
- * Noble Nest Academy - Bootstrap 5 CSS
- * This project uses Bootstrap 5 (NOT Tailwind) per project requirements.
- * Bootstrap is loaded via CDN in the layout files.
+ * Noble Nest Academy — "Blossom" Design System
+ * Claymorphism + Playful Creative (Vivid Violet palette)
+ * Fonts: Baloo 2 (headings) + Nunito (body) + Comic Neue (playful accents)
+ * Bootstrap 5 (NOT Tailwind) loaded via CDN
  */
 
-/* Custom variables following Bootstrap conventions */
 :root {
-    --nn-font-sans: 'Instrument Sans', var(--bs-font-sans-serif);
-    --nn-primary: #0d5c63;
-    --nn-secondary: #8b5cf6;
-    --nn-success: #22c55e;
-    --nn-warning: #f59e0b;
-    --nn-danger: #ef4444;
+    /* Blossom palette — Claymorphism Vivid Violet */
+    --nn-primary: #7C3AED;
+    --nn-primary-soft: rgba(124, 58, 237, 0.12);
+    --nn-primary-dark: #6D28D9;
+    --nn-secondary: #A78BFA;
+    --nn-accent: #F59E0B;
+    --nn-accent-soft: rgba(245, 158, 11, 0.12);
+    --nn-coral: #F43F5E;
+    --nn-coral-soft: rgba(244, 63, 94, 0.10);
+    --nn-bg: #FFFBF0;
+    --nn-bg-gradient: linear-gradient(180deg, #F5F0FF 0%, #FFFBF0 50%, #FFF7ED 100%);
+    --nn-surface: rgba(255, 255, 255, 0.88);
+    --nn-surface-strong: #ffffff;
+    --nn-text: #1E1B4B;
+    --nn-text-muted: #6B7280;
+    --nn-border: rgba(124, 58, 237, 0.12);
+    --nn-success: #10B981;
+    --nn-danger: #F43F5E;
+    --nn-warning: #F59E0B;
+
+    /* Blossom pastels */
+    --nn-peach: #FECACA;
+    --nn-baby-blue: #BFDBFE;
+    --nn-mint: #A7F3D0;
+    --nn-lilac: #DDD6FE;
+    --nn-cream: #FEF3C7;
+
+    /* Subject card colors */
+    --nn-subject-math: #FDE68A;
+    --nn-subject-science: #A7F3D0;
+    --nn-subject-reading: #BFDBFE;
+    --nn-subject-art: #FBCFE8;
+    --nn-subject-music: #DDD6FE;
+    --nn-subject-quran: #D5F5E3;
+
+    /* Clay tokens — enhanced multi-layer */
+    --nn-radius: 22px;
+    --nn-radius-sm: 14px;
+    --nn-radius-pill: 999px;
+    --nn-border-w: 3px;
+    --nn-shadow-clay:
+        6px 6px 14px rgba(124, 58, 237, 0.08),
+        -2px -2px 8px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 6px rgba(255, 255, 255, 0.7);
+    --nn-shadow-clay-hover:
+        8px 8px 20px rgba(124, 58, 237, 0.14),
+        -3px -3px 10px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 8px rgba(255, 255, 255, 0.8);
+    --nn-shadow-clay-pressed:
+        2px 2px 6px rgba(124, 58, 237, 0.06),
+        inset 2px 2px 6px rgba(124, 58, 237, 0.08);
+    --nn-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --nn-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Global font family override */
+/* Typography */
 body {
-    font-family: var(--nn-font-sans);
+    font-family: 'Nunito', 'Comic Neue', var(--bs-font-sans-serif);
+    color: var(--nn-text);
+    background: var(--nn-bg);
+    background-image: var(--nn-bg-gradient);
+    min-height: 100vh;
 }
 
-/* RTL support styles */
-[dir="rtl"] {
-    text-align: right;
+h1, h2, h3, h4, h5, h6,
+.navbar-brand, .brand-grad, .heading-font {
+    font-family: 'Baloo 2', 'Fredoka', var(--bs-font-sans-serif);
+    letter-spacing: -0.01em;
 }
 
-[dir="rtl"] .ms-auto {
-    margin-right: auto !important;
-    margin-left: unset !important;
+.playful-font { font-family: 'Comic Neue', 'Nunito', sans-serif; }
+
+/* RTL support */
+[dir="rtl"] { text-align: right; }
+[dir="rtl"] .ms-auto { margin-right: auto !important; margin-left: unset !important; }
+[dir="rtl"] .me-auto { margin-left: auto !important; margin-right: unset !important; }
+
+/* ─── Clay Card ──────────────────────────────── */
+.clay-card {
+    background: var(--nn-surface-strong);
+    border: var(--nn-border-w) solid var(--nn-border);
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow-clay);
+    transition: transform 0.25s var(--nn-bounce), box-shadow 0.25s ease;
+}
+.clay-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--nn-shadow-clay-hover);
 }
 
-[dir="rtl"] .me-auto {
-    margin-left: auto !important;
-    margin-right: unset !important;
+/* ─── Clay Button ────────────────────────────── */
+.btn-clay {
+    border-radius: var(--nn-radius-sm);
+    border: var(--nn-border-w) solid transparent;
+    font-weight: 700;
+    font-family: 'Baloo 2', sans-serif;
+    padding: 0.65rem 1.5rem;
+    box-shadow: var(--nn-shadow-clay);
+    transition: all 0.25s var(--nn-bounce);
+    cursor: pointer;
+}
+.btn-clay:active {
+    transform: scale(0.95);
+    box-shadow: var(--nn-shadow-clay-pressed);
+}
+.btn-clay-primary {
+    background: linear-gradient(135deg, var(--nn-primary), var(--nn-secondary));
+    color: #fff;
+    border-color: var(--nn-primary);
+}
+.btn-clay-primary:hover {
+    background: linear-gradient(135deg, var(--nn-primary-dark), var(--nn-primary));
+    color: #fff;
+    box-shadow: var(--nn-shadow-clay-hover);
+}
+.btn-clay-accent {
+    background: linear-gradient(135deg, var(--nn-accent), #FBBF24);
+    color: #1E1B4B;
+    border-color: var(--nn-accent);
+}
+.btn-clay-accent:hover {
+    background: linear-gradient(135deg, #D97706, var(--nn-accent));
+    color: #1E1B4B;
+}
+.btn-clay-coral {
+    background: linear-gradient(135deg, var(--nn-coral), #FB7185);
+    color: #fff;
+    border-color: var(--nn-coral);
 }
 
-/* Theme-specific customizations */
-.theme-playful .navbar {
-    background: linear-gradient(135deg, var(--nn-primary), var(--nn-secondary)) !important;
-}
-
-.theme-professional .navbar {
-    background-color: #1f2937 !important;
-}
-
-/* Activity card styles */
+/* ─── Activity Card ──────────────────────────── */
 .activity-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--nn-surface-strong);
+    border: var(--nn-border-w) solid var(--nn-border);
+    border-radius: var(--nn-radius);
+    box-shadow: var(--nn-shadow-clay);
+    transition: transform 0.3s var(--nn-bounce), box-shadow 0.3s ease;
+    overflow: hidden;
+    position: relative;
 }
-
 .activity-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: var(--nn-shadow-clay-hover);
+}
+.activity-card .card-emoji {
+    font-size: 2.2rem;
+    filter: drop-shadow(2px 2px 0 rgba(124, 58, 237, 0.12));
 }
 
-/* Age badge styles */
+/* ─── Subject Card Colors ────────────────────── */
+.subject-math    { border-left: 5px solid var(--nn-subject-math);   }
+.subject-science { border-left: 5px solid var(--nn-subject-science);}
+.subject-reading { border-left: 5px solid var(--nn-subject-reading);}
+.subject-art     { border-left: 5px solid var(--nn-subject-art);    }
+.subject-music   { border-left: 5px solid var(--nn-subject-music);  }
+.subject-quran   { border-left: 5px solid var(--nn-subject-quran);  }
+
+/* ─── Pastel Backgrounds ─────────────────────── */
+.bg-peach  { background-color: var(--nn-peach) !important; }
+.bg-baby-blue { background-color: var(--nn-baby-blue) !important; }
+.bg-mint   { background-color: var(--nn-mint) !important; }
+.bg-lilac  { background-color: var(--nn-lilac) !important; }
+.bg-cream  { background-color: var(--nn-cream) !important; }
+
+/* ─── Age Badge ──────────────────────────────── */
 .age-badge {
     font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
+    font-weight: 700;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--nn-radius-pill);
+    border: 2px solid var(--nn-border);
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Canvas styles for tracing/drawing activities */
+/* ─── Drawing Canvas ─────────────────────────── */
 .drawing-canvas {
-    border: 2px solid var(--bs-border-color);
-    border-radius: 0.375rem;
+    border: var(--nn-border-w) solid var(--nn-border);
+    border-radius: var(--nn-radius-sm);
     touch-action: none;
+    box-shadow: var(--nn-shadow-clay);
+}
+
+/* ─── Gradient Hero ──────────────────────────── */
+.gradient-hero {
+    background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 40%, #F59E0B 100%);
+    color: #fff;
+    border-radius: var(--nn-radius);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+.gradient-hero::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ─── Locked Overlay ─────────────────────────── */
+.locked-overlay {
+    opacity: 0.55;
+    filter: grayscale(0.3);
+    pointer-events: auto;
+}
+.locked-overlay .lock-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: var(--nn-radius-pill);
+    padding: 0.25rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    box-shadow: var(--nn-shadow-clay);
+}
+
+/* ─── Streak Badge ───────────────────────────── */
+.streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    border: 2px solid #FBBF24;
+    border-radius: var(--nn-radius-pill);
+    padding: 0.3rem 0.8rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+    box-shadow: var(--nn-shadow-clay);
+}
+
+/* ─── Progress Ring ──────────────────────────── */
+.progress-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: conic-gradient(var(--nn-primary) var(--progress, 0%), var(--nn-lilac) 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--nn-shadow-clay);
+}
+.progress-ring__inner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--nn-surface-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--nn-primary);
+}
+
+/* ─── Wave Divider ───────────────────────────── */
+.wave-divider {
+    width: 100%;
+    height: 60px;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q150 0 300 30 T600 30 T900 30 T1200 30 V60 H0Z' fill='%23FFFBF0'/%3E%3C/svg%3E") no-repeat center;
+    background-size: cover;
+}
+
+/* ─── Floating Blob (decorative) ─────────────── */
+.floating-blob {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.08;
+    pointer-events: none;
+    animation: blob-float 8s ease-in-out infinite;
+}
+.floating-blob--purple { background: var(--nn-primary); }
+.floating-blob--amber  { background: var(--nn-accent); }
+.floating-blob--coral  { background: var(--nn-coral); }
+
+@keyframes blob-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-20px) scale(1.05); }
+}
+
+/* ─── Confetti Burst (on completion) ─────────── */
+@keyframes confetti-burst {
+    0%   { transform: scale(0) rotate(0deg); opacity: 1; }
+    50%  { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+.confetti-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: confetti-burst 0.8s var(--nn-bounce) forwards;
+}
+
+/* ─── Age Tier Accents ───────────────────────── */
+.age-baby      { --tier-color: #FBBF24; --tier-bg: #FEF3C7; }
+.age-toddler   { --tier-color: #F472B6; --tier-bg: #FCE7F3; }
+.age-preschool { --tier-color: #34D399; --tier-bg: #D1FAE5; }
+.age-school    { --tier-color: #7C3AED; --tier-bg: #EDE9FE; }
+
+/* ─── Reduced Motion ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .clay-card, .activity-card, .btn-clay, .floating-blob {
+        transition: none !important;
+        animation: none !important;
+    }
+    .clay-card:hover, .activity-card:hover {
+        transform: none !important;
+    }
 }

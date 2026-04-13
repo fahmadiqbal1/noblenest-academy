@@ -21,6 +21,7 @@ import argparse
 import json
 import pathlib
 import sys
+from typing import Any
 
 
 INDEX_DIR = pathlib.Path(__file__).parent.parent / "curriculum-index"
@@ -36,7 +37,7 @@ def build_index(input_path: str) -> None:
     activities = json.loads(source.read_text(encoding="utf-8"))
     print(f"Indexing {len(activities)} activities …", flush=True)
 
-    nodes = []
+    nodes: list[dict[str, Any]] = []
     for act in activities:
         nodes.append({
             "title":     act.get("title", "Untitled"),
@@ -47,7 +48,7 @@ def build_index(input_path: str) -> None:
             "is_free":   act.get("is_free", True),
         })
 
-    index = {"nodes": nodes, "total": len(nodes)}
+    index: dict[str, Any] = {"nodes": nodes, "total": len(nodes)}
     out = INDEX_DIR / "activities-index.json"
     out.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Index written to {out} ({len(nodes)} nodes)", flush=True)

@@ -19,10 +19,10 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body text-center py-4">
-                    <div style="font-size:2.5rem;font-weight:800;color:#0d5c63">{{ $summary['pct'] }}%</div>
+                    <div style="font-size:2.5rem;font-weight:800;color:#7C3AED">{{ $summary['pct'] }}%</div>
                     <div class="text-muted small fw-semibold">Curriculum Coverage</div>
                     <div class="progress mt-2" style="height:6px">
-                        <div class="progress-bar" style="width:{{ $summary['pct'] }}%;background:#0d5c63"></div>
+                        <div class="progress-bar" style="width:{{ $summary['pct'] }}%;background:#7C3AED"></div>
                     </div>
                     <div class="text-muted" style="font-size:0.72rem;margin-top:4px">
                         {{ $summary['completed'] }} / {{ $summary['total'] }} activities

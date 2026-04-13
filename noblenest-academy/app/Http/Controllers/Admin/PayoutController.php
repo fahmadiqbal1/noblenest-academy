@@ -11,7 +11,7 @@ class PayoutController extends Controller
 {
     public function index(Request $request)
     {
-        $status   = $request->get('status', 'pending');
+        $status   = $request->input('status', 'pending');
         $payouts  = PayoutRequest::with('teacher')
             ->where('status', $status)
             ->latest()

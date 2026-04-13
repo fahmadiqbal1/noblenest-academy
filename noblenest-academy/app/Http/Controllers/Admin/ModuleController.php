@@ -36,7 +36,7 @@ class ModuleController extends Controller
         if (!empty($data['activities'])) {
             $module->activities()->sync($data['activities']);
         }
-        return redirect()->route('admin.modules.index')->with('success', 'Module created.');
+        return redirect()->route('admin.modules.index')->with('status', 'Module created.');
     }
 
     public function edit(Module $module)
@@ -59,14 +59,14 @@ class ModuleController extends Controller
         ]);
         $module->update($data);
         $module->activities()->sync($data['activities'] ?? []);
-        return redirect()->route('admin.modules.index')->with('success', 'Module updated.');
+        return redirect()->route('admin.modules.index')->with('status', 'Module updated.');
     }
 
     public function destroy(Module $module)
     {
         $module->activities()->detach();
         $module->delete();
-        return redirect()->route('admin.modules.index')->with('success', 'Module deleted.');
+        return redirect()->route('admin.modules.index')->with('status', 'Module deleted.');
     }
 }
 

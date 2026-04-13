@@ -15,6 +15,19 @@ class CourseController extends Controller
         return view('admin.courses.index', compact('courses'));
     }
 
+    public function show(Course $course)
+    {
+        $course->load(['modules' => function ($q) {
+            $q->orderBy('order')->with(['activities' => function ($aq) {
+                $aq->orderByPivot('order');
+            }, 'lessons' => function ($lq) {
+                $lq->orderBy('order');
+            }]);
+        }]);
+
+        return view('admin.courses.show', compact('course'));
+    }
+
     public function create()
     {
         $course = new Course();
@@ -24,9 +37,13 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255',
+            'title'       => 'required|string|max:255',
+            'slug'        => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'age_min'     => 'nullable|integer|min:0|max:18',
+            'age_max'     => 'nullable|integer|min:0|max:18|gte:age_min',
+            'color'       => 'nullable|string|max:20',
+            'emoji'       => 'nullable|string|max:10',
         ]);
 
         if (empty($data['slug'])) {
@@ -54,9 +71,13 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:courses,slug,' . $course->id,
+            'title'       => 'required|string|max:255',
+            'slug'        => 'required|string|max:255|unique:courses,slug,'.$course->id,
             'description' => 'nullable|string',
+            'age_min'     => 'nullable|integer|min:0|max:18',
+            'age_max'     => 'nullable|integer|min:0|max:18|gte:age_min',
+            'color'       => 'nullable|string|max:20',
+            'emoji'       => 'nullable|string|max:10',
         ]);
 
         $course->update($data);

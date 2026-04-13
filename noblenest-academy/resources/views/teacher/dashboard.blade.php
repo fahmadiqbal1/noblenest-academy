@@ -41,7 +41,7 @@
     {{-- Stats --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c);">
+            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);">
                 <div class="py-3">
                     <div class="fs-2 fw-bold">{{ $courses->count() }}</div>
                     <div class="small">Courses</div>
@@ -57,7 +57,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#1f7a8c,#4aa3b5);">
+            <div class="teacher-stat text-center text-white" style="background:linear-gradient(135deg,#A78BFA,#C4B5FD);">
                 <div class="py-3">
                     <div class="fs-2 fw-bold">{{ $upcomingSessions->count() }}</div>
                     <div class="small">Upcoming Sessions</div>
@@ -65,7 +65,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="teacher-stat text-center text-dark" style="background:linear-gradient(135deg,#f2a541,#f7bf65);">
+            <div class="teacher-stat text-center text-dark" style="background:linear-gradient(135deg,#F97316,#FB923C);">
                 <div class="py-3">
                     <div class="fs-2 fw-bold">${{ number_format($totalEarnings, 0) }}</div>
                     <div class="small">Total Earned</div>

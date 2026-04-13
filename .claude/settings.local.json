@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm ls:*)",
+      "Bash(curl -s http://localhost:8742/)",
+      "Bash(curl -s http://localhost:8742/api/status)",
+      "Bash(curl -s http://localhost:8742/api/health)",
+      "Bash(pipx --version)",
+      "Bash(pip show:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "code-review-graph"
+  ],
+  "enableAllProjectMcpServers": true
+}

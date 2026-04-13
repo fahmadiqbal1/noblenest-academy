@@ -31,7 +31,7 @@ class ContentReviewController extends Controller
     {
         $activity->update(['published' => true]);
 
-        return back()->with('success', '"' . $activity->title . '" published.');
+        return back()->with('status', '"' . $activity->title . '" published.');
     }
 
     /**
@@ -41,7 +41,7 @@ class ContentReviewController extends Controller
     {
         $activity->delete();
 
-        return back()->with('success', 'Activity rejected and removed.');
+        return back()->with('status', 'Activity rejected and removed.');
     }
 
     /**
@@ -51,6 +51,6 @@ class ContentReviewController extends Controller
     {
         $count = Activity::where('published', false)->update(['published' => true]);
 
-        return back()->with('success', "{$count} activities approved.");
+        return back()->with('status', "{$count} activities approved.");
     }
 }

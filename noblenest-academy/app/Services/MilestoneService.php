@@ -19,15 +19,12 @@ class MilestoneService
         $ageMonths = $child->age_months ?? 0;
 
         // Milestones due at or before child's current age
-        $dueMilestones = Milestone::where('typical_age_months', '<=', $ageMonths)
-            ->orderBy('typical_age_months')
+        $dueMilestones = Milestone::where('age_months_min', '<=', $ageMonths)
+            ->orderBy('age_months_min')
             ->get();
 
-        // Already achieved milestone IDs
-        $achieved = $child->achievements()
-            ->where('achievable_type', Milestone::class)
-            ->pluck('achievable_id')
-            ->toArray();
+        // Already achieved milestone IDs (via child_milestone_progress pivot)
+        $achieved = $child->milestones()->wherePivot('status', 'achieved')->pluck('milestones.id')->toArray();
 
         $newlyUnlocked = [];
 
@@ -38,10 +35,11 @@ class MilestoneService
 
             // Auto-award milestones where activity completion threshold is met
             if ($this->hasMet($child, $milestone)) {
-                $child->achievements()->create([
-                    'achievable_type' => Milestone::class,
-                    'achievable_id'   => $milestone->id,
-                    'achieved_at'     => now(),
+                $child->milestones()->syncWithoutDetaching([
+                    $milestone->id => [
+                        'status'      => 'achieved',
+                        'achieved_at' => now()->toDateTimeString(),
+                    ],
                 ]);
                 $newlyUnlocked[] = $milestone;
             }
@@ -58,7 +56,12 @@ class MilestoneService
 
     /**
      * Determine if a child has met the threshold for a given milestone.
-     * Simple heuristic: count completed activities in the milestone's domain.
+     *
+     * Domain-specific thresholds (research-backed):
+     * - executive_function: 5 completions (strongest predictor of academic success — Diamond, 2013)
+     * - emotional_regulation: 5 completions (critical for social development)
+     * - metacognition: 5 completions (advanced cognitive skill, needs repeated practice)
+     * - Standard domains: 3 completions
      */
     private function hasMet(ChildProfile $child, Milestone $milestone): bool
     {
@@ -67,14 +70,53 @@ class MilestoneService
             return true;
         }
 
-        $completed = ChildActivityProgress::where('child_profile_id', $child->id)
+        // Domain-specific thresholds
+        $threshold = match ($milestone->domain) {
+            'executive_function',
+            'emotional_regulation',
+            'metacognition',
+            'mental_arithmetic',
+            'focus_attention'       => 5,
+            default                 => 3,
+        };
+
+        // First: try matching by subject (traditional path)
+        $completedBySubject = ChildActivityProgress::where('child_profile_id', $child->id)
             ->whereHas('activity', function ($q) use ($milestone) {
                 $q->where('subject', $milestone->domain);
             })
-            ->where('completed', true)
+            ->whereNotNull('completed_at')
             ->count();
 
-        return $completed >= 3; // threshold: 3 completed activities per domain
+        if ($completedBySubject >= $threshold) {
+            return true;
+        }
+
+        // Second: try matching by cognitive_domain (Phase 5 enhanced path)
+        // This catches executive function/emotional regulation activities tagged
+        // with cognitive_domain rather than subject
+        $completedByCognitiveDomain = ChildActivityProgress::where('child_profile_id', $child->id)
+            ->whereHas('activity', function ($q) use ($milestone) {
+                $q->where('cognitive_domain', $milestone->domain);
+            })
+            ->whereNotNull('completed_at')
+            ->count();
+
+        if ($completedByCognitiveDomain >= $threshold) {
+            return true;
+        }
+
+        // Third: try matching by developmental_domains JSON array
+        // Activities can target multiple domains (e.g., an activity tagged
+        // with developmental_domains: ["executive_function", "fine_motor"])
+        $completedByDevDomains = ChildActivityProgress::where('child_profile_id', $child->id)
+            ->whereHas('activity', function ($q) use ($milestone) {
+                $q->whereJsonContains('developmental_domains', $milestone->domain);
+            })
+            ->whereNotNull('completed_at')
+            ->count();
+
+        return ($completedBySubject + $completedByCognitiveDomain + $completedByDevDomains) >= $threshold;
     }
 
     /**
@@ -83,7 +125,7 @@ class MilestoneService
     private function checkBadges(ChildProfile $child): array
     {
         $totalCompleted = ChildActivityProgress::where('child_profile_id', $child->id)
-            ->where('completed', true)
+            ->whereNotNull('completed_at')
             ->count();
 
         $streak = $child->streak_days ?? 0;
@@ -92,10 +134,8 @@ class MilestoneService
 
         $candidates = Badge::all();
 
-        $alreadyHas = $child->achievements()
-            ->where('achievable_type', Badge::class)
-            ->pluck('achievable_id')
-            ->toArray();
+        // Already earned badge IDs (via child_badges pivot)
+        $alreadyHas = $child->badges()->pluck('badges.id')->toArray();
 
         foreach ($candidates as $badge) {
             if (in_array($badge->id, $alreadyHas, true)) {
@@ -107,15 +147,13 @@ class MilestoneService
             $earned = match ($badge->badge_type) {
                 'streak'    => isset($criteria['days']) && $streak >= $criteria['days'],
                 'activity'  => isset($criteria['count']) && $totalCompleted >= $criteria['count'],
-                'milestone' => false, // handled by milestone flow above
+                'milestone' => false,
                 default     => false,
             };
 
             if ($earned) {
-                $child->achievements()->create([
-                    'achievable_type' => Badge::class,
-                    'achievable_id'   => $badge->id,
-                    'achieved_at'     => now(),
+                $child->badges()->syncWithoutDetaching([
+                    $badge->id => ['awarded_at' => now()->toDateTimeString()],
                 ]);
                 $newBadges[] = $badge;
             }
@@ -131,13 +169,11 @@ class MilestoneService
     {
         $ageMonths = $child->age_months ?? 0;
 
-        $achieved = $child->achievements()
-            ->where('achievable_type', Milestone::class)
-            ->pluck('achievable_id');
+        $achieved = $child->milestones()->pluck('milestones.id');
 
         return Milestone::whereNotIn('id', $achieved)
-            ->where('typical_age_months', '>=', $ageMonths)
-            ->orderBy('typical_age_months')
+            ->where('age_months_min', '>=', $ageMonths)
+            ->orderBy('age_months_min')
             ->limit(3)
             ->get();
     }

@@ -51,6 +51,44 @@ class MilestoneSeeder extends Seeder
             ['title' => 'Shows empathy to peers',                'domain' => 'social',     'age_months_min' => 72, 'age_months_max' => 96],
             ['title' => 'Reads fluently',                        'domain' => 'literacy',   'age_months_min' => 84, 'age_months_max' => 120],
             ['title' => 'Multiplies and divides',                'domain' => 'numeracy',   'age_months_min' => 96, 'age_months_max' => 120],
+
+            // ── Phase 5: Executive Functioning ──────────────────────
+            ['title' => 'Holds 2 items in memory (e.g. "get the ball and the cup")',
+                'domain' => 'executive_function', 'age_months_min' => 18, 'age_months_max' => 36],
+            ['title' => 'Waits for a short turn during a game',
+                'domain' => 'executive_function', 'age_months_min' => 24, 'age_months_max' => 42],
+            ['title' => 'Stops an action when told (inhibitory control)',
+                'domain' => 'executive_function', 'age_months_min' => 30, 'age_months_max' => 48],
+            ['title' => 'Switches between two simple tasks',
+                'domain' => 'executive_function', 'age_months_min' => 36, 'age_months_max' => 60],
+            ['title' => 'Plans and executes a 3-step project independently',
+                'domain' => 'executive_function', 'age_months_min' => 60, 'age_months_max' => 96],
+
+            // ── Phase 5: Emotional Regulation ───────────────────────
+            ['title' => 'Names 4 basic emotions (happy, sad, angry, scared)',
+                'domain' => 'emotional_regulation', 'age_months_min' => 24, 'age_months_max' => 42],
+            ['title' => 'Uses a calming strategy when upset (deep breaths, counting)',
+                'domain' => 'emotional_regulation', 'age_months_min' => 30, 'age_months_max' => 54],
+            ['title' => 'Recognises emotions in others\' faces',
+                'domain' => 'emotional_regulation', 'age_months_min' => 36, 'age_months_max' => 60],
+            ['title' => 'Expresses frustration with words instead of actions',
+                'domain' => 'emotional_regulation', 'age_months_min' => 42, 'age_months_max' => 72],
+
+            // ── Phase 5: Mental Arithmetic ──────────────────────────
+            ['title' => 'Instantly recognises quantities up to 5 (subitising)',
+                'domain' => 'mental_arithmetic', 'age_months_min' => 36, 'age_months_max' => 60],
+            ['title' => 'Adds single-digit numbers mentally (no fingers)',
+                'domain' => 'mental_arithmetic', 'age_months_min' => 60, 'age_months_max' => 84],
+            ['title' => 'Completes soroban-style addition within 10',
+                'domain' => 'mental_arithmetic', 'age_months_min' => 72, 'age_months_max' => 108],
+
+            // ── Phase 5: Focus & Attention ──────────────────────────
+            ['title' => 'Sustains focus on a 5-minute activity without prompting',
+                'domain' => 'focus_attention', 'age_months_min' => 36, 'age_months_max' => 54],
+            ['title' => 'Completes a 15-minute focused task independently',
+                'domain' => 'focus_attention', 'age_months_min' => 60, 'age_months_max' => 84],
+            ['title' => 'Switches attention between tasks without losing progress',
+                'domain' => 'focus_attention', 'age_months_min' => 72, 'age_months_max' => 108],
         ];
 
         foreach ($milestones as $idx => $milestone) {

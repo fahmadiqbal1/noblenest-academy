@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Activity;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CurriculumController extends Controller
@@ -14,14 +15,14 @@ class CurriculumController extends Controller
         if ($request->filled('age')) {
             $query->where('age_min', '<=', $request->age)->where('age_max', '>=', $request->age);
         }
-        if ($request->filled('skill')) {
-            $query->where('skill', 'like', '%'.$request->skill.'%');
+        if ($request->filled('subject')) {
+            $query->where('subject', 'like', '%'.$request->subject.'%');
         }
         $allActivities = Activity::orderBy('age_min')->get();
-        $activities = $query->orderBy('skill')->get();
-        $skills = $activities->groupBy('skill');
+        $activities = $query->orderBy('subject')->get();
+        $subjects = $activities->groupBy('subject');
         return view('admin.activities.curriculum', [
-            'skills' => $skills,
+            'subjects' => $subjects,
             'allActivities' => $allActivities,
         ]);
     }
@@ -30,26 +31,26 @@ class CurriculumController extends Controller
     {
         $request->validate([
             'activity_id' => 'required|exists:activities,id',
-            'skill' => 'required|string',
+            'subject' => 'required|string',
         ]);
         $activity = Activity::findOrFail($request->activity_id);
-        $activity->skill = $request->skill;
+        $activity->subject = $request->subject;
         $activity->save();
-        return redirect()->back()->with('success', 'Activity assigned to skill!');
+        return redirect()->back()->with('status', 'Activity assigned to subject!');
     }
 
     public function remove(Request $request)
     {
         $request->validate([
             'activity_id' => 'required|exists:activities,id',
-            'skill' => 'required|string',
+            'subject' => 'required|string',
         ]);
         $activity = Activity::findOrFail($request->activity_id);
-        if ($activity->skill === $request->skill) {
-            $activity->skill = null;
+        if ($activity->subject === $request->subject) {
+            $activity->subject = null;
             $activity->save();
         }
-        return redirect()->back()->with('success', 'Activity removed from skill!');
+        return redirect()->back()->with('status', 'Activity removed from subject!');
     }
 
     // DRAG-AND-DROP SUPPORT: Accept AJAX drag-and-drop assignment/removal
@@ -57,10 +58,10 @@ class CurriculumController extends Controller
     {
         $request->validate([
             'activity_id' => 'required|exists:activities,id',
-            'skill' => 'required|string',
+            'subject' => 'required|string',
         ]);
         $activity = Activity::findOrFail($request->activity_id);
-        $activity->skill = $request->skill;
+        $activity->subject = $request->subject;
         $activity->save();
         return response()->json(['success' => true]);
     }
@@ -69,11 +70,11 @@ class CurriculumController extends Controller
     {
         $request->validate([
             'activity_id' => 'required|exists:activities,id',
-            'skill' => 'required|string',
+            'subject' => 'required|string',
         ]);
         $activity = Activity::findOrFail($request->activity_id);
-        if ($activity->skill === $request->skill) {
-            $activity->skill = null;
+        if ($activity->subject === $request->subject) {
+            $activity->subject = null;
             $activity->save();
         }
         return response()->json(['success' => true]);
@@ -118,7 +119,7 @@ class CurriculumController extends Controller
         $totalSkills = $skills->count();
         $totalActivities = Activity::count();
         // Send email to admin(s)
-        \Mail::send('admin.activities.report_email', compact('coverage', 'topLiked', 'totalSkills', 'totalActivities'), function($m) {
+        Mail::send('admin.activities.report_email', compact('coverage', 'topLiked', 'totalSkills', 'totalActivities'), function($m) {
             $m->to(config('mail.admin_address', 'admin@noblenest.com'))
               ->subject('Monthly Curriculum Analytics Report');
         });
