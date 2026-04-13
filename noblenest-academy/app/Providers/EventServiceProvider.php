@@ -3,6 +3,18 @@
 namespace App\Providers;
 
 use App\Events\ActivityCompleted;
+use App\Events\BadgeEarned;
+use App\Events\MilestoneUnlocked;
+use App\Events\ParentDisengaged;
+use App\Events\ReferralConverted;
+use App\Events\StreakAtRisk;
+use App\Events\StruggleDetected;
+use App\Listeners\HandleBadgeEarnedListener;
+use App\Listeners\HandleMilestoneUnlockedListener;
+use App\Listeners\HandleParentDisengagedListener;
+use App\Listeners\HandleReferralConvertedListener;
+use App\Listeners\HandleStreakAtRiskListener;
+use App\Listeners\HandleStruggleDetectedListener;
 use App\Listeners\UpdateChildSkillStateListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -16,6 +28,26 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         ActivityCompleted::class => [
             UpdateChildSkillStateListener::class,
+        ],
+
+        // Viral Growth & Retention events (Phase 1 scaffold — bodies filled in later phases)
+        ReferralConverted::class => [
+            HandleReferralConvertedListener::class,
+        ],
+        MilestoneUnlocked::class => [
+            HandleMilestoneUnlockedListener::class,
+        ],
+        BadgeEarned::class => [
+            HandleBadgeEarnedListener::class,
+        ],
+        StreakAtRisk::class => [
+            HandleStreakAtRiskListener::class,
+        ],
+        StruggleDetected::class => [
+            HandleStruggleDetectedListener::class,
+        ],
+        ParentDisengaged::class => [
+            HandleParentDisengagedListener::class,
         ],
     ];
 
