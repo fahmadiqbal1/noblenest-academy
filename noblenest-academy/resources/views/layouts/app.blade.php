@@ -40,14 +40,7 @@
     <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
     <meta name="msapplication-TileColor" content="#0d5c63">
     <meta name="theme-color" content="#7C3AED">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Comic+Neue:wght@300;400;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    @if($dir === 'rtl')
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-rtl@5.3.3/dist/css/bootstrap-rtl.min.css" rel="stylesheet" crossorigin="anonymous">
-    @endif
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="{{ asset('css/playful.css') }}" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     @stack('styles')
@@ -640,7 +633,6 @@ window.addEventListener('DOMContentLoaded',()=>{
     }
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 @yield('scripts')
 <script>
 function toggleTheme() {
