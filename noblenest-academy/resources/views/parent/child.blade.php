@@ -1,143 +1,163 @@
-@extends('layouts.app')
+@extends('layouts.parent')
 
 @section('title', $child->name . "'s Progress — Noble Nest Academy")
 
 @section('content')
 @php
-    $tierKey = match($child->age_tier ?? $child->age_bracket ?? 'learner') {
-        'baby'       => 'baby',
-        'toddler'    => 'toddler',
-        'preschool'  => 'preschool',
-        'school-age', 'school' => 'school',
-        default      => 'default',
+    $tone = match($child->age_tier ?? $child->age_bracket ?? 'learner') {
+        'baby'                  => 'baby',
+        'toddler'               => 'toddler',
+        'preschool'             => 'preschool',
+        'school-age', 'school' => 'primary',
+        default                 => 'primary',
     };
-    $tierIcon = match($tierKey) {
-        'baby'     => 'bi-balloon-heart-fill',
-        'toddler'  => 'bi-stars',
-        'preschool'=> 'bi-flower1',
-        'school'   => 'bi-mortarboard-fill',
-        default    => 'bi-person-fill',
+    $tierIcon = match($tone) {
+        'baby'      => '🐣',
+        'toddler'   => '🦊',
+        'preschool' => '🐢',
+        default     => '🦉',
     };
-    $tierLabel = match($tierKey) {
-        'baby'     => 'Baby',
-        'toddler'  => 'Toddler',
-        'preschool'=> 'Preschool',
-        'school'   => 'School Age',
-        default    => ucfirst($child->age_tier ?? 'Learner'),
+    $tierLabel = match($tone) {
+        'baby'      => 'Baby',
+        'toddler'   => 'Toddler',
+        'preschool' => 'Preschool',
+        default     => 'School Age',
     };
+    $completedCount = $progress->total();
+    $progressPct = $completedCount > 0 ? min(round(($completedCount / max($completedCount + 5, 10)) * 100), 100) : 0;
 @endphp
 
-<div class="container py-4" style="max-width:860px;">
+{{-- ── Breadcrumb ── --}}
+<nav aria-label="Breadcrumb" class="mb-6">
+    <ol class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+        <li>
+            <a href="{{ route('parent.dashboard') }}" class="flex items-center gap-1 hover:text-[var(--color-primary)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] rounded">
+                <x-ui.icon name="home" class="w-4 h-4" />
+                Dashboard
+            </a>
+        </li>
+        <li aria-hidden="true"><x-ui.icon name="chevron-right" class="w-4 h-4" /></li>
+        <li class="font-semibold text-[var(--color-text)]" aria-current="page">{{ $child->name }}</li>
+    </ol>
+</nav>
 
-    {{-- ══════  BREADCRUMB  ══════ --}}
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb align-items-center mb-0">
-            <li class="breadcrumb-item">
-                <a href="{{ route('parent.dashboard') }}" class="d-inline-flex align-items-center gap-1 text-decoration-none" style="color:var(--nn-primary,#7C3AED);">
-                    <i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $child->name }}</li>
-        </ol>
-    </nav>
-
-    {{-- ══════  CHILD PROFILE CARD  ══════ --}}
-    <div class="nn-child-card mb-4">
-        <div class="nn-child-card__header nn-tier-{{ $tierKey }}">
-            <div class="nn-child-card__avatar" aria-hidden="true">
-                {{ mb_substr($child->name, 0, 1) }}
-            </div>
-            <div class="flex-fill min-w-0">
-                <h2 class="nn-child-card__name mb-0">{{ $child->name }}</h2>
-                <div class="d-flex align-items-center gap-2 flex-wrap mt-1">
-                    <span class="nn-child-card__tier-badge">
-                        <i class="bi {{ $tierIcon }} me-1" aria-hidden="true"></i>{{ $tierLabel }}
-                    </span>
+{{-- ── Child profile hero ── --}}
+<x-ui.card :tone="$tone" variant="clay" padding="none" class="mb-6 overflow-hidden">
+    {{-- Tier-coloured hero strip --}}
+    <div class="px-6 py-5 bg-[var(--color-tier-{{ $tone }})] text-white">
+        <div class="flex items-center gap-4">
+            <x-ui.avatar :name="$child->name" size="xl" ring class="shrink-0" />
+            <div class="flex-1 min-w-0">
+                <h1 class="font-display font-black text-2xl text-white leading-tight truncate">{{ $child->name }}</h1>
+                <div class="flex flex-wrap items-center gap-2 mt-1">
+                    <x-ui.badge tone="neutral" class="bg-white/25 text-white border-white/30">
+                        <span aria-hidden="true">{{ $tierIcon }}</span> {{ $tierLabel }}
+                    </x-ui.badge>
                     @if($child->age_months)
-                    <span class="nn-child-card__tier-badge">
-                        <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>{{ $child->age_display ?? (floor($child->age_months/12).'y '.($child->age_months % 12).'m') }}
-                    </span>
+                        <x-ui.badge tone="neutral" class="bg-white/25 text-white border-white/30">
+                            <x-ui.icon name="calendar" class="w-3 h-3" aria-hidden="true" />
+                            {{ $child->age_display ?? (floor($child->age_months/12).'y '.($child->age_months % 12).'m') }}
+                        </x-ui.badge>
                     @endif
                 </div>
             </div>
-        </div>
-        <div class="nn-child-card__stats">
-            <div class="nn-child-card__stat">
-                <span class="nn-child-card__stat-value">{{ $progress->total() }}</span>
-                <span class="nn-child-card__stat-label">Completed</span>
+            {{-- Progress ring --}}
+            <div class="shrink-0 hidden sm:block">
+                <x-ui.progress variant="ring" :value="$progressPct" size="lg" tone="brand" label="Progress" />
             </div>
-            <div class="nn-child-card__stat">
-                <span class="nn-child-card__stat-value d-flex align-items-center justify-content-center gap-1">
-                    <i class="bi bi-fire" aria-hidden="true"></i>{{ $child->streak_days ?? 0 }}
-                </span>
-                <span class="nn-child-card__stat-label">Day Streak</span>
-            </div>
-            <div class="nn-child-card__stat">
-                <span class="nn-child-card__stat-value">
-                    {{ $child->age_months ? floor($child->age_months/12).'y '.($child->age_months % 12).'m' : '—' }}
-                </span>
-                <span class="nn-child-card__stat-label">Age</span>
-            </div>
-        </div>
-        <div class="nn-child-card__actions">
-            <a href="{{ route('child.activities', $child) }}" class="nn-child-card__cta">
-                <i class="bi bi-controller me-1" aria-hidden="true"></i>Start Learning
-            </a>
-            <a href="{{ route('child.dashboard', $child) }}" class="nn-child-card__cta" style="background:rgba(255,255,255,0.15);">
-                <i class="bi bi-house me-1" aria-hidden="true"></i>Child Dashboard
-            </a>
         </div>
     </div>
 
-    {{-- ══════  ACTIVITY HISTORY  ══════ --}}
-    <div class="nn-section-title mb-3">
-        <i class="bi bi-clock-history nn-section-emoji" aria-hidden="true"></i>
-        Activity History
-        <span class="nn-section-count">{{ $progress->total() }}</span>
+    {{-- Stats row --}}
+    <div class="grid grid-cols-3 divide-x divide-[var(--color-border)] border-b border-[var(--color-border)]">
+        <div class="py-4 px-4 text-center">
+            <div class="text-2xl font-bold font-[var(--font-sans)] text-[var(--color-primary)]">{{ $completedCount }}</div>
+            <div class="text-xs text-[var(--color-text-muted)] font-medium mt-0.5">Completed</div>
+        </div>
+        <div class="py-4 px-4 text-center">
+            <div class="text-2xl font-bold font-[var(--font-sans)] text-amber-500 flex items-center justify-center gap-1">
+                <x-ui.icon name="flame" class="w-5 h-5" aria-hidden="true" />{{ $child->streak_days ?? 0 }}
+            </div>
+            <div class="text-xs text-[var(--color-text-muted)] font-medium mt-0.5">Day Streak</div>
+        </div>
+        <div class="py-4 px-4 text-center">
+            <div class="text-2xl font-bold font-[var(--font-sans)] text-[var(--color-text)]">
+                {{ $child->age_months ? floor($child->age_months/12).'y '.($child->age_months % 12).'m' : '—' }}
+            </div>
+            <div class="text-xs text-[var(--color-text-muted)] font-medium mt-0.5">Age</div>
+        </div>
     </div>
+
+    {{-- CTAs --}}
+    <div class="flex gap-2 p-4 flex-wrap">
+        <x-ui.button variant="primary" href="{{ route('child.activities', $child) }}" icon="sparkles" class="flex-1">
+            Start Learning
+        </x-ui.button>
+        <x-ui.button variant="secondary" href="{{ route('child.dashboard', $child) }}" icon="home" class="flex-1">
+            Child Dashboard
+        </x-ui.button>
+        <x-ui.button variant="ghost" href="{{ route('children.edit', $child) }}" icon="edit">
+            Edit
+        </x-ui.button>
+    </div>
+</x-ui.card>
+
+{{-- ── Activity history ── --}}
+<x-ui.section>
+    <x-slot name="title">
+        Activity History
+        <x-ui.badge tone="brand" size="sm" class="ms-2">{{ $completedCount }}</x-ui.badge>
+    </x-slot>
 
     @if($progress->isEmpty())
-    <div class="text-center py-5 rounded-4" style="background:rgba(255,255,255,0.7); border:2px dashed var(--nn-border,rgba(124,58,237,0.15));">
-        <i class="bi bi-controller display-4 mb-3 d-block" style="color:var(--nn-primary,#7C3AED); opacity:0.4;" aria-hidden="true"></i>
-        <p class="fw-semibold mb-1" style="color:var(--nn-text,#1E1B4B);">No activities completed yet.</p>
-        <a href="{{ route('child.activities', $child) }}" class="btn btn-sm mt-2 fw-bold px-4" style="background:var(--nn-primary,#7C3AED); color:#fff; border:none; border-radius:999px;">
-            <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Start now!
-        </a>
-    </div>
+        <x-ui.empty-state
+            icon="book-open"
+            title="No activities completed yet"
+            description="Start a learning adventure to see progress here."
+        >
+            <x-slot name="actions">
+                <x-ui.button variant="primary" href="{{ route('child.activities', $child) }}" icon="sparkles">
+                    Start now!
+                </x-ui.button>
+            </x-slot>
+        </x-ui.empty-state>
     @else
-    <div class="nn-history-list mb-4">
-        @foreach($progress as $item)
-        <div class="nn-history-item">
-            <div class="nn-history-item__icon" aria-hidden="true">
-                @if(!empty($item->activity->emoji))
-                <span style="font-size:1.25rem;">{{ $item->activity->emoji }}</span>
-                @else
-                <i class="bi bi-book-open-fill"></i>
-                @endif
-            </div>
-            <div class="nn-history-item__body">
-                <div class="nn-history-item__title">{{ $item->activity->title ?? 'Activity' }}</div>
-                <div class="nn-history-item__meta">
-                    <i class="bi bi-calendar3" aria-hidden="true"></i>
-                    {{ $item->completed_at?->format('M d, Y') }}
-                    @if($item->completed_at)
-                    <span aria-hidden="true">&middot;</span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    {{ $item->completed_at->format('g:i A') }}
+        <div class="rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] divide-y divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface-strong)]">
+            @foreach($progress as $item)
+            <div class="flex items-center gap-3 px-4 py-3">
+                <div class="w-10 h-10 min-w-[2.5rem] rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center text-lg" aria-hidden="true">
+                    @if(!empty($item->activity->emoji))
+                        {{ $item->activity->emoji }}
+                    @else
+                        <x-ui.icon name="book-open" class="w-5 h-5" />
                     @endif
                 </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-[var(--color-text)] truncate">{{ $item->activity->title ?? 'Activity' }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)] flex items-center gap-2 flex-wrap">
+                        @if($item->completed_at)
+                            <span class="flex items-center gap-1">
+                                <x-ui.icon name="calendar" class="w-3.5 h-3.5" aria-hidden="true" />
+                                {{ $item->completed_at->format('M d, Y') }}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <x-ui.icon name="clock" class="w-3.5 h-3.5" aria-hidden="true" />
+                                {{ $item->completed_at->format('g:i A') }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                <x-ui.badge tone="success" size="sm">
+                    <x-ui.icon name="check" class="w-3 h-3" aria-hidden="true" />
+                    Done
+                </x-ui.badge>
             </div>
-            <span class="nn-history-item__badge">
-                <i class="bi bi-check-circle-fill" aria-hidden="true"></i>Done
-            </span>
+            @endforeach
         </div>
-        @endforeach
-    </div>
 
-    <div class="d-flex justify-content-center">
-        {{ $progress->links() }}
-    </div>
+        <div class="mt-4 flex justify-center">
+            {{ $progress->links() }}
+        </div>
     @endif
-
-</div>
+</x-ui.section>
 @endsection

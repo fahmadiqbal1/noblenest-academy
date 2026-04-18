@@ -1,298 +1,309 @@
-@extends(isset($child) && $child ? 'layouts.child' : 'layouts.app')
+@extends(isset($child) && $child ? 'layouts.child' : 'layouts.parent')
+
+@section('title', $activity->title . ' — Noble Nest Academy')
 
 @section('content')
-<div class="container py-5" style="max-width:900px;">
+@php
+    $subjectColor = match($activity->subject ?? '') {
+        'islamic', 'quran'    => '#059669',
+        'arabic'              => '#7C3AED',
+        'art'                 => '#EC4899',
+        'language'            => '#3B82F6',
+        'stem', 'science'     => '#10B981',
+        'stories', 'literacy' => '#F59E0B',
+        'motor'               => '#22C55E',
+        'coding'              => '#6366F1',
+        'math'                => '#EF4444',
+        'etiquette'           => '#A855F7',
+        'social'              => '#06B6D4',
+        'sensory'             => '#8B5CF6',
+        default               => '#7C3AED',
+    };
+    $childQuery = isset($child) && $child ? '?child=' . $child->id : '';
+@endphp
 
-    {{-- Context-aware back nav --}}
+<div class="max-w-2xl mx-auto">
+
+    {{-- ── Back button ── --}}
     @if(isset($child) && $child)
-    <a href="{{ route('child.activities', $child) }}" class="nn-btn nn-btn-reset mb-4">
-        <i class="bi bi-arrow-left"></i> {{ $child->name }}'s Activities
-    </a>
+        <x-ui.button variant="ghost" href="{{ route('child.activities', $child) }}" icon="arrow-left" size="sm" class="mb-5">
+            {{ $child->name }}'s Activities
+        </x-ui.button>
     @else
-    <a href="{{ route('activities.index') }}" class="nn-btn nn-btn-reset mb-4">
-        <i class="bi bi-arrow-left"></i> Browse Curriculum
-    </a>
+        <x-ui.button variant="ghost" href="{{ route('activities.index') }}" icon="arrow-left" size="sm" class="mb-5">
+            Browse Curriculum
+        </x-ui.button>
     @endif
 
-    {{-- Hero card with gradient banner --}}
-    @php
-        $subjectColor = match($activity->subject ?? '') {
-            'islamic' => '#7C3AED', 'art' => '#F43F5E', 'language' => '#3B82F6',
-            'stem' => '#10B981', 'stories' => '#F59E0B', 'motor' => '#EC4899',
-            'coding' => '#6366F1', 'math' => '#EF4444', 'science' => '#10B981',
-            'quran' => '#059669', 'arabic' => '#7C3AED', 'etiquette' => '#A855F7',
-            'literacy' => '#10B981', 'social' => '#06B6D4', 'sensory' => '#8B5CF6',
-            default => '#A78BFA',
-        };
-    @endphp
-    <div class="nn-show-hero mb-4">
+    {{-- ── Activity hero ── --}}
+    <x-ui.card variant="clay" padding="none" class="mb-5 overflow-hidden">
         {{-- Gradient banner --}}
-        <div class="nn-show-banner" style="background:linear-gradient(135deg, {{ $subjectColor }}22, {{ $subjectColor }}08);">
+        <div class="relative px-5 pt-5 pb-4"
+             style="background: linear-gradient(135deg, color-mix(in oklab, {{ $subjectColor }}, white 85%), color-mix(in oklab, {{ $subjectColor }}, white 92%));">
             @if($activity->thumbnail_url)
-            <img src="{{ $activity->thumbnail_url }}" alt="{{ $activity->title }}"
-                 class="w-100 rounded-3 mb-3" style="max-height:360px; object-fit:cover;">
+                <img src="{{ $activity->thumbnail_url }}" alt="{{ $activity->title }}"
+                     class="w-full rounded-[var(--radius-sm)] mb-4 max-h-72 object-cover" loading="lazy" decoding="async">
             @endif
-            <div class="nn-show-emoji mb-2">{{ $activity->emoji ?? '🎯' }}</div>
-            <h1 class="nn-show-title">{{ $activity->title }}</h1>
-        </div>
+            <div class="text-5xl mb-2 leading-none" aria-hidden="true">{{ $activity->emoji ?? '🎯' }}</div>
+            <h1 class="font-display font-black text-2xl text-[var(--color-text)] leading-tight mb-3">{{ $activity->title }}</h1>
 
-        <div class="p-4 pt-2">
             {{-- Badge row --}}
-            <div class="nn-show-badges mb-3">
+            <div class="flex flex-wrap gap-2 mt-3">
                 @if($activity->subject)
-                <span class="nn-show-badge" style="background:{{ $subjectColor }}12;color:{{ $subjectColor }};border-color:{{ $subjectColor }}30;">
-                    {{ ucfirst($activity->subject) }}
-                </span>
+                    <x-ui.badge tone="neutral" class="text-white border-0" style="background: {{ $subjectColor }};">
+                        {{ ucfirst($activity->subject) }}
+                    </x-ui.badge>
                 @endif
                 @if($activity->difficulty)
-                <span class="nn-show-badge" style="background:#FEF3C7;color:#92400E;border-color:#FDE68A;">
-                    {{ ucfirst($activity->difficulty) }}
-                </span>
+                    <x-ui.badge tone="warning">{{ ucfirst($activity->difficulty) }}</x-ui.badge>
                 @endif
                 @if($activity->duration_minutes)
-                <span class="nn-show-badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border-color:rgba(124,58,237,0.15);">
-                    ⏱️ {{ $activity->duration_minutes }} min
-                </span>
+                    <x-ui.badge tone="brand">
+                        <x-ui.icon name="clock" class="w-3 h-3" aria-hidden="true" />{{ $activity->duration_minutes }} min
+                    </x-ui.badge>
                 @endif
                 @if(isset($activity->age_min, $activity->age_max))
-                <span class="nn-show-badge" style="background:rgba(16,185,129,0.08);color:#059669;border-color:rgba(16,185,129,0.15);">
-                    🎂 Age {{ $activity->age_min }}–{{ $activity->age_max }}
-                </span>
+                    <x-ui.badge tone="success">
+                        🎂 Age {{ $activity->age_min }}–{{ $activity->age_max }}
+                    </x-ui.badge>
                 @endif
                 @if($activity->is_free)
-                <span class="nn-show-badge" style="background:rgba(16,185,129,0.12);color:#059669;border-color:#10B981;">🎁 Free</span>
+                    <x-ui.badge tone="success">🎁 Free</x-ui.badge>
                 @else
-                <span class="nn-show-badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border-color:var(--nn-primary);">⭐ Premium</span>
+                    <x-ui.badge tone="brand">⭐ Premium</x-ui.badge>
                 @endif
             </div>
+        </div>
 
+        <div class="px-5 py-4 space-y-4">
             @if($activity->description)
-            <p class="lead" style="color:var(--nn-text-muted); font-family:'Comic Neue',sans-serif; font-weight:700;">{{ $activity->description }}</p>
+                <p class="text-[var(--color-text-muted)] font-semibold leading-relaxed">{{ $activity->description }}</p>
             @endif
 
-            {{-- Benefit Explanation --}}
+            {{-- Why this activity matters --}}
             @if($activity->benefit_explanation)
-            <div class="nn-benefit-box mb-3">
-                <h6 class="fw-bold mb-1" style="color:#059669;">💡 Why This Activity Matters</h6>
-                <p class="mb-0 small" style="color:var(--nn-text-muted);">{{ $activity->benefit_explanation }}</p>
-            </div>
+                <div class="rounded-[var(--radius-sm)] bg-emerald-50 border-[2px] border-emerald-200 p-3">
+                    <h2 class="font-bold text-emerald-800 text-sm mb-1">💡 Why This Activity Matters</h2>
+                    <p class="text-sm text-emerald-700">{{ $activity->benefit_explanation }}</p>
+                </div>
             @endif
 
-            {{-- Skills Improved --}}
+            {{-- Skills --}}
             @if($activity->skills_improved && count($activity->skills_improved))
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="small fw-bold me-1" style="color:var(--nn-text-muted);"><i class="bi bi-stars"></i> Skills:</span>
-                @foreach($activity->skills_improved as $skill)
-                <span class="nn-skill-chip">{{ ucwords(str_replace('_', ' ', $skill)) }}</span>
-                @endforeach
-            </div>
+                <div class="flex flex-wrap gap-1.5 items-center">
+                    <span class="text-xs font-bold text-[var(--color-text-muted)]">
+                        <x-ui.icon name="sparkles" class="w-3.5 h-3.5 inline me-0.5 text-[var(--color-primary)]" aria-hidden="true" />Skills:
+                    </span>
+                    @foreach($activity->skills_improved as $skill)
+                        <x-ui.badge tone="brand" size="sm">{{ ucwords(str_replace('_', ' ', $skill)) }}</x-ui.badge>
+                    @endforeach
+                </div>
             @endif
 
-            {{-- Learning Modality --}}
+            {{-- Learning modality --}}
             @if($activity->primary_modality)
             @php
                 $modalityIcon = match($activity->primary_modality) {
                     'visual' => '👁️', 'auditory' => '👂', 'kinesthetic' => '🤲', 'reading' => '📖', default => '📚'
                 };
             @endphp
-            <span class="nn-show-badge mb-2" style="background:rgba(236,72,153,0.08);color:#DB2777;border-color:rgba(236,72,153,0.15);">
-                {{ $modalityIcon }} {{ ucfirst($activity->primary_modality) }} Learning
-            </span>
+                <x-ui.badge tone="info">
+                    {{ $modalityIcon }} {{ ucfirst($activity->primary_modality) }} Learning
+                </x-ui.badge>
             @endif
         </div>
-    </div>
+    </x-ui.card>
 
-    {{-- Audio Player --}}
+    {{-- ── Audio player ── --}}
     @if($activity->audio_url)
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">🎧</span> Listen & Learn</h5>
-            <audio controls class="w-100" preload="metadata">
-                <source src="{{ $activity->audio_url }}" type="audio/mpeg">
-                Your browser does not support audio playback.
-            </audio>
-        </div>
-    </div>
+    <x-ui.card variant="clay" padding="md" class="mb-4">
+        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+            <span aria-hidden="true">🎧</span> Listen &amp; Learn
+        </h2>
+        <audio controls class="w-full" preload="metadata">
+            <source src="{{ $activity->audio_url }}" type="audio/mpeg">
+            Your browser does not support audio playback.
+        </audio>
+    </x-ui.card>
     @endif
 
-    {{-- Video Player --}}
+    {{-- ── Video player ── --}}
     @if($activity->video_url)
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">🎬</span> Watch & Discover</h5>
-            <video controls class="w-100 rounded-3" preload="metadata" style="max-height:420px;">
-                <source src="{{ $activity->video_url }}" type="video/mp4">
-                Your browser does not support video playback.
-            </video>
-        </div>
-    </div>
+    <x-ui.card variant="clay" padding="md" class="mb-4">
+        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+            <span aria-hidden="true">🎬</span> Watch &amp; Discover
+        </h2>
+        <video controls class="w-full rounded-[var(--radius-sm)]" preload="metadata" style="max-height:420px;">
+            <source src="{{ $activity->video_url }}" type="video/mp4">
+            Your browser does not support video playback.
+        </video>
+    </x-ui.card>
     @endif
 
-    {{-- Media URL (fallback generic media) --}}
+    {{-- ── Generic media fallback ── --}}
     @if($activity->media_url && !$activity->video_url)
         @php $ext = strtolower(pathinfo($activity->media_url, PATHINFO_EXTENSION)); @endphp
         @if(in_array($ext, ['mp4','webm','mov']))
-        <div class="nn-content-card mb-4">
-            <div class="card-body">
-                <video controls class="w-100 rounded-3" preload="metadata">
-                    <source src="{{ $activity->media_url }}">
-                </video>
-            </div>
-        </div>
+        <x-ui.card variant="clay" padding="md" class="mb-4">
+            <video controls class="w-full rounded-[var(--radius-sm)]" preload="metadata">
+                <source src="{{ $activity->media_url }}">
+            </video>
+        </x-ui.card>
         @elseif(in_array($ext, ['mp3','wav','ogg']))
-        <div class="nn-content-card mb-4">
-            <div class="card-body">
-                <audio controls class="w-100" preload="metadata">
-                    <source src="{{ $activity->media_url }}">
-                </audio>
-            </div>
-        </div>
+        <x-ui.card variant="clay" padding="md" class="mb-4">
+            <audio controls class="w-full" preload="metadata">
+                <source src="{{ $activity->media_url }}">
+            </audio>
+        </x-ui.card>
         @elseif(in_array($ext, ['jpg','jpeg','png','gif','webp','svg']))
-        <div class="nn-content-card mb-3">
-            <img src="{{ $activity->media_url }}" alt="{{ $activity->title }}" class="w-100 rounded-3" style="max-height:400px; object-fit:cover;">
-        </div>
+        <x-ui.card variant="clay" padding="none" class="mb-4 overflow-hidden">
+            <img src="{{ $activity->media_url }}" alt="{{ $activity->title }}"
+                 class="w-full max-h-96 object-cover" loading="lazy" decoding="async">
+        </x-ui.card>
         @endif
     @endif
 
-    {{-- Instructions --}}
+    {{-- ── Instructions ── --}}
     @if($activity->instructions)
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">📋</span> What To Do</h5>
-            @if(is_array($activity->instructions))
-                <ol class="nn-ordered-steps mb-0">
-                    @foreach($activity->instructions as $step)
-                    <li class="mb-2">{{ $step }}</li>
-                    @endforeach
-                </ol>
-            @else
-                <p class="mb-0" style="font-weight:600;color:#374151;line-height:1.75;">{{ $activity->instructions }}</p>
-            @endif
-        </div>
-    </div>
-    @endif
-
-    {{-- Step Player (animated guided walkthrough — always show when steps exist) --}}
-    @if($activity->steps && $activity->steps->count())
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">🎬</span> Guided Walkthrough</h5>
-            <x-step-player
-                :steps="$activity->steps"
-                :subject="$activity->subject ?? 'default'"
-                :activityEmoji="$activity->emoji ?? '🎯'"
-            />
-        </div>
-    </div>
-    @endif
-
-    {{-- Materials Needed --}}
-    @if(is_array($activity->materials_needed) && count((array)$activity->materials_needed))
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">🎒</span> Gather Your Supplies</h5>
-            <ul class="nn-list-playful nn-list-materials">
-                @foreach($activity->materials_needed as $material)
-                <li>{{ $material }}</li>
+    <x-ui.card variant="clay" padding="md" class="mb-4">
+        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+            <span aria-hidden="true">📋</span> What To Do
+        </h2>
+        @if(is_array($activity->instructions))
+            <ol class="space-y-2 list-none ps-0">
+                @foreach($activity->instructions as $idx => $step)
+                <li class="flex items-start gap-3">
+                    <span class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-white"
+                          style="background: {{ $subjectColor }};">{{ $idx + 1 }}</span>
+                    <span class="text-[var(--color-text)] font-medium leading-relaxed">{{ $step }}</span>
+                </li>
                 @endforeach
-            </ul>
-        </div>
-    </div>
-    @endif
-
-    {{-- Learning Objectives --}}
-    @if(is_array($activity->learning_objectives) && count((array)$activity->learning_objectives))
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">🏆</span> What You'll Master</h5>
-            <ul class="nn-list-playful nn-list-objectives">
-                @foreach($activity->learning_objectives as $obj)
-                <li>{{ $obj }}</li>
-                @endforeach
-            </ul>
-        </div>
-    </div>
-    @endif
-
-    {{-- Start Activity / Completion Zone --}}
-    @php $childQuery = isset($child) && $child ? '?child=' . $child->id : ''; @endphp
-    <div class="nn-completion-zone mb-5">
-        {{-- Activity type CTA --}}
-        @php $actType = $activity->activity_type ?? ''; @endphp
-        @if($actType === 'tracing')
-            <a href="{{ route('activities.tracing', $activity) . $childQuery }}"
-               class="nn-cta-btn nn-cta-primary w-100 justify-content-center">
-                <i class="bi bi-pencil-fill"></i> Start Tracing ✏️
-            </a>
-        @elseif($actType === 'drawing')
-            <a href="{{ route('activities.drawing', $activity) . $childQuery }}"
-               class="nn-cta-btn nn-cta-primary w-100 justify-content-center">
-                <i class="bi bi-palette-fill"></i> Start Drawing 🎨
-            </a>
-        @elseif($actType === 'puzzle')
-            <a href="{{ route('activities.puzzle', $activity) . $childQuery }}"
-               class="nn-cta-btn nn-cta-primary w-100 justify-content-center">
-                <i class="bi bi-puzzle-fill"></i> Start Puzzle 🧩
-            </a>
-        @elseif($actType === 'quiz' && ($activity->quiz_id ?? false))
-            <a href="{{ route('quizzes.show', $activity->quiz_id) . $childQuery }}"
-               class="nn-cta-btn nn-cta-primary w-100 justify-content-center">
-                <i class="bi bi-question-circle-fill"></i> Take Quiz 🧠
-            </a>
-        @elseif($actType === 'video' || $activity->video_url || (isset($activity->media_url) && str_ends_with((string)$activity->media_url, '.mp4')))
-            <a href="{{ route('activities.video', $activity) . $childQuery }}"
-               class="nn-cta-btn w-100 justify-content-center"
-               style="background:linear-gradient(135deg,#1E40AF,#3B82F6);border-color:#1E40AF;">
-                <i class="bi bi-play-circle-fill"></i> Watch Video 🎬
-            </a>
-        @elseif($actType === 'slides' || $actType === 'simulation')
-            <a href="{{ route('activities.slides', $activity) . $childQuery }}"
-               class="nn-cta-btn w-100 justify-content-center"
-               style="background:linear-gradient(135deg,#0E7490,#06B6D4);border-color:#0E7490;">
-                <i class="bi bi-collection-play-fill"></i> Start Lesson Slides 📖
-            </a>
-        @elseif($activity->steps && $activity->steps->count() > 0)
-            {{-- Activities with steps: offer a slides view --}}
-            <a href="{{ route('activities.slides', $activity) . $childQuery }}"
-               class="nn-cta-btn w-100 justify-content-center mb-3"
-               style="background:linear-gradient(135deg,#7C3AED,#A78BFA);border-color:#7C3AED;">
-                <i class="bi bi-collection-play-fill"></i> Interactive Lesson View 🎯
-            </a>
-            <div class="nn-ready-card">
-                <div class="nn-ready-icon">🌟</div>
-                <h4 class="nn-ready-title">Or Work Through the Steps Above</h4>
-                <p class="nn-ready-text">Read each step, then come back when you're done!</p>
-            </div>
+            </ol>
         @else
-            <div class="nn-ready-card">
-                <div class="nn-ready-icon">🌟</div>
-                <h4 class="nn-ready-title">You're Ready to Begin!</h4>
-                <p class="nn-ready-text">Work through the steps above and come back when you're done.</p>
-            </div>
+            <p class="text-[var(--color-text)] font-medium leading-relaxed">{{ $activity->instructions }}</p>
+        @endif
+    </x-ui.card>
+    @endif
+
+    {{-- ── Step player ── --}}
+    @if($activity->steps && $activity->steps->count())
+    <x-ui.card variant="clay" padding="md" class="mb-4">
+        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+            <span aria-hidden="true">🎬</span> Guided Walkthrough
+        </h2>
+        <x-step-player
+            :steps="$activity->steps"
+            :subject="$activity->subject ?? 'default'"
+            :activityEmoji="$activity->emoji ?? '🎯'"
+        />
+    </x-ui.card>
+    @endif
+
+    {{-- ── Materials ── --}}
+    @if(is_array($activity->materials_needed) && count((array)$activity->materials_needed))
+    <x-ui.card variant="clay" padding="md" class="mb-4">
+        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+            <span aria-hidden="true">🎒</span> Gather Your Supplies
+        </h2>
+        <ul class="space-y-2">
+            @foreach($activity->materials_needed as $material)
+            <li class="flex items-center gap-2 text-[var(--color-text)]">
+                <x-ui.icon name="check-circle" class="w-4 h-4 text-emerald-500 shrink-0" aria-hidden="true" />
+                {{ $material }}
+            </li>
+            @endforeach
+        </ul>
+    </x-ui.card>
+    @endif
+
+    {{-- ── Learning objectives ── --}}
+    @if(is_array($activity->learning_objectives) && count((array)$activity->learning_objectives))
+    <x-ui.card variant="clay" padding="md" class="mb-4">
+        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
+            <span aria-hidden="true">🏆</span> What You'll Master
+        </h2>
+        <ul class="space-y-2">
+            @foreach($activity->learning_objectives as $obj)
+            <li class="flex items-center gap-2 text-[var(--color-text)]">
+                <x-ui.icon name="star" class="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
+                {{ $obj }}
+            </li>
+            @endforeach
+        </ul>
+    </x-ui.card>
+    @endif
+
+    {{-- ── Completion zone ── --}}
+    @php $actType = $activity->activity_type ?? ''; @endphp
+    <div class="mb-8 space-y-3">
+        {{-- Activity type CTA --}}
+        @if($actType === 'tracing')
+            <x-ui.button variant="primary" href="{{ route('activities.tracing', $activity) . $childQuery }}" icon="pencil" size="lg" class="w-full justify-center">
+                Start Tracing ✏️
+            </x-ui.button>
+        @elseif($actType === 'drawing')
+            <x-ui.button variant="primary" href="{{ route('activities.drawing', $activity) . $childQuery }}" icon="brush" size="lg" class="w-full justify-center">
+                Start Drawing 🎨
+            </x-ui.button>
+        @elseif($actType === 'puzzle')
+            <x-ui.button variant="primary" href="{{ route('activities.puzzle', $activity) . $childQuery }}" icon="puzzle-piece" size="lg" class="w-full justify-center">
+                Start Puzzle 🧩
+            </x-ui.button>
+        @elseif($actType === 'quiz' && ($activity->quiz_id ?? false))
+            <x-ui.button variant="primary" href="{{ route('quizzes.show', $activity->quiz_id) . $childQuery }}" icon="target" size="lg" class="w-full justify-center">
+                Take Quiz 🧠
+            </x-ui.button>
+        @elseif($actType === 'video' || $activity->video_url)
+            <x-ui.button variant="primary" href="{{ route('activities.video', $activity) . $childQuery }}" icon="play" size="lg" class="w-full justify-center">
+                Watch Video 🎬
+            </x-ui.button>
+        @elseif(in_array($actType, ['slides', 'simulation']))
+            <x-ui.button variant="primary" href="{{ route('activities.slides', $activity) . $childQuery }}" icon="layers" size="lg" class="w-full justify-center">
+                Start Lesson Slides 📖
+            </x-ui.button>
+        @elseif($activity->steps && $activity->steps->count() > 0)
+            <x-ui.button variant="primary" href="{{ route('activities.slides', $activity) . $childQuery }}" icon="layers" size="lg" class="w-full justify-center">
+                Interactive Lesson View 🎯
+            </x-ui.button>
+            <x-ui.card variant="clay" padding="md" class="text-center">
+                <div class="text-3xl mb-2" aria-hidden="true">🌟</div>
+                <h3 class="font-display font-bold text-[var(--color-text)] mb-1">Or Work Through the Steps Above</h3>
+                <p class="text-sm text-[var(--color-text-muted)]">Read each step, then come back when you're done!</p>
+            </x-ui.card>
+        @else
+            <x-ui.card variant="clay" padding="md" class="text-center">
+                <div class="text-3xl mb-2" aria-hidden="true">🌟</div>
+                <h3 class="font-display font-bold text-[var(--color-text)] mb-1">You're Ready to Begin!</h3>
+                <p class="text-sm text-[var(--color-text-muted)]">Work through the steps above and come back when you're done.</p>
+            </x-ui.card>
         @endif
 
-        {{-- Mark Complete --}}
+        {{-- Mark complete --}}
         @if(isset($child) && $child)
-        <form action="{{ route('child.activity.complete', [$child, $activity]) }}" method="POST" class="mt-4" id="completeForm">
+        <form action="{{ route('child.activity.complete', [$child, $activity]) }}" method="POST" id="completeForm">
             @csrf
-            <button type="submit" class="nn-complete-zone-btn" id="completeBtn">
-                <span class="nn-complete-zone-icon">🎉</span>
-                <span class="nn-complete-zone-label">
-                    <strong>I Finished This Activity!</strong>
-                    <small>Mark complete &amp; earn your badge</small>
+            <button
+                type="submit"
+                id="completeBtn"
+                class="w-full flex items-center gap-4 px-5 py-4 min-h-[4rem] rounded-[var(--radius-card)] border-[3px] border-emerald-500 bg-gradient-to-br from-emerald-500 to-emerald-400 text-white shadow-[var(--shadow-clay)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-clay-hover)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-emerald-600 focus-visible:outline-offset-2 cursor-pointer"
+            >
+                <span class="text-3xl shrink-0" aria-hidden="true">🎉</span>
+                <span class="flex-1 text-start">
+                    <strong class="block font-display font-black text-base leading-tight">I Finished This Activity!</strong>
+                    <small class="text-emerald-100 text-sm">Mark complete &amp; earn your badge</small>
                 </span>
-                <i class="bi bi-check-circle-fill ms-auto"></i>
+                <x-ui.icon name="check-circle" class="w-6 h-6 shrink-0" aria-hidden="true" />
             </button>
         </form>
         @endif
     </div>
+
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Animate complete button on click
     const btn = document.getElementById('completeBtn');
     if (btn) {
         btn.addEventListener('click', function() {
@@ -302,4 +313,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+@endpush

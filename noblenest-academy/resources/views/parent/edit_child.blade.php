@@ -1,65 +1,140 @@
-@extends('layouts.app')
+@extends('layouts.parent')
+
+@section('title', 'Edit ' . $child->name . ' — Noble Nest Academy')
 
 @section('content')
-<div class="container mt-5">
-    <h2>{{ I18n::get('edit_child') }}</h2>
+<div class="max-w-xl mx-auto">
+
+    <x-ui.page-header
+        title="{{ I18n::get('edit_child') }}"
+        subtitle="Update {{ $child->name }}'s learning profile"
+    >
+        <x-slot name="actions">
+            <x-ui.button variant="ghost" href="{{ route('parent.child', $child) }}" icon="chevron-left" size="sm">
+                Back
+            </x-ui.button>
+        </x-slot>
+    </x-ui.page-header>
 
     @if($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
+        <x-ui.alert tone="danger" class="mb-6">
+            <ul class="space-y-1 list-disc list-inside">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
-        </div>
+        </x-ui.alert>
     @endif
 
-    <form method="POST" action="{{ route('children.update', $child) }}">
-        @csrf
-        @method('PUT')
-        <div class="mb-3">
-            <label for="name" class="form-label">{{ I18n::get('child_name') }}</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $child->name) }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="date_of_birth" class="form-label">Date of Birth</label>
-            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $child->date_of_birth?->format('Y-m-d')) }}" max="{{ now()->toDateString() }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="gender" class="form-label">Gender</label>
-            <select class="form-select" id="gender" name="gender" required>
-                <option value="">Select...</option>
-                <option value="male" @if(old('gender', $child->gender)==='male') selected @endif>Boy</option>
-                <option value="female" @if(old('gender', $child->gender)==='female') selected @endif>Girl</option>
-                <option value="other" @if(old('gender', $child->gender)==='other') selected @endif>Other</option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="preferred_language" class="form-label">{{ I18n::get('preferred_language') }}</label>
-            <select class="form-select" id="preferred_language" name="preferred_language">
-                <option value="">{{ I18n::get('select_language') }}</option>
-                @foreach(['en'=>'English','fr'=>'French','ru'=>'Russian','zh'=>'Mandarin','es'=>'Spanish','ko'=>'Korean','ur'=>'Urdu','ar'=>'Arabic'] as $code=>$lang)
-                    <option value="{{ $code }}" @if(old('preferred_language', $child->preferred_language)===$code) selected @endif>{{ $lang }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Is your family Muslim?</label>
-            <div class="d-flex gap-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="is_muslim" id="muslim_yes" value="1" @if(old('is_muslim', $child->is_muslim)) checked @endif>
-                    <label class="form-check-label" for="muslim_yes">Yes</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="is_muslim" id="muslim_no" value="0" @if(!old('is_muslim', $child->is_muslim)) checked @endif>
-                    <label class="form-check-label" for="muslim_no">No</label>
-                </div>
+    <x-ui.card variant="clay" padding="lg">
+        <form method="POST" action="{{ route('children.update', $child) }}" novalidate>
+            @csrf
+            @method('PUT')
+
+            <div class="space-y-5">
+
+                <x-ui.field
+                    label="{{ I18n::get('child_name') }}"
+                    name="name"
+                    :error="$errors->first('name')"
+                    required
+                >
+                    <x-ui.input
+                        type="text"
+                        name="name"
+                        :value="old('name', $child->name)"
+                        placeholder="e.g. Amira"
+                        :invalid="$errors->has('name')"
+                        autocomplete="off"
+                    />
+                </x-ui.field>
+
+                <x-ui.field
+                    label="Date of Birth"
+                    name="date_of_birth"
+                    :error="$errors->first('date_of_birth')"
+                    required
+                >
+                    <x-ui.input
+                        type="date"
+                        name="date_of_birth"
+                        :value="old('date_of_birth', $child->date_of_birth?->format('Y-m-d'))"
+                        max="{{ now()->toDateString() }}"
+                        :invalid="$errors->has('date_of_birth')"
+                    />
+                </x-ui.field>
+
+                <x-ui.field
+                    label="Gender"
+                    name="gender"
+                    :error="$errors->first('gender')"
+                    required
+                >
+                    <x-ui.select
+                        name="gender"
+                        :value="old('gender', $child->gender)"
+                        placeholder="Select..."
+                        :options="['male' => 'Boy', 'female' => 'Girl', 'other' => 'Other']"
+                        :invalid="$errors->has('gender')"
+                    />
+                </x-ui.field>
+
+                <x-ui.field
+                    label="{{ I18n::get('preferred_language') }}"
+                    name="preferred_language"
+                    :error="$errors->first('preferred_language')"
+                >
+                    <x-ui.select
+                        name="preferred_language"
+                        :value="old('preferred_language', $child->preferred_language)"
+                        placeholder="{{ I18n::get('select_language') }}"
+                        :options="['en' => 'English', 'fr' => 'French', 'ru' => 'Russian', 'zh' => 'Mandarin', 'es' => 'Spanish', 'ko' => 'Korean', 'ur' => 'Urdu', 'ar' => 'Arabic']"
+                        :invalid="$errors->has('preferred_language')"
+                    />
+                </x-ui.field>
+
+                {{-- Muslim family toggle --}}
+                <fieldset>
+                    <legend class="block text-sm font-semibold text-[var(--color-text)] mb-2">
+                        Is your family Muslim?
+                    </legend>
+                    <div class="flex gap-6">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="is_muslim"
+                                value="1"
+                                @if(old('is_muslim', $child->is_muslim)) checked @endif
+                                class="w-4 h-4 accent-[var(--color-brand-600)] cursor-pointer"
+                            >
+                            <span class="text-sm font-medium text-[var(--color-text)]">Yes</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="is_muslim"
+                                value="0"
+                                @if(!old('is_muslim', $child->is_muslim)) checked @endif
+                                class="w-4 h-4 accent-[var(--color-brand-600)] cursor-pointer"
+                            >
+                            <span class="text-sm font-medium text-[var(--color-text)]">No</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-[var(--color-text-muted)] mt-1.5">This helps us include Quran and Islamic studies content tailored for your child.</p>
+                </fieldset>
+
             </div>
-            <small class="text-muted">This helps us include Quran and Islamic studies content tailored for your child.</small>
-        </div>
-        <button type="submit" class="btn btn-success">{{ I18n::get('update_child') }}</button>
-        <a href="{{ route('children.index') }}" class="btn btn-secondary">{{ I18n::get('cancel') }}</a>
-    </form>
+
+            <div class="flex gap-3 mt-8">
+                <x-ui.button type="submit" variant="primary" icon="check" class="flex-1">
+                    {{ I18n::get('update_child') }}
+                </x-ui.button>
+                <x-ui.button variant="secondary" href="{{ route('children.index') }}">
+                    {{ I18n::get('cancel') }}
+                </x-ui.button>
+            </div>
+        </form>
+    </x-ui.card>
+
 </div>
 @endsection
-

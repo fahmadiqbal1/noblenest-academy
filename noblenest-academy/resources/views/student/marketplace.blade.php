@@ -1,207 +1,175 @@
-@extends('layouts.app')
+@extends('layouts.student')
 
+@section('title', 'Find a Teacher — Noble Nest Academy')
 @section('meta_title', 'Find a Teacher | NobleNest Global Academy')
 @section('meta_description', 'Browse live online courses from expert teachers on NobleNest Global Academy. Compare subjects, age fit, pricing, and enrolment options in one marketplace.')
 @section('meta_image', asset('og-marketplace.png'))
 
 @section('content')
-<style>
-    .market-hero,
-    .market-filter,
-    .market-card,
-    .market-cta {
-        background: var(--nn-surface);
-        border: var(--nn-border-w) solid var(--nn-border);
-        box-shadow: var(--nn-shadow);
-    }
-    .market-hero,
-    .market-filter,
-    .market-card,
-    .market-cta { border-radius: var(--nn-radius); }
-    .market-hero {
-        position: relative;
-        overflow: hidden;
-        padding: 1.8rem;
-        margin-bottom: 1.5rem;
-        background:
-            radial-gradient(circle at 14% 20%, var(--nn-primary-soft), transparent 20%),
-            radial-gradient(circle at 88% 16%, var(--nn-primary-soft), transparent 24%),
-            var(--nn-surface);
-    }
-    .market-eyebrow {
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        font-size: 0.78rem;
-        font-weight: 800;
-        color: var(--nn-primary);
-    }
-    .market-filter { padding: 1rem; }
-    .market-filter .form-control,
-    .market-filter .form-select { min-height: 48px; border-radius: var(--nn-radius-sm); }
-    .market-card { overflow: hidden; height: 100%; }
-    .market-card__media {
-        height: 190px;
-        background: linear-gradient(135deg, var(--nn-primary), #A78BFA 58%, var(--nn-accent));
-    }
-    .market-card__meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
-        margin-bottom: 0.75rem;
-    }
-    .market-card__teacher {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.8rem 0.9rem;
-        border-radius: var(--nn-radius-sm);
-        background: var(--nn-surface);
-        border: var(--nn-border-w) solid var(--nn-border);
-    }
-    .market-cta {
-        background: linear-gradient(135deg, var(--nn-primary), #A78BFA 58%, var(--nn-accent));
-    }
-</style>
 
-<div class="container py-4">
-    <section class="market-hero">
-        <div class="row g-4 align-items-center">
-            <div class="col-lg-7">
-                <div class="market-eyebrow mb-2">Live learning marketplace</div>
-                <h1 class="fw-bold mb-3"><i class="bi bi-shop text-primary"></i> Find a Teacher</h1>
-                <p class="text-muted fs-5 mb-0">Browse expert-led courses, compare age fit and price instantly, and move from discovery to enrolment without friction.</p>
+{{-- ── Hero banner ── --}}
+<x-ui.card variant="clay" padding="none" class="mb-6 overflow-hidden">
+    <div class="px-6 py-8 bg-gradient-to-br from-[var(--color-brand-50)] to-[var(--color-accent-50)]">
+        <div class="grid lg:grid-cols-[1fr_auto] gap-6 items-center">
+            <div>
+                <div class="text-xs font-black uppercase tracking-widest text-[var(--color-primary)] mb-2">Live learning marketplace</div>
+                <h1 class="font-display font-black text-3xl text-[var(--color-text)] mb-2 flex items-center gap-2">
+                    <x-ui.icon name="graduation-cap" class="w-8 h-8 text-[var(--color-primary)]" aria-hidden="true" />Find a Teacher
+                </h1>
+                <p class="text-[var(--color-text-muted)] text-base max-w-lg">Browse expert-led courses, compare age fit and price instantly, and move from discovery to enrolment without friction.</p>
             </div>
-            <div class="col-lg-5">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="glass-panel p-3 h-100">
-                            <div class="market-eyebrow mb-2">Published</div>
-                            <div class="display-6 fw-bold" style="color:var(--nn-text);">{{ $courses->total() }}</div>
-                            <div class="small" style="color:var(--nn-text-muted);">available course results in this search</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="glass-panel p-3 h-100">
-                            <div class="market-eyebrow mb-2">Subjects</div>
-                            <div class="display-6 fw-bold" style="color:var(--nn-text);">{{ $subjects->count() }}</div>
-                            <div class="small" style="color:var(--nn-text-muted);">topics currently represented by teachers</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="grid grid-cols-2 gap-3 min-w-[240px]">
+                <x-ui.stat label="Published" :value="$courses->total()" icon="book" />
+                <x-ui.stat label="Subjects" :value="$subjects->count()" icon="layers" />
             </div>
         </div>
-    </section>
+    </div>
+</x-ui.card>
 
-    @if(session('status'))
-        <div class="alert alert-success alert-dismissible fade show">{{ session('status') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-    @endif
+{{-- ── Flash messages ── --}}
+@if(session('status'))
+    <x-ui.alert tone="success" dismissible class="mb-4">{{ session('status') }}</x-ui.alert>
+@endif
+@if(session('error'))
+    <x-ui.alert tone="danger" dismissible class="mb-4">{{ session('error') }}</x-ui.alert>
+@endif
 
-    {{-- Filters --}}
-    <form method="GET" class="market-filter mb-4">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <input type="text" name="q" class="form-control" placeholder="Search courses, subjects..." value="{{ request('q') }}">
-            </div>
-            <div class="col-md-2">
-                <select name="subject" class="form-select">
-                    <option value="">All Subjects</option>
-                    @foreach($subjects as $subj)
-                        <option value="{{ $subj }}" {{ request('subject') === $subj ? 'selected' : '' }}>{{ $subj }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select name="level" class="form-select">
-                    <option value="">All Levels</option>
-                    @foreach(['beginner','intermediate','advanced'] as $lvl)
-                        <option value="{{ $lvl }}" {{ request('level') === $lvl ? 'selected' : '' }}>{{ ucfirst($lvl) }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <input type="number" name="age" class="form-control" placeholder="Child age" value="{{ request('age') }}" min="0" max="18">
-            </div>
-            <div class="col-md-1">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="free" value="1" id="freeOnly" {{ request('free') ? 'checked' : '' }}>
-                    <label class="form-check-label" for="freeOnly">Free</label>
+{{-- ── Filter bar ── --}}
+<x-ui.card variant="clay" padding="md" class="mb-6">
+    <form method="GET" novalidate>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto_auto_auto_auto] gap-3 items-end">
+            <x-ui.field label="Search" name="q">
+                <x-ui.input
+                    type="text"
+                    name="q"
+                    :value="request('q')"
+                    placeholder="Courses, subjects..."
+                    icon="search"
+                />
+            </x-ui.field>
+
+            <x-ui.field label="Subject" name="subject">
+                <x-ui.select
+                    name="subject"
+                    :value="request('subject')"
+                    placeholder="All Subjects"
+                    :options="$subjects->mapWithKeys(fn($s) => [$s => $s])->toArray()"
+                />
+            </x-ui.field>
+
+            <x-ui.field label="Level" name="level">
+                <x-ui.select
+                    name="level"
+                    :value="request('level')"
+                    placeholder="All Levels"
+                    :options="['beginner' => 'Beginner', 'intermediate' => 'Intermediate', 'advanced' => 'Advanced']"
+                />
+            </x-ui.field>
+
+            <x-ui.field label="Child age" name="age">
+                <x-ui.input
+                    type="number"
+                    name="age"
+                    :value="request('age')"
+                    placeholder="Any age"
+                    min="0"
+                    max="18"
+                />
+            </x-ui.field>
+
+            <x-ui.field label="Free only" name="free">
+                <div class="flex items-center min-h-[2.5rem] gap-2">
+                    <x-ui.checkbox name="free" value="1" :checked="(bool) request('free')" />
+                    <label for="free" class="text-sm font-medium text-[var(--color-text)] cursor-pointer">Free</label>
                 </div>
-            </div>
-            <div class="col-md-1">
-                <button class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+            </x-ui.field>
+
+            <div class="flex items-end">
+                <x-ui.button type="submit" variant="primary" icon="search" class="w-full min-h-[2.5rem]">
+                    Search
+                </x-ui.button>
             </div>
         </div>
     </form>
+</x-ui.card>
 
-    {{-- Results --}}
-    @if($courses->isEmpty())
-        <div class="text-center py-5">
-            <i class="bi bi-search display-3 text-muted d-block mb-3"></i>
-            <p class="text-muted">No courses found. Try a different search.</p>
-        </div>
-    @else
-    <div class="row g-4">
-        @foreach($courses as $course)
-        <div class="col-md-6 col-lg-4">
-            <div class="market-card">
-                @if($course->thumbnail)
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($course->thumbnail) }}" class="w-100 market-card__media" style="object-fit:cover;" alt="{{ $course->title }}">
-                @else
-                    <div class="market-card__media d-flex align-items-center justify-content-center">
-                        <i class="bi bi-book-half text-white" style="font-size:3rem"></i>
-                    </div>
+{{-- ── Results grid ── --}}
+@if($courses->isEmpty())
+    <x-ui.empty-state
+        icon="search"
+        title="No courses found"
+        description="Try a different search term, subject, or level."
+    />
+@else
+<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+    @foreach($courses as $course)
+    <x-ui.card variant="clay" padding="none" class="flex flex-col overflow-hidden">
+        {{-- Thumbnail --}}
+        @if($course->thumbnail)
+            <img src="{{ \Illuminate\Support\Facades\Storage::url($course->thumbnail) }}"
+                 class="w-full h-48 object-cover" alt="{{ $course->title }}"
+                 loading="lazy" decoding="async">
+        @else
+            <div class="w-full h-48 flex items-center justify-center bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-accent)]">
+                <x-ui.icon name="book" class="w-12 h-12 text-white/70" aria-hidden="true" />
+            </div>
+        @endif
+
+        <div class="flex flex-col flex-1 p-4">
+            {{-- Subject + price --}}
+            <div class="flex items-start justify-between gap-2 mb-2">
+                @if($course->subject)
+                    <x-ui.badge tone="brand" size="sm">{{ $course->subject }}</x-ui.badge>
                 @endif
-                <div class="p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        @if($course->subject)
-                            <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">{{ $course->subject }}</span>
-                        @endif
-                        @if($course->price > 0)
-                            <span class="fw-bold" style="color:var(--nn-success);">${{ $course->price }}</span>
-                        @else
-                            <span class="badge" style="background:var(--nn-success);">Free</span>
-                        @endif
-                    </div>
-                    <h5 class="card-title fw-semibold mt-2" style="color:var(--nn-text);">{{ $course->title }}</h5>
-                    <p class="card-text small" style="color:var(--nn-text-muted);">{{ Str::limit($course->description, 110) }}</p>
-                    <div class="market-card__meta small">
-                        @if($course->age_min || $course->age_max)
-                            <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">Ages {{ $course->age_min ?? '?' }}–{{ $course->age_max ?? '?' }}</span>
-                        @endif
-                        <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">{{ ucfirst($course->level) }}</span>
-                        <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">{{ $course->active_enrollments_count ?? 0 }} enrolled</span>
-                    </div>
-                    <div class="market-card__teacher mb-3 mt-auto">
-                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ $course->teacher_id }}" style="width:42px;height:42px;border-radius:50%" alt="teacher avatar">
-                        <div>
-                            <div class="fw-semibold small">{{ $course->teacher->name ?? 'Teacher' }}</div>
-                            <div class="text-muted small">Instructor</div>
-                        </div>
-                    </div>
-                    <a href="{{ route('marketplace.show', $course->slug) }}" class="btn btn-primary stretched-link">
-                        View Course <i class="bi bi-arrow-right"></i>
-                    </a>
+                @if($course->price > 0)
+                    <span class="font-black text-emerald-600 text-sm shrink-0">${{ $course->price }}</span>
+                @else
+                    <x-ui.badge tone="success" size="sm">Free</x-ui.badge>
+                @endif
+            </div>
+
+            <h2 class="font-semibold text-[var(--color-text)] leading-snug mb-1">{{ $course->title }}</h2>
+            <p class="text-sm text-[var(--color-text-muted)] mb-3 flex-1 line-clamp-2">{{ Str::limit($course->description, 110) }}</p>
+
+            {{-- Meta badges --}}
+            <div class="flex flex-wrap gap-1.5 mb-3">
+                @if($course->age_min || $course->age_max)
+                    <x-ui.badge tone="neutral" size="sm">Ages {{ $course->age_min ?? '?' }}–{{ $course->age_max ?? '?' }}</x-ui.badge>
+                @endif
+                <x-ui.badge tone="neutral" size="sm">{{ ucfirst($course->level) }}</x-ui.badge>
+                <x-ui.badge tone="neutral" size="sm">{{ $course->active_enrollments_count ?? 0 }} enrolled</x-ui.badge>
+            </div>
+
+            {{-- Teacher --}}
+            <div class="flex items-center gap-2 mb-4 p-2 rounded-[var(--radius-sm)] bg-[var(--color-border)] border border-[var(--color-border)]">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ $course->teacher_id }}"
+                     class="w-8 h-8 rounded-full shrink-0" alt="Teacher avatar" loading="lazy">
+                <div class="min-w-0">
+                    <div class="text-sm font-semibold text-[var(--color-text)] truncate">{{ $course->teacher->name ?? 'Teacher' }}</div>
+                    <div class="text-xs text-[var(--color-text-muted)]">Instructor</div>
                 </div>
             </div>
-        </div>
-        @endforeach
-    </div>
 
-    <div class="mt-4">{{ $courses->links() }}</div>
-    @endif
-
-    {{-- CTA for teachers --}}
-    <div class="market-cta mt-5 border-0 text-white">
-        <div class="card-body text-center py-5">
-            <h3 class="fw-bold">Are you a teacher?</h3>
-            <p>Create your own courses and reach students worldwide. Set your own schedule and prices.</p>
-            <a href="{{ route('register') }}?role=Teacher" class="btn btn-light btn-lg">
-                <i class="bi bi-person-video3"></i> Register as Teacher
-            </a>
+            <x-ui.button variant="primary" href="{{ route('marketplace.show', $course->slug) }}" icon-right="arrow-right" class="w-full justify-center">
+                View Course
+            </x-ui.button>
         </div>
-    </div>
+    </x-ui.card>
+    @endforeach
 </div>
+
+<div class="flex justify-center mb-6">
+    {{ $courses->links() }}
+</div>
+@endif
+
+{{-- ── Teacher CTA ── --}}
+<x-ui.card variant="clay" padding="lg" class="text-center bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-400)] border-[var(--color-brand-600)]">
+    <h2 class="font-display font-black text-2xl text-white mb-2">Are you a teacher?</h2>
+    <p class="text-white/85 mb-5 max-w-md mx-auto">Create your own courses and reach students worldwide. Set your own schedule and prices.</p>
+    <x-ui.button variant="secondary" href="{{ route('register') }}?role=Teacher" icon="graduation-cap" size="lg">
+        Register as Teacher
+    </x-ui.button>
+</x-ui.card>
+
 @endsection

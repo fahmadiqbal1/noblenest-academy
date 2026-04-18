@@ -49,7 +49,7 @@
 @if($allSteps->isNotEmpty())
 <div class="nn-step-player" x-data="stepPlayer()" x-init="init()">
     <style>
-        .nn-step-player { position: relative; border-radius: var(--nn-radius, 16px); overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+        .nn-step-player { position: relative; border-radius: var(--radius-card, 16px); overflow: hidden; box-shadow: var(--shadow-clay, 0 8px 32px rgba(0,0,0,0.12)); }
 
         /* Stage */
         .nn-step-player__stage {
@@ -57,7 +57,7 @@
             width: 100%;
             aspect-ratio: 16/9;
             overflow: hidden;
-            background: #1E1B4B;
+            background: var(--color-brand-900, #1E1B4B);
         }
         /* Real image: Ken Burns pan */
         .nn-step-player__img {
@@ -105,7 +105,7 @@
         .nn-scene-step-emoji { font-size: 2.2rem; z-index: 2; margin-top: 0.5rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25)); }
         .nn-scene-label {
             z-index: 2;
-            font-family: 'Baloo 2', sans-serif;
+            font-family: var(--font-display, 'Baloo 2', sans-serif);
             font-weight: 800;
             font-size: 1rem;
             color: rgba(255,255,255,0.9);
@@ -136,7 +136,7 @@
             color: #fff;
         }
         .nn-step-player__step-label {
-            font-family: 'Baloo 2', sans-serif;
+            font-family: var(--font-display, 'Baloo 2', sans-serif);
             font-weight: 800; font-size: 1.05rem;
             margin-bottom: 0.25rem;
         }
@@ -164,31 +164,31 @@
         .nn-step-player__controls {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 0.85rem 1.25rem;
-            background: rgba(255,255,255,0.97);
-            border-top: 2px solid #EDE9FE;
+            background: var(--color-surface-strong, rgba(255,255,255,0.97));
+            border-top: 2px solid var(--color-brand-100, #EDE9FE);
         }
         .nn-sp-btn {
             width: 38px; height: 38px;
-            border: 2px solid #EDE9FE; border-radius: 50%;
-            background: #fff; display: inline-flex;
+            border: 2px solid var(--color-brand-100, #EDE9FE); border-radius: 50%;
+            background: var(--color-surface-strong, #fff); display: inline-flex;
             align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s;
-            font-size: 0.9rem; color: #4C1D95;
+            font-size: 0.9rem; color: var(--color-brand-800, #4C1D95);
         }
-        .nn-sp-btn:hover:not(:disabled) { background: #EDE9FE; transform: scale(1.08); }
+        .nn-sp-btn:hover:not(:disabled) { background: var(--color-brand-100, #EDE9FE); transform: scale(1.08); }
         .nn-sp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .nn-sp-progress {
             flex: 1; height: 6px;
-            background: #EDE9FE; border-radius: 3px; overflow: hidden;
+            background: var(--color-brand-100, #EDE9FE); border-radius: var(--radius-full, 3px); overflow: hidden;
         }
         .nn-sp-progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #7C3AED, #A78BFA);
-            border-radius: 3px; transition: width 0.35s ease;
+            background: linear-gradient(90deg, var(--color-brand-600, #7C3AED), var(--color-brand-300, #A78BFA));
+            border-radius: var(--radius-full, 3px); transition: width 0.35s ease;
         }
         .nn-sp-counter {
-            font-family: 'Baloo 2', sans-serif; font-weight: 700;
-            font-size: 0.82rem; color: #6B7280; white-space: nowrap;
+            font-family: var(--font-display, 'Baloo 2', sans-serif); font-weight: 700;
+            font-size: 0.82rem; color: var(--color-text-muted, #6B7280); white-space: nowrap;
         }
     </style>
 

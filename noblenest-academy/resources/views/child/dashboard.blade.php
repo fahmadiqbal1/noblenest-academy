@@ -1,60 +1,6 @@
 @extends('layouts.child')
 
-@section('page_title', 'Hello, ' . $child->name . '!')
-
-@push('head')
-<style>
-/* ── Dashboard gradient hero ── */
-.nn-dash-hero {
-    position: relative;
-    padding: 2rem 1.25rem 3.5rem;
-    overflow: hidden;
-    margin-bottom: -2rem;
-}
-.nn-dash-hero__bg {
-    position: absolute; inset: 0;
-    background: var(--tier-hero-from, linear-gradient(135deg,#7C3AED,#A78BFA));
-    z-index: 0;
-}
-.nn-dash-hero__bg::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 180' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='40' r='60' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='370' cy='160' r='80' fill='rgba(255,255,255,0.05)'/%3E%3Ccircle cx='200' cy='20' r='40' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E") no-repeat center/cover;
-}
-.nn-dash-hero::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 2.5rem;
-    background: var(--nn-bg);
-    border-radius: 2rem 2rem 0 0;
-    z-index: 1;
-}
-.nn-dash-hero__content {
-    position: relative; z-index: 2;
-}
-/* Stars floating in hero */
-.nn-dash-star {
-    position: absolute;
-    font-size: 1.5rem;
-    opacity: 0.3;
-    animation: nn-drift 7s ease-in-out infinite;
-    z-index: 2;
-    pointer-events: none;
-}
-/* Body background */
-.child-layout.age-baby    { background: #FFF8F0; }
-.child-layout.age-toddler { background: #F0FFF8; }
-.child-layout.age-preschool { background: #F5F0FF; }
-.child-layout.age-school  { background: #F0F0FF; }
-
-/* Streak flame animation */
-@keyframes flicker {
-    0%,100% { transform: scale(1) rotate(-5deg); }
-    50% { transform: scale(1.15) rotate(5deg); }
-}
-.nn-flame { animation: flicker 1.8s ease-in-out infinite; display:inline-block; }
-</style>
-@endpush
+@section('title', 'Hi, ' . $child->name . '! — Noble Nest Academy')
 
 @section('content')
 @php
@@ -66,192 +12,209 @@
         default          => 'school',
     };
     $mascots = [
-        'baby'     => ['emoji' => '🐣', 'name' => 'Pip',    'greeting' => 'Hello, little star!', 'bg' => 'linear-gradient(135deg,#FF8C42,#FBBF24)', 'badge' => 'rgba(255,255,255,0.25)'],
-        'toddler'  => ['emoji' => '🦊', 'name' => 'Finn',   'greeting' => 'Ready to discover?',  'bg' => 'linear-gradient(135deg,#10B981,#34D399)', 'badge' => 'rgba(255,255,255,0.25)'],
-        'preschool'=> ['emoji' => '🐢', 'name' => 'Shelly', 'greeting' => "Let's explore today!", 'bg' => 'linear-gradient(135deg,#7C3AED,#A78BFA)', 'badge' => 'rgba(255,255,255,0.25)'],
-        'school'   => ['emoji' => '🦉', 'name' => 'Ollie',  'greeting' => 'Knowledge awaits!',   'bg' => 'linear-gradient(135deg,#1E40AF,#3B82F6)', 'badge' => 'rgba(255,255,255,0.25)'],
+        'baby'     => ['emoji' => '🐣', 'name' => 'Pip',    'greeting' => 'Hello, little star!', 'from' => 'var(--color-tier-baby)',      'to' => '#FBBF24'],
+        'toddler'  => ['emoji' => '🦊', 'name' => 'Finn',   'greeting' => 'Ready to discover?',  'from' => 'var(--color-tier-toddler)',   'to' => '#34D399'],
+        'preschool'=> ['emoji' => '🐢', 'name' => 'Shelly', 'greeting' => "Let's explore today!",'from' => 'var(--color-tier-preschool)', 'to' => 'var(--color-brand-300)'],
+        'school'   => ['emoji' => '🦉', 'name' => 'Ollie',  'greeting' => 'Knowledge awaits!',   'from' => 'var(--color-tier-primary)',   'to' => '#3B82F6'],
     ];
     $mascot = $mascots[$tier];
     $streak = $child->streak_days ?? 0;
     $progressPct = $totalCompleted > 0 ? min(round(($totalCompleted / max($totalCompleted + 3, 10)) * 100), 100) : 0;
 @endphp
 
-{{-- ══════════════════════════════════════════════
-     HERO BANNER
-══════════════════════════════════════════════ --}}
-<div class="nn-dash-hero">
-    <div class="nn-dash-hero__bg" style="background:{{ $mascot['bg'] }};"></div>
-    {{-- Floating stars --}}
-    <span class="nn-dash-star" style="top:10%;left:5%;">⭐</span>
-    <span class="nn-dash-star" style="top:20%;right:8%;animation-delay:2s;">✨</span>
-    <span class="nn-dash-star" style="top:55%;left:80%;animation-delay:4s;font-size:1rem;">🌟</span>
+{{-- ── Hero banner ── --}}
+<div class="relative overflow-hidden pb-10 pt-6 px-4" aria-label="Greeting">
+    {{-- Gradient bg --}}
+    <div class="absolute inset-0 -z-10" style="background: linear-gradient(135deg, {{ $mascot['from'] }}, {{ $mascot['to'] }});"></div>
+    {{-- Decorative circles --}}
+    <div class="absolute top-0 start-0 w-40 h-40 rounded-full bg-white/10 -translate-x-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true"></div>
+    <div class="absolute bottom-0 end-0 w-32 h-32 rounded-full bg-white/10 translate-x-1/4 translate-y-1/4 pointer-events-none" aria-hidden="true"></div>
+    <div class="absolute top-4 end-8 pointer-events-none" aria-hidden="true" style="animation: nn-float 3s ease-in-out infinite;">⭐</div>
+    <div class="absolute top-12 start-12 pointer-events-none" aria-hidden="true" style="animation: nn-float 4s ease-in-out infinite 1s;">✨</div>
 
-    <div class="nn-dash-hero__content">
-        <div class="d-flex align-items-center gap-3 mb-3">
-            {{-- Mascot bubble --}}
-            <div style="font-size:4rem;line-height:1;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.2));animation:nn-float 3s ease-in-out infinite;">
+    <div class="max-w-lg mx-auto">
+        <div class="flex items-center gap-4 mb-3">
+            {{-- Mascot --}}
+            <div class="text-6xl leading-none shrink-0 drop-shadow-lg" aria-hidden="true" style="animation: nn-float 3s ease-in-out infinite;">
                 {{ $mascot['emoji'] }}
             </div>
             <div>
-                <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">
-                    {{ $mascot['name'] }} says
-                </div>
-                <h2 style="font-family:'Baloo 2',sans-serif;font-weight:900;font-size:clamp(1.3rem,5vw,1.75rem);color:#fff;margin:0;text-shadow:0 2px 12px rgba(0,0,0,0.2);">
+                <div class="text-xs font-bold text-white/75 uppercase tracking-widest mb-0.5">{{ $mascot['name'] }} says</div>
+                <h1 class="font-display font-black text-2xl sm:text-3xl text-white leading-tight" style="text-shadow: 0 2px 12px rgba(0,0,0,0.2);">
                     {{ $mascot['greeting'] }}
-                </h2>
-                <div style="color:rgba(255,255,255,0.85);font-weight:700;font-size:0.9rem;margin-top:0.2rem;">
-                    Hi <strong style="color:#fff;">{{ $child->name }}</strong>!
-                    @if($child->age_display) You're <strong style="color:#fff;">{{ $child->age_display }}</strong> old. @endif
-                </div>
+                </h1>
+                <p class="text-white/90 font-bold text-sm mt-0.5">
+                    Hi <strong class="text-white">{{ $child->name }}</strong>!
+                    @if($child->age_display)
+                        You're <strong class="text-white">{{ $child->age_display }}</strong> old.
+                    @endif
+                </p>
             </div>
         </div>
 
         {{-- Streak chip --}}
         @if($streak > 0)
-        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-1"
-             style="background:{{ $mascot['badge'] }};backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.35);">
-            <span class="nn-flame">🔥</span>
-            <span style="font-family:'Baloo 2',sans-serif;font-weight:800;color:#fff;font-size:0.9rem;">
-                {{ $streak }}-day streak!
-            </span>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-1"
+             style="background: rgba(255,255,255,0.25); backdrop-filter: blur(8px); border: 1.5px solid rgba(255,255,255,0.35);">
+            <span aria-hidden="true" style="animation: flicker 1.8s ease-in-out infinite; display:inline-block;">🔥</span>
+            <span class="font-display font-black text-white text-sm">{{ $streak }}-day streak!</span>
         </div>
         @endif
     </div>
 </div>
 
-{{-- ══════════════════════════════════════════════
-     MAIN CONTENT CARD
-══════════════════════════════════════════════ --}}
-<div style="background:var(--nn-bg);padding:0 0.75rem 2rem;min-height:60vh;">
-    <div style="max-width:600px;margin:0 auto;padding-top:2.5rem;">
+{{-- ── Main content (card lifts over hero) ── --}}
+<div class="relative -mt-6 rounded-t-3xl bg-[var(--color-surface)] min-h-64 pb-10">
+    <div class="max-w-lg mx-auto px-4 pt-8">
 
-        {{-- Stats row --}}
-        <div class="row g-2 mb-4">
-            <div class="col-4">
-                <div class="stat-chip">
-                    <i class="bi bi-fire stat-chip__icon" aria-hidden="true"></i>
-                    <span class="stat-chip__val">{{ $streak }}</span>
-                    <span class="stat-chip__label">Streak</span>
+        {{-- Stat chips --}}
+        <div class="grid grid-cols-3 gap-2 mb-6">
+            <div class="rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] p-3 text-center">
+                <div class="text-amber-500 flex justify-center mb-1" aria-hidden="true">
+                    <x-ui.icon name="flame" class="w-5 h-5" />
                 </div>
+                <div class="font-display font-black text-xl text-[var(--color-text)] leading-none">{{ $streak }}</div>
+                <div class="text-xs text-[var(--color-text-muted)] font-semibold mt-0.5">Streak</div>
             </div>
-            <div class="col-4">
-                <div class="stat-chip">
-                    <i class="bi bi-star-fill stat-chip__icon" aria-hidden="true"></i>
-                    <span class="stat-chip__val">{{ $totalCompleted }}</span>
-                    <span class="stat-chip__label">Done</span>
+            <div class="rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] p-3 text-center">
+                <div class="text-[var(--color-primary)] flex justify-center mb-1" aria-hidden="true">
+                    <x-ui.icon name="sparkles" class="w-5 h-5" />
                 </div>
+                <div class="font-display font-black text-xl text-[var(--color-text)] leading-none">{{ $totalCompleted }}</div>
+                <div class="text-xs text-[var(--color-text-muted)] font-semibold mt-0.5">Done</div>
             </div>
-            <div class="col-4">
-                <div class="stat-chip">
-                    <i class="bi bi-award-fill stat-chip__icon" aria-hidden="true"></i>
-                    <span class="stat-chip__val">{{ $badgeCount }}</span>
-                    <span class="stat-chip__label">Badges</span>
+            <div class="rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] p-3 text-center">
+                <div class="text-[var(--color-accent)] flex justify-center mb-1" aria-hidden="true">
+                    <x-ui.icon name="trophy" class="w-5 h-5" />
                 </div>
+                <div class="font-display font-black text-xl text-[var(--color-text)] leading-none">{{ $badgeCount }}</div>
+                <div class="text-xs text-[var(--color-text-muted)] font-semibold mt-0.5">Badges</div>
             </div>
         </div>
 
-        {{-- XP Progress bar --}}
+        {{-- XP progress bar --}}
         @if($totalCompleted > 0)
-        <div class="mb-4 px-1">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.85rem;color:var(--nn-text-muted);">
-                    <i class="bi bi-lightning-charge-fill me-1" style="color:var(--nn-accent);"></i>Learning XP
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-display font-bold text-sm text-[var(--color-text-muted)]">
+                    <x-ui.icon name="zap" class="w-4 h-4 inline me-1 text-[var(--color-accent)]" aria-hidden="true" />
+                    Learning XP
                 </span>
-                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.82rem;color:var(--nn-primary);">
+                <span class="font-display font-bold text-sm text-[var(--color-primary)]">
                     {{ $totalCompleted }} / {{ $totalCompleted + 3 }} ⭐
                 </span>
             </div>
-            <div style="height:14px;background:var(--nn-primary-soft);border-radius:7px;overflow:hidden;">
-                <div style="height:100%;width:{{ $progressPct }}%;background:linear-gradient(90deg,var(--nn-primary),#A78BFA,var(--nn-accent));border-radius:7px;transition:width 1s ease;position:relative;">
-                    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:nn-shimmer 2s infinite;"></div>
-                </div>
+            <div class="relative h-3.5 bg-[var(--color-border)] rounded-full overflow-hidden"
+                 role="progressbar" aria-valuenow="{{ $progressPct }}" aria-valuemin="0" aria-valuemax="100"
+                 aria-label="Learning progress">
+                <div class="h-full rounded-full transition-all duration-[var(--duration-slow)]"
+                     style="width: {{ $progressPct }}%; background: linear-gradient(90deg, var(--color-brand-600), var(--color-brand-300), var(--color-accent));"></div>
             </div>
         </div>
         @endif
 
-        {{-- Today's Activities --}}
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="section-title">
+        {{-- Today's adventures heading --}}
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-display font-black text-xl text-[var(--color-text)] flex items-center gap-2">
                 <span aria-hidden="true">🎯</span> Today's Adventures
             </h2>
-            <a href="{{ route('child.activities', $child) }}" class="btn-tier" style="font-size:0.82rem;padding:0.45rem 1rem;">
-                <i class="bi bi-grid-fill me-1"></i>All
+            <a href="{{ route('child.activities', $child) }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] border-[2px] border-[var(--color-border)] text-sm font-bold text-[var(--color-text-muted)] hover:border-[var(--color-brand-400)] hover:text-[var(--color-primary)] transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 min-h-[2rem]">
+                <x-ui.icon name="grid" class="w-4 h-4" aria-hidden="true" />All
             </a>
         </div>
 
+        {{-- Activity grid --}}
         @if($todayActivities->isEmpty())
-            <div class="empty-state mb-4">
-                <span class="empty-state__icon">🌈</span>
-                <p>🎉 All done for today!<br><small style="font-size:0.9rem;opacity:0.8;">Come back tomorrow for more fun.</small></p>
-                <a href="{{ route('child.activities', $child) }}" class="btn-tier">
-                    <i class="bi bi-stars me-1"></i>Explore More
+            <div class="rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] p-8 text-center mb-6">
+                <div class="text-5xl mb-3" aria-hidden="true">🌈</div>
+                <p class="font-display font-bold text-[var(--color-text)] mb-1">All done for today!</p>
+                <p class="text-sm text-[var(--color-text-muted)] mb-4">Come back tomorrow for more fun.</p>
+                <a href="{{ route('child.activities', $child) }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 min-h-[2.75rem] rounded-[var(--radius-sm)] border-[3px] border-[var(--color-brand-600)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-400)] text-white font-bold shadow-[var(--shadow-clay)] hover:-translate-y-[2px] transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2">
+                    <x-ui.icon name="sparkles" class="w-4 h-4" aria-hidden="true" />Explore More
                 </a>
             </div>
         @else
-            <div class="activity-grid mb-4">
+            <div class="grid grid-cols-2 gap-3 mb-6">
                 @foreach($todayActivities as $activity)
-                    @php
-                        $actUrl = match($activity->activity_type ?? '') {
-                            'tracing'    => route('activities.tracing', $activity) . '?child=' . $child->id,
-                            'drawing'    => route('activities.drawing',  $activity) . '?child=' . $child->id,
-                            'puzzle'     => route('activities.puzzle',   $activity) . '?child=' . $child->id,
-                            'video'      => route('activities.video',    $activity) . '?child=' . $child->id,
-                            'slides'     => route('activities.slides',   $activity) . '?child=' . $child->id,
-                            'simulation' => route('activities.slides',   $activity) . '?child=' . $child->id,
-                            default      => route('activities.show',     $activity) . '?child=' . $child->id,
-                        };
-                        $isDone = $activity->pivot->completed ?? false;
-                    @endphp
-                    <a href="{{ $actUrl }}"
-                       class="activity-card-child {{ $isDone ? 'activity-card-child--done' : '' }}"
-                       aria-label="{{ $activity->title }}{{ $isDone ? ' (completed)' : '' }}">
-                        <div class="activity-card-child__emoji" aria-hidden="true">{{ $activity->emoji ?? '📚' }}</div>
-                        <div class="activity-card-child__title">{{ $activity->title }}</div>
-                        <div class="activity-card-child__subject">{{ ucfirst($activity->subject ?? '') }}</div>
-                        @if($isDone)
-                            <div class="activity-card-child__done-badge" aria-label="Completed">
-                                <i class="bi bi-check-lg" aria-hidden="true"></i>
-                            </div>
-                        @endif
-                    </a>
+                @php
+                    $actUrl = match($activity->activity_type ?? '') {
+                        'tracing'    => route('activities.tracing', $activity) . '?child=' . $child->id,
+                        'drawing'    => route('activities.drawing',  $activity) . '?child=' . $child->id,
+                        'puzzle'     => route('activities.puzzle',   $activity) . '?child=' . $child->id,
+                        'video'      => route('activities.video',    $activity) . '?child=' . $child->id,
+                        'slides'     => route('activities.slides',   $activity) . '?child=' . $child->id,
+                        'simulation' => route('activities.slides',   $activity) . '?child=' . $child->id,
+                        default      => route('activities.show',     $activity) . '?child=' . $child->id,
+                    };
+                    $isDone = $activity->pivot->completed ?? false;
+                @endphp
+                <a href="{{ $actUrl }}"
+                   class="relative flex flex-col items-center text-center rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] p-4 min-h-[6rem] gap-1 hover:-translate-y-1 hover:shadow-[var(--shadow-clay-hover)] transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 {{ $isDone ? 'opacity-70' : '' }}"
+                   aria-label="{{ $activity->title }}{{ $isDone ? ' (completed)' : '' }}">
+                    @if($isDone)
+                    <span class="absolute top-2 end-2 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center" aria-hidden="true">
+                        <x-ui.icon name="check" class="w-3 h-3" />
+                    </span>
+                    @endif
+                    <div class="text-3xl leading-none" aria-hidden="true">{{ $activity->emoji ?? '📚' }}</div>
+                    <div class="font-display font-bold text-sm text-[var(--color-text)] leading-tight">{{ $activity->title }}</div>
+                    @if($activity->subject)
+                        <div class="text-xs text-[var(--color-text-muted)]">{{ ucfirst($activity->subject) }}</div>
+                    @endif
+                </a>
                 @endforeach
             </div>
         @endif
 
-        {{-- Next Milestone --}}
+        {{-- Next milestone teaser --}}
         @if($nextMilestone)
-            <a href="{{ route('parent.milestones') }}" class="milestone-teaser mb-4 d-flex text-decoration-none" style="color:inherit;">
-                <span style="font-size:1.75rem;flex-shrink:0;" aria-hidden="true">🏆</span>
-                <div style="margin-left:1rem;">
-                    <div class="milestone-teaser__label">Next Milestone</div>
-                    <div class="milestone-teaser__name">{{ $nextMilestone->title }}</div>
-                    <div style="font-size:0.75rem;color:var(--nn-accent);margin-top:0.15rem;font-weight:600;">
-                        Keep going — you're almost there!
-                    </div>
-                </div>
-                <i class="bi bi-chevron-right ms-auto align-self-center" style="color:var(--nn-accent);font-size:1rem;"></i>
-            </a>
+        <a href="{{ route('parent.milestones') }}"
+           class="flex items-center gap-4 rounded-[var(--radius-card)] border-[3px] border-[var(--color-accent)] bg-amber-50 shadow-[var(--shadow-clay)] px-4 py-3 mb-6 text-[var(--color-text)] no-underline hover:-translate-y-0.5 transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2">
+            <span class="text-3xl shrink-0" aria-hidden="true">🏆</span>
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-bold text-[var(--color-accent)] uppercase tracking-wide">Next Milestone</div>
+                <div class="font-display font-bold text-sm text-[var(--color-text)] truncate">{{ $nextMilestone->title }}</div>
+                <div class="text-xs text-amber-600 font-semibold mt-0.5">Keep going — you're almost there!</div>
+            </div>
+            <x-ui.icon name="chevron-right" class="w-5 h-5 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+        </a>
         @endif
 
-        {{-- See all activities CTA --}}
-        <div class="text-center mt-3 mb-2">
-            <a href="{{ route('child.activities', $child) }}" class="btn-tier" style="font-size:1rem;padding:0.75rem 2rem;">
-                <i class="bi bi-stars me-2" aria-hidden="true"></i>Explore All Adventures
+        {{-- See all CTA --}}
+        <div class="text-center mb-4">
+            <a href="{{ route('child.activities', $child) }}"
+               class="inline-flex items-center gap-2 px-6 py-3 min-h-[2.75rem] rounded-[var(--radius-sm)] border-[3px] border-[var(--color-brand-600)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-400)] text-white font-display font-black text-base shadow-[var(--shadow-clay)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-clay-hover)] transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2">
+                <x-ui.icon name="sparkles" class="w-5 h-5" aria-hidden="true" />Explore All Adventures
             </a>
         </div>
 
-        {{-- Paywall nudge (after 7 completions without subscription — only for paying-role users) --}}
+        {{-- Paywall nudge --}}
         @if($totalCompleted >= 7 && !$child->parent->subscriptions()->where('active', true)->exists() && in_array(auth()->user()->role ?? '', ['Parent', 'Student']))
-        <div class="nn-paywall-nudge mt-4">
-            <span class="nn-paywall-nudge__icon">✨</span>
-            <div class="nn-paywall-nudge__title">Unlock 100+ More Adventures!</div>
-            <p class="nn-paywall-nudge__text">{{ $child->name }} is on a roll! Unlock the full curriculum to keep the momentum going.</p>
-            <a href="{{ route('pricing') }}" class="nn-paywall-nudge__btn">
-                <i class="bi bi-stars me-1"></i>See Plans — from $3/mo
-            </a>
-        </div>
+        <x-ui.card variant="gradient" padding="md" class="mt-4 text-center">
+            <div class="text-3xl mb-2" aria-hidden="true">✨</div>
+            <h3 class="font-display font-black text-[var(--color-text)] mb-1">Unlock 100+ More Adventures!</h3>
+            <p class="text-sm text-[var(--color-text-muted)] mb-4">{{ $child->name }} is on a roll! Unlock the full curriculum to keep the momentum going.</p>
+            <x-ui.button variant="primary" href="{{ route('pricing') }}" icon="sparkles">
+                See Plans — from $3/mo
+            </x-ui.button>
+        </x-ui.card>
         @endif
 
     </div>
 </div>
+
+@push('head')
+<style>
+@keyframes flicker {
+    0%,100% { transform: scale(1) rotate(-5deg); }
+    50% { transform: scale(1.15) rotate(5deg); }
+}
+@keyframes nn-float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+</style>
+@endpush
 @endsection
