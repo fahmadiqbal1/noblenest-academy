@@ -1,10 +1,19 @@
-@extends('layouts.app')
+@extends('layouts.marketing')
+
+@section('title', '500 — Server Error')
 
 @section('content')
-<div class="text-center py-5">
-    <div style="font-size:5rem">⚠️</div>
-    <h1 class="display-4 fw-bold mt-3">Something Went Wrong</h1>
-    <p class="lead text-muted">We're working on fixing this. Please try again in a moment.</p>
-    <a href="{{ url('/') }}" class="btn btn-primary mt-3"><i class="bi bi-house"></i> Go Home</a>
-</div>
+<x-ui.empty-state
+    title="Something Went Wrong"
+    description="We're sorry — our servers hit a bump. Our team has been notified. Please try again in a moment."
+>
+    <x-slot:illustration>
+        <div class="text-7xl select-none" aria-hidden="true">🛠️</div>
+    </x-slot:illustration>
+
+    <x-slot:actions>
+        <x-ui.button as="a" href="{{ url('/') }}" variant="primary" icon="home">Go Home</x-ui.button>
+        <x-ui.button as="a" href="javascript:location.reload()" variant="secondary" icon="arrow-right">Try Again</x-ui.button>
+    </x-slot:actions>
+</x-ui.empty-state>
 @endsection

@@ -1,10 +1,19 @@
-@extends('layouts.app')
+@extends('layouts.marketing')
+
+@section('title', '404 — Page Not Found')
 
 @section('content')
-<div class="text-center py-5">
-    <div style="font-size:5rem">🔍</div>
-    <h1 class="display-4 fw-bold mt-3">Page Not Found</h1>
-    <p class="lead text-muted">Oops! The page you're looking for doesn't exist or has been moved.</p>
-    <a href="{{ url('/') }}" class="btn btn-primary mt-3"><i class="bi bi-house"></i> Go Home</a>
-</div>
+<x-ui.empty-state
+    title="Page Not Found"
+    description="Oops! The page you're looking for doesn't exist or has been moved. Let's get you back on track."
+>
+    <x-slot:illustration>
+        <div class="text-7xl select-none" aria-hidden="true">🔍</div>
+    </x-slot:illustration>
+
+    <x-slot:actions>
+        <x-ui.button as="a" href="{{ url('/') }}" variant="primary" icon="home">Go Home</x-ui.button>
+        <x-ui.button as="a" href="mailto:support@noblenest.com" variant="secondary" icon="mail">Contact Support</x-ui.button>
+    </x-slot:actions>
+</x-ui.empty-state>
 @endsection
