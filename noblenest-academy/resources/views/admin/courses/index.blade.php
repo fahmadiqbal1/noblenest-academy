@@ -1,106 +1,149 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Courses')
+@section('title', __('Courses'))
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">{{ I18n::get('courses') }}</h2>
-            <small class="text-muted">{{ $courses->total() }} course(s) across all age groups</small>
-        </div>
-        <a class="btn btn-primary" href="{{ route('admin.courses.create') }}">
-            <i class="bi bi-plus-lg me-1"></i> {{ I18n::get('new_course') }}
-        </a>
-    </div>
+    <x-ui.page-header
+        :title="__('Courses')"
+        :subtitle="$courses->total() . ' ' . __('course(s) across all age groups')"
+        :breadcrumbs="[
+            ['label' => __('Admin'), 'url' => route('admin.dashboard')],
+            ['label' => __('Courses')],
+        ]"
+    >
+        <x-slot:actions>
+            <x-ui.button variant="primary" icon="plus" href="{{ route('admin.courses.create') }}">
+                {{ __('New Course') }}
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
+    {{-- Flash messages --}}
     @if(session('status'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <x-ui.alert tone="success" dismissible class="mb-6">
             {{ session('status') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        </x-ui.alert>
     @endif
 
-    <div class="row g-3">
-        @forelse($courses as $course)
-            @php
-                $color  = $course->color ?: '#64B5F6';
-                $emoji  = $course->emoji ?: '📘';
-                $ageLabel = ($course->age_min !== null && $course->age_max !== null)
-                    ? ($course->age_min === $course->age_max
-                        ? "Age {$course->age_min}"
-                        : "Ages {$course->age_min}–{$course->age_max}")
-                    : null;
-                $moduleCount   = $course->modules()->count();
-                $activityCount = $course->modules()->withCount('activities')->get()->sum('activities_count');
-            @endphp
-            <div class="col-sm-6 col-lg-4 col-xl-3">
-                <div class="card h-100 border-0 shadow-sm overflow-hidden">
-                    {{-- Coloured top bar --}}
-                    <div style="height:6px;background:{{ $color }}"></div>
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex align-items-start gap-3 mb-3">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-                                 style="width:52px;height:52px;background:{{ $color }}22;font-size:1.6rem">
-                                {{ $emoji }}
-                            </div>
-                            <div class="flex-grow-1 min-w-0">
-                                <h6 class="fw-bold mb-0 lh-sm"><a href="{{ route('admin.courses.show', $course) }}" class="text-decoration-none text-body">{{ $course->title }}</a></h6>
-                                <span class="badge bg-secondary-subtle text-secondary-emphasis border small mt-1">{{ $course->slug }}</span>
+    {{-- Course grid --}}
+    @if($courses->isNotEmpty())
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @foreach($courses as $course)
+                @php
+                    $color       = $course->color ?: '#64B5F6';
+                    $emoji       = $course->emoji ?: '📘';
+                    $ageLabel    = ($course->age_min !== null && $course->age_max !== null)
+                        ? ($course->age_min === $course->age_max
+                            ? __('Age :n', ['n' => $course->age_min])
+                            : __('Ages :min–:max', ['min' => $course->age_min, 'max' => $course->age_max]))
+                        : null;
+                    $moduleCount   = $course->modules()->count();
+                    $activityCount = $course->modules()->withCount('activities')->get()->sum('activities_count');
+                @endphp
+                <x-ui.card variant="outlined" padding="none" class="flex flex-col overflow-hidden">
+                    {{-- Colour accent bar --}}
+                    <div class="h-1.5 w-full" style="background:{{ $color }}" aria-hidden="true"></div>
+
+                    <div class="p-4 flex flex-col flex-1">
+                        {{-- Emoji + title --}}
+                        <div class="flex items-start gap-3 mb-3">
+                            <div
+                                class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
+                                style="background:{{ $color }}22"
+                                aria-hidden="true"
+                            >{{ $emoji }}</div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-bold text-[var(--color-text)] leading-snug">
+                                    <a
+                                        href="{{ route('admin.courses.show', $course) }}"
+                                        class="hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded"
+                                    >{{ $course->title }}</a>
+                                </h3>
+                                <x-ui.badge tone="neutral" size="sm" class="mt-1">{{ $course->slug }}</x-ui.badge>
                             </div>
                         </div>
 
                         @if($ageLabel)
-                            <span class="badge rounded-pill mb-2 align-self-start"
-                                  style="background:{{ $color }}22;color:{{ $color }};font-size:.8rem">
-                                🎂 {{ $ageLabel }}
-                            </span>
+                            <x-ui.badge tone="brand" size="sm" class="mb-2 self-start">🎂 {{ $ageLabel }}</x-ui.badge>
                         @endif
 
                         @if($course->description)
-                            <p class="text-muted small mb-3 flex-grow-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">
+                            <p class="text-sm text-[var(--color-text-muted)] mb-3 flex-1 line-clamp-3 leading-relaxed">
                                 {{ $course->description }}
                             </p>
                         @else
-                            <div class="flex-grow-1"></div>
+                            <div class="flex-1"></div>
                         @endif
 
-                        <div class="d-flex gap-2 text-muted small mb-3">
-                            <span><i class="bi bi-collection"></i> {{ $moduleCount }} module(s)</span>
-                            <span><i class="bi bi-lightning"></i> {{ $activityCount }} activity(s)</span>
+                        <div class="flex gap-3 text-xs text-[var(--color-text-muted)] mb-3">
+                            <span class="flex items-center gap-1">
+                                <x-ui.icon name="book" class="w-3.5 h-3.5" />
+                                {{ $moduleCount }} {{ __('module(s)') }}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <x-ui.icon name="star" class="w-3.5 h-3.5" />
+                                {{ $activityCount }} {{ __('activity(s)') }}
+                            </span>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('admin.courses.show', $course) }}"
-                               class="btn btn-sm btn-outline-success flex-fill">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                            <a href="{{ route('admin.courses.edit', $course) }}"
-                               class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form action="{{ route('admin.courses.destroy', $course) }}" method="POST"
-                                  onsubmit="return confirm('Delete this course and all its modules?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                        {{-- Actions --}}
+                        <div class="flex gap-2">
+                            <x-ui.button
+                                variant="secondary"
+                                size="sm"
+                                icon="eye"
+                                href="{{ route('admin.courses.show', $course) }}"
+                                class="flex-1"
+                            >
+                                {{ __('View') }}
+                            </x-ui.button>
+                            <x-ui.button
+                                variant="ghost"
+                                size="sm"
+                                icon="edit"
+                                href="{{ route('admin.courses.edit', $course) }}"
+                                :title="__('Edit')"
+                            ></x-ui.button>
+                            <form
+                                method="POST"
+                                action="{{ route('admin.courses.destroy', $course) }}"
+                                onsubmit="return confirm('{{ __('Delete this course and all its modules?') }}')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <x-ui.button
+                                    type="submit"
+                                    variant="ghost"
+                                    size="sm"
+                                    icon="trash"
+                                    :title="__('Delete')"
+                                    class="text-[var(--color-coral-500)] hover:bg-[var(--color-coral-50)]"
+                                ></x-ui.button>
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-12 text-center text-muted py-5">
-                <i class="bi bi-collection fs-1 d-block mb-2"></i>
-                No courses yet. <a href="{{ route('admin.courses.create') }}">Create the first one.</a>
-            </div>
-        @endforelse
-    </div>
+                </x-ui.card>
+            @endforeach
+        </div>
+    @else
+        <x-ui.empty-state
+            icon="book"
+            :title="__('No courses yet')"
+            :description="__('Create the first course to get started.')"
+        >
+            <x-slot:actions>
+                <x-ui.button variant="primary" icon="plus" href="{{ route('admin.courses.create') }}">
+                    {{ __('Create Course') }}
+                </x-ui.button>
+            </x-slot:actions>
+        </x-ui.empty-state>
+    @endif
 
+    {{-- Pagination --}}
     @if($courses->hasPages())
-        <div class="d-flex justify-content-end mt-4">
+        <div class="mt-6 flex justify-end">
             {{ $courses->links() }}
         </div>
     @endif
