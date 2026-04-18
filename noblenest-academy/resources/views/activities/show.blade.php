@@ -186,69 +186,6 @@
     </div>
     @endif
 
-    {{-- Structured Steps (ActivityStep relation) --}}
-    @if($activity->steps && $activity->steps->count())
-    <div class="nn-content-card mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3"><span class="nn-card-header-icon">🗺️</span> Step-by-Step Adventure</h5>
-
-            {{-- Progress indicator --}}
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <small class="fw-bold" style="color:#7C3AED;">Your Progress</small>
-                    <small class="fw-bold" style="color:#6B7280;">{{ $activity->steps->count() }} steps</small>
-                </div>
-                <div class="nn-progress-wrap">
-                    <div class="nn-progress-bar" style="width: 0%;" id="stepProgress"></div>
-                </div>
-            </div>
-
-            @php
-                $stepIcons = [1=>'🎒',2=>'👀',3=>'🤲',4=>'💬',5=>'🎉',6=>'⭐',7=>'🏆',8=>'💡'];
-                $stepColors = [
-                    1=>'#7C3AED',2=>'#3B82F6',3=>'#10B981',4=>'#F59E0B',
-                    5=>'#EC4899',6=>'#8B5CF6',7=>'#EF4444',8=>'#06B6D4',
-                ];
-            @endphp
-            @foreach($activity->steps as $step)
-            @php
-                $si = $step->step_number;
-                $ic = $stepIcons[$si] ?? $stepIcons[(($si-1)%8)+1];
-                $sc = $stepColors[$si] ?? $stepColors[(($si-1)%8)+1];
-            @endphp
-            <div class="nn-step-row d-flex gap-3 {{ !$loop->last ? 'mb-4 pb-4' : '' }}"
-                 style="{{ !$loop->last ? 'border-bottom:2px solid rgba(124,58,237,0.06);' : '' }}">
-                {{-- Visual icon column --}}
-                <div class="flex-shrink-0 d-flex flex-column align-items-center" style="width:52px;gap:6px;">
-                    <div class="nn-step-circle" style="background:{{ $sc }}18;color:{{ $sc }};border:2.5px solid {{ $sc }}55;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;flex-shrink:0;">{{ $step->step_number }}</div>
-                    <div style="font-size:1.4rem;line-height:1;">{{ $ic }}</div>
-                </div>
-                <div class="flex-grow-1 pt-1">
-                    @if($step->title)
-                    <h6 class="fw-bold mb-2" style="font-family:'Baloo 2',sans-serif;color:#1F2937;font-size:1rem;line-height:1.3;">{{ $step->title }}</h6>
-                    @endif
-                    <p class="mb-2" style="color:#374151;line-height:1.75;font-weight:500;font-size:0.9375rem;">{{ $step->instruction }}</p>
-                    @if($step->benefit_note)
-                    <div class="d-flex align-items-start gap-2 mt-2 p-2 rounded-3" style="background:rgba(5,150,105,0.07);border-left:3px solid #10B981;">
-                        <i class="bi bi-lightbulb-fill mt-1 flex-shrink-0" style="color:#059669;font-size:0.85rem;"></i>
-                        <p class="mb-0 small" style="color:#065F46;font-weight:600;line-height:1.55;"><strong>Why this matters:</strong> {{ $step->benefit_note }}</p>
-                    </div>
-                    @endif
-                    @if($step->video_url)
-                    <video controls class="w-100 rounded-3 mt-3" preload="metadata" style="max-height:200px;">
-                        <source src="{{ $step->video_url }}" type="video/mp4">
-                    </video>
-                    @endif
-                    @if($step->duration_seconds && $step->duration_seconds > 0)
-                    <span class="small mt-1 d-inline-block" style="color:#9CA3AF;"><i class="bi bi-clock me-1"></i>~{{ round($step->duration_seconds / 60) ?: 1 }} min</span>
-                    @endif
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
     {{-- Materials Needed --}}
     @if(is_array($activity->materials_needed) && count((array)$activity->materials_needed))
     <div class="nn-content-card mb-4">
@@ -350,6 +287,7 @@
         @endif
     </div>
 </div>
+@endsection
 
 @section('scripts')
 <script>

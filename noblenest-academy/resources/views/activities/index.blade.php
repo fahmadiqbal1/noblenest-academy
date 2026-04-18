@@ -114,6 +114,12 @@
         </div>
         <div class="mt-4">{{ $activities->withQueryString()->links() }}</div>
     </div>
+    @else
+    <div class="text-center py-5 mb-5">
+        <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+        <h4 class="fw-bold" style="color:var(--nn-text,#1F2937);font-family:'Baloo 2',sans-serif;">No activities found</h4>
+        <p class="mb-0" style="color:var(--nn-text-muted,#6B7280);font-family:'Comic Neue',sans-serif;">Try adjusting your filters or age range.</p>
+    </div>
     @endif
 
     {{-- Curriculum Roadmap --}}
