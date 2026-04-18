@@ -1,144 +1,141 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
+@section('title', 'Sign In | NobleNest Global Academy')
 @section('meta_title', 'Login | NobleNest Global Academy')
 @section('meta_description', 'Log in to NobleNest Global Academy to continue learning, manage courses, monitor children, or access admin workflows from one secure account.')
 @section('meta_image', asset('og-login.png'))
 
 @section('content')
-<style>
-    .auth-shell {
-        background: rgba(255,255,255,0.92);
-        border: 2px solid rgba(124,58,237,0.10);
-        box-shadow: 8px 8px 24px rgba(124,58,237,0.10), -4px -4px 14px rgba(255,255,255,0.7);
-        border-radius: 1.75rem;
-        overflow: hidden;
-    }
-    .auth-field {
-        min-height: 52px;
-        border-radius: 0.85rem;
-        border: 2px solid rgba(124,58,237,0.14);
-        font-size: 1rem;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        background: rgba(255,255,255,0.95);
-    }
-    .auth-field:focus {
-        border-color: var(--nn-primary, #7C3AED);
-        box-shadow: 0 0 0 3px rgba(124,58,237,0.14);
-        outline: none;
-        background: #fff;
-    }
-    .input-group .auth-field {
-        border-right: none;
-        border-top-right-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
-    }
-    .input-group .auth-field:focus { z-index: 3; }
-    .pw-toggle-btn {
-        min-width: 52px;
-        border: 2px solid rgba(124,58,237,0.14);
-        border-left: none;
-        border-top-right-radius: 0.85rem !important;
-        border-bottom-right-radius: 0.85rem !important;
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
-        background: rgba(255,255,255,0.95);
-        color: var(--nn-text-muted, #6B7280);
-        transition: color 0.15s, background 0.15s;
-    }
-    .pw-toggle-btn:hover { background: var(--nn-primary-soft, rgba(124,58,237,0.08)); color: var(--nn-primary, #7C3AED); }
-    .auth-brand { width: 88px; height: 88px; border-radius: 1.4rem; box-shadow: 0 20px 40px rgba(0,0,0,0.18); }
-    .auth-submit-btn { min-height: 52px; font-size: 1.05rem; letter-spacing: 0.01em; }
-    .auth-form-label { font-weight: 600; font-size: 0.92rem; color: var(--nn-text, #1E1B4B); }
-    .auth-divider { border: none; height: 1px; background: linear-gradient(to right, transparent, rgba(124,58,237,0.12), transparent); margin: 1.5rem 0; }
-</style>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="auth-shell">
-                <div class="row g-0 align-items-stretch">
-                    {{-- Brand / marketing panel --}}
-                    <div class="col-lg-5 p-4 p-lg-5 text-white" style="background:linear-gradient(145deg,#6D28D9 0%,#7C3AED 40%,#A78BFA 75%, #F59E0B 100%);">
-                        <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="auth-brand mb-4">
-                        <div class="text-uppercase fw-bold small mb-3" style="letter-spacing:0.14em; opacity:0.8;">Welcome back</div>
-                        <h2 class="fw-bold mb-3" style="font-family:'Baloo 2',sans-serif; font-size:1.9rem;">{{ I18n::get('login') }}</h2>
-                        <p class="mb-4" style="opacity:0.82; line-height:1.6;">Resume learning, manage classrooms, or continue your admin workflow from one secure account.</p>
-                        <div class="d-grid gap-3">
-                            <div class="rounded-3 p-3" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.18);">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <i class="bi bi-book-open-fill"></i>
-                                    <span class="fw-semibold">Students</span>
-                                </div>
-                                <div class="small" style="opacity:0.78;">Jump back into enrolled courses and live sessions.</div>
-                            </div>
-                            <div class="rounded-3 p-3" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.18);">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <i class="bi bi-people-fill"></i>
-                                    <span class="fw-semibold">Parents &amp; admins</span>
-                                </div>
-                                <div class="small" style="opacity:0.78;">Monitor learning and manage curriculum operations.</div>
-                            </div>
-                        </div>
-                    </div>
+{{--
+  Auth layout wraps content in a centred card (max-w-md).
+  For login we want a two-column split, so we break out of that
+  by using a full-bleed negative-margin trick inside the card slot.
+--}}
 
-                    {{-- Form panel --}}
-                    <div class="col-lg-7 p-4 p-lg-5" x-data="{ showPw: false, loading: false }">
-                        <h2 class="mb-1" style="font-family:'Baloo 2',sans-serif; font-size:1.7rem; color:var(--nn-text, #1E1B4B);">Sign in to your account</h2>
-                        <p class="text-muted mb-4" style="font-size:0.92rem;">Enter your credentials below to continue.</p>
+<div class="flex flex-col lg:flex-row -m-8 overflow-hidden rounded-[var(--radius-card)]">
 
-                        <form method="POST" action="{{ url('/login') }}" @submit="loading = true">
-                            @csrf
-                            @if($errors->any())
-                                <div class="alert alert-danger border-0 d-flex align-items-center gap-2 rounded-3 mb-3" role="alert">
-                                    <i class="bi bi-exclamation-circle-fill flex-shrink-0"></i>
-                                    <span>{{ $errors->first() }}</span>
-                                </div>
-                            @endif
-
-                            <div class="mb-3">
-                                <label for="email" class="form-label auth-form-label">{{ I18n::get('email') }}</label>
-                                <input type="email" class="form-control auth-field" id="email" name="email"
-                                       value="{{ old('email') }}" required autocomplete="email"
-                                       placeholder="you@example.com">
-                            </div>
-
-                            <div class="mb-1">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label for="password" class="form-label auth-form-label mb-0">{{ I18n::get('password') }}</label>
-                                    <a href="{{ route('password.request') }}" class="text-decoration-none fw-semibold"
-                                       style="font-size:0.84rem; color:var(--nn-primary);">Forgot password?</a>
-                                </div>
-                                <div class="input-group">
-                                    <input :type="showPw ? 'text' : 'password'" class="form-control auth-field"
-                                           id="password" name="password" required autocomplete="current-password">
-                                    <button class="btn pw-toggle-btn" type="button"
-                                            @click="showPw = !showPw"
-                                            :aria-label="showPw ? 'Hide password' : 'Show password'">
-                                        <i :class="showPw ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-primary auth-submit-btn" :disabled="loading">
-                                    <span x-show="!loading">{{ I18n::get('login') }}</span>
-                                    <span x-show="loading" class="d-inline-flex align-items-center justify-content-center gap-2">
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Signing in&hellip;
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
-
-                        <hr class="auth-divider">
-                        <p class="text-center text-muted mb-0" style="font-size:0.92rem;">
-                            Don&rsquo;t have an account?
-                            <a href="{{ route('register') }}" class="fw-bold text-decoration-none ms-1" style="color:var(--nn-primary);">Create one free</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
+  {{-- Brand panel --}}
+  <aside class="lg:w-2/5 p-8 text-white bg-gradient-to-b from-[var(--color-brand-700)] via-[var(--color-brand-600)] to-[var(--color-brand-400)]">
+    <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="w-20 h-20 rounded-[var(--radius-sm)] shadow-[var(--shadow-clay)] mb-6">
+    <p class="text-xs font-extrabold uppercase tracking-widest text-white/80 mb-2">Welcome back</p>
+    <h1 class="text-2xl font-bold font-[var(--font-display)] mb-3">{{ I18n::get('login') }}</h1>
+    <p class="text-white/82 text-sm leading-relaxed mb-8">
+      Resume learning, manage classrooms, or continue your admin workflow from one secure account.
+    </p>
+    <div class="space-y-3">
+      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
+        <div class="flex items-center gap-2 mb-1">
+          <x-ui.icon name="book-open" class="w-4 h-4" />
+          <span class="font-semibold text-sm">Students</span>
         </div>
+        <p class="text-xs text-white/78">Jump back into enrolled courses and live sessions.</p>
+      </div>
+      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
+        <div class="flex items-center gap-2 mb-1">
+          <x-ui.icon name="users" class="w-4 h-4" />
+          <span class="font-semibold text-sm">Parents &amp; admins</span>
+        </div>
+        <p class="text-xs text-white/78">Monitor learning and manage curriculum operations.</p>
+      </div>
     </div>
+  </aside>
+
+  {{-- Form panel --}}
+  <div class="flex-1 p-8" x-data="{ showPw: false, loading: false }">
+    <h2 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-1">Sign in to your account</h2>
+    <p class="text-sm text-[var(--color-text-muted)] mb-6">Enter your credentials below to continue.</p>
+
+    <form method="POST" action="{{ url('/login') }}" @submit="loading = true" novalidate>
+      @csrf
+
+      @if($errors->any())
+        <x-ui.alert tone="danger" class="mb-4">{{ $errors->first() }}</x-ui.alert>
+      @endif
+
+      <div class="space-y-4">
+        <x-ui.field name="email" label="{{ I18n::get('email') }}" :error="$errors->first('email')" required>
+          <x-ui.input
+            type="email"
+            name="email"
+            :value="old('email')"
+            placeholder="you@example.com"
+            autocomplete="email"
+            :invalid="$errors->has('email')"
+            size="lg"
+          />
+        </x-ui.field>
+
+        <x-ui.field name="password" :error="$errors->first('password')" required>
+          <x-slot name="label">
+            <div class="flex items-center justify-between">
+              <label for="password" class="block text-sm font-semibold text-[var(--color-text)]">
+                {{ I18n::get('password') }}
+                <span class="text-[var(--color-coral-500)] ms-0.5" aria-hidden="true">*</span>
+              </label>
+              <a href="{{ route('password.request') }}"
+                 class="text-xs font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">
+                Forgot password?
+              </a>
+            </div>
+          </x-slot>
+          <div class="relative flex">
+            <input
+              :type="showPw ? 'text' : 'password'"
+              id="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              aria-describedby="{{ $errors->has('password') ? 'password_error' : '' }}"
+              :aria-invalid="'{{ $errors->has('password') ? 'true' : 'false' }}'"
+              class="block w-full rounded-s-[var(--radius-sm)] rounded-e-none border-[2px] border-e-0 border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-text)] py-3 px-4 text-base focus:outline-none focus:border-[var(--color-brand-500)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 {{ $errors->has('password') ? 'border-[var(--color-coral-500)]' : '' }}"
+            >
+            <button
+              type="button"
+              @click="showPw = !showPw"
+              :aria-label="showPw ? 'Hide password' : 'Show password'"
+              class="px-4 border-[2px] border-[var(--color-border)] border-s-0 rounded-e-[var(--radius-sm)] bg-[var(--color-surface-strong)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-brand-50)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            >
+              <x-ui.icon name="eye" class="w-5 h-5" x-show="!showPw" />
+              <x-ui.icon name="eye-off" class="w-5 h-5" x-show="showPw" x-cloak />
+            </button>
+          </div>
+        </x-ui.field>
+
+        <div class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="remember"
+            name="remember"
+            class="w-4 h-4 rounded border-[2px] border-[var(--color-border)] text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 cursor-pointer"
+          >
+          <label for="remember" class="text-sm text-[var(--color-text)] cursor-pointer select-none">Remember me</label>
+        </div>
+
+        <x-ui.button
+          variant="primary"
+          size="lg"
+          type="submit"
+          class="w-full"
+          :loading="loading"
+          :disabled="loading"
+        >
+          <span x-show="!loading">{{ I18n::get('login') }}</span>
+          <span x-show="loading" x-cloak>Signing in&hellip;</span>
+        </x-ui.button>
+      </div>
+    </form>
+
+    <hr class="my-6 border-[var(--color-border)]">
+
+    <p class="text-center text-sm text-[var(--color-text-muted)]">
+      Don&rsquo;t have an account?
+      <a href="{{ route('register') }}" class="font-bold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded ms-1">
+        Create one free
+      </a>
+    </p>
+  </div>
+
 </div>
+
 @endsection

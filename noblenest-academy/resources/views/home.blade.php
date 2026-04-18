@@ -1,370 +1,220 @@
-@extends('layouts.app')
+@extends('layouts.marketing')
 
 @section('meta_title', 'NobleNest Global Academy | Family-First Learning Platform')
 @section('meta_description', 'Explore NobleNest Global Academy: a family-first learning platform with adaptive courses, onboarding guidance, and AI support for parents, students, teachers, and admins.')
 @section('meta_image', asset('og-home.png'))
 
 @section('content')
-<style>
-  .hero-stage {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--nn-radius);
-    padding: clamp(1.75rem, 3vw, 3rem);
-    background: linear-gradient(145deg, #F5F0FF 0%, rgba(255,255,255,0.92) 50%, #FFF7ED 100%);
-    border: var(--nn-border-w) solid var(--nn-border);
-    box-shadow: var(--nn-shadow);
-  }
-  .hero-stage::after {
-    content: '';
-    position: absolute;
-    inset: auto -8% -22% auto;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(124,58,237,0.10), transparent 70%);
-  }
-  .hero-metric,
-  .spotlight-card,
-  .dashboard-card {
-    background: rgba(255,255,255,0.88);
-    border: var(--nn-border-w) solid var(--nn-border);
-    box-shadow: var(--nn-shadow);
-  }
-  .hero-metric {
-    border-radius: var(--nn-radius);
-    padding: 1rem 1.1rem;
-    transition: transform 0.2s var(--nn-bounce);
-  }
-  .hero-metric:hover { transform: translateY(-4px); }
-  .hero-orbit {
-    position: relative;
-    min-height: 100%;
-    display: grid;
-    place-items: center;
-  }
-  .hero-orbit__core {
-    width: 280px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.94);
-    color: var(--nn-text);
-    border: var(--nn-border-w) solid var(--nn-border);
-    box-shadow: var(--nn-shadow);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-  }
-  .hero-orbit__ring,
-  .hero-orbit__dot {
-    position: absolute;
-    border-radius: 50%;
-  }
-  .hero-orbit__ring {
-    inset: 7%;
-    border: 2px dashed rgba(37, 99, 235, 0.18);
-  }
-  .hero-orbit__dot {
-    width: 68px;
-    height: 68px;
-    display: grid;
-    place-items: center;
-    background: rgba(255,255,255,0.94);
-    box-shadow: var(--nn-shadow);
-    border: var(--nn-border-w) solid var(--nn-border);
-    font-size: 1.35rem;
-    color: var(--nn-primary);
-    transition: transform 0.3s var(--nn-bounce);
-  }
-  .hero-orbit__dot:hover { transform: scale(1.12); }
-  .hero-orbit__dot--one { top: 8%; left: 12%; }
-  .hero-orbit__dot--two { top: 18%; right: 2%; }
-  .hero-orbit__dot--three { bottom: 12%; left: 4%; }
-  .hero-orbit__dot--four { bottom: 4%; right: 14%; }
-  .hero-brand-mark {
-    width: 116px;
-    height: 116px;
-    border-radius: var(--nn-radius);
-    box-shadow: var(--nn-shadow);
-    margin-bottom: 1rem;
-  }
-  .spotlight-card,
-  .dashboard-card {
-    border-radius: var(--nn-radius);
-    padding: 1.25rem;
-    height: 100%;
-    transition: transform 0.2s var(--nn-bounce);
-  }
-  .spotlight-card:hover,
-  .dashboard-card:hover { transform: translateY(-4px); }
-  .spotlight-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--nn-radius-sm);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--nn-primary-soft);
-    color: var(--nn-primary);
-    font-size: 1.4rem;
-  }
-  .section-eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-size: 0.78rem;
-    font-weight: 800;
-    color: var(--nn-primary);
-    font-family: 'Baloo 2', sans-serif;
-  }
-  .dashboard-kpi {
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 800;
-    line-height: 1;
-    font-family: 'Baloo 2', sans-serif;
-  }
-  .subscription-shell {
-    border-radius: var(--nn-radius);
-    border: var(--nn-border-w) solid var(--nn-border);
-    box-shadow: var(--nn-shadow);
-  }
-  .clay-stat {
-    background: rgba(255,255,255,0.88);
-    border: var(--nn-border-w) solid var(--nn-border);
-    border-radius: var(--nn-radius);
-    box-shadow: var(--nn-shadow);
-    padding: 1.5rem 1rem;
-    transition: transform 0.2s var(--nn-bounce);
-  }
-  .clay-stat:hover { transform: translateY(-4px); }
-  .clay-step {
-    background: rgba(255,255,255,0.88);
-    border: var(--nn-border-w) solid var(--nn-border);
-    border-radius: var(--nn-radius);
-    box-shadow: var(--nn-shadow);
-    transition: transform 0.2s var(--nn-bounce);
-  }
-  .clay-step:hover { transform: translateY(-4px); }
-  .clay-testimonial {
-    background: rgba(255,255,255,0.88);
-    border: var(--nn-border-w) solid var(--nn-border);
-    border-radius: var(--nn-radius);
-    box-shadow: var(--nn-shadow);
-  }
-  .clay-cta {
-    background: linear-gradient(135deg, #7C3AED, #A78BFA);
-    border: var(--nn-border-w) solid #7C3AED;
-    border-radius: var(--nn-radius);
-    box-shadow: var(--nn-shadow);
-    color: #fff;
-  }
-  @media (max-width: 991.98px) {
-    .hero-orbit { margin-top: 2rem; }
-    .hero-orbit__core { width: 220px; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-metric:hover, .spotlight-card:hover, .dashboard-card:hover,
-    .clay-stat:hover, .clay-step:hover, .hero-orbit__dot:hover { transform: none; }
-  }
-</style>
 
-<div class="hero-stage hero mb-5">
-  <div class="row align-items-center g-4">
-    <div class="col-lg-7 position-relative">
-      <div class="section-eyebrow mb-3">Adaptive learning platform</div>
-      <h1 class="display-4 fw-bold mb-2" style="font-family:'Baloo 2',sans-serif; color:var(--nn-text);">{{ I18n::get('home_title') }}</h1>
-      <div class="mb-3" style="font-size:1.6rem; letter-spacing:0.2em;">🎨 📖 🔬 🎵 🧩 ✍️</div>
-      <p class="col-lg-10 fs-5 text-muted mt-2 mb-4">{{ I18n::get('home_subtitle') }}</p>
-      <div class="d-flex gap-2 mt-3 flex-wrap">
-      <button class="btn btn-primary btn-lg" type="button" onclick="openAIModal()">{{ I18n::get('get_weekly_plan') }}</button>
-      @auth
-        @if(auth()->user()->role === 'Admin')
-          <a class="btn btn-outline-secondary btn-lg" href="{{ route('admin.courses.index') }}">{{ I18n::get('manage_courses') }}</a>
+{{-- ============================================================
+     HERO
+     ============================================================ --}}
+<section aria-label="Hero" class="relative overflow-hidden rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-accent-50)] p-8 lg:p-12 mb-12">
+
+  {{-- Decorative background glow --}}
+  <div aria-hidden="true" class="pointer-events-none absolute -end-16 -bottom-20 w-80 h-80 rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.10),transparent_70%)]"></div>
+
+  <div class="grid lg:grid-cols-[1fr_auto] gap-10 items-center">
+
+    {{-- Left: copy + CTAs --}}
+    <div>
+      <p class="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary)] font-[var(--font-display)] mb-3">Adaptive learning platform</p>
+
+      <h1 class="text-4xl lg:text-5xl font-bold text-[var(--color-text)] font-[var(--font-display)] leading-tight mb-4">
+        {{ I18n::get('home_title') }}
+      </h1>
+
+      <p class="text-xl font-bold tracking-widest mb-4" aria-hidden="true">🎨 📖 🔬 🎵 🧩 ✍️</p>
+
+      <p class="text-lg text-[var(--color-text-muted)] mb-8 max-w-lg">{{ I18n::get('home_subtitle') }}</p>
+
+      <div class="flex flex-wrap gap-3">
+        <x-ui.button variant="primary" size="lg" as="button" type="button" onclick="openAIModal()">
+          {{ I18n::get('get_weekly_plan') }}
+        </x-ui.button>
+
+        @auth
+          @if(auth()->user()->role === 'Admin')
+            <x-ui.button variant="secondary" size="lg" href="{{ route('admin.courses.index') }}">
+              {{ I18n::get('manage_courses') }}
+            </x-ui.button>
+          @else
+            <x-ui.button variant="secondary" size="lg" href="{{ route('onboarding') }}" icon="arrow-right">
+              {{ __('Get Started') }}
+            </x-ui.button>
+          @endif
         @else
-          <a class="btn btn-outline-secondary btn-lg" href="{{ route('onboarding') }}"><i class="bi bi-rocket-takeoff"></i> Get Started</a>
-        @endif
-      @else
-        <a class="btn btn-outline-secondary btn-lg" href="{{ route('register') }}"><i class="bi bi-person-plus"></i> Register Free</a>
-      @endauth
+          <x-ui.button variant="secondary" size="lg" href="{{ route('register') }}" icon="user">
+            {{ __('Register Free') }}
+          </x-ui.button>
+        @endauth
       </div>
-      <div class="row g-3 mt-4">
-        <div class="col-sm-4">
-          <div class="hero-metric">
-            <div class="section-eyebrow mb-2">Coverage</div>
-            <div class="dashboard-kpi">1200+</div>
-            <div class="text-muted small">activities across early years, language, and STEM tracks</div>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="hero-metric">
-            <div class="section-eyebrow mb-2">Languages</div>
-            <div class="dashboard-kpi">6</div>
-            <div class="text-muted small">locales supported for child-friendly delivery and parent guidance</div>
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="hero-metric">
-            <div class="section-eyebrow mb-2">AI loop</div>
-            <div class="dashboard-kpi">Live</div>
-            <div class="text-muted small">assistant, job orchestration, review, and publishing in one workflow</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-5">
-      <div class="hero-orbit">
-        <div class="hero-orbit__ring"></div>
-        <div class="hero-orbit__core">
-          <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="hero-brand-mark">
-          <div class="section-eyebrow mb-2">NobleNest Global Academy</div>
-          <h3 class="fw-bold mb-2">Next-gen family learning</h3>
-          <p class="mb-0 small text-muted">A single workspace for curriculum, onboarding, AI support, and role-aware learning journeys.</p>
-        </div>
-        <div class="hero-orbit__dot hero-orbit__dot--one"><i class="bi bi-translate"></i></div>
-        <div class="hero-orbit__dot hero-orbit__dot--two"><i class="bi bi-robot"></i></div>
-        <div class="hero-orbit__dot hero-orbit__dot--three"><i class="bi bi-palette2"></i></div>
-        <div class="hero-orbit__dot hero-orbit__dot--four"><i class="bi bi-puzzle"></i></div>
-      </div>
-    </div>
-  </div>
-</div>
 
+      {{-- Metric pills --}}
+      <div class="grid grid-cols-3 gap-4 mt-8">
+        <div class="bg-white/80 border-[2px] border-[var(--color-border)] rounded-[var(--radius-card)] p-4 transition-transform duration-[var(--duration-base)] hover:-translate-y-1 focus-within:-translate-y-1 shadow-[var(--shadow-clay)]">
+          <p class="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary)] font-[var(--font-display)] mb-1">Coverage</p>
+          <p class="text-3xl font-bold text-[var(--color-text)] font-[var(--font-display)] leading-none">1200+</p>
+          <p class="text-xs text-[var(--color-text-muted)] mt-1">activities across early years, language, and STEM</p>
+        </div>
+        <div class="bg-white/80 border-[2px] border-[var(--color-border)] rounded-[var(--radius-card)] p-4 transition-transform duration-[var(--duration-base)] hover:-translate-y-1 shadow-[var(--shadow-clay)]">
+          <p class="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary)] font-[var(--font-display)] mb-1">Languages</p>
+          <p class="text-3xl font-bold text-[var(--color-text)] font-[var(--font-display)] leading-none">6</p>
+          <p class="text-xs text-[var(--color-text-muted)] mt-1">locales for child delivery and parent guidance</p>
+        </div>
+        <div class="bg-white/80 border-[2px] border-[var(--color-border)] rounded-[var(--radius-card)] p-4 transition-transform duration-[var(--duration-base)] hover:-translate-y-1 shadow-[var(--shadow-clay)]">
+          <p class="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary)] font-[var(--font-display)] mb-1">AI loop</p>
+          <p class="text-3xl font-bold text-[var(--color-text)] font-[var(--font-display)] leading-none">Live</p>
+          <p class="text-xs text-[var(--color-text-muted)] mt-1">assistant, orchestration, review, and publishing</p>
+        </div>
+      </div>
+    </div>
+
+    {{-- Right: orbital brand mark --}}
+    <div class="hidden lg:flex items-center justify-center relative w-80 h-80 shrink-0" aria-hidden="true">
+      {{-- Dashed ring --}}
+      <div class="absolute inset-[7%] rounded-full border-[2px] border-dashed border-[var(--color-brand-200)]"></div>
+
+      {{-- Core circle --}}
+      <div class="relative z-10 w-64 h-64 rounded-full bg-white/94 border-[2px] border-[var(--color-border)] shadow-[var(--shadow-clay)] flex flex-col items-center justify-center text-center p-8">
+        <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="" class="w-24 h-24 rounded-[var(--radius-sm)] shadow-[var(--shadow-clay)] mb-4">
+        <p class="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary)] font-[var(--font-display)] mb-1">NobleNest Global Academy</p>
+        <p class="text-xs text-[var(--color-text-muted)]">A single workspace for curriculum, onboarding, AI support, and role-aware learning.</p>
+      </div>
+
+      {{-- Orbit dots --}}
+      @foreach([
+        ['top-4 start-8',   'translate'],
+        ['top-12 end-0',    'robot'],
+        ['bottom-8 start-2','star'],
+        ['bottom-2 end-10', 'book-open'],
+      ] as $dot)
+      <div class="absolute {{ $dot[0] }} w-14 h-14 rounded-full bg-white border-[2px] border-[var(--color-border)] shadow-[var(--shadow-clay)] flex items-center justify-center text-[var(--color-primary)] transition-transform duration-[var(--duration-base)] hover:scale-110">
+        <x-ui.icon name="{{ $dot[1] }}" class="w-6 h-6" />
+      </div>
+      @endforeach
+    </div>
+
+  </div>
+</section>
+
+{{-- ============================================================
+     ROLE-SPECIFIC DASHBOARDS (authenticated)
+     ============================================================ --}}
 @php
   $user = Auth::user();
   $role = $user->role ?? null;
-  $theme = session('theme', $role === 'Parent' ? 'professional' : ($role === 'Student' ? 'playful' : 'professional'));
-  $isPlayful = $theme === 'playful';
 @endphp
 
-{{-- Admin Dashboard --}}
 @if($user && $role === 'Admin')
-  <div class="row g-4 mb-4">
-    @php
-      $courseCount = \App\Models\Course::count();
-      $activityCount = \App\Models\Activity::count();
-      $userCount = \App\Models\User::where('role', '!=', 'Admin')->count();
-      $jobCount = \App\Models\AIJob::where('status', 'queued')->count();
-      $pendingJobs = \App\Models\AIJob::where('moderation_status', 'pending')->where('status', 'completed')->count();
-    @endphp
-    <div class="col-12 mb-2">
-      <h4 class="fw-bold text-primary"><i class="bi bi-speedometer2"></i> Admin Dashboard</h4>
-    </div>
-    <div class="col-6 col-md-3">
-      <a href="{{ route('admin.courses.index') }}" class="text-decoration-none">
-        <div class="dashboard-card text-center h-100">
-          <div>
-            <div class="fs-1 text-primary fw-bold">{{ $courseCount }}</div>
-            <div class="text-muted small">Courses</div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-3">
-      <a href="/admin/activities" class="text-decoration-none">
-        <div class="dashboard-card text-center h-100">
-          <div>
-            <div class="fs-1 text-success fw-bold">{{ $activityCount }}</div>
-            <div class="text-muted small">Activities</div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-3">
-      <a href="{{ route('admin.analytics.index') }}" class="text-decoration-none">
-        <div class="dashboard-card text-center h-100">
-          <div>
-            <div class="fs-1 text-info fw-bold">{{ $userCount }}</div>
-            <div class="text-muted small">Users</div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-6 col-md-3">
-      <a href="{{ route('admin.orchestrator.index') }}" class="text-decoration-none">
-        <div class="dashboard-card text-center h-100">
-          <div>
-            <div class="fs-1 fw-bold {{ $pendingJobs > 0 ? 'text-warning' : 'text-secondary' }}">{{ $jobCount + $pendingJobs }}</div>
-            <div class="text-muted small">AI Jobs{{ $pendingJobs > 0 ? ' ('.$pendingJobs.' need review)' : '' }}</div>
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-12">
-      <div class="d-flex gap-2 flex-wrap">
-        <a href="{{ route('admin.orchestrator.index') }}" class="btn btn-primary"><i class="bi bi-robot"></i> AI Orchestrator</a>
-        <a href="{{ route('admin.analytics.index') }}" class="btn btn-outline-info"><i class="bi bi-bar-chart-line"></i> Analytics</a>
-        <a href="{{ route('admin.courses.create') }}" class="btn btn-outline-success"><i class="bi bi-plus-circle"></i> New Course</a>
-        <a href="{{ route('admin.curriculum') }}" class="btn btn-outline-secondary"><i class="bi bi-diagram-3"></i> Curriculum Map</a>
-      </div>
-    </div>
+<section aria-label="Admin Dashboard" class="mb-10">
+  @php
+    $courseCount   = \App\Models\Course::count();
+    $activityCount = \App\Models\Activity::count();
+    $userCount     = \App\Models\User::where('role', '!=', 'Admin')->count();
+    $jobCount      = \App\Models\AIJob::where('status', 'queued')->count();
+    $pendingJobs   = \App\Models\AIJob::where('moderation_status', 'pending')->where('status', 'completed')->count();
+  @endphp
+
+  <h2 class="text-xl font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
+    <x-ui.icon name="settings" class="w-5 h-5 text-[var(--color-primary)]" />
+    Admin Dashboard
+  </h2>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <a href="{{ route('admin.courses.index') }}" class="block focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded-[var(--radius-card)]">
+      <x-ui.card variant="clay" padding="md" class="text-center">
+        <p class="text-3xl font-bold text-[var(--color-primary)]">{{ $courseCount }}</p>
+        <p class="text-sm text-[var(--color-text-muted)] mt-1">Courses</p>
+      </x-ui.card>
+    </a>
+    <a href="/admin/activities" class="block focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded-[var(--radius-card)]">
+      <x-ui.card variant="clay" padding="md" class="text-center">
+        <p class="text-3xl font-bold text-emerald-600">{{ $activityCount }}</p>
+        <p class="text-sm text-[var(--color-text-muted)] mt-1">Activities</p>
+      </x-ui.card>
+    </a>
+    <a href="{{ route('admin.analytics.index') }}" class="block focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded-[var(--radius-card)]">
+      <x-ui.card variant="clay" padding="md" class="text-center">
+        <p class="text-3xl font-bold text-blue-600">{{ $userCount }}</p>
+        <p class="text-sm text-[var(--color-text-muted)] mt-1">Users</p>
+      </x-ui.card>
+    </a>
+    <a href="{{ route('admin.orchestrator.index') }}" class="block focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded-[var(--radius-card)]">
+      <x-ui.card variant="clay" padding="md" class="text-center">
+        <p class="text-3xl font-bold {{ $pendingJobs > 0 ? 'text-amber-600' : 'text-[var(--color-text-muted)]' }}">{{ $jobCount + $pendingJobs }}</p>
+        <p class="text-sm text-[var(--color-text-muted)] mt-1">AI Jobs{{ $pendingJobs > 0 ? ' ('.$pendingJobs.' need review)' : '' }}</p>
+      </x-ui.card>
+    </a>
   </div>
+
+  <div class="flex flex-wrap gap-2">
+    <x-ui.button variant="primary" href="{{ route('admin.orchestrator.index') }}" icon="star">AI Orchestrator</x-ui.button>
+    <x-ui.button variant="secondary" href="{{ route('admin.analytics.index') }}">Analytics</x-ui.button>
+    <x-ui.button variant="secondary" href="{{ route('admin.courses.create') }}" icon="plus">New Course</x-ui.button>
+    <x-ui.button variant="ghost" href="{{ route('admin.curriculum') }}">Curriculum Map</x-ui.button>
+  </div>
+</section>
 @endif
 
-{{-- Parent Dashboard --}}
 @if($user && $role === 'Parent')
-  <div class="row g-4 mb-4">
-    @php
-      $children = \App\Models\ChildProfile::where('parent_id', $user->id)->get();
-    @endphp
-    <div class="col-md-6">
-      <div class="dashboard-card h-100">
-        <div>
-          <h4 class="card-title mb-3"><i class="bi bi-people text-primary"></i> My Children</h4>
-          @forelse($children as $child)
-            <div class="d-flex align-items-center justify-content-between mb-2 p-2 bg-light rounded">
-              <div>
-                <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ $child->id }}" style="width:36px;height:36px;border-radius:50%;" class="me-2">
-                <span class="fw-semibold">{{ $child->name }}</span>
-                <span class="text-muted small ms-1">· {{ $child->age_display ?? 'Age unknown' }} · {{ strtoupper($child->preferred_language ?? 'en') }}</span>
-              </div>
-              <div class="d-flex gap-1">
-                <a href="{{ route('children.edit', $child) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-              </div>
+@php $children = \App\Models\ChildProfile::where('parent_id', $user->id)->get(); @endphp
+<section aria-label="Parent Dashboard" class="mb-10">
+  <div class="grid md:grid-cols-2 gap-6">
+    <x-ui.card variant="clay" padding="md">
+      <h2 class="text-lg font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
+        <x-ui.icon name="users" class="w-5 h-5 text-[var(--color-primary)]" />
+        My Children
+      </h2>
+      @forelse($children as $child)
+        <div class="flex items-center justify-between py-2 px-3 rounded-[var(--radius-sm)] bg-[var(--color-surface-strong)] mb-2">
+          <div class="flex items-center gap-2">
+            <x-ui.avatar :name="$child->name" size="sm" />
+            <div>
+              <p class="font-semibold text-sm text-[var(--color-text)]">{{ $child->name }}</p>
+              <p class="text-xs text-[var(--color-text-muted)]">{{ $child->age_display ?? 'Age unknown' }} · {{ strtoupper($child->preferred_language ?? 'en') }}</p>
             </div>
-          @empty
-            <p class="text-muted small">No children added yet.</p>
-          @endforelse
-          <div class="mt-3 d-flex gap-2">
-            <a href="{{ route('children.create') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Add Child</a>
-            <a href="{{ route('children.index') }}" class="btn btn-outline-secondary btn-sm">Manage All</a>
           </div>
+          <x-ui.button variant="ghost" size="sm" href="{{ route('children.edit', $child) }}" icon="edit">
+            <span class="sr-only">Edit {{ $child->name }}</span>
+          </x-ui.button>
         </div>
+      @empty
+        <p class="text-sm text-[var(--color-text-muted)]">No children added yet.</p>
+      @endforelse
+      <div class="flex gap-2 mt-4">
+        <x-ui.button variant="secondary" size="sm" href="{{ route('children.create') }}" icon="plus">Add Child</x-ui.button>
+        <x-ui.button variant="ghost" size="sm" href="{{ route('children.index') }}">Manage All</x-ui.button>
       </div>
-    </div>
-    <div class="col-md-6">
-      <div class="dashboard-card h-100">
-        <div>
-          <h4 class="card-title mb-3"><i class="bi bi-bell text-info"></i> What's New</h4>
-          <ul class="list-unstyled mb-0">
-            <li class="mb-2"><i class="bi bi-star-fill text-warning me-2"></i> New STEM robotics activities added!</li>
-            <li class="mb-2"><i class="bi bi-translate text-primary me-2"></i> Korean language pack now available.</li>
-            <li class="mb-2"><i class="bi bi-gift text-success me-2"></i> Invite friends and earn rewards.</li>
-            <li class="mb-2"><i class="bi bi-robot text-info me-2"></i> AI-generated activity plans ready.</li>
-          </ul>
-          <a href="{{ route('onboarding') }}" class="btn btn-outline-primary btn-sm mt-3"><i class="bi bi-sliders"></i> Update Preferences</a>
-        </div>
-      </div>
-    </div>
+    </x-ui.card>
+
+    <x-ui.card variant="clay" padding="md">
+      <h2 class="text-lg font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
+        <x-ui.icon name="bell" class="w-5 h-5 text-blue-500" />
+        What's New
+      </h2>
+      <ul class="space-y-2 text-sm text-[var(--color-text)]">
+        <li class="flex items-start gap-2"><x-ui.icon name="star" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" /> New STEM robotics activities added!</li>
+        <li class="flex items-start gap-2"><x-ui.icon name="book-open" class="w-4 h-4 text-[var(--color-primary)] shrink-0 mt-0.5" /> Korean language pack now available.</li>
+        <li class="flex items-start gap-2"><x-ui.icon name="heart" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" /> Invite friends and earn rewards.</li>
+        <li class="flex items-start gap-2"><x-ui.icon name="star" class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" /> AI-generated activity plans ready.</li>
+      </ul>
+      <x-ui.button variant="secondary" size="sm" href="{{ route('onboarding') }}" class="mt-4" icon="settings">Update Preferences</x-ui.button>
+    </x-ui.card>
   </div>
+</section>
 @endif
 
-{{-- Student/Child Dashboard --}}
 @if($user && ($role === 'Student' || $role === 'Child'))
-  <div class="row g-4 mb-4">
-    <div class="col-12">
-      <div class="dashboard-card h-100 text-center" style="background:linear-gradient(120deg, #F5F0FF 0%, #FFF7ED 100%);">
-        <div>
-          <h2 class="mb-3"><i class="bi bi-emoji-smile text-warning"></i> Welcome, {{ $user->name }}!</h2>
-          <div class="mb-3">
-            <span class="badge bg-warning text-dark me-2"><i class="bi bi-star-fill"></i> Keep going!</span>
-          </div>
-          <a href="{{ route('activities.index') }}" class="btn btn-lg btn-primary mt-2"><i class="bi bi-controller"></i> Start Learning</a>
-        </div>
-      </div>
+<section aria-label="Student Welcome" class="mb-10">
+  <x-ui.card variant="gradient" padding="lg" class="text-center">
+    <h2 class="text-2xl font-bold text-[var(--color-text)] mb-3 font-[var(--font-display)]">Welcome, {{ $user->name }}!</h2>
+    <x-ui.badge tone="warning" class="mb-4">Keep going!</x-ui.badge>
+    <div class="mt-4">
+      <x-ui.button variant="primary" size="lg" href="{{ route('activities.index') }}" icon="play">Start Learning</x-ui.button>
     </div>
-  </div>
+  </x-ui.card>
+</section>
 @endif
 
 {{-- Subscription status --}}
@@ -380,156 +230,146 @@
       }
     } catch (\Throwable $e) { }
   @endphp
-  <div class="alert {{ $subscription ? 'alert-success' : 'alert-warning' }} subscription-shell mt-4">
-    @if($subscription)
-      <i class="bi bi-check-circle-fill me-2"></i> Subscription active until <strong>{{ optional($subscription->ends_at)->format('F j, Y') }}</strong>.
-    @else
-      <i class="bi bi-exclamation-circle-fill me-2"></i> No active subscription.
-      <a href="/checkout" class="btn btn-sm btn-primary ms-2">Subscribe now</a>
-    @endif
-  </div>
+  @if($subscription)
+    <x-ui.alert tone="success" class="mb-8">
+      Subscription active until <strong>{{ optional($subscription->ends_at)->format('F j, Y') }}</strong>.
+    </x-ui.alert>
+  @else
+    <x-ui.alert tone="warn" class="mb-8">
+      No active subscription.
+      <x-ui.button variant="primary" size="sm" href="/checkout" class="ms-2">Subscribe now</x-ui.button>
+    </x-ui.alert>
+  @endif
 @endif
 
-{{-- Course Category Cards (visible to all) --}}
+{{-- Platform highlights (shown to guests and parents) --}}
 @if(!$user || in_array($role, ['Parent', 'Admin', null]))
-<div class="row g-4 mt-4">
-  <div class="col-12">
-    <div class="section-eyebrow mb-2">Platform highlights</div>
-    <h4 class="fw-bold" style="font-family:'Baloo 2',sans-serif; color:var(--nn-text);">Built to feel alive, guided, and role-aware</h4>
+<x-ui.section title="Platform highlights" subtitle="Built to feel alive, guided, and role-aware" class="mb-10">
+  <div class="grid md:grid-cols-3 gap-6">
+    <x-ui.card variant="clay" padding="md" class="text-center">
+      <div class="w-14 h-14 rounded-[var(--radius-sm)] bg-[var(--color-brand-50)] text-[var(--color-primary)] flex items-center justify-center mx-auto mb-4">
+        <x-ui.icon name="users" class="w-7 h-7" />
+      </div>
+      <h3 class="font-bold text-[var(--color-text)] mb-2">Parent Academy</h3>
+      <p class="text-sm text-[var(--color-text-muted)] mb-3">{{ I18n::get('parent_academy_desc') }}</p>
+      <x-ui.badge tone="neutral">6 courses · 57 modules</x-ui.badge>
+    </x-ui.card>
+
+    <x-ui.card variant="clay" padding="md" class="text-center">
+      <div class="w-14 h-14 rounded-[var(--radius-sm)] bg-[var(--color-brand-50)] text-[var(--color-primary)] flex items-center justify-center mx-auto mb-4">
+        <x-ui.icon name="heart" class="w-7 h-7" />
+      </div>
+      <h3 class="font-bold text-[var(--color-text)] mb-2">Early Years (0–6)</h3>
+      <p class="text-sm text-[var(--color-text-muted)] mb-3">{{ I18n::get('early_years_desc') }}</p>
+      <x-ui.badge tone="neutral">1200+ activities · 72 monthly units</x-ui.badge>
+    </x-ui.card>
+
+    <x-ui.card variant="clay" padding="md" class="text-center">
+      <div class="w-14 h-14 rounded-[var(--radius-sm)] bg-[var(--color-brand-50)] text-[var(--color-primary)] flex items-center justify-center mx-auto mb-4">
+        <x-ui.icon name="star" class="w-7 h-7" />
+      </div>
+      <h3 class="font-bold text-[var(--color-text)] mb-2">STEM (7–10)</h3>
+      <p class="text-sm text-[var(--color-text-muted)] mb-3">{{ I18n::get('stem_desc') }}</p>
+      <x-ui.badge tone="neutral">Robotics · Coding · Web</x-ui.badge>
+    </x-ui.card>
   </div>
-  <div class="col-md-4">
-    <div class="spotlight-card text-center">
-      <div class="spotlight-icon mx-auto mb-3"><i class="bi bi-people-fill"></i></div>
-        <h5 class="card-title">Parent Academy</h5>
-        <p class="text-muted small">{{ I18n::get('parent_academy_desc') }}</p>
-        <span class="badge bg-light text-dark border">6 courses · 57 modules</span>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="spotlight-card text-center">
-      <div class="spotlight-icon mx-auto mb-3"><i class="bi bi-flower1"></i></div>
-        <h5 class="card-title">Early Years (0–6)</h5>
-        <p class="text-muted small">{{ I18n::get('early_years_desc') }}</p>
-        <span class="badge bg-light text-dark border">1200+ activities · 72 monthly units</span>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="spotlight-card text-center">
-      <div class="spotlight-icon mx-auto mb-3"><i class="bi bi-cpu-fill"></i></div>
-        <h5 class="card-title">STEM (7–10)</h5>
-        <p class="text-muted small">{{ I18n::get('stem_desc') }}</p>
-        <span class="badge bg-light text-dark border">Robotics · Coding · Web</span>
-    </div>
-  </div>
-</div>
+</x-ui.section>
 @endif
 
 {{-- ============================================================
-     VIRAL MARKETING SECTIONS (public-facing, below the fold)
+     MARKETING SECTIONS (guest only)
      ============================================================ --}}
 @guest
-<div class="mt-5 pt-2">
 
-  {{-- Social Proof Numbers --}}
-  <div class="row g-3 text-center mb-5">
-    <div class="col-6 col-md-3">
-      <div class="clay-stat">
-        <div class="dashboard-kpi" style="color:var(--nn-primary)">50K+</div>
-        <div class="text-muted small">Children Learning</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="clay-stat">
-        <div class="dashboard-kpi" style="color:#7c3aed">120+</div>
-        <div class="text-muted small">Countries</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="clay-stat">
-        <div class="dashboard-kpi" style="color:var(--nn-accent)">4.9&#9733;</div>
-        <div class="text-muted small">Parent Rating</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="clay-stat">
-        <div class="dashboard-kpi" style="color:var(--nn-success)">8</div>
-        <div class="text-muted small">Languages</div>
-      </div>
-    </div>
-  </div>
-
-  {{-- How It Works --}}
-  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem;font-family:'Baloo 2',sans-serif">Start in 3 Simple Steps</h2>
-  <div class="row g-3 mb-5">
-    <div class="col-md-4">
-      <div class="clay-step d-flex gap-3 align-items-start p-3">
-        <div class="spotlight-icon flex-shrink-0"><i class="bi bi-pencil-square"></i></div>
-        <div>
-          <div class="fw-bold">Create Account</div>
-          <div class="text-muted small">Sign up in 30 seconds. No credit card to start.</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="clay-step d-flex gap-3 align-items-start p-3">
-        <div class="spotlight-icon flex-shrink-0"><i class="bi bi-person-hearts"></i></div>
-        <div>
-          <div class="fw-bold">Add Your Child</div>
-          <div class="text-muted small">Date of birth → instant age-adapted curriculum.</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="clay-step d-flex gap-3 align-items-start p-3">
-        <div class="spotlight-icon flex-shrink-0"><i class="bi bi-rocket-takeoff"></i></div>
-        <div>
-          <div class="fw-bold">Start Learning</div>
-          <div class="text-muted small">7 free activities daily. Upgrade anytime.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {{-- Testimonials --}}
-  <h2 class="fw-bold text-center mb-4" style="font-size:1.5rem;font-family:'Baloo 2',sans-serif">What Families Say</h2>
-  <div class="row g-3 mb-5">
+{{-- Social proof --}}
+<x-ui.section aria-label="Social proof" class="mb-10">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
     @foreach([
-      ['quote' => 'My daughter went from refusing to read to asking for more activities every day. NobleNest changed everything.', 'author' => 'Amara O.', 'country' => '🇳🇬 Nigeria', 'stars' => 5],
-      ['quote' => 'Finally a platform that works in Arabic and adapts to my 3-year-old\'s pace. Incredible!', 'author' => 'Fatima A.', 'country' => '🇵🇰 Pakistan', 'stars' => 5],
-      ['quote' => 'The teacher marketplace is fantastic. My son\'s tutor is from Indonesia and he loves the sessions.', 'author' => 'Li Wei', 'country' => '🇨🇳 China', 'stars' => 5],
-    ] as $t)
-      <div class="col-md-4">
-        <div class="clay-testimonial h-100 p-4">
-          <div style="color:var(--nn-accent);font-size:0.8rem;margin-bottom:0.5rem">{{ str_repeat('★', $t['stars']) }}</div>
-          <p class="mb-3 small" style="font-style:italic">"{{ $t['quote'] }}"</p>
-          <div class="fw-bold small">{{ $t['author'] }}</div>
-          <div class="text-muted" style="font-size:0.72rem">{{ $t['country'] }}</div>
-        </div>
-      </div>
+      ['value' => '50K+',  'label' => 'Children Learning',  'color' => 'text-[var(--color-primary)]'],
+      ['value' => '120+',  'label' => 'Countries',           'color' => 'text-violet-600'],
+      ['value' => '4.9★', 'label' => 'Parent Rating',       'color' => 'text-[var(--color-accent-500)]'],
+      ['value' => '8',     'label' => 'Languages',           'color' => 'text-emerald-600'],
+    ] as $stat)
+    <x-ui.card variant="clay" padding="md">
+      <p class="text-3xl font-bold {{ $stat['color'] }} font-[var(--font-display)]">{{ $stat['value'] }}</p>
+      <p class="text-sm text-[var(--color-text-muted)] mt-1">{{ $stat['label'] }}</p>
+    </x-ui.card>
     @endforeach
   </div>
+</x-ui.section>
 
-  {{-- Final CTA --}}
-  <div class="clay-cta text-center py-5 mb-4">
-    <h2 class="fw-bold mb-2" style="font-size:1.75rem;font-family:'Baloo 2',sans-serif">Start Your Child's Journey Today</h2>
-    <p class="mb-4" style="opacity:0.88">7 free activities. No card required. Cancel anytime.</p>
-    <div class="d-flex gap-3 justify-content-center flex-wrap">
-      <a href="{{ route('register') }}" class="btn btn-warning rounded-pill px-5 py-2 fw-bold" style="border-width:var(--nn-border-w)">
-        Get Started Free →
-      </a>
-      <a href="{{ route('pricing') }}" class="btn btn-outline-light rounded-pill px-4 py-2" style="border-width:var(--nn-border-w)">
-        View Pricing
-      </a>
-    </div>
-    {{-- WhatsApp Share --}}
-    <div class="mt-4">
-      <a href="https://wa.me/?text={{ urlencode('🌟 My kids are learning on NobleNest Academy – world-class early education in 8 languages! Try it free: ' . url('/')) }}"
-         class="btn btn-success btn-sm rounded-pill px-3" target="_blank" rel="noopener">
-        <i class="bi bi-whatsapp me-1"></i> Share on WhatsApp
-      </a>
-    </div>
+{{-- How It Works --}}
+<x-ui.section title="Start in 3 Simple Steps" class="mb-10">
+  <div class="grid md:grid-cols-3 gap-4">
+    @foreach([
+      ['icon' => 'edit',        'step' => '1', 'title' => 'Create Account',  'desc' => 'Sign up in 30 seconds. No credit card to start.'],
+      ['icon' => 'users',       'step' => '2', 'title' => 'Add Your Child',   'desc' => 'Date of birth → instant age-adapted curriculum.'],
+      ['icon' => 'arrow-right', 'step' => '3', 'title' => 'Start Learning',   'desc' => '7 free activities daily. Upgrade anytime.'],
+    ] as $step)
+    <x-ui.card variant="clay" padding="md" class="flex gap-4 items-start">
+      <div class="w-14 h-14 rounded-[var(--radius-sm)] bg-[var(--color-brand-50)] text-[var(--color-primary)] flex items-center justify-center shrink-0">
+        <x-ui.icon name="{{ $step['icon'] }}" class="w-7 h-7" />
+      </div>
+      <div>
+        <p class="font-bold text-[var(--color-text)]">{{ $step['title'] }}</p>
+        <p class="text-sm text-[var(--color-text-muted)] mt-1">{{ $step['desc'] }}</p>
+      </div>
+    </x-ui.card>
+    @endforeach
   </div>
+</x-ui.section>
 
-</div>
+{{-- Testimonials --}}
+<x-ui.section title="What Families Say" class="mb-10">
+  <div class="grid md:grid-cols-3 gap-4">
+    @foreach([
+      ['quote' => 'My daughter went from refusing to read to asking for more activities every day. NobleNest changed everything.', 'author' => 'Amara O.', 'country' => 'Nigeria', 'stars' => 5],
+      ['quote' => 'Finally a platform that works in Arabic and adapts to my 3-year-old\'s pace. Incredible!', 'author' => 'Fatima A.', 'country' => 'Pakistan', 'stars' => 5],
+      ['quote' => 'The teacher marketplace is fantastic. My son\'s tutor is from Indonesia and he loves the sessions.', 'author' => 'Li Wei', 'country' => 'China', 'stars' => 5],
+    ] as $t)
+    <x-ui.card variant="clay" padding="md">
+      <div class="flex gap-0.5 mb-3" aria-label="{{ $t['stars'] }} stars">
+        @for($i = 0; $i < $t['stars']; $i++)
+          <x-ui.icon name="star" class="w-4 h-4 text-amber-400 fill-amber-400" />
+        @endfor
+      </div>
+      <blockquote class="text-sm text-[var(--color-text)] italic mb-4">"{{ $t['quote'] }}"</blockquote>
+      <footer>
+        <p class="font-bold text-sm text-[var(--color-text)]">{{ $t['author'] }}</p>
+        <p class="text-xs text-[var(--color-text-muted)]">{{ $t['country'] }}</p>
+      </footer>
+    </x-ui.card>
+    @endforeach
+  </div>
+</x-ui.section>
+
+{{-- Final CTA --}}
+<section aria-label="Call to action" class="rounded-[var(--radius-card)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-400)] shadow-[var(--shadow-clay)] text-white text-center py-16 px-8 mb-8">
+  <h2 class="text-3xl font-bold font-[var(--font-display)] mb-3">Start Your Child's Journey Today</h2>
+  <p class="text-white/85 mb-8 text-lg">7 free activities. No card required. Cancel anytime.</p>
+  <div class="flex flex-wrap gap-4 justify-center">
+    <x-ui.button variant="secondary" size="lg" href="{{ route('register') }}" iconRight="arrow-right">
+      Get Started Free
+    </x-ui.button>
+    <x-ui.button
+      size="lg"
+      href="{{ route('pricing') }}"
+      class="bg-white/15 border-white/30 text-white hover:bg-white/25"
+    >
+      View Pricing
+    </x-ui.button>
+  </div>
+  {{-- WhatsApp share --}}
+  <div class="mt-8">
+    <a href="https://wa.me/?text={{ urlencode('My kids are learning on NobleNest Academy – world-class early education in 8 languages! Try it free: ' . url('/')) }}"
+       class="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-400 transition-colors text-white text-sm font-semibold px-5 py-2.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+       target="_blank" rel="noopener noreferrer">
+      <x-ui.icon name="share-2" class="w-4 h-4" />
+      Share on WhatsApp
+    </a>
+  </div>
+</section>
+
 @endguest
+
 @endsection
