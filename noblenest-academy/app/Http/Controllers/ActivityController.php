@@ -35,7 +35,16 @@ class ActivityController extends Controller
         $skills = Activity::select('subject')->distinct()->pluck('subject')->filter()->values();
         $languages = Activity::select('language')->distinct()->pluck('language')->filter()->values();
 
-        return view('activities.index', compact('activities', 'skills', 'languages'));
+        // Curriculum roadmap: real DB activities grouped by age_group, max 20 per group
+        $roadmap = Activity::select('id', 'title', 'age_group', 'subject')
+            ->whereNotNull('age_group')
+            ->orderBy('age_group')
+            ->orderBy('title')
+            ->get()
+            ->groupBy('age_group')
+            ->map(fn ($group) => $group->take(20));
+
+        return view('activities.index', compact('activities', 'skills', 'languages', 'roadmap'));
     }
 
     public function show(Request $request, Activity $activity)
@@ -83,26 +92,25 @@ class ActivityController extends Controller
 
     public function showTracing(Activity $activity)
     {
-        if ($activity->activity_type !== 'tracing') {
-            abort(404);
-        }
-        return view('activities.tracing', compact('activity'));
+        return $this->showTyped($activity, 'tracing');
     }
 
     public function showDrawing(Activity $activity)
     {
-        if ($activity->activity_type !== 'drawing') {
-            abort(404);
-        }
-        return view('activities.drawing', compact('activity'));
+        return $this->showTyped($activity, 'drawing');
     }
 
     public function showPuzzle(Activity $activity)
     {
-        if ($activity->activity_type !== 'puzzle') {
+        return $this->showTyped($activity, 'puzzle');
+    }
+
+    private function showTyped(Activity $activity, string $type): \Illuminate\View\View
+    {
+        if ($activity->activity_type !== $type) {
             abort(404);
         }
-        return view('activities.puzzle', compact('activity'));
+        return view("activities.{$type}", compact('activity'));
     }
 
     public function savePuzzleComplete(Request $request, $id)

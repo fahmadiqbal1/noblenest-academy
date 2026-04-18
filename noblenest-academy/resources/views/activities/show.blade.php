@@ -50,7 +50,7 @@
                 </span>
                 @endif
                 @if($activity->duration_minutes)
-                <span class="nn-show-badge" style="background:rgba(124,58,237,0.08);color:#7C3AED;border-color:rgba(124,58,237,0.15);">
+                <span class="nn-show-badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border-color:rgba(124,58,237,0.15);">
                     ⏱️ {{ $activity->duration_minutes }} min
                 </span>
                 @endif
@@ -62,26 +62,26 @@
                 @if($activity->is_free)
                 <span class="nn-show-badge" style="background:rgba(16,185,129,0.12);color:#059669;border-color:#10B981;">🎁 Free</span>
                 @else
-                <span class="nn-show-badge" style="background:rgba(124,58,237,0.12);color:#7C3AED;border-color:#7C3AED;">⭐ Premium</span>
+                <span class="nn-show-badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border-color:var(--nn-primary);">⭐ Premium</span>
                 @endif
             </div>
 
             @if($activity->description)
-            <p class="lead" style="color:#6B7280; font-family:'Comic Neue',sans-serif; font-weight:700;">{{ $activity->description }}</p>
+            <p class="lead" style="color:var(--nn-text-muted); font-family:'Comic Neue',sans-serif; font-weight:700;">{{ $activity->description }}</p>
             @endif
 
             {{-- Benefit Explanation --}}
             @if($activity->benefit_explanation)
             <div class="nn-benefit-box mb-3">
                 <h6 class="fw-bold mb-1" style="color:#059669;">💡 Why This Activity Matters</h6>
-                <p class="mb-0 small" style="color:#6B7280;">{{ $activity->benefit_explanation }}</p>
+                <p class="mb-0 small" style="color:var(--nn-text-muted);">{{ $activity->benefit_explanation }}</p>
             </div>
             @endif
 
             {{-- Skills Improved --}}
             @if($activity->skills_improved && count($activity->skills_improved))
             <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="small fw-bold me-1" style="color:#6B7280;"><i class="bi bi-stars"></i> Skills:</span>
+                <span class="small fw-bold me-1" style="color:var(--nn-text-muted);"><i class="bi bi-stars"></i> Skills:</span>
                 @foreach($activity->skills_improved as $skill)
                 <span class="nn-skill-chip">{{ ucwords(str_replace('_', ' ', $skill)) }}</span>
                 @endforeach
