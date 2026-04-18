@@ -15,6 +15,11 @@ class EnsureSubscriptionActive
             return redirect()->route('login');
         }
 
+        // Staff roles can preview all content without a subscription.
+        if (in_array($user->role, ['Admin', 'Teacher', 'Practitioner'])) {
+            return $next($request);
+        }
+
         $subscription = Subscription::where('user_id', $user->id)
             ->where('active', true)
             ->where('ends_at', '>', Carbon::now())

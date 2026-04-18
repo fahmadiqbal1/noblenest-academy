@@ -10,23 +10,23 @@
     .market-filter,
     .market-card,
     .market-cta {
-        background: rgba(255,255,255,0.84);
-        border: 1px solid rgba(24,34,47,0.08);
-        box-shadow: 0 24px 48px rgba(24,34,47,0.10);
+        background: var(--nn-surface);
+        border: var(--nn-border-w) solid var(--nn-border);
+        box-shadow: var(--nn-shadow);
     }
     .market-hero,
     .market-filter,
     .market-card,
-    .market-cta { border-radius: 1.5rem; }
+    .market-cta { border-radius: var(--nn-radius); }
     .market-hero {
         position: relative;
         overflow: hidden;
         padding: 1.8rem;
         margin-bottom: 1.5rem;
         background:
-            radial-gradient(circle at 14% 20%, rgba(242,165,65,0.18), transparent 20%),
-            radial-gradient(circle at 88% 16%, rgba(13,92,99,0.18), transparent 24%),
-            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
+            radial-gradient(circle at 14% 20%, var(--nn-primary-soft), transparent 20%),
+            radial-gradient(circle at 88% 16%, var(--nn-primary-soft), transparent 24%),
+            var(--nn-surface);
     }
     .market-eyebrow {
         text-transform: uppercase;
@@ -41,7 +41,7 @@
     .market-card { overflow: hidden; height: 100%; }
     .market-card__media {
         height: 190px;
-        background: linear-gradient(135deg, #7C3AED, #A78BFA 58%, #F59E0B);
+        background: linear-gradient(135deg, var(--nn-primary), #A78BFA 58%, var(--nn-accent));
     }
     .market-card__meta {
         display: flex;
@@ -54,12 +54,12 @@
         align-items: center;
         gap: 0.75rem;
         padding: 0.8rem 0.9rem;
-        border-radius: 1rem;
-        background: rgba(241,247,248,0.86);
-        border: 1px solid rgba(24,34,47,0.06);
+        border-radius: var(--nn-radius-sm);
+        background: var(--nn-surface);
+        border: var(--nn-border-w) solid var(--nn-border);
     }
     .market-cta {
-        background: linear-gradient(135deg, #0d5c63, #1f7a8c 58%, #f2a541);
+        background: linear-gradient(135deg, var(--nn-primary), #A78BFA 58%, var(--nn-accent));
     }
 </style>
 
@@ -74,17 +74,17 @@
             <div class="col-lg-5">
                 <div class="row g-3">
                     <div class="col-6">
-                        <div class="p-3 rounded-4 bg-white border h-100">
+                        <div class="glass-panel p-3 h-100">
                             <div class="market-eyebrow mb-2">Published</div>
-                            <div class="display-6 fw-bold">{{ $courses->total() }}</div>
-                            <div class="text-muted small">available course results in this search</div>
+                            <div class="display-6 fw-bold" style="color:var(--nn-text);">{{ $courses->total() }}</div>
+                            <div class="small" style="color:var(--nn-text-muted);">available course results in this search</div>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-3 rounded-4 bg-white border h-100">
+                        <div class="glass-panel p-3 h-100">
                             <div class="market-eyebrow mb-2">Subjects</div>
-                            <div class="display-6 fw-bold">{{ $subjects->count() }}</div>
-                            <div class="text-muted small">topics currently represented by teachers</div>
+                            <div class="display-6 fw-bold" style="color:var(--nn-text);">{{ $subjects->count() }}</div>
+                            <div class="small" style="color:var(--nn-text-muted);">topics currently represented by teachers</div>
                         </div>
                     </div>
                 </div>
@@ -157,22 +157,22 @@
                 <div class="p-4 d-flex flex-column h-100">
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         @if($course->subject)
-                            <span class="badge bg-light text-dark border">{{ $course->subject }}</span>
+                            <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">{{ $course->subject }}</span>
                         @endif
                         @if($course->price > 0)
-                            <span class="fw-bold text-success">${{ $course->price }}</span>
+                            <span class="fw-bold" style="color:var(--nn-success);">${{ $course->price }}</span>
                         @else
-                            <span class="badge bg-success">Free</span>
+                            <span class="badge" style="background:var(--nn-success);">Free</span>
                         @endif
                     </div>
-                    <h5 class="card-title fw-semibold mt-2">{{ $course->title }}</h5>
-                    <p class="card-text text-muted small">{{ Str::limit($course->description, 110) }}</p>
+                    <h5 class="card-title fw-semibold mt-2" style="color:var(--nn-text);">{{ $course->title }}</h5>
+                    <p class="card-text small" style="color:var(--nn-text-muted);">{{ Str::limit($course->description, 110) }}</p>
                     <div class="market-card__meta small">
                         @if($course->age_min || $course->age_max)
-                            <span class="badge bg-light text-dark border">Ages {{ $course->age_min ?? '?' }}–{{ $course->age_max ?? '?' }}</span>
+                            <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">Ages {{ $course->age_min ?? '?' }}–{{ $course->age_max ?? '?' }}</span>
                         @endif
-                        <span class="badge bg-light text-dark border">{{ ucfirst($course->level) }}</span>
-                        <span class="badge bg-light text-dark border">{{ $course->active_enrollments_count ?? 0 }} enrolled</span>
+                        <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">{{ ucfirst($course->level) }}</span>
+                        <span class="badge" style="background:var(--nn-primary-soft);color:var(--nn-primary);border:1px solid var(--nn-border);">{{ $course->active_enrollments_count ?? 0 }} enrolled</span>
                     </div>
                     <div class="market-card__teacher mb-3 mt-auto">
                         <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ $course->teacher_id }}" style="width:42px;height:42px;border-radius:50%" alt="teacher avatar">

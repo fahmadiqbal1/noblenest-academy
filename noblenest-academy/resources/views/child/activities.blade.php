@@ -225,10 +225,14 @@
                         <div class="nn-card-cta nn-card-cta--locked" aria-label="Unlocks in week {{ $activity->unlock_week ?? '?' }}">
                             <i class="bi bi-lock-fill me-1" aria-hidden="true"></i>Unlocks Week {{ $activity->unlock_week ?? '?' }}
                         </div>
-                        @else
+                        @elseif(in_array(auth()->user()->role ?? '', ['Parent', 'Student']))
                         <a href="{{ route('pricing') }}" class="nn-card-cta nn-card-cta--premium d-block text-decoration-none">
                             <i class="bi bi-stars me-1" aria-hidden="true"></i>Unlock Premium
                         </a>
+                        @else
+                        <div class="nn-card-cta nn-card-cta--locked" aria-label="Locked activity">
+                            <i class="bi bi-lock-fill me-1" aria-hidden="true"></i>Locked
+                        </div>
                         @endif
                     @elseif($isDone)
                     <a href="{{ $activityUrl }}" class="nn-card-cta nn-card-cta--replay d-block text-decoration-none">
@@ -260,8 +264,8 @@
             {{ $activities->appends(request()->query())->links() }}
         </div>
 
-        {{-- ══════════  UPGRADE NUDGE (free tier only)  ══════════ --}}
-        @unless($hasSubscription)
+        {{-- ══════════  UPGRADE NUDGE (paying-role free tier only)  ══════════ --}}
+        @unless($hasSubscription || !in_array(auth()->user()->role ?? '', ['Parent', 'Student']))
         <div class="nn-upgrade-nudge mt-4">
             <i class="bi bi-stars nn-upgrade-nudge__icon" aria-hidden="true"></i>
             <h5 class="nn-upgrade-nudge__title">Unlock All Weekly Packs!</h5>

@@ -25,7 +25,7 @@
     content: '';
     position: absolute; bottom: 0; left: 0; right: 0;
     height: 2.5rem;
-    background: #F8F7FF;
+    background: var(--nn-bg);
     border-radius: 2rem 2rem 0 0;
     z-index: 1;
 }
@@ -122,7 +122,7 @@
 {{-- ══════════════════════════════════════════════
      MAIN CONTENT CARD
 ══════════════════════════════════════════════ --}}
-<div style="background:#F8F7FF;padding:0 0.75rem 2rem;min-height:60vh;">
+<div style="background:var(--nn-bg);padding:0 0.75rem 2rem;min-height:60vh;">
     <div style="max-width:600px;margin:0 auto;padding-top:2.5rem;">
 
         {{-- Stats row --}}
@@ -154,15 +154,15 @@
         @if($totalCompleted > 0)
         <div class="mb-4 px-1">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.85rem;color:#6B7280;">
-                    <i class="bi bi-lightning-charge-fill me-1" style="color:#F59E0B;"></i>Learning XP
+                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.85rem;color:var(--nn-text-muted);">
+                    <i class="bi bi-lightning-charge-fill me-1" style="color:var(--nn-accent);"></i>Learning XP
                 </span>
-                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.82rem;color:#7C3AED;">
+                <span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:0.82rem;color:var(--nn-primary);">
                     {{ $totalCompleted }} / {{ $totalCompleted + 3 }} ⭐
                 </span>
             </div>
-            <div style="height:14px;background:rgba(124,58,237,0.10);border-radius:7px;overflow:hidden;">
-                <div style="height:100%;width:{{ $progressPct }}%;background:linear-gradient(90deg,#7C3AED,#A78BFA,#F59E0B);border-radius:7px;transition:width 1s ease;position:relative;">
+            <div style="height:14px;background:var(--nn-primary-soft);border-radius:7px;overflow:hidden;">
+                <div style="height:100%;width:{{ $progressPct }}%;background:linear-gradient(90deg,var(--nn-primary),#A78BFA,var(--nn-accent));border-radius:7px;transition:width 1s ease;position:relative;">
                     <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:nn-shimmer 2s infinite;"></div>
                 </div>
             </div>
@@ -225,11 +225,11 @@
                 <div style="margin-left:1rem;">
                     <div class="milestone-teaser__label">Next Milestone</div>
                     <div class="milestone-teaser__name">{{ $nextMilestone->title }}</div>
-                    <div style="font-size:0.75rem;color:#92400E;margin-top:0.15rem;font-weight:600;">
+                    <div style="font-size:0.75rem;color:var(--nn-accent);margin-top:0.15rem;font-weight:600;">
                         Keep going — you're almost there!
                     </div>
                 </div>
-                <i class="bi bi-chevron-right ms-auto align-self-center" style="color:#F59E0B;font-size:1rem;"></i>
+                <i class="bi bi-chevron-right ms-auto align-self-center" style="color:var(--nn-accent);font-size:1rem;"></i>
             </a>
         @endif
 
@@ -240,8 +240,8 @@
             </a>
         </div>
 
-        {{-- Paywall nudge (after 7 completions without subscription) --}}
-        @if($totalCompleted >= 7 && !$child->parent->subscriptions()->where('active', true)->exists())
+        {{-- Paywall nudge (after 7 completions without subscription — only for paying-role users) --}}
+        @if($totalCompleted >= 7 && !$child->parent->subscriptions()->where('active', true)->exists() && in_array(auth()->user()->role ?? '', ['Parent', 'Student']))
         <div class="nn-paywall-nudge mt-4">
             <span class="nn-paywall-nudge__icon">✨</span>
             <div class="nn-paywall-nudge__title">Unlock 100+ More Adventures!</div>

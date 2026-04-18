@@ -120,9 +120,15 @@
 
         {{-- CTA --}}
         @if($locked)
+            @if(in_array(auth()->user()->role ?? '', ['Parent', 'Student']))
             <a href="{{ route('pricing') }}" class="nn-card__btn nn-card__btn--lock">
                 ✨ Unlock Premium
             </a>
+            @else
+            <span class="nn-card__btn nn-card__btn--lock" style="cursor:default;">
+                🔒 Locked (preview)
+            </span>
+            @endif
         @else
             <form action="{{ route('child.activity.complete', [$child, $activity]) }}" method="POST">
                 @csrf
@@ -140,18 +146,19 @@
 /* ── Noble Nest Activity Cards ─────────────────────────────── */
 .nn-card {
     position: relative;
-    background: #fff;
-    border-radius: 18px;
+    background: var(--nn-surface-strong);
+    border-radius: var(--nn-radius-sm);
+    border: var(--nn-border-w) solid var(--nn-border);
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,.07);
-    transition: transform .22s ease, box-shadow .22s ease;
+    box-shadow: var(--nn-shadow);
+    transition: transform .22s var(--nn-bounce), box-shadow .22s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 .nn-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 32px rgba(0,0,0,.13);
+    box-shadow: 0 12px 32px rgba(124,58,237,0.15);
 }
 .nn-card__stripe {
     height: 6px;
@@ -191,13 +198,13 @@
 .nn-card__title {
     font-size: .92rem;
     font-weight: 700;
-    color: #111827;
+    color: var(--nn-text);
     line-height: 1.35;
     margin-bottom: 4px;
 }
 .nn-card__desc {
     font-size: .77rem;
-    color: #6b7280;
+    color: var(--nn-text-muted);
     line-height: 1.45;
     margin-bottom: 8px;
     flex: 1;
@@ -209,8 +216,8 @@
     margin-bottom: 10px;
 }
 .nn-card__chip {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--nn-primary-soft);
+    color: var(--nn-text-muted);
     border-radius: 20px;
     padding: 2px 9px;
     font-size: .68rem;
@@ -263,9 +270,9 @@
 .nn-card__lock-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(17,24,39,.48);
+    background: rgba(30,27,75,.48);
     backdrop-filter: blur(3px);
-    border-radius: 18px;
+    border-radius: var(--nn-radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
