@@ -1,67 +1,121 @@
-@extends('layouts.app')
+@extends('layouts.parent')
 
+@section('title', 'Choose Your Language — Noble Nest Academy')
 @section('meta_title', 'Choose Your Language — Noble Nest Academy')
 
 @section('content')
-<div class="min-vh-100 d-flex align-items-center justify-content-center"
-     style="background: linear-gradient(135deg, #F5F0FF 0%, #FFFBF0 50%, #FFF7ED 100%);">
-    <div class="card border-0 rounded-4" style="max-width: 520px; width: 100%; background:rgba(255,255,255,0.82); border:2px solid rgba(124,58,237,0.10) !important; box-shadow:8px 8px 16px rgba(124,58,237,0.08), -4px -4px 12px rgba(255,255,255,0.6);">
-        <div class="card-body p-5">
 
-            {{-- Progress orbs --}}
-            <div class="d-flex justify-content-center gap-3 mb-4">
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--nn-primary, #7C3AED);color:#fff;font-weight:700;font-size:0.85rem;">1</div>
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:rgba(124,58,237,0.10);color:var(--nn-primary, #7C3AED);font-weight:700;font-size:0.85rem;">2</div>
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:rgba(124,58,237,0.10);color:var(--nn-primary, #7C3AED);font-weight:700;font-size:0.85rem;">3</div>
-            </div>
+<div class="flex items-center justify-center min-h-[80vh] py-8">
+  <div class="w-full max-w-md">
 
-            <h1 class="h3 text-center fw-bold mb-2" style="font-family:'Baloo 2',sans-serif; color:var(--nn-text, #1E1B4B);">Welcome to Noble Nest 🌟</h1>
-            <p class="text-center text-muted mb-4">What language do you prefer?</p>
-
-            <form action="{{ route('onboarding.step1.store') }}" method="POST">
-                @csrf
-                @if(request()->filled('ref'))
-                    <input type="hidden" name="ref" value="{{ e(request('ref')) }}">
-                @endif
-
-                <div class="row g-2 mb-4">
-                    @php
-                    $locales = [
-                        'en' => ['label' => 'English',  'flag' => '🇬🇧'],
-                        'ar' => ['label' => 'العربية',   'flag' => '🇸🇦'],
-                        'fr' => ['label' => 'Français',  'flag' => '🇫🇷'],
-                        'ur' => ['label' => 'اردو',       'flag' => '🇵🇰'],
-                        'ru' => ['label' => 'Русский',   'flag' => '🇷🇺'],
-                        'zh' => ['label' => '中文',       'flag' => '🇨🇳'],
-                        'es' => ['label' => 'Español',   'flag' => '🇪🇸'],
-                        'ko' => ['label' => '한국어',     'flag' => '🇰🇷'],
-                    ];
-                    @endphp
-
-                    @foreach($locales as $code => $info)
-                    <div class="col-6">
-                        <input type="radio" class="btn-check" name="preferred_language"
-                               id="lang_{{ $code }}" value="{{ $code }}"
-                               {{ old('preferred_language', 'en') === $code ? 'checked' : '' }}>
-                        <label class="btn btn-outline-secondary w-100 py-3 rounded-3 text-start"
-                               for="lang_{{ $code }}">
-                            <span class="fs-4 me-2">{{ $info['flag'] }}</span>
-                            <span class="fw-semibold">{{ $info['label'] }}</span>
-                        </label>
-                    </div>
-                    @endforeach
-                </div>
-
-                @error('preferred_language')
-                    <div class="alert alert-danger py-2 mb-3">{{ $message }}</div>
-                @enderror
-
-                <button type="submit" class="btn fw-bold w-100 py-3 rounded-3 fs-5 text-white" style="background:linear-gradient(135deg, #7C3AED, #A78BFA); border:none;">
-                    Continue →
-                </button>
-            </form>
-
+    {{-- Step indicator --}}
+    <div class="mb-8">
+      {{-- Visual step orbs --}}
+      <div class="flex items-center justify-center gap-3 mb-4" role="list" aria-label="Onboarding progress">
+        {{-- Step 1 — current --}}
+        <div role="listitem" class="flex flex-col items-center gap-1">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--color-brand-600)] text-white font-bold text-sm shadow-sm" aria-current="step" aria-label="Step 1 of 3, current">
+            1
+          </div>
+          <span class="text-[0.65rem] font-semibold text-[var(--color-brand-600)]">Language</span>
         </div>
+
+        {{-- Connector --}}
+        <div class="flex-1 max-w-[3rem] h-0.5 bg-[var(--color-border)] rounded-full" aria-hidden="true"></div>
+
+        {{-- Step 2 — upcoming --}}
+        <div role="listitem" class="flex flex-col items-center gap-1">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--color-brand-50)] text-[var(--color-brand-600)] font-bold text-sm border-2 border-[var(--color-border)]" aria-label="Step 2 of 3">
+            2
+          </div>
+          <span class="text-[0.65rem] font-semibold text-[var(--color-text-muted)]">Child</span>
+        </div>
+
+        {{-- Connector --}}
+        <div class="flex-1 max-w-[3rem] h-0.5 bg-[var(--color-border)] rounded-full" aria-hidden="true"></div>
+
+        {{-- Step 3 — upcoming --}}
+        <div role="listitem" class="flex flex-col items-center gap-1">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--color-brand-50)] text-[var(--color-brand-600)] font-bold text-sm border-2 border-[var(--color-border)]" aria-label="Step 3 of 3">
+            3
+          </div>
+          <span class="text-[0.65rem] font-semibold text-[var(--color-text-muted)]">Goals</span>
+        </div>
+      </div>
+
+      <x-ui.progress value="33" size="sm" />
     </div>
+
+    <x-ui.card variant="clay" padding="lg">
+
+      <div class="text-center mb-6">
+        <div class="text-4xl mb-3" aria-hidden="true">🌟</div>
+        <h1 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-1">Welcome to Noble Nest!</h1>
+        <p class="text-sm text-[var(--color-text-muted)]">What language do you prefer?</p>
+      </div>
+
+      <form action="{{ route('onboarding.step1.store') }}" method="POST" novalidate>
+        @csrf
+
+        @if(request()->filled('ref'))
+          <input type="hidden" name="ref" value="{{ e(request('ref')) }}">
+        @endif
+
+        @php
+        $locales = [
+          'en' => ['label' => 'English',   'flag' => '🇬🇧'],
+          'ar' => ['label' => 'العربية',    'flag' => '🇸🇦'],
+          'fr' => ['label' => 'Français',   'flag' => '🇫🇷'],
+          'ur' => ['label' => 'اردو',        'flag' => '🇵🇰'],
+          'ru' => ['label' => 'Русский',    'flag' => '🇷🇺'],
+          'zh' => ['label' => '中文',        'flag' => '🇨🇳'],
+          'es' => ['label' => 'Español',    'flag' => '🇪🇸'],
+          'ko' => ['label' => '한국어',      'flag' => '🇰🇷'],
+        ];
+        @endphp
+
+        <fieldset class="mb-5">
+          <legend class="sr-only">Preferred language</legend>
+          <div class="grid grid-cols-2 gap-2">
+            @foreach($locales as $code => $info)
+            <div>
+              <input
+                type="radio"
+                class="sr-only peer"
+                name="preferred_language"
+                id="lang_{{ $code }}"
+                value="{{ $code }}"
+                {{ old('preferred_language', 'en') === $code ? 'checked' : '' }}
+              >
+              <label
+                for="lang_{{ $code }}"
+                class="flex items-center gap-2 w-full rounded-[var(--radius-sm)] border-2 border-[var(--color-border)] bg-[var(--color-surface-strong)] px-3 py-3 cursor-pointer select-none transition-all duration-[var(--duration-fast)]
+                       hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40
+                       peer-checked:border-[var(--color-brand-500)] peer-checked:bg-[var(--color-brand-50)] peer-checked:shadow-sm
+                       peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--color-brand-600)] peer-focus-visible:outline-offset-2"
+              >
+                <span class="text-xl" aria-hidden="true">{{ $info['flag'] }}</span>
+                <span class="font-semibold text-sm text-[var(--color-text)]">{{ $info['label'] }}</span>
+              </label>
+            </div>
+            @endforeach
+          </div>
+        </fieldset>
+
+        @error('preferred_language')
+          <x-ui.alert tone="danger" class="mb-4">{{ $message }}</x-ui.alert>
+        @enderror
+
+        <x-ui.button variant="primary" size="lg" type="submit" class="w-full">
+          Continue
+          <x-ui.icon name="arrow-right" class="w-4 h-4 ms-1" />
+        </x-ui.button>
+
+      </form>
+
+    </x-ui.card>
+
+  </div>
 </div>
+
 @endsection
