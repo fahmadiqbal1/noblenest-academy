@@ -1,0 +1,18 @@
+{
+    "defaults": {
+        "standard": "WCAG2AA",
+        "timeout": 60000,
+        "wait": 1000,
+        "chromeLaunchConfig": {
+            "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+        }
+    },
+    "urls": [
+        "http://localhost:8000/",
+        "http://localhost:8000/pricing",
+        "http://localhost:8000/login",
+        "http://localhost:8000/register",
+        "http://localhost:8000/forgot-password",
+        "http://localhost:8000/errors/404"
+    ]
+}
