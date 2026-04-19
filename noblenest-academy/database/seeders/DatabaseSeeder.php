@@ -19,6 +19,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // ── Development credentials gate ─────────────────────────────────────
+        // The test accounts below use a known password and must NEVER be seeded
+        // in production. Content seeders (activities, curriculum, pricing) run
+        // unconditionally because they are required for the app to function.
+        if (! app()->environment('local', 'testing')) {
+            $this->command->info('Production environment — skipping development credential seeding.');
+            $this->command->info('Calling content seeders only...');
+            $this->call([
+                BasicCourseSeeder::class,
+                CurriculumSeeder::class,
+                PricingTierSeeder::class,
+                BadgeSeeder::class,
+                MilestoneSeeder::class,
+                MaternalSeeder::class,
+                ActivitySeeder::class,
+                ActivityStepSeeder::class,
+                BabyActivitySeeder::class,
+                ToddlerActivitySeeder::class,
+                EmotionalRegulationActivitySeeder::class,
+                PreschoolActivitySeeder::class,
+                SchoolActivitySeeder::class,
+                ExecutiveFunctionSeeder::class,
+                EmotionalRegulationSeeder::class,
+                ThematicJourneySeeder::class,
+            ]);
+            return;
+        }
+
         $defaultPassword = Hash::make('Password1!');
 
         $users = [
@@ -74,7 +102,8 @@ class DatabaseSeeder extends Seeder
             ActivitySeeder::class,
             ActivityStepSeeder::class,
             BabyActivitySeeder::class,         // 0–12 months
-            ToddlerActivitySeeder::class,       // 12–36 months (new — Phase 4)
+            ToddlerActivitySeeder::class,       // 12–36 months
+            EmotionalRegulationActivitySeeder::class, // toddler ER activities (breathing, feelings)
             PreschoolActivitySeeder::class,     // 3–6 years
             SchoolActivitySeeder::class,        // 6–12 years
 
