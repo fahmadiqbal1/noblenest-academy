@@ -29,6 +29,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#7C3AED">
+    {{-- Critical font preloads — fonts must exist in public/fonts/ (see resources/fonts/README.md) --}}
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Baloo2-Regular.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Baloo2-Bold.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Nunito-Regular.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Inter-Regular.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Inter-SemiBold.woff2">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="{{ asset('css/playful.css') }}" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
