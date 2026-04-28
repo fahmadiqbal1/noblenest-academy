@@ -1,80 +1,141 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
+@section('title', 'Sign In | NobleNest Global Academy')
 @section('meta_title', 'Login | NobleNest Global Academy')
 @section('meta_description', 'Log in to NobleNest Global Academy to continue learning, manage courses, monitor children, or access admin workflows from one secure account.')
 @section('meta_image', asset('og-login.png'))
 
 @section('content')
-<style>
-    .auth-shell,
-    .auth-panel {
-        background: rgba(255,255,255,0.86);
-        border: 1px solid rgba(24,34,47,0.08);
-        box-shadow: 0 28px 60px rgba(24,34,47,0.12);
-        border-radius: 1.75rem;
-    }
-    .auth-shell {
-        overflow: hidden;
-        background:
-            radial-gradient(circle at 16% 18%, rgba(242,165,65,0.18), transparent 22%),
-            radial-gradient(circle at 85% 14%, rgba(13,92,99,0.18), transparent 25%),
-            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
-    }
-    .auth-panel { padding: 1.6rem; }
-    .auth-field { min-height: 50px; border-radius: 1rem; }
-    .auth-brand {
-        width: 88px;
-        height: 88px;
-        border-radius: 1.4rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.18);
-    }
-</style>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="auth-shell">
-                <div class="row g-0 align-items-stretch">
-                    <div class="col-lg-5 p-4 p-lg-5 text-white" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c 58%, #f2a541);">
-                        <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="auth-brand mb-4">
-                        <div class="text-uppercase fw-bold small mb-3" style="letter-spacing:0.14em;">Welcome back</div>
-                        <h2 class="fw-bold mb-3">{{ I18n::get('login') }}</h2>
-                        <p class="mb-4 opacity-75">Resume learning, manage classrooms, or continue your admin workflow from one secure account.</p>
-                        <div class="d-grid gap-3">
-                            <div class="bg-white bg-opacity-10 rounded-4 p-3">
-                                <div class="fw-semibold">Students</div>
-                                <div class="small opacity-75">Jump back into enrolled courses and live sessions.</div>
-                            </div>
-                            <div class="bg-white bg-opacity-10 rounded-4 p-3">
-                                <div class="fw-semibold">Parents and admins</div>
-                                <div class="small opacity-75">Monitor learning and manage curriculum operations.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-7 p-4 p-lg-5">
-    <h2 class="mb-4">{{ I18n::get('login') }}</h2>
-    <form method="POST" action="{{ url('/login') }}">
-        @csrf
-        @if($errors->any())
-            <div class="alert alert-danger">{{ $errors->first() }}</div>
-        @endif
-        <div class="mb-3">
-            <label for="email" class="form-label">{{ I18n::get('email') }}</label>
-            <input type="email" class="form-control auth-field" id="email" name="email" value="{{ old('email') }}" required>
+{{--
+  Auth layout wraps content in a centred card (max-w-md).
+  For login we want a two-column split, so we break out of that
+  by using a full-bleed negative-margin trick inside the card slot.
+--}}
+
+<div class="flex flex-col lg:flex-row -m-8 overflow-hidden rounded-[var(--radius-card)]">
+
+  {{-- Brand panel --}}
+  <aside class="lg:w-2/5 p-8 text-white bg-gradient-to-b from-[var(--color-brand-700)] via-[var(--color-brand-600)] to-[var(--color-brand-400)]">
+    <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="w-20 h-20 rounded-[var(--radius-sm)] shadow-[var(--shadow-clay)] mb-6">
+    <p class="text-xs font-extrabold uppercase tracking-widest text-white/80 mb-2">Welcome back</p>
+    <h1 class="text-2xl font-bold font-[var(--font-display)] mb-3">{{ I18n::get('login') }}</h1>
+    <p class="text-white/82 text-sm leading-relaxed mb-8">
+      Resume learning, manage classrooms, or continue your admin workflow from one secure account.
+    </p>
+    <div class="space-y-3">
+      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
+        <div class="flex items-center gap-2 mb-1">
+          <x-ui.icon name="book-open" class="w-4 h-4" />
+          <span class="font-semibold text-sm">Students</span>
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">{{ I18n::get('password') }}</label>
-            <input type="password" class="form-control auth-field" id="password" name="password" required>
+        <p class="text-xs text-white/78">Jump back into enrolled courses and live sessions.</p>
+      </div>
+      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
+        <div class="flex items-center gap-2 mb-1">
+          <x-ui.icon name="users" class="w-4 h-4" />
+          <span class="font-semibold text-sm">Parents &amp; admins</span>
         </div>
-        <button type="submit" class="btn btn-primary px-4">{{ I18n::get('login') }}</button>
-    </form>
-    <div class="mt-3">
-        <a href="{{ route('register') }}">{{ I18n::get('dont_have_account') }}</a>
+        <p class="text-xs text-white/78">Monitor learning and manage curriculum operations.</p>
+      </div>
     </div>
-                    </div>
-                </div>
+  </aside>
+
+  {{-- Form panel --}}
+  <div class="flex-1 p-8" x-data="{ showPw: false, loading: false }">
+    <h2 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-1">Sign in to your account</h2>
+    <p class="text-sm text-[var(--color-text-muted)] mb-6">Enter your credentials below to continue.</p>
+
+    <form method="POST" action="{{ url('/login') }}" @submit="loading = true" novalidate>
+      @csrf
+
+      @if($errors->any())
+        <x-ui.alert tone="danger" class="mb-4">{{ $errors->first() }}</x-ui.alert>
+      @endif
+
+      <div class="space-y-4">
+        <x-ui.field name="email" label="{{ I18n::get('email') }}" :error="$errors->first('email')" required>
+          <x-ui.input
+            type="email"
+            name="email"
+            :value="old('email')"
+            placeholder="you@example.com"
+            autocomplete="email"
+            :invalid="$errors->has('email')"
+            size="lg"
+          />
+        </x-ui.field>
+
+        <x-ui.field name="password" :error="$errors->first('password')" required>
+          <x-slot name="label">
+            <div class="flex items-center justify-between">
+              <label for="password" class="block text-sm font-semibold text-[var(--color-text)]">
+                {{ I18n::get('password') }}
+                <span class="text-[var(--color-coral-500)] ms-0.5" aria-hidden="true">*</span>
+              </label>
+              <a href="{{ route('password.request') }}"
+                 class="text-xs font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">
+                Forgot password?
+              </a>
             </div>
+          </x-slot>
+          <div class="relative flex">
+            <input
+              :type="showPw ? 'text' : 'password'"
+              id="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              aria-describedby="{{ $errors->has('password') ? 'password_error' : '' }}"
+              :aria-invalid="'{{ $errors->has('password') ? 'true' : 'false' }}'"
+              class="block w-full rounded-s-[var(--radius-sm)] rounded-e-none border-[2px] border-e-0 border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-text)] py-3 px-4 text-base focus:outline-none focus:border-[var(--color-brand-500)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 {{ $errors->has('password') ? 'border-[var(--color-coral-500)]' : '' }}"
+            >
+            <button
+              type="button"
+              @click="showPw = !showPw"
+              :aria-label="showPw ? 'Hide password' : 'Show password'"
+              class="px-4 border-[2px] border-[var(--color-border)] border-s-0 rounded-e-[var(--radius-sm)] bg-[var(--color-surface-strong)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-brand-50)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            >
+              <x-ui.icon name="eye" class="w-5 h-5" x-show="!showPw" />
+              <x-ui.icon name="eye-off" class="w-5 h-5" x-show="showPw" x-cloak />
+            </button>
+          </div>
+        </x-ui.field>
+
+        <div class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="remember"
+            name="remember"
+            class="w-4 h-4 rounded border-[2px] border-[var(--color-border)] text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 cursor-pointer"
+          >
+          <label for="remember" class="text-sm text-[var(--color-text)] cursor-pointer select-none">Remember me</label>
         </div>
-    </div>
+
+        <x-ui.button
+          variant="primary"
+          size="lg"
+          type="submit"
+          class="w-full"
+          :loading="loading"
+          :disabled="loading"
+        >
+          <span x-show="!loading">{{ I18n::get('login') }}</span>
+          <span x-show="loading" x-cloak>Signing in&hellip;</span>
+        </x-ui.button>
+      </div>
+    </form>
+
+    <hr class="my-6 border-[var(--color-border)]">
+
+    <p class="text-center text-sm text-[var(--color-text-muted)]">
+      Don&rsquo;t have an account?
+      <a href="{{ route('register') }}" class="font-bold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded ms-1">
+        Create one free
+      </a>
+    </p>
+  </div>
+
 </div>
+
 @endsection

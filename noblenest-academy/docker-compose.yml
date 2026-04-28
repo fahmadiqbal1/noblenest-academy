@@ -1,0 +1,110 @@
+services:
+  # PHP-FPM + Nginx + Supervisor
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: noblenest-app
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-noblenest}
+      - DB_USERNAME=${DB_USERNAME:-noblenest}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - SESSION_DRIVER=redis
+      - CACHE_STORE=redis
+    ports:
+      - "${APP_PORT:-8000}:80"
+    volumes:
+      # Only persist storage (logs, uploads, sessions) — source code from image
+      - app_storage:/app/storage
+      - supervisor_logs:/var/log/supervisor
+    networks:
+      - noblenest
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # MySQL 8 Database (internal-only; no host port binding to avoid conflicts)
+  db:
+    image: mysql:8.0
+    container_name: noblenest-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-noblenest}
+      MYSQL_USER: ${DB_USERNAME:-noblenest}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./.docker/mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - noblenest
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  # Redis Cache & Session Store (internal-only)
+  redis:
+    image: redis:7-alpine
+    container_name: noblenest-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - noblenest
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Optional: Mailhog for email testing (development only)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: noblenest-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - noblenest
+    profiles:
+      - dev
+
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_storage:
+    driver: local
+  supervisor_logs:
+    driver: local
+
+networks:
+  noblenest:
+    driver: bridge

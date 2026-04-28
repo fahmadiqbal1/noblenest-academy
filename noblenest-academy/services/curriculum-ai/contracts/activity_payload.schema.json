@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Activity Payload Schema",
+  "description": "Shared contract between PHP (AIAssistantService) and Python (activity_chain.py) for activity generation. Both sides validate against this schema.",
+  "type": "object",
+  "required": [
+    "title",
+    "description",
+    "instructions",
+    "materials",
+    "duration_minutes",
+    "difficulty",
+    "age_tier",
+    "subject",
+    "language",
+    "is_free",
+    "mess_level",
+    "safety_warnings",
+    "adaptations",
+    "cognitive_domain",
+    "developmental_domains",
+    "materials_cost",
+    "parent_involvement",
+    "instructions_for_parent"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 3,
+      "description": "Activity name, max 8 words"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 300,
+      "description": "1-2 sentence overview for parents"
+    },
+    "instructions": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 1000,
+      "description": "Step-by-step guide for the child (3-6 steps)"
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 15,
+      "description": "List of materials needed"
+    },
+    "duration_minutes": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 60,
+      "description": "Activity duration in minutes"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "medium", "hard"],
+      "description": "Activity difficulty level"
+    },
+    "age_tier": {
+      "type": "string",
+      "enum": ["baby", "toddler", "preschool", "school"],
+      "description": "Target age tier"
+    },
+    "subject": {
+      "type": "string",
+      "enum": ["math", "language", "science", "art", "music", "physical", "social", "cooking"],
+      "description": "Primary subject area"
+    },
+    "language": {
+      "type": "string",
+      "enum": ["english", "french", "spanish", "russian", "chinese", "korean", "urdu", "arabic"],
+      "description": "Language of instruction"
+    },
+    "is_free": {
+      "type": "boolean",
+      "description": "Whether activity is available in free tier"
+    },
+    "mess_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "How messy/cleanup-intensive the activity is"
+    },
+    "safety_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "choking_hazard",
+          "heat_source",
+          "sharp_objects",
+          "small_parts",
+          "loud_noise",
+          "strong_smell",
+          "water_hazard",
+          "allergenic_materials"
+        ]
+      },
+      "description": "Array of safety warnings applicable to this activity"
+    },
+    "adaptations": {
+      "type": "object",
+      "required": ["easier", "harder"],
+      "properties": {
+        "easier": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 200,
+          "description": "How to make the activity easier for struggling children"
+        },
+        "harder": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 200,
+          "description": "How to make the activity harder for advanced children"
+        }
+      },
+      "description": "Real-time adaptations for difficulty tuning"
+    },
+    "cognitive_domain": {
+      "type": "string",
+      "enum": [
+        "math",
+        "language",
+        "science",
+        "art",
+        "music",
+        "executive_function",
+        "emotional_regulation",
+        "social_emotional",
+        "physical_development"
+      ],
+      "description": "Primary cognitive domain this activity targets"
+    },
+    "developmental_domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "gross_motor",
+          "fine_motor",
+          "language",
+          "cognitive",
+          "social_emotional",
+          "self_care",
+          "attention",
+          "memory",
+          "reasoning"
+        ]
+      },
+      "maxItems": 5,
+      "description": "Secondary developmental domains addressed"
+    },
+    "materials_cost": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Estimated cost in USD cents (0-100 cents = $0-$1.00)"
+    },
+    "parent_involvement": {
+      "type": "string",
+      "enum": ["minimal", "moderate", "high"],
+      "description": "How much parent involvement is required/expected"
+    },
+    "instructions_for_parent": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 500,
+      "description": "Guidance for parents on how to facilitate the activity, what to watch for, conversation starters"
+    }
+  },
+  "additionalProperties": false
+}

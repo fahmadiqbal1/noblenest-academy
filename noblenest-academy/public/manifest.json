@@ -90,6 +90,13 @@
       "description": "View your children's progress",
       "url": "/parent/dashboard",
       "icons": [{ "src": "/brand/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Maternal Wellness",
+      "short_name": "Maternal",
+      "description": "Pregnancy and postnatal wellness hub",
+      "url": "/maternal/dashboard",
+      "icons": [{ "src": "/brand/icon-96.png", "sizes": "96x96" }]
     }
   ],
   "related_applications": [],

@@ -11,7 +11,7 @@ class SchoolInquiryController extends Controller
 {
     public function index(Request $request)
     {
-        $status    = $request->get('status', 'new');
+        $status    = $request->input('status', 'new');
         $inquiries = SchoolInquiry::where('status', $status)
             ->latest()
             ->paginate(25);

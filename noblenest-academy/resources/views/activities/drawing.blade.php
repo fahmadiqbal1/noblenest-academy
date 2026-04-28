@@ -14,7 +14,26 @@
             <canvas id="drawing-canvas" width="400" height="300" style="display:block;"></canvas>
         </div>
     </div>
+    {{-- Color Palette --}}
+    <div class="d-flex gap-2 justify-content-center mb-2 flex-wrap">
+        @foreach(['#000000', '#ff69b4', '#00bcd4', '#7ed6a5', '#f8c471', '#bb8fce', '#f1948a', '#7C3AED'] as $color)
+        <button class="btn btn-sm rounded-circle draw-color-btn" data-color="{{ $color }}" style="width:36px;height:36px;background:{{ $color }};border:3px solid {{ $loop->first ? '#333' : 'transparent' }};transition:border 0.2s;"></button>
+        @endforeach
+    </div>
+
+    {{-- Brush Size + Eraser --}}
+    <div class="d-flex gap-2 justify-content-center mb-2 align-items-center flex-wrap">
+        <span class="small text-muted">Brush:</span>
+        <button class="btn btn-sm btn-outline-secondary draw-brush-btn active" data-min="1" data-max="2">S</button>
+        <button class="btn btn-sm btn-outline-secondary draw-brush-btn" data-min="2" data-max="4">M</button>
+        <button class="btn btn-sm btn-outline-secondary draw-brush-btn" data-min="4" data-max="8">L</button>
+        <button class="btn btn-sm btn-outline-secondary draw-brush-btn" data-min="8" data-max="16">XL</button>
+        <span class="mx-2">|</span>
+        <button id="eraser-toggle" class="btn btn-sm btn-outline-danger"><i class="bi bi-eraser-fill"></i> Eraser</button>
+    </div>
+
     <div class="d-flex gap-3 justify-content-center mb-3">
+        <button id="undo-drawing" class="btn btn-lg btn-outline-warning"><i class="bi bi-arrow-counterclockwise"></i> Undo</button>
         <button id="clear-drawing" class="btn btn-lg {{ $isPlayful ? 'btn-info' : 'btn-secondary' }}"><i class="bi bi-eraser"></i> {{ I18n::get('clear') }}</button>
         <button id="save-drawing" class="btn btn-lg {{ $isPlayful ? 'btn-success' : 'btn-primary' }}"><i class="bi bi-check2-circle"></i> {{ I18n::get('save') }}</button>
     </div>
@@ -30,6 +49,44 @@
 <script>
 const drawingCanvas = document.getElementById('drawing-canvas');
 const drawingPad = new SignaturePad(drawingCanvas, { minWidth: 2, maxWidth: 4, penColor: '{{ $isPlayful ? '#00bcd4' : 'rgb(0,0,0)' }}' });
+let lastDrawColor = drawingPad.penColor;
+let eraserOn = false;
+
+// Undo support
+document.getElementById('undo-drawing').onclick = () => {
+    const data = drawingPad.toData();
+    if (data.length) { data.pop(); drawingPad.fromData(data); }
+};
+
+// Color palette
+document.querySelectorAll('.draw-color-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.draw-color-btn').forEach(b => b.style.border = '3px solid transparent');
+        btn.style.border = '3px solid #333';
+        lastDrawColor = btn.dataset.color;
+        if (!eraserOn) drawingPad.penColor = lastDrawColor;
+    };
+});
+
+// Brush size
+document.querySelectorAll('.draw-brush-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.draw-brush-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        drawingPad.minWidth = parseInt(btn.dataset.min);
+        drawingPad.maxWidth = parseInt(btn.dataset.max);
+    };
+});
+
+// Eraser toggle
+document.getElementById('eraser-toggle').onclick = function() {
+    eraserOn = !eraserOn;
+    this.classList.toggle('active', eraserOn);
+    this.classList.toggle('btn-danger', eraserOn);
+    this.classList.toggle('btn-outline-danger', !eraserOn);
+    drawingPad.penColor = eraserOn ? '{{ $isPlayful ? '#e0f7fa' : '#ffffff' }}' : lastDrawColor;
+};
+
 document.getElementById('clear-drawing').onclick = () => drawingPad.clear();
 document.getElementById('save-drawing').onclick = function() {
     if (drawingPad.isEmpty()) {

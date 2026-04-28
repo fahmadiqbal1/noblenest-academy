@@ -25,23 +25,47 @@ class Activity extends Model
         'duration_minutes',
         'difficulty',
         'thumbnail_url',
+        'audio_url',
+        'video_url',
         'instructions',
         'materials_needed',
         'learning_objectives',
         'age_group',
         'is_muslim_only',
+        'benefit_explanation',
+        'skills_improved',
+        'health_benefit',
+        'learning_modalities',
+        'primary_modality',
+        'subtitle_url',
+        'interactive_type',
+        // Phase 2: Enhanced parental context fields
+        'mess_level',
+        'safety_warnings',
+        'adaptations',
+        'cognitive_domain',
+        'developmental_domains',
+        'materials_cost',
+        'parent_involvement',
+        'instructions_for_parent',
     ];
 
     protected $casts = [
-        'age_min'             => 'integer',
-        'age_max'             => 'integer',
-        'duration_minutes'    => 'integer',
-        'is_rtl'              => 'boolean',
-        'is_free'             => 'boolean',
-        'like_count'          => 'integer',
-        'is_muslim_only'      => 'boolean',
-        'materials_needed'    => 'array',
-        'learning_objectives' => 'array',
+        'age_min'               => 'integer',
+        'age_max'               => 'integer',
+        'duration_minutes'      => 'integer',
+        'is_rtl'                => 'boolean',
+        'is_free'               => 'boolean',
+        'like_count'            => 'integer',
+        'is_muslim_only'        => 'boolean',
+        'materials_needed'      => 'array',
+        'learning_objectives'   => 'array',
+        'skills_improved'       => 'array',
+        'learning_modalities'   => 'array',
+        // Phase 2: Enhanced parental context fields
+        'safety_warnings'       => 'array',
+        'adaptations'           => 'array',
+        'developmental_domains' => 'array',
     ];
 
     /**
@@ -110,5 +134,21 @@ class Activity extends Model
     public function isAppropriateForAge(int $ageMonths): bool
     {
         return $this->age_min <= $ageMonths && $this->age_max >= $ageMonths;
+    }
+
+    /**
+     * Get step-by-step instructions for this activity.
+     */
+    public function steps()
+    {
+        return $this->hasMany(ActivityStep::class)->orderBy('step_number');
+    }
+
+    /**
+     * Get all media assets for this activity.
+     */
+    public function media()
+    {
+        return $this->hasMany(ActivityMedia::class)->orderBy('order');
     }
 }

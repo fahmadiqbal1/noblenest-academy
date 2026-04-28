@@ -11,9 +11,19 @@ class ShareCardController extends Controller
 {
     /**
      * Show a share card (public-facing SSR for OG tags).
+     * Only the parent who owns the child can view the card.
      */
     public function show(ShareCard $shareCard)
     {
+        $shareCard->loadMissing('childProfile');
+
+        // Only the owning parent (or admin) may view a child's share card
+        $user = Auth::user();
+        abort_unless(
+            $user && ($user->role === 'admin' || $shareCard->childProfile->parent_id === $user->id),
+            403
+        );
+
         return view('share.card', compact('shareCard'));
     }
 

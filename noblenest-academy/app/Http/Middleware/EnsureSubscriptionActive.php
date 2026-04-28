@@ -14,13 +14,21 @@ class EnsureSubscriptionActive
         if (!$user) {
             return redirect()->route('login');
         }
+
+        // Staff roles can preview all content without a subscription.
+        if (in_array($user->role, ['Admin', 'Teacher', 'Practitioner'])) {
+            return $next($request);
+        }
+
         $subscription = Subscription::where('user_id', $user->id)
             ->where('active', true)
             ->where('ends_at', '>', Carbon::now())
             ->first();
+
         if (!$subscription) {
             return redirect('/')->with('error', 'You need an active subscription to access this content.');
         }
+
         return $next($request);
     }
 }

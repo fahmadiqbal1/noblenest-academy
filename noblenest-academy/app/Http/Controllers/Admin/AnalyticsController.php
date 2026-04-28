@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class AnalyticsController extends Controller
@@ -44,7 +45,7 @@ class AnalyticsController extends Controller
         return response()->json($topLiked->map(fn ($a) => [
             'id'       => $a->id,
             'title'    => $a->title,
-            'skill'    => $a->skill,
+            'subject'  => $a->subject,
             'age_min'  => $a->age_min,
             'age_max'  => $a->age_max,
             'likes'    => $a->likes_count,
@@ -62,14 +63,14 @@ class AnalyticsController extends Controller
 
     private function buildData(): array
     {
-        $skills = Activity::select('skill')->distinct()->pluck('skill')->filter();
+        $subjects = Activity::select('subject')->distinct()->pluck('subject')->filter();
 
         $coverage = [];
-        foreach ($skills as $skill) {
-            $activities = Activity::where('skill', $skill)->get();
+        foreach ($subjects as $subject) {
+            $activities = Activity::where('subject', $subject)->get();
             $ages       = $activities->flatMap(fn ($a) => [$a->age_min, $a->age_max]);
             $coverage[] = [
-                'skill'    => $skill,
+                'skill'    => $subject,
                 'count'    => $activities->count(),
                 'age_min'  => $ages->min(),
                 'age_max'  => $ages->max(),
@@ -78,7 +79,7 @@ class AnalyticsController extends Controller
 
         $topLiked = collect(); // no likes relation yet; placeholder
 
-        $totalSkills      = $skills->count();
+        $totalSkills      = $subjects->count();
         $totalActivities  = Activity::count();
 
         $monthlyCompletions = $this->queryMonthlyCompletions();
@@ -95,8 +96,8 @@ class AnalyticsController extends Controller
      */
     private function queryMonthlyCompletions(): \Illuminate\Support\Collection
     {
-        if (\DB::getDriverName() === 'mysql') {
-            return \DB::table('activity_user_progress')
+        if (DB::getDriverName() === 'mysql') {
+            return DB::table('activity_user_progress')
                 ->selectRaw("DATE_FORMAT(completed_at, '%Y-%m') as month, count(*) as completions")
                 ->whereNotNull('completed_at')
                 ->groupByRaw("DATE_FORMAT(completed_at, '%Y-%m')")
@@ -105,7 +106,7 @@ class AnalyticsController extends Controller
         }
 
         // Fallback for non-MySQL drivers: group in PHP.
-        return \DB::table('activity_user_progress')
+        return DB::table('activity_user_progress')
             ->whereNotNull('completed_at')
             ->pluck('completed_at')
             ->map(fn ($ts) => \Illuminate\Support\Carbon::parse($ts)->format('Y-m'))

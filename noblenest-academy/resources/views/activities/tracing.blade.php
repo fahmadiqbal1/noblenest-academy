@@ -23,7 +23,23 @@
             @endif
         </div>
     </div>
+    {{-- Color Picker --}}
+    <div class="d-flex gap-2 justify-content-center mb-2 flex-wrap">
+        @foreach(['#ff69b4', '#7ed6a5', '#85c1e9', '#f8c471', '#bb8fce', '#f1948a'] as $color)
+        <button class="btn btn-sm rounded-circle trace-color-btn" data-color="{{ $color }}" style="width:36px;height:36px;background:{{ $color }};border:3px solid transparent;transition:border 0.2s;" title="{{ $color }}"></button>
+        @endforeach
+    </div>
+
+    {{-- Difficulty --}}
+    <div class="d-flex gap-2 justify-content-center mb-2">
+        <span class="small text-muted">Difficulty:</span>
+        <button class="btn btn-sm btn-outline-success trace-difficulty active" data-opacity="0.25">Easy</button>
+        <button class="btn btn-sm btn-outline-warning trace-difficulty" data-opacity="0.12">Medium</button>
+        <button class="btn btn-sm btn-outline-danger trace-difficulty" data-opacity="0.04">Hard</button>
+    </div>
+
     <div class="d-flex gap-3 justify-content-center mb-3">
+        <button id="undo-canvas" class="btn btn-lg btn-outline-warning"><i class="bi bi-arrow-counterclockwise"></i> Undo</button>
         <button id="clear-canvas" class="btn btn-lg {{ $isPlayful ? 'btn-pink' : 'btn-secondary' }}"><i class="bi bi-eraser"></i> {{ I18n::get('clear') }}</button>
         <button id="save-canvas" class="btn btn-lg {{ $isPlayful ? 'btn-success' : 'btn-primary' }}"><i class="bi bi-check2-circle"></i> {{ I18n::get('save') }}</button>
     </div>
@@ -42,7 +58,35 @@
 <script>
 const canvas = document.getElementById('tracing-canvas');
 const signaturePad = new SignaturePad(canvas, { minWidth: 2, maxWidth: 4, penColor: '{{ $isPlayful ? '#ff69b4' : 'rgb(44,62,80)' }}' });
-document.getElementById('clear-canvas').onclick = () => signaturePad.clear();
+
+// Undo support — track stroke history
+let undoHistory = [];
+signaturePad.addEventListener('endStroke', () => { undoHistory.push(signaturePad.toData().length); });
+document.getElementById('undo-canvas').onclick = () => {
+    const data = signaturePad.toData();
+    if (data.length) { data.pop(); signaturePad.fromData(data); undoHistory.pop(); }
+};
+
+// Color picker
+document.querySelectorAll('.trace-color-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.trace-color-btn').forEach(b => b.style.border = '3px solid transparent');
+        btn.style.border = '3px solid #333';
+        signaturePad.penColor = btn.dataset.color;
+    };
+});
+
+// Difficulty — adjusts overlay opacity
+document.querySelectorAll('.trace-difficulty').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.trace-difficulty').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const overlay = canvas.parentElement.querySelector('img[alt="Sample"]');
+        if (overlay) overlay.style.opacity = btn.dataset.opacity;
+    };
+});
+
+document.getElementById('clear-canvas').onclick = () => { signaturePad.clear(); undoHistory = []; };
 document.getElementById('save-canvas').onclick = function() {
     if (signaturePad.isEmpty()) {
         document.getElementById('save-status').innerHTML = '<span class="text-danger">{{ I18n::get('please_trace_something') }}</span>';

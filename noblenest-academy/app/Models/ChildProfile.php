@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * ChildProfile Model
@@ -42,6 +43,9 @@ class ChildProfile extends Model
         'avatar_url',
         'preferences',
         'learning_goals',
+        'age_tier',
+        'streak_days',
+        'last_activity_date',
     ];
 
     protected $casts = [
@@ -143,6 +147,26 @@ class ChildProfile extends Model
     public function activityProgress(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ChildActivityProgress::class);
+    }
+
+    /**
+     * Milestones this child has achieved or is working towards.
+     */
+    public function milestones(): BelongsToMany
+    {
+        return $this->belongsToMany(Milestone::class, 'child_milestone_progress')
+            ->withPivot(['status', 'achieved_at', 'parent_note'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Badges this child has earned.
+     */
+    public function badges(): BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class, 'child_badges')
+            ->withPivot(['awarded_at'])
+            ->withTimestamps();
     }
 
     /**

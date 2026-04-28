@@ -1,68 +1,643 @@
 /*
- * Noble Nest Academy - Bootstrap 5 CSS
- * This project uses Bootstrap 5 (NOT Tailwind) per project requirements.
- * Bootstrap is loaded via CDN in the layout files.
+ * Noble Nest Academy — "Blossom" Design System
+ * Tailwind v4 · Claymorphism + Playful Creative (Vivid Violet palette)
+ * Fonts: Baloo 2 (display/kid) · Nunito (body/parent) · Inter (adult surfaces)
  */
 
-/* Custom variables following Bootstrap conventions */
-:root {
-    --nn-font-sans: 'Instrument Sans', var(--bs-font-sans-serif);
-    --nn-primary: #0d5c63;
-    --nn-secondary: #8b5cf6;
-    --nn-success: #22c55e;
-    --nn-warning: #f59e0b;
-    --nn-danger: #ef4444;
+/* ─── Self-hosted Fonts ──────────────────────────────────────────────────── */
+/*
+ * Font files must be placed in resources/fonts/ and published to public/fonts/
+ * via Vite. If files are missing, fonts fall back to system-ui.
+ * See resources/fonts/README.md for download URLs.
+ */
+@font-face {
+    font-family: 'Baloo 2';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/Baloo2-Regular.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Baloo 2';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/Baloo2-Bold.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Global font family override */
-body {
-    font-family: var(--nn-font-sans);
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/Nunito-Regular.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/Nunito-SemiBold.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/Nunito-Bold.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* RTL support styles */
-[dir="rtl"] {
-    text-align: right;
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/Inter-Regular.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/Inter-Medium.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/Inter-Bold.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-[dir="rtl"] .ms-auto {
-    margin-right: auto !important;
-    margin-left: unset !important;
+/* ─── Tailwind v4 ────────────────────────────────────────────────────────── */
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+@theme {
+    /* ── Brand palette (derived from Vivid Violet #7C3AED) ── */
+    --color-brand-50:  #f5f3ff;
+    --color-brand-100: #ede9fe;
+    --color-brand-200: #ddd6fe;
+    --color-brand-300: #c4b5fd;
+    --color-brand-400: #a78bfa;
+    --color-brand-500: #8b5cf6;
+    --color-brand-600: #7c3aed;
+    --color-brand-700: #6d28d9;
+    --color-brand-800: #5b21b6;
+    --color-brand-900: #4c1d95;
+    --color-brand-950: #2e1065;
+
+    /* ── Accent (amber) ── */
+    --color-accent-50:  #fffbeb;
+    --color-accent-100: #fef3c7;
+    --color-accent-200: #fde68a;
+    --color-accent-300: #fcd34d;
+    --color-accent-400: #fbbf24;
+    --color-accent-500: #f59e0b;
+    --color-accent-600: #d97706;
+    --color-accent-700: #b45309;
+    --color-accent-800: #92400e;
+    --color-accent-900: #78350f;
+    --color-accent-950: #451a03;
+
+    /* ── Coral ── */
+    --color-coral-50:  #fff1f2;
+    --color-coral-100: #ffe4e6;
+    --color-coral-200: #fecdd3;
+    --color-coral-300: #fda4af;
+    --color-coral-400: #fb7185;
+    --color-coral-500: #f43f5e;
+    --color-coral-600: #e11d48;
+    --color-coral-700: #be123c;
+    --color-coral-800: #9f1239;
+    --color-coral-900: #881337;
+    --color-coral-950: #4c0519;
+
+    /* ── Lavender ── */
+    --color-lavender-50:  #f5f3ff;
+    --color-lavender-100: #ede9fe;
+    --color-lavender-200: #ddd6fe;
+    --color-lavender-300: #c4b5fd;
+    --color-lavender-400: #a78bfa;
+    --color-lavender-500: #8b5cf6;
+
+    /* ── Semantic mappings ── */
+    --color-primary:         var(--color-brand-600);
+    --color-primary-soft:    color-mix(in srgb, var(--color-brand-600) 12%, transparent);
+    --color-primary-dark:    var(--color-brand-700);
+    --color-secondary:       var(--color-brand-400);
+    --color-accent:          var(--color-accent-500);
+    --color-accent-soft:     color-mix(in srgb, var(--color-accent-500) 12%, transparent);
+    --color-coral:           var(--color-coral-500);
+    --color-coral-soft:      color-mix(in srgb, var(--color-coral-500) 10%, transparent);
+
+    /* ── Surface / background ── */
+    --color-bg:              #FFFBF0;
+    --color-surface:         rgba(255, 255, 255, 0.88);
+    --color-surface-strong:  #ffffff;
+    --color-border:          rgba(124, 58, 237, 0.12);
+
+    /* ── Text ── */
+    --color-text:            #1E1B4B;
+    --color-text-muted:      #6B7280;
+
+    /* ── Status ── */
+    --color-success:         #10B981;
+    --color-danger:          #F43F5E;
+    --color-warning:         #F59E0B;
+    --color-info:            #3B82F6;
+
+    /* ── Pastels ── */
+    --color-peach:           #FECACA;
+    --color-baby-blue:       #BFDBFE;
+    --color-mint:            #A7F3D0;
+    --color-lilac:           #DDD6FE;
+    --color-cream:           #FEF3C7;
+
+    /* ── Age-tier semantic tokens ── */
+    /* baby: warm orange & cream (0–23 months) */
+    --color-tier-baby:           #FF8C42;
+    --color-tier-baby-dark:      #E07035;
+    --color-tier-baby-bg:        #FFF8F0;
+    --color-tier-baby-accent:    #FFF4E3;
+    --color-tier-baby-text:      #3D2B1F;
+
+    /* toddler: sky blue & yellow (24–47 months) */
+    --color-tier-toddler:        #29ABE2;
+    --color-tier-toddler-dark:   #1E8CBF;
+    --color-tier-toddler-bg:     #F0FAFF;
+    --color-tier-toddler-accent: #FFF8D6;
+    --color-tier-toddler-text:   #1A2E3B;
+
+    /* preschool: green & peach (48–71 months) */
+    --color-tier-preschool:        #44BB77;
+    --color-tier-preschool-dark:   #33A060;
+    --color-tier-preschool-bg:     #F5FFF8;
+    --color-tier-preschool-accent: #F2FFF7;
+    --color-tier-preschool-text:   #1A3020;
+
+    /* school/primary: purple & white (72+ months) */
+    --color-tier-primary:        #7C3AED;
+    --color-tier-primary-dark:   #6328C5;
+    --color-tier-primary-bg:     #FAFAFE;
+    --color-tier-primary-accent: #F5F0FF;
+    --color-tier-primary-text:   #1E1035;
+
+    /* ── Subject card colors ── */
+    --color-subject-math:    #FDE68A;
+    --color-subject-science: #A7F3D0;
+    --color-subject-reading: #BFDBFE;
+    --color-subject-art:     #FBCFE8;
+    --color-subject-music:   #DDD6FE;
+    --color-subject-quran:   #D5F5E3;
+
+    /* ── Border radii ── */
+    --radius-card: 22px;
+    --radius-sm:   14px;
+    --radius-pill: 999px;
+
+    /* ── Shadows (clay morphism) ── */
+    --shadow-clay:
+        6px 6px 14px rgba(124, 58, 237, 0.08),
+        -2px -2px 8px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 6px rgba(255, 255, 255, 0.7);
+    --shadow-clay-hover:
+        8px 8px 20px rgba(124, 58, 237, 0.14),
+        -3px -3px 10px rgba(255, 255, 255, 0.95),
+        inset -2px -2px 8px rgba(255, 255, 255, 0.8);
+    --shadow-clay-pressed:
+        2px 2px 6px rgba(124, 58, 237, 0.06),
+        inset 2px 2px 6px rgba(124, 58, 237, 0.08);
+    --shadow-soft:
+        0 4px 16px rgba(30, 41, 59, 0.06);
+
+    /* ── Typography ── */
+    --font-display: 'Baloo 2', system-ui, sans-serif;
+    --font-body:    'Nunito', system-ui, sans-serif;
+    --font-sans:    'Inter', system-ui, sans-serif;
+
+    /* ── Type scale (7 steps) ── */
+    --text-xs:   0.72rem;
+    --text-sm:   0.875rem;
+    --text-base: 1rem;
+    --text-lg:   1.125rem;
+    --text-xl:   1.25rem;
+    --text-2xl:  1.5rem;
+    --text-3xl:  1.875rem;
+    --text-4xl:  2.25rem;
+
+    /* ── Motion ── */
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --duration-fast: 150ms;
+    --duration-base: 250ms;
+    --duration-slow: 400ms;
 }
 
-[dir="rtl"] .me-auto {
-    margin-left: auto !important;
-    margin-right: unset !important;
+/* ─── Dark mode variant ──────────────────────────────────────────────────── */
+@variant dark (&:where(.dark, .dark *));
+
+/* ─── Base layer ─────────────────────────────────────────────────────────── */
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+
+    html {
+        font-family: var(--font-sans);
+        -webkit-text-size-adjust: 100%;
+        tab-size: 4;
+    }
+
+    body {
+        font-family: var(--font-body);
+        color: var(--color-text);
+        background: var(--color-bg);
+        background-image: linear-gradient(180deg, #F5F0FF 0%, #FFFBF0 50%, #FFF7ED 100%);
+        min-height: 100vh;
+        line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+    }
+
+    /* Focus ring — WCAG AA */
+    :focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+
+    /* RTL support */
+    [dir="rtl"] { text-align: right; }
+    [dir="rtl"] .ms-auto { margin-right: auto !important; margin-left: unset !important; }
+    [dir="rtl"] .me-auto { margin-left: auto !important; margin-right: unset !important; }
 }
 
-/* Theme-specific customizations */
-.theme-playful .navbar {
-    background: linear-gradient(135deg, var(--nn-primary), var(--nn-secondary)) !important;
+/* ─── Component layer ────────────────────────────────────────────────────── */
+@layer components {
+    /* Clay Card */
+    .clay-card {
+        background: var(--color-surface-strong);
+        border: 3px solid var(--color-border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-clay);
+        transition:
+            transform var(--duration-base) var(--ease-bounce),
+            box-shadow var(--duration-base) ease;
+    }
+    .clay-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: var(--shadow-clay-hover);
+    }
+
+    /* Activity card (slightly more lift than clay-card) */
+    .activity-card {
+        background: var(--color-surface-strong);
+        border: 3px solid var(--color-border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-clay);
+        transition:
+            transform 300ms var(--ease-bounce),
+            box-shadow 300ms ease;
+        overflow: hidden;
+        position: relative;
+    }
+    .activity-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: var(--shadow-clay-hover);
+    }
+    .activity-card .card-emoji {
+        font-size: 2.2rem;
+        filter: drop-shadow(2px 2px 0 rgba(124, 58, 237, 0.12));
+    }
+
+    /* Clay Button base */
+    .btn-clay {
+        border-radius: var(--radius-sm);
+        border: 3px solid transparent;
+        font-weight: 700;
+        font-family: var(--font-display);
+        padding: 0.65rem 1.5rem;
+        box-shadow: var(--shadow-clay);
+        transition: all var(--duration-base) var(--ease-bounce);
+        cursor: pointer;
+    }
+    .btn-clay:active {
+        transform: scale(0.95);
+        box-shadow: var(--shadow-clay-pressed);
+    }
+    .btn-clay-primary {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        color: #fff;
+        border-color: var(--color-primary);
+    }
+    .btn-clay-primary:hover {
+        background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+        color: #fff;
+        box-shadow: var(--shadow-clay-hover);
+    }
+    .btn-clay-accent {
+        background: linear-gradient(135deg, var(--color-accent), #FBBF24);
+        color: #1E1B4B;
+        border-color: var(--color-accent);
+    }
+    .btn-clay-accent:hover {
+        background: linear-gradient(135deg, #D97706, var(--color-accent));
+        color: #1E1B4B;
+    }
+    .btn-clay-coral {
+        background: linear-gradient(135deg, var(--color-coral), #FB7185);
+        color: #fff;
+        border-color: var(--color-coral);
+    }
+
+    /* Subject border accents */
+    .subject-math    { border-left: 5px solid var(--color-subject-math); }
+    .subject-science { border-left: 5px solid var(--color-subject-science); }
+    .subject-reading { border-left: 5px solid var(--color-subject-reading); }
+    .subject-art     { border-left: 5px solid var(--color-subject-art); }
+    .subject-music   { border-left: 5px solid var(--color-subject-music); }
+    .subject-quran   { border-left: 5px solid var(--color-subject-quran); }
+
+    /* Pastel backgrounds */
+    .bg-peach     { background-color: var(--color-peach); }
+    .bg-baby-blue { background-color: var(--color-baby-blue); }
+    .bg-mint      { background-color: var(--color-mint); }
+    .bg-lilac     { background-color: var(--color-lilac); }
+    .bg-cream     { background-color: var(--color-cream); }
+
+    /* Age badge */
+    .age-badge {
+        font-size: var(--text-xs);
+        font-weight: 700;
+        padding: 0.3rem 0.7rem;
+        border-radius: var(--radius-pill);
+        border: 2px solid var(--color-border);
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Drawing canvas */
+    .drawing-canvas {
+        border: 3px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        touch-action: none;
+        box-shadow: var(--shadow-clay);
+    }
+
+    /* Gradient hero */
+    .gradient-hero {
+        background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 40%, #F59E0B 100%);
+        color: #fff;
+        border-radius: var(--radius-card);
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .gradient-hero::after {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* Locked overlay */
+    .locked-overlay {
+        opacity: 0.55;
+        filter: grayscale(0.3);
+        pointer-events: auto;
+    }
+    .locked-overlay .lock-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: var(--radius-pill);
+        padding: 0.25rem 0.65rem;
+        font-size: var(--text-xs);
+        font-weight: 700;
+        box-shadow: var(--shadow-clay);
+    }
+
+    /* Streak badge */
+    .streak-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+        color: #92400E;
+        border: 2px solid #FBBF24;
+        border-radius: var(--radius-pill);
+        padding: 0.3rem 0.8rem;
+        font-weight: 800;
+        font-size: var(--text-sm);
+        box-shadow: var(--shadow-clay);
+    }
+
+    /* Progress ring */
+    .progress-ring {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: conic-gradient(var(--color-primary) var(--progress, 0%), var(--color-lilac) 0%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-clay);
+    }
+    .progress-ring__inner {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--color-surface-strong);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: var(--text-sm);
+        color: var(--color-primary);
+    }
+
+    /* Wave divider */
+    .wave-divider {
+        width: 100%;
+        height: 60px;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q150 0 300 30 T600 30 T900 30 T1200 30 V60 H0Z' fill='%23FFFBF0'/%3E%3C/svg%3E") no-repeat center;
+        background-size: cover;
+    }
+
+    /* Floating blob (decorative) */
+    .floating-blob {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.08;
+        pointer-events: none;
+        animation: blob-float 8s ease-in-out infinite;
+    }
+    .floating-blob--purple { background: var(--color-primary); }
+    .floating-blob--amber  { background: var(--color-accent); }
+    .floating-blob--coral  { background: var(--color-coral); }
+
+    /* Age-tier accent classes (apply to age-* body) */
+    .age-baby      {
+        --tier-color: var(--color-tier-baby);
+        --tier-bg:    var(--color-tier-baby-bg);
+        --tier-text:  var(--color-tier-baby-text);
+        background: var(--color-tier-baby-bg);
+        color: var(--color-tier-baby-text);
+        font-size: calc(1rem * 1.25);
+    }
+    .age-toddler   {
+        --tier-color: var(--color-tier-toddler);
+        --tier-bg:    var(--color-tier-toddler-bg);
+        --tier-text:  var(--color-tier-toddler-text);
+        background: var(--color-tier-toddler-bg);
+        color: var(--color-tier-toddler-text);
+        font-size: calc(1rem * 1.15);
+    }
+    .age-preschool {
+        --tier-color: var(--color-tier-preschool);
+        --tier-bg:    var(--color-tier-preschool-bg);
+        --tier-text:  var(--color-tier-preschool-text);
+        background: var(--color-tier-preschool-bg);
+        color: var(--color-tier-preschool-text);
+        font-size: calc(1rem * 1.1);
+    }
+    .age-school    {
+        --tier-color: var(--color-tier-primary);
+        --tier-bg:    var(--color-tier-primary-bg);
+        --tier-text:  var(--color-tier-primary-text);
+        background: var(--color-tier-primary-bg);
+        color: var(--color-tier-primary-text);
+    }
+
+    /* Child nav tier theming */
+    .age-baby .child-nav,
+    .age-toddler .child-nav,
+    .age-preschool .child-nav,
+    .age-school .child-nav {
+        background: var(--tier-color, var(--color-primary));
+        color: #fff;
+    }
+    .age-baby .child-nav .navbar-brand,
+    .age-baby .child-nav a,
+    .age-toddler .child-nav .navbar-brand,
+    .age-toddler .child-nav a,
+    .age-preschool .child-nav .navbar-brand,
+    .age-preschool .child-nav a,
+    .age-school .child-nav .navbar-brand,
+    .age-school .child-nav a {
+        color: #fff;
+    }
+
+    .child-badge {
+        background: rgba(255, 255, 255, 0.3);
+        color: #fff;
+        border-radius: 20px;
+        padding: 4px 12px;
+    }
+
+    /* Glass panel */
+    .glass-panel {
+        background: var(--color-surface);
+        border: 3px solid var(--color-border);
+        border-radius: var(--radius-card);
+        box-shadow: var(--shadow-clay);
+    }
+
+    /* Focus ring utility class */
+    .focus-ring {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    /* Brand gradient text */
+    .brand-grad {
+        background: linear-gradient(120deg, #7C3AED 0%, #A78BFA 45%, #F59E0B 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Playful font class (for any surface that intentionally uses the display font) */
+    .playful-font { font-family: var(--font-display); }
 }
 
-.theme-professional .navbar {
-    background-color: #1f2937 !important;
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes blob-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%       { transform: translateY(-20px) scale(1.05); }
 }
 
-/* Activity card styles */
-.activity-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+@keyframes confetti-burst {
+    0%   { transform: scale(0) rotate(0deg); opacity: 1; }
+    50%  { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
 }
 
-.activity-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-/* Age badge styles */
-.age-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-}
-
-/* Canvas styles for tracing/drawing activities */
-.drawing-canvas {
-    border: 2px solid var(--bs-border-color);
-    border-radius: 0.375rem;
-    touch-action: none;
+.confetti-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: confetti-burst 0.8s var(--ease-bounce) forwards;
 }

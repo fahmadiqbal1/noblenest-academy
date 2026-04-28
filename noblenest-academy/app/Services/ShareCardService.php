@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\ChildProfile;
 use App\Models\Activity;
 use App\Models\Badge;
-use App\Models\ShareCard;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -165,7 +164,6 @@ class ShareCardService
         ob_start();
         imagepng($image);
         $data = ob_get_clean();
-        imagedestroy($image);
 
         $hash = Str::random(12);
         $path = "share-cards/{$name}_{$hash}.png";

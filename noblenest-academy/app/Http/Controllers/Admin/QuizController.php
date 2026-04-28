@@ -28,7 +28,7 @@ class QuizController extends Controller
             'module_id' => 'nullable|exists:modules,id',
         ]);
         $quiz = Quiz::create($data);
-        return redirect()->route('admin.quizzes.edit', $quiz)->with('success', 'Quiz created. Now add questions.');
+        return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Quiz created. Now add questions.');
     }
 
     public function edit(Quiz $quiz)
@@ -46,13 +46,13 @@ class QuizController extends Controller
             'module_id' => 'nullable|exists:modules,id',
         ]);
         $quiz->update($data);
-        return redirect()->route('admin.quizzes.index')->with('success', 'Quiz updated.');
+        return redirect()->route('admin.quizzes.index')->with('status', 'Quiz updated.');
     }
 
     public function destroy(Quiz $quiz)
     {
         $quiz->delete();
-        return redirect()->route('admin.quizzes.index')->with('success', 'Quiz deleted.');
+        return redirect()->route('admin.quizzes.index')->with('status', 'Quiz deleted.');
     }
 }
 

@@ -58,3 +58,69 @@ def get_existing_activity_summaries(age_group: str, subject: str) -> str:
 
     except (json.JSONDecodeError, KeyError):
         return ""  # Corrupted index — degrade gracefully
+
+
+def get_existing_activity_summaries_enriched(age_group: str, subject: str) -> dict:
+    """
+    Return enriched context including existing activity titles AND
+    cognitive domain coverage summary.
+
+    Used by enhanced activity_chain.py to avoid gaps in curriculum balance.
+
+    Returns dict with:
+        - existing_context: plain-text activity title list
+        - cognitive_domain_summary: summary of current cognitive domain coverage
+    """
+    index_file = INDEX_DIR / "activities-index.json"
+
+    if not index_file.exists():
+        return {
+            "existing_context": "",
+            "cognitive_domain_summary": "No existing activities yet. Start with foundational domains.",
+        }
+
+    try:
+        data = json.loads(index_file.read_text(encoding="utf-8"))
+        nodes = data.get("nodes", [])
+
+        # Filter for matching age_group + subject
+        matching = [
+            node
+            for node in nodes
+            if node.get("age_group") == age_group
+            and node.get("subject", "").lower() == subject.lower()
+        ]
+
+        if not matching:
+            return {
+                "existing_context": "",
+                "cognitive_domain_summary": "No existing activities yet in this category. Start with foundational domains.",
+            }
+
+        # Extract titles for duplicate avoidance
+        titles = [node["title"] for node in matching[:50]]
+        existing_context = "\n".join(f"- {title}" for title in titles)
+
+        # Analyze cognitive domain coverage
+        cognitive_counts = {}
+        for node in matching:
+            domain = node.get("cognitive_domain", "unknown")
+            cognitive_counts[domain] = cognitive_counts.get(domain, 0) + 1
+
+        # Build summary string for LLM
+        if cognitive_counts:
+            domain_lines = [f"  - {domain}: {count} activities" for domain, count in sorted(cognitive_counts.items())]
+            cognitive_summary = "Current cognitive domain coverage:\n" + "\n".join(domain_lines) + "\n\nConsider activities for underrepresented domains."
+        else:
+            cognitive_summary = "No cognitive domain metadata yet. Prioritize foundational domains: math, language, science, emotional_regulation."
+
+        return {
+            "existing_context": existing_context,
+            "cognitive_domain_summary": cognitive_summary,
+        }
+
+    except (json.JSONDecodeError, KeyError):
+        return {
+            "existing_context": "",
+            "cognitive_domain_summary": "Index corrupted. Start fresh with foundational domains.",
+        }

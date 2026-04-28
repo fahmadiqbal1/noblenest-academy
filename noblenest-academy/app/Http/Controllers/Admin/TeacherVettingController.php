@@ -11,7 +11,7 @@ class TeacherVettingController extends Controller
 {
     public function index(Request $request)
     {
-        $status    = $request->get('status', 'pending');
+        $status    = $request->input('status', 'pending');
         $teachers  = TeacherProfile::with('user')
             ->where('status', $status)
             ->latest()

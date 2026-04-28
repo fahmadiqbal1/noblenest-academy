@@ -1,82 +1,168 @@
-@extends('layouts.app')
+@extends('layouts.parent')
 
-@section('title', 'Refer Friends — Noble Nest Academy')
+@section('title', __('Refer Friends') . ' — Noble Nest Academy')
 
 @section('content')
-<div class="container py-4" style="max-width: 700px;">
-    <h2 class="fw-bold mb-1">Invite Friends 🎁</h2>
-    <p class="text-muted mb-4">When a friend signs up with your link, you both get 1 month free!</p>
+<div class="mx-auto max-w-2xl px-4 sm:px-6 py-8">
 
-    {{-- Referral link box --}}
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <label class="form-label fw-semibold">Your referral link</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="refLink" value="{{ url('/ref/' . Auth::user()->referral_code) }}" readonly>
-                <button class="btn btn-primary" onclick="copyRefLink()" id="copyBtn">Copy</button>
-            </div>
-            <p class="text-muted small mt-2">Share via WhatsApp, email, or social media</p>
-            <div class="d-flex gap-2 mt-3">
-                <a href="https://wa.me/?text={{ urlencode('Join me on Noble Nest Academy — learning made magical for kids! Use my link: ' . url('/ref/' . Auth::user()->referral_code)) }}"
-                   class="btn btn-success btn-sm" target="_blank" rel="noopener noreferrer">
-                    📱 WhatsApp
-                </a>
-                <a href="mailto:?subject={{ urlencode('Join Noble Nest Academy') }}&body={{ urlencode('I\'ve been using Noble Nest Academy with my kids and thought you\'d love it! Sign up here: ' . url('/ref/' . Auth::user()->referral_code)) }}"
-                   class="btn btn-outline-secondary btn-sm">
-                    📧 Email
-                </a>
-            </div>
+    {{-- Hero --}}
+    <x-ui.section class="pt-0 text-center">
+        <div class="mb-4 w-20 h-20 mx-auto rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center" aria-hidden="true">
+            <x-ui.icon name="gift" class="w-10 h-10 text-[var(--color-primary)]" />
         </div>
-    </div>
+        <h1 class="text-3xl font-bold text-[var(--color-text)] mb-2">{{ __('Invite Friends, Earn Rewards') }}</h1>
+        <p class="text-[var(--color-text-muted)] max-w-sm mx-auto leading-relaxed">
+            {{ __('When a friend signs up with your link, you both get 1 month free!') }}
+        </p>
+    </x-ui.section>
+
+    {{-- Referral link --}}
+    <x-ui.card variant="clay" padding="md" class="mb-6">
+        <label class="block text-sm font-semibold text-[var(--color-text)] mb-1">
+            {{ __('Your referral link') }}
+        </label>
+        <div
+            x-data="{ copied: false }"
+            class="flex items-center gap-2"
+        >
+            <input
+                id="refLink"
+                type="text"
+                readonly
+                value="{{ url('/ref/' . Auth::user()->referral_code) }}"
+                class="flex-1 block rounded-[var(--radius-sm)] border-[2px] border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-text)] text-sm py-2.5 px-4 focus:outline-none focus:border-[var(--color-brand-500)] select-all cursor-text"
+                aria-label="{{ __('Referral link') }}"
+                onclick="this.select()"
+            />
+            <x-ui.button
+                type="button"
+                variant="primary"
+                size="md"
+                icon="copy"
+                x-bind:aria-label="copied ? '{{ __('Copied!') }}' : '{{ __('Copy link') }}'"
+                @click="
+                    navigator.clipboard.writeText(document.getElementById('refLink').value);
+                    copied = true;
+                    setTimeout(() => copied = false, 2000)
+                "
+            >
+                <span x-show="!copied">{{ __('Copy') }}</span>
+                <span x-show="copied" x-cloak>{{ __('Copied!') }}</span>
+            </x-ui.button>
+        </div>
+        <p class="text-xs text-[var(--color-text-muted)] mt-2">
+            {{ __('Share via WhatsApp, email, or social media') }}
+        </p>
+
+        {{-- Share shortcuts --}}
+        <div class="flex flex-wrap gap-2 mt-3">
+            <x-ui.button
+                variant="secondary"
+                size="sm"
+                href="https://wa.me/?text={{ urlencode(__('Join me on Noble Nest Academy — learning made magical for kids! Use my link: ') . url('/ref/' . Auth::user()->referral_code)) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                📱 {{ __('WhatsApp') }}
+            </x-ui.button>
+            <x-ui.button
+                variant="secondary"
+                size="sm"
+                href="mailto:?subject={{ urlencode(__('Join Noble Nest Academy')) }}&body={{ urlencode(__("I've been using Noble Nest Academy with my kids and thought you'd love it! Sign up here: ") . url('/ref/' . Auth::user()->referral_code)) }}"
+                icon="mail"
+            >
+                {{ __('Email') }}
+            </x-ui.button>
+        </div>
+    </x-ui.card>
 
     {{-- Stats --}}
-    <div class="row g-3 mb-4">
-        <div class="col-4 text-center">
-            <div class="h3 fw-bold text-primary">{{ $referrals->total() }}</div>
-            <div class="text-muted small">Total invites</div>
-        </div>
-        <div class="col-4 text-center">
-            <div class="h3 fw-bold text-success">{{ $referrals->where('converted_at', '!=', null)->count() }}</div>
-            <div class="text-muted small">Converted</div>
-        </div>
-        <div class="col-4 text-center">
-            <div class="h3 fw-bold text-warning">{{ $referrals->where('reward_granted', true)->count() }}</div>
-            <div class="text-muted small">Rewards earned</div>
-        </div>
+    <div class="grid grid-cols-3 gap-4 mb-8">
+        <x-ui.stat
+            :label="__('Invites Sent')"
+            :value="$referrals->total()"
+            icon="send"
+        />
+        <x-ui.stat
+            :label="__('Converted')"
+            :value="$referrals->where('converted_at', '!=', null)->count()"
+            icon="check-circle"
+        />
+        <x-ui.stat
+            :label="__('Rewards Earned')"
+            :value="$referrals->where('reward_granted', true)->count()"
+            icon="award"
+        />
     </div>
 
-    {{-- Referral list --}}
-    @if($referrals->isNotEmpty())
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white fw-semibold">Referral history</div>
-        <ul class="list-group list-group-flush">
-            @foreach($referrals as $ref)
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="fw-semibold">{{ $ref->referred->name ?? 'Pending...' }}</div>
-                    <small class="text-muted">{{ $ref->created_at->format('M d, Y') }}</small>
-                </div>
-                <span class="badge {{ $ref->converted_at ? 'bg-success' : 'bg-secondary' }}">
-                    {{ $ref->converted_at ? 'Converted ✓' : 'Pending' }}
-                </span>
-            </li>
+    {{-- How it works --}}
+    <x-ui.section :title="__('How It Works')">
+        <ol class="space-y-4">
+            @foreach([
+                ['icon' => 'copy',       'step' => '1', 'title' => __('Copy your link'),    'desc' => __('Share your unique referral link with friends and family.')],
+                ['icon' => 'users',      'step' => '2', 'title' => __('Friend signs up'),   'desc' => __('Your friend creates an account using your referral link.')],
+                ['icon' => 'award',      'step' => '3', 'title' => __('Both get rewarded'), 'desc' => __('You both receive 1 month free when they subscribe.')],
+            ] as $step)
+                <li class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-[var(--color-primary-soft)] flex items-center justify-center shrink-0 mt-0.5">
+                        <x-ui.icon :name="$step['icon']" class="w-5 h-5 text-[var(--color-primary)]" />
+                    </div>
+                    <div>
+                        <p class="font-bold text-[var(--color-text)] text-sm">{{ $step['step'] }}. {{ $step['title'] }}</p>
+                        <p class="text-sm text-[var(--color-text-muted)] mt-0.5 leading-relaxed">{{ $step['desc'] }}</p>
+                    </div>
+                </li>
             @endforeach
-        </ul>
-    </div>
-    {{ $referrals->links('pagination::bootstrap-5') }}
-    @endif
-</div>
+        </ol>
+    </x-ui.section>
 
-@push('scripts')
-<script>
-function copyRefLink() {
-    const input = document.getElementById('refLink');
-    input.select();
-    document.execCommand('copy');
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-}
-</script>
-@endpush
+    {{-- Referral History --}}
+    <x-ui.section :title="__('Referral History')">
+        @if($referrals->isNotEmpty())
+            <x-ui.table :striped="true">
+                <x-slot:head>
+                    <tr>
+                        <th class="px-4 py-3 text-start">{{ __('Friend') }}</th>
+                        <th class="px-4 py-3 text-start">{{ __('Date') }}</th>
+                        <th class="px-4 py-3 text-start">{{ __('Status') }}</th>
+                    </tr>
+                </x-slot:head>
+
+                @foreach($referrals as $ref)
+                    <tr>
+                        <td class="px-4 py-3">
+                            <span class="font-semibold text-[var(--color-text)]">
+                                {{ $ref->referred->name ?? __('Pending…') }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-[var(--color-text-muted)]">
+                            {{ $ref->created_at->format('M d, Y') }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <x-ui.badge :tone="$ref->converted_at ? 'success' : 'neutral'" size="sm">
+                                @if($ref->converted_at)
+                                    <x-ui.icon name="check" class="w-3 h-3" />
+                                    {{ __('Converted') }}
+                                @else
+                                    {{ __('Pending') }}
+                                @endif
+                            </x-ui.badge>
+                        </td>
+                    </tr>
+                @endforeach
+            </x-ui.table>
+
+            <div class="mt-4">
+                {{ $referrals->links() }}
+            </div>
+        @else
+            <x-ui.empty-state
+                icon="send"
+                :title="__('No referrals yet')"
+                :description="__('Share your link above to start inviting friends!')"
+            />
+        @endif
+    </x-ui.section>
+
+</div>
 @endsection

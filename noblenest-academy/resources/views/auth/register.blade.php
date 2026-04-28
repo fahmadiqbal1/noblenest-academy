@@ -1,99 +1,226 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
+@section('title', 'Create Account | NobleNest Global Academy')
 @section('meta_title', 'Create Your Account | NobleNest Global Academy')
 @section('meta_description', 'Create a NobleNest Global Academy account as a student, teacher, parent, or admin and enter the right learning experience from your first session.')
 @section('meta_image', asset('og-register.png'))
 
 @section('content')
-<style>
-    .auth-shell,
-    .auth-panel {
-        background: rgba(255,255,255,0.86);
-        border: 1px solid rgba(24,34,47,0.08);
-        box-shadow: 0 28px 60px rgba(24,34,47,0.12);
-        border-radius: 1.75rem;
-    }
-    .auth-shell {
-        overflow: hidden;
-        background:
-            radial-gradient(circle at 16% 18%, rgba(242,165,65,0.18), transparent 22%),
-            radial-gradient(circle at 85% 14%, rgba(13,92,99,0.18), transparent 25%),
-            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
-    }
-    .auth-field { min-height: 50px; border-radius: 1rem; }
-    .auth-brand {
-        width: 88px;
-        height: 88px;
-        border-radius: 1.4rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.18);
-    }
-</style>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-xl-11">
-            <div class="auth-shell">
-                <div class="row g-0 align-items-stretch">
-                    <div class="col-lg-5 p-4 p-lg-5 text-white" style="background:linear-gradient(135deg,#0d5c63,#1f7a8c 58%, #f2a541);">
-                        <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="auth-brand mb-4">
-                        <div class="text-uppercase fw-bold small mb-3" style="letter-spacing:0.14em;">Create your account</div>
-                        <h2 class="fw-bold mb-3">{{ I18n::get('register') }}</h2>
-                        <p class="mb-4 opacity-75">Start as a student, teacher, parent, or admin and land in the right experience from the first session.</p>
-                        <div class="d-grid gap-3">
-                            <div class="bg-white bg-opacity-10 rounded-4 p-3">
-                                <div class="fw-semibold">Students</div>
-                                <div class="small opacity-75">Discover and join live teacher-led courses.</div>
-                            </div>
-                            <div class="bg-white bg-opacity-10 rounded-4 p-3">
-                                <div class="fw-semibold">Teachers</div>
-                                <div class="small opacity-75">Publish courses, schedule classes, and manage invitations.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-7 p-4 p-lg-5">
-    <h2 class="mb-4">{{ I18n::get('register') }}</h2>
-    <form method="POST" action="{{ url('/register') }}">
-        @csrf
-        @if($errors->any())
-            <div class="alert alert-danger">{{ $errors->first() }}</div>
-        @endif
-        <div class="mb-3">
-            <label for="name" class="form-label">{{ I18n::get('name') }}</label>
-            <input type="text" class="form-control auth-field" id="name" name="name" value="{{ old('name') }}" required>
+{{--
+  Auth layout wraps content in a centred card (max-w-md).
+  For register we want a two-column split, so we break out of that
+  by using a full-bleed negative-margin trick inside the card slot.
+--}}
+
+<div class="flex flex-col lg:flex-row -m-8 overflow-hidden rounded-[var(--radius-card)]">
+
+  {{-- Brand panel --}}
+  <aside class="lg:w-2/5 p-8 text-white bg-gradient-to-b from-[var(--color-brand-700)] via-[var(--color-brand-600)] to-[var(--color-brand-400)]">
+    <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="w-20 h-20 rounded-[var(--radius-sm)] shadow-[var(--shadow-clay)] mb-6">
+    <p class="text-xs font-extrabold uppercase tracking-widest text-white/80 mb-2">Get started free</p>
+    <h1 class="text-2xl font-bold font-[var(--font-display)] mb-3">{{ I18n::get('register') }}</h1>
+    <p class="text-white/82 text-sm leading-relaxed mb-8">
+      Start as a student, teacher, parent, or practitioner and land in the right experience from your very first session.
+    </p>
+    <div class="space-y-3">
+      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
+        <div class="flex items-center gap-2 mb-1">
+          <x-ui.icon name="graduation-cap" class="w-4 h-4" />
+          <span class="font-semibold text-sm">Teachers</span>
         </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">{{ I18n::get('email') }}</label>
-            <input type="email" class="form-control auth-field" id="email" name="email" value="{{ old('email') }}" required>
+        <p class="text-xs text-white/78">Publish courses, schedule classes, and manage invitations.</p>
+      </div>
+      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
+        <div class="flex items-center gap-2 mb-1">
+          <x-ui.icon name="users" class="w-4 h-4" />
+          <span class="font-semibold text-sm">Parents</span>
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">{{ I18n::get('password') }}</label>
-            <input type="password" class="form-control auth-field" id="password" name="password" required>
+        <p class="text-xs text-white/78">Give your child a personalised learning journey.</p>
+      </div>
+    </div>
+  </aside>
+
+  {{-- Form panel --}}
+  <div class="flex-1 p-8"
+       x-data="{
+         showPw: false,
+         showPwC: false,
+         loading: false,
+         role: '{{ old('role', str_contains((string) session('url.intended', ''), '/invite/') ? 'Student' : (request('role') ?? 'Parent')) }}'
+       }">
+
+    <h2 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-1">Create your account</h2>
+    <p class="text-sm text-[var(--color-text-muted)] mb-6">Fill in the details below to get started.</p>
+
+    <form method="POST" action="{{ url('/register') }}" @submit="loading = true" novalidate>
+      @csrf
+
+      {{-- Hidden role field bound to Alpine state --}}
+      <input type="hidden" name="role" :value="role">
+
+      @if($errors->any())
+        <x-ui.alert tone="danger" class="mb-4">{{ $errors->first() }}</x-ui.alert>
+      @endif
+
+      {{-- Role picker --}}
+      <fieldset class="mb-5">
+        <legend class="block text-sm font-semibold text-[var(--color-text)] mb-2">{{ I18n::get('register_as') }}</legend>
+        <div class="grid grid-cols-2 gap-2">
+
+          @php
+          $roles = [
+            'Parent'       => ['icon' => 'users',          'desc' => 'Monitor learning'],
+            'Teacher'      => ['icon' => 'graduation-cap', 'desc' => 'Create courses'],
+            'Student'      => ['icon' => 'book-open',      'desc' => 'Join courses'],
+            'Practitioner' => ['icon' => 'shield',         'desc' => 'Wellness review'],
+          ];
+          @endphp
+
+          @foreach($roles as $roleKey => $roleData)
+          <button
+            type="button"
+            role="radio"
+            :aria-checked="role === '{{ $roleKey }}' ? 'true' : 'false'"
+            @click="role = '{{ $roleKey }}'"
+            @keydown.enter="role = '{{ $roleKey }}'"
+            @keydown.space.prevent="role = '{{ $roleKey }}'"
+            class="relative flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border-2 p-3 text-center cursor-pointer select-none transition-all duration-[var(--duration-fast)]
+                   focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            :class="role === '{{ $roleKey }}'
+              ? 'border-[var(--color-brand-500)] bg-[var(--color-brand-50)] shadow-sm -translate-y-0.5'
+              : 'border-[var(--color-border)] bg-[var(--color-surface-strong)] hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40'"
+          >
+            <x-ui.icon
+              name="{{ $roleData['icon'] }}"
+              class="w-6 h-6 transition-colors duration-[var(--duration-fast)]"
+              ::class="role === '{{ $roleKey }}' ? 'text-[var(--color-brand-600)]' : 'text-[var(--color-text-muted)]'"
+            />
+            <span class="text-xs font-bold text-[var(--color-text)]">{{ $roleKey }}</span>
+            <span class="text-[0.65rem] text-[var(--color-text-muted)]">{{ $roleData['desc'] }}</span>
+          </button>
+          @endforeach
+
         </div>
-        <div class="mb-3">
-            <label for="password_confirmation" class="form-label">{{ I18n::get('confirm_password') }}</label>
-            <input type="password" class="form-control auth-field" id="password_confirmation" name="password_confirmation" required>
+      </fieldset>
+
+      <div class="space-y-4">
+
+        <x-ui.field name="name" label="{{ I18n::get('name') }}" :error="$errors->first('name')" required>
+          <x-ui.input
+            type="text"
+            name="name"
+            :value="old('name')"
+            placeholder="Your full name"
+            autocomplete="name"
+            :invalid="$errors->has('name')"
+            size="lg"
+          />
+        </x-ui.field>
+
+        <x-ui.field name="email" label="{{ I18n::get('email') }}" :error="$errors->first('email')" required>
+          <x-ui.input
+            type="email"
+            name="email"
+            :value="old('email')"
+            placeholder="you@example.com"
+            autocomplete="email"
+            :invalid="$errors->has('email')"
+            size="lg"
+          />
+        </x-ui.field>
+
+        {{-- Password with toggle --}}
+        <x-ui.field name="password" label="{{ I18n::get('password') }}" :error="$errors->first('password')" required>
+          <div class="relative flex">
+            <input
+              :type="showPw ? 'text' : 'password'"
+              id="password"
+              name="password"
+              required
+              autocomplete="new-password"
+              placeholder="Min. 8 characters"
+              aria-describedby="{{ $errors->has('password') ? 'password_error' : '' }}"
+              class="block w-full rounded-s-[var(--radius-sm)] rounded-e-none border-2 border-e-0 border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-text)] py-3 px-4 text-base focus:outline-none focus:border-[var(--color-brand-500)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 {{ $errors->has('password') ? 'border-[var(--color-coral-500)]' : '' }}"
+            >
+            <button
+              type="button"
+              @click="showPw = !showPw"
+              :aria-label="showPw ? 'Hide password' : 'Show password'"
+              class="px-4 border-2 border-[var(--color-border)] border-s-0 rounded-e-[var(--radius-sm)] bg-[var(--color-surface-strong)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-brand-50)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            >
+              <x-ui.icon name="eye" class="w-5 h-5" x-show="!showPw" />
+              <x-ui.icon name="eye-off" class="w-5 h-5" x-show="showPw" x-cloak />
+            </button>
+          </div>
+        </x-ui.field>
+
+        {{-- Confirm password with toggle --}}
+        <x-ui.field name="password_confirmation" label="{{ I18n::get('confirm_password') }}" :error="$errors->first('password_confirmation')" required>
+          <div class="relative flex">
+            <input
+              :type="showPwC ? 'text' : 'password'"
+              id="password_confirmation"
+              name="password_confirmation"
+              required
+              autocomplete="new-password"
+              class="block w-full rounded-s-[var(--radius-sm)] rounded-e-none border-2 border-e-0 border-[var(--color-border)] bg-[var(--color-surface-strong)] text-[var(--color-text)] py-3 px-4 text-base focus:outline-none focus:border-[var(--color-brand-500)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            >
+            <button
+              type="button"
+              @click="showPwC = !showPwC"
+              :aria-label="showPwC ? 'Hide password' : 'Show password'"
+              class="px-4 border-2 border-[var(--color-border)] border-s-0 rounded-e-[var(--radius-sm)] bg-[var(--color-surface-strong)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-brand-50)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            >
+              <x-ui.icon name="eye" class="w-5 h-5" x-show="!showPwC" />
+              <x-ui.icon name="eye-off" class="w-5 h-5" x-show="showPwC" x-cloak />
+            </button>
+          </div>
+        </x-ui.field>
+
+        {{-- Terms checkbox --}}
+        <div class="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="terms"
+            name="terms"
+            required
+            class="mt-0.5 w-4 h-4 rounded border-2 border-[var(--color-border)] text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 cursor-pointer"
+          >
+          <label for="terms" class="text-sm text-[var(--color-text-muted)] cursor-pointer select-none leading-snug">
+            I agree to the
+            <a href="{{ route('noble.terms') }}" target="_blank" class="font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">Terms of Service</a>
+            and
+            <a href="{{ route('noble.privacy') }}" target="_blank" class="font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">Privacy Policy</a>.
+          </label>
         </div>
-        <div class="mb-3">
-            <label for="role" class="form-label">{{ I18n::get('register_as') }}</label>
-            <select class="form-select auth-field" id="role" name="role" required>
-                @php
-                    $defaultRole = old('role', str_contains((string) session('url.intended', ''), '/invite/') ? 'Student' : request('role'));
-                @endphp
-                <option value="Parent" {{ $defaultRole == 'Parent' ? 'selected' : '' }}>{{ I18n::get('parent') }} — Monitor my child's learning</option>
-                <option value="Teacher" {{ $defaultRole == 'Teacher' ? 'selected' : '' }}>Teacher — Offer online courses</option>
-                <option value="Student" {{ $defaultRole == 'Student' ? 'selected' : '' }}>Student — Find &amp; join courses</option>
-                <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>{{ I18n::get('admin') }}</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary px-4">{{ I18n::get('register') }}</button>
+
+        <x-ui.button
+          variant="primary"
+          size="lg"
+          type="submit"
+          class="w-full"
+          :loading="loading"
+          :disabled="loading"
+        >
+          <span x-show="!loading">{{ I18n::get('register') }}</span>
+          <span x-show="loading" x-cloak>Creating account&hellip;</span>
+        </x-ui.button>
+
+      </div>
     </form>
-    <div class="mt-3">
-        <a href="{{ route('login') }}">{{ I18n::get('already_have_account') }}</a>
-    </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+    <hr class="my-6 border-[var(--color-border)]">
+
+    <p class="text-center text-sm text-[var(--color-text-muted)]">
+      Already have an account?
+      <a href="{{ route('login') }}" class="font-bold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded ms-1">
+        Sign in
+      </a>
+    </p>
+
+  </div>
+
 </div>
+
 @endsection

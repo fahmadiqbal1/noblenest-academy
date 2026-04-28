@@ -14,10 +14,18 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global HTTP middleware — applied to every request
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        // Exclude Stripe webhook from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'webhook/stripe',
+        ]);
+
         // Register route middleware aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'subscription.active' => \App\Http\Middleware\EnsureSubscriptionActive::class,
+            'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
+            'maternal.consent' => \App\Http\Middleware\EnsureMaternalConsent::class,
+            'practitioner.active' => \App\Http\Middleware\EnsurePractitionerActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

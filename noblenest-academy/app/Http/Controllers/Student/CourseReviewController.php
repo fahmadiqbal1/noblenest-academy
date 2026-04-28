@@ -34,7 +34,7 @@ class CourseReviewController extends Controller
             [...$validated, 'is_visible' => true]
         );
 
-        return back()->with('success', 'Thank you for your review!');
+        return back()->with('status', 'Thank you for your review!');
     }
 
     /**
@@ -46,6 +46,6 @@ class CourseReviewController extends Controller
             ->where('user_id', Auth::id())
             ->delete();
 
-        return back()->with('success', 'Review removed.');
+        return back()->with('status', 'Review removed.');
     }
 }

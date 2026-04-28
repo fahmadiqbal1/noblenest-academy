@@ -33,7 +33,7 @@ class QuestionController extends Controller
                 ]);
             }
         }
-        return redirect()->route('admin.quizzes.edit', $quiz)->with('success', 'Question added.');
+        return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Question added.');
     }
 
     public function edit(Quiz $quiz, Question $question)
@@ -76,13 +76,13 @@ class QuestionController extends Controller
         }
         // Delete removed options
         $question->options()->whereNotIn('id', $ids)->delete();
-        return redirect()->route('admin.quizzes.edit', $quiz)->with('success', 'Question updated.');
+        return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Question updated.');
     }
 
     public function destroy(Quiz $quiz, Question $question)
     {
         $question->delete();
-        return redirect()->route('admin.quizzes.edit', $quiz)->with('success', 'Question deleted.');
+        return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Question deleted.');
     }
 }
 

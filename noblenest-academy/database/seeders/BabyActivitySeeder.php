@@ -28,7 +28,7 @@ class BabyActivitySeeder extends Seeder
             foreach ($chunk as $data) {
                 Activity::updateOrCreate(
                     ['title' => $data['title']],
-                    array_merge($data, ['language' => 'en', 'like_count' => 0])
+                    array_merge(['instructions' => $data['description'] ?? null], $data, ['language' => 'en', 'like_count' => 0])
                 );
             }
         }

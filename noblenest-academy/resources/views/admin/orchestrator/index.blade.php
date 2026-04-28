@@ -86,7 +86,7 @@
     .status-pill--live { background: rgba(22, 134, 107, 0.12); color: #16866b; }
     .status-pill--failed { background: rgba(196, 69, 54, 0.12); color: #c44536; }
     .status-pill--unchecked,
-    .status-pill--configured { background: rgba(13, 92, 99, 0.10); color: #0d5c63; }
+    .status-pill--configured { background: rgba(124, 58, 237, 0.10); color: #7C3AED; }
     .provider-helper {
         color: #5f6c7b;
         font-size: 0.9rem;
@@ -122,7 +122,7 @@
         letter-spacing: 0.14em;
         text-transform: uppercase;
         font-weight: 800;
-        color: #0d5c63;
+        color: #7C3AED;
     }
 </style>
 
@@ -217,7 +217,8 @@
                                 <div class="d-flex flex-wrap align-items-center gap-2">
                                     <span class="fw-semibold">{{ $p->name }}</span>
                                     <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ $p->slug }}</span>
-                                    <span class="status-pill status-pill--{{ in_array($p->connection_status, ['live', 'failed', 'configured'], true) ? $p->connection_status : 'unchecked' }}">
+                                    <span class="status-pill status-pill--{{ in_array($p->connection_status, ['live', 'failed', 'configured'], true) ? $p->connection_status : 'unchecked' }}"
+                                          id="status-pill-{{ $p->id }}">
                                         <i class="bi bi-{{ $p->connection_status === 'live' ? 'broadcast-pin' : ($p->connection_status === 'failed' ? 'x-octagon' : 'activity') }}"></i>
                                         {{ $p->connection_status ?? 'unchecked' }}
                                     </span>
@@ -241,12 +242,12 @@
                                 </div>
                             </div>
                             <div class="d-flex gap-1 flex-wrap justify-content-end">
-                                <form method="POST" action="{{ route('admin.orchestrator.verifyProvider', $p) }}">
-                                    @csrf
-                                    <button class="btn btn-outline-primary btn-sm" title="Verify live status">
-                                        <i class="bi bi-arrow-repeat"></i>
-                                    </button>
-                                </form>
+                                <button class="btn btn-outline-primary btn-sm"
+                                        id="verify-btn-{{ $p->id }}"
+                                        title="Verify live status"
+                                        onclick="verifyProvider({{ $p->id }}, '{{ route('admin.orchestrator.verifyProvider', $p) }}', this)">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
                                 <form method="POST" action="{{ route('admin.orchestrator.toggleProvider', $p) }}" style="display:inline">
                                     @csrf
                                     <button class="btn btn-sm {{ $p->is_active ? 'btn-success' : 'btn-outline-secondary' }}" title="{{ $p->is_active ? 'Disable' : 'Enable' }}">
@@ -427,6 +428,8 @@
     <div class="alert alert-info" id="scanResultContent"></div>
 </div>
 
+@include('admin.orchestrator.media-panel')
+
 {{-- Add Provider Modal --}}
 <div class="modal fade" id="addProviderModal" tabindex="-1">
     <div class="modal-dialog">
@@ -438,6 +441,15 @@
             <form method="POST" action="{{ route('admin.orchestrator.storeProvider') }}">
                 @csrf
                 <div class="modal-body">
+                    @if($errors->any())
+                        <div class="alert alert-danger py-2 small mb-3">
+                            <ul class="mb-0 ps-3">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="mb-3">
                         <label class="form-label">Provider Family</label>
                         <select name="driver" id="driverSelect" class="form-select" onchange="onDriverChange(this.value)">
@@ -504,6 +516,14 @@
 
 @section('scripts')
 <script>
+// Fix Bootstrap modal stacking context: .app-main has z-index which traps the modal behind the backdrop
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('addProviderModal');
+    if (modal) {
+        document.body.appendChild(modal);
+    }
+});
+
 const DRIVER_META = {
     openai:       { help: 'OpenAI-compatible: GPT-4o, GPT-4o-mini, etc. API key: sk-... Base URL optional for proxies.', cap: 'text' },
     anthropic:    { help: 'Anthropic Claude — use key starting with sk-ant-... No base URL needed.', cap: 'text' },
@@ -523,20 +543,30 @@ function onDriverChange(val) {
 
 function scanCurriculum() {
     const btn = document.getElementById('scanBtn');
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfMeta) { alert('CSRF token missing — please reload the page.'); return; }
+    if (btn.dataset.scanning === '1') return; // debounce
+
+    btn.dataset.scanning = '1';
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Scanning...';
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     fetch('{{ route('admin.orchestrator.scan') }}', {
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+        signal: controller.signal,
+        headers: { 'X-CSRF-TOKEN': csrfMeta.content, 'Accept': 'application/json' }
     })
-    .then(r => r.json())
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(data => {
         const panel = document.getElementById('scanResult');
         const content = document.getElementById('scanResultContent');
-        let html = `<strong><i class="bi bi-search"></i> Curriculum Scan:</strong> ${data.total_gaps} gap(s) found.<br>${data.suggestion}`;
+        let html = `<strong><i class="bi bi-search"></i> Curriculum Scan:</strong> ${data.total_gaps} gap(s) found.<br>${data.suggestion || ''}`;
         if (data.gaps && data.gaps.length) {
             html += '<ul class="mt-2 mb-0">';
             data.gaps.slice(0, 10).forEach(g => {
-                html += `<li>Age <b>${g.age}</b>: missing <b>${g.skill}</b></li>`;
+                html += `<li>Age <b>${g.age}</b>: missing <b>${g.subject || g.skill}</b></li>`;
             });
             if (data.gaps.length > 10) html += `<li>...and ${data.gaps.length - 10} more</li>`;
             html += '</ul>';
@@ -545,11 +575,75 @@ function scanCurriculum() {
         panel.style.display = 'block';
         panel.scrollIntoView({ behavior: 'smooth' });
     })
-    .catch(() => alert('Scan failed. Please try again.'))
+    .catch(err => {
+        if (err.name === 'AbortError') {
+            alert('Scan timed out after 30 seconds. Please try again.');
+        } else {
+            alert('Scan failed: ' + err.message);
+        }
+    })
     .finally(() => {
+        clearTimeout(timeout);
+        btn.dataset.scanning = '';
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-search"></i> Scan Curriculum Gaps';
     });
 }
+
+let _verifyControllers = {};
+function verifyProvider(id, url, btn) {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfMeta) { alert('CSRF token missing — please reload.'); return; }
+    if (btn.dataset.verifying === '1') return;
+
+    // Cancel any in-flight request for this provider
+    if (_verifyControllers[id]) _verifyControllers[id].abort();
+    const controller = new AbortController();
+    _verifyControllers[id] = controller;
+    const timeout = setTimeout(() => controller.abort(), 25000);
+
+    btn.dataset.verifying = '1';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    fetch(url, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+            'X-CSRF-TOKEN': csrfMeta.content,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const pill = document.getElementById('status-pill-' + id);
+        if (pill) {
+            const isOk = data.status === 'live' || data.ok;
+            pill.className = 'badge rounded-pill ' + (isOk ? 'bg-success' : 'bg-warning text-dark');
+            pill.textContent = data.status || (isOk ? 'live' : 'error');
+        }
+        const msg = data.message || (data.ok ? 'Provider is live.' : 'Check failed.');
+        btn.title = msg;
+    })
+    .catch(err => {
+        if (err.name !== 'AbortError') btn.title = 'Verify failed: ' + err.message;
+    })
+    .finally(() => {
+        clearTimeout(timeout);
+        delete _verifyControllers[id];
+        btn.dataset.verifying = '';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+    });
+}
+
+// Auto-reopen Add Provider modal if there were validation errors
+@if($errors->any())
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = new bootstrap.Modal(document.getElementById('addProviderModal'));
+    modal.show();
+});
+@endif
 </script>
 @endsection

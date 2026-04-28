@@ -141,7 +141,13 @@ class OnboardingController extends Controller
             'onboarding_goals' => $data['goals'] ?? [],
         ]);
 
-        return redirect()->route('home')->with('status', 'Welcome to Noble Nest Academy! 🎉');
+        $route = match ($user->role ?? '') {
+            'Parent'  => 'parent.dashboard',
+            'Teacher' => 'teacher.dashboard',
+            default   => 'home',
+        };
+
+        return redirect()->route($route)->with('status', 'Welcome to Noble Nest Academy! 🎉');
     }
 
     /**

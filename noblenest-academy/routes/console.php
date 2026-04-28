@@ -29,3 +29,13 @@ Artisan::command('curriculum:export-json {--output=}', function () {
 })->purpose('Export activities to JSON for the curriculum-ai PageIndex sidecar');
 
 Schedule::command('curriculum:export-json')->dailyAt('02:30');
+
+// Weekly curriculum auto-generation dry-run report (Sundays at 03:00)
+Schedule::command('curriculum:auto-generate --dry-run')
+    ->weeklyOn(0, '03:00')
+    ->withoutOverlapping();
+
+// Daily thumbnail generation for activities missing thumbnails
+Schedule::command('media:generate --type=thumbnail --missing-only --limit=25')
+    ->dailyAt('04:00')
+    ->withoutOverlapping();
