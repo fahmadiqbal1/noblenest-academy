@@ -108,6 +108,13 @@
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
+/* ─── Playful (nn-*) activity-page styles ────────────────────────────────── */
+/* Previously served separately from public/css/playful.css. Moved into the */
+/* Vite pipeline so it is bundled, minified, hashed, and cache-busted with  */
+/* the main app stylesheet. Pruning of unused selectors is tracked as a    */
+/* Phase-1 follow-up in docs/phase1-launch/CHANGES.md.                     */
+@import "./playful.css";
+
 /* ─── Design Tokens ──────────────────────────────────────────────────────── */
 @theme {
     /* ── Brand palette (derived from Vivid Violet #7C3AED) ── */
@@ -620,6 +627,17 @@
 
     /* Playful font class (for any surface that intentionally uses the display font) */
     .playful-font { font-family: var(--font-display); }
+
+    /* Classroom toggle buttons: render both on/off icons and swap visibility
+       based on the parent's `.active`/`.inactive` class. See
+       resources/views/classroom/room.blade.php updateControls(). */
+    .ctrl-btn .when-off,
+    .ctrl-btn.inactive .when-on { display: none; }
+    .ctrl-btn.inactive .when-off { display: inline-block; }
+
+    /* Tailwind-flavoured table helpers replacing Bootstrap's .table-striped / .table-hover. */
+    .table-striped-tw tbody tr:nth-child(odd) { background: var(--color-surface-alt, rgb(249 250 251)); }
+    .table-hover-tw   tbody tr:hover          { background: var(--color-surface-alt, rgb(249 250 251)); }
 }
 
 /* ─── Animations ─────────────────────────────────────────────────────────── */

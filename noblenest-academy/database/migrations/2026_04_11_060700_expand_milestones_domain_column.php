@@ -16,13 +16,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // MySQL enums cannot be easily altered via Schema builder.
-        // Use raw SQL to change the column type.
+        // MySQL enums cannot be easily altered via Schema builder. Use raw SQL on MySQL.
+        // SQLite (used by tests) has no enums and no MODIFY COLUMN — go through
+        // Laravel's Schema::change() which rebuilds the table portably.
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            Schema::table('milestones', function (Blueprint $table) {
+                $table->string('domain', 50)->default('cognitive')->change();
+            });
+            return;
+        }
         DB::statement("ALTER TABLE milestones MODIFY COLUMN domain VARCHAR(50) DEFAULT 'cognitive'");
     }
 
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            // No enum reversal on SQLite — leave the column as varchar.
+            return;
+        }
         DB::statement("ALTER TABLE milestones MODIFY COLUMN domain ENUM('cognitive','motor','language','social','creative','literacy','numeracy') DEFAULT 'cognitive'");
     }
 };

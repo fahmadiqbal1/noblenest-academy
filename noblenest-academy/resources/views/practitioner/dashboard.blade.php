@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.practitioner')
 
 @section('meta_title', 'Practitioner Dashboard | NobleNest Global Academy')
 
@@ -35,32 +35,32 @@
 </style>
 
 <div class="prac-header">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold mb-1"><i class="bi bi-shield-check me-2"></i>Practitioner Dashboard</h2>
+            <h2 class="font-bold mb-1"><x-ui.icon name="shield-check" class="me-2" />Practitioner Dashboard</h2>
             <p class="mb-0 opacity-75">Welcome back, {{ auth()->user()->name }}. {{ $profile->formattedLicenseType() }} — {{ $profile->specialization }}</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('practitioner.reviews.index') }}" class="btn btn-light"><i class="bi bi-clipboard-check me-1"></i> Review Queue</a>
-            <a href="{{ route('practitioner.profile.edit') }}" class="btn btn-outline-light"><i class="bi bi-pencil me-1"></i> Edit Profile</a>
+        <div class="flex gap-2">
+            <a href="{{ route('practitioner.reviews.index') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-900 hover:bg-gray-200"><x-ui.icon name="clipboard-check" class="me-1" /> Review Queue</a>
+            <a href="{{ route('practitioner.profile.edit') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-200 text-gray-100 hover:bg-gray-100 hover:text-gray-900"><x-ui.icon name="pencil" class="me-1" /> Edit Profile</a>
         </div>
     </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-4">
+<div class="flex flex-wrap gap-4 mb-4">
+    <div class="md:w-4/12">
         <div class="prac-stat">
             <div class="prac-stat__number" style="color: var(--nn-primary);">{{ $reviewedCount }}</div>
             <div class="prac-stat__label">Total Reviews</div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="md:w-4/12">
         <div class="prac-stat">
             <div class="prac-stat__number" style="color: var(--nn-success);">{{ $approvedCount }}</div>
             <div class="prac-stat__label">Approved</div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="md:w-4/12">
         <div class="prac-stat">
             <div class="prac-stat__number" style="color: var(--nn-accent);">{{ $pendingQueue }}</div>
             <div class="prac-stat__label">Pending Queue</div>
@@ -70,17 +70,17 @@
 
 @if($pendingQueue > 0)
 <div class="glass-panel p-4">
-    <h5 class="fw-bold mb-3"><i class="bi bi-hourglass-split me-2"></i>Content Awaiting Review</h5>
-    <p class="text-muted">There {{ $pendingQueue === 1 ? 'is' : 'are' }} <strong>{{ $pendingQueue }}</strong> piece{{ $pendingQueue !== 1 ? 's' : '' }} of maternal wellness content waiting for professional review.</p>
-    <a href="{{ route('practitioner.reviews.index') }}" class="btn btn-primary">
-        <i class="bi bi-arrow-right me-1"></i> Go to Review Queue
+    <h5 class="font-bold mb-3"><x-ui.icon name="hourglass" class="me-2" />Content Awaiting Review</h5>
+    <p class="text-[var(--color-text-muted)]">There {{ $pendingQueue === 1 ? 'is' : 'are' }} <strong>{{ $pendingQueue }}</strong> piece{{ $pendingQueue !== 1 ? 's' : '' }} of maternal wellness content waiting for professional review.</p>
+    <a href="{{ route('practitioner.reviews.index') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700">
+        <x-ui.icon name="arrow-right" class="me-1" /> Go to Review Queue
     </a>
 </div>
 @else
 <div class="glass-panel p-4 text-center">
-    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-    <h5 class="fw-bold mt-3">All Caught Up!</h5>
-    <p class="text-muted">No pending content needs your review right now.</p>
+    <x-ui.icon name="check-circle" class="text-emerald-600" style="font-size: 3rem;" />
+    <h5 class="font-bold mt-3">All Caught Up!</h5>
+    <p class="text-[var(--color-text-muted)]">No pending content needs your review right now.</p>
 </div>
 @endif
 @endsection

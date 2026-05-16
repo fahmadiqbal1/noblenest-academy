@@ -10,7 +10,7 @@
 
 [![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php&logoColor=white)](https://php.net)
 [![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat-square&logo=laravel&logoColor=white)](https://laravel.com)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=flat-square&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
+[![Tailwind](https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 
@@ -36,11 +36,11 @@
 |---|---|---|
 | 📚 | **1200+ Activities** | Carefully crafted content spanning 72 monthly units for ages 0–6 |
 | 🤖 | **AI-Powered Learning** | Personalized experiences with intelligent content generation |
-| 🌍 | **Multilingual** | English · French · Russian · Mandarin · Spanish · Korean |
+| 🌍 | **Multilingual** | English · French · Russian · Mandarin · Spanish · Korean · Urdu · Arabic (RTL) |
 | 🎮 | **Interactive Tools** | Tracing, games, quizzes, videos, and creative activities |
 | 👨‍👩‍👧‍👦 | **Parent Dashboard** | Child progress tracking and family profile management |
 | 🏫 | **Educator Portal** | Course management, student analytics, and content authoring |
-| 📱 | **Mobile-First UI** | Fully responsive Bootstrap 5 interface for all devices |
+| 📱 | **Mobile-First UI** | Tailwind v4 + `x-ui.*` Blade components — fully responsive |
 | 🎯 | **STEM Curriculum** | Robotics, coding, and design for ages 7–10 |
 | 📊 | **Assessment Engine** | IQ and personality assessments with career guidance |
 | 🔒 | **COPPA / GDPR** | Parental consent flows and child-safe data policies |
@@ -60,7 +60,7 @@
 | Layer | Technology |
 |---|---|
 | **Backend** | Laravel 12 · PHP 8.2+ · MySQL 8.0+ |
-| **Frontend** | Blade Templates · Bootstrap 5.x · Alpine.js |
+| **Frontend** | Blade Templates · Tailwind v4 · `x-ui.*` components · Alpine.js · Lucide |
 | **Caching** | Redis |
 | **Media** | S3-compatible storage · HLS streaming |
 | **AI** | LLM APIs · TTS · Video synthesis · Image generation |
@@ -309,7 +309,7 @@ php artisan tinker
 | Social-Emotional Learning | Creative Arts |
 | Cultural Studies | Practical Life Skills |
 
-**Language Training** *(EN · FR · RU · ZH · ES · KO)*
+**Language Training** *(EN · FR · RU · ZH · ES · KO · UR · AR)*
 
 - Phonics & Letter Formation
 - Vocabulary & Dialogues
@@ -345,13 +345,14 @@ php artisan tinker
 
 ## 🎨 User Interface
 
-Built with **Bootstrap 5.x** and **Blade Templates**:
+Built with **Tailwind v4** and **Blade Templates** (`x-ui.*` component library):
 
-- Mobile-first responsive design
-- WCAG 2.1 accessibility-first components
+- Mobile-first responsive design with self-hosted fonts (Baloo 2 / Nunito / Inter)
+- WCAG 2.1 accessibility-first components, RTL-aware (Arabic / Urdu)
 - Gamification — badges, streaks, and certificates
-- Locale switcher for multilingual support
+- Locale switcher for 8 languages
 - AI-powered onboarding assistant
+- Style-guide reference at `/_styleguide` (admin-only)
 
 **Fonts**
 
@@ -374,7 +375,7 @@ Built with **Bootstrap 5.x** and **Blade Templates**:
 ### AI Assistant
 
 - First-login onboarding guide
-- Multilingual support *(EN · FR · RU · ZH · ES · KO)*
+- Multilingual support *(EN · FR · RU · ZH · ES · KO · UR · AR)*
 - Child-safe conversation policies
 - Age-appropriate activity recommendations
 
@@ -475,7 +476,8 @@ GitHub Actions pipeline runs on every push:
 ## 📖 Documentation
 
 - [Laravel Documentation](https://laravel.com/docs) — Framework guide
-- [Bootstrap 5 Docs](https://getbootstrap.com/docs) — UI components
+- [Tailwind CSS Docs](https://tailwindcss.com/docs) — utility classes used by `x-ui.*`
+- [Lucide Icons](https://lucide.dev) — icon registry in `app/View/Components/Ui/Icon.php`
 - [Alpine.js Docs](https://alpinejs.dev) — Lightweight reactivity
 
 <br>
@@ -518,7 +520,7 @@ Contributions are welcome. Please:
 
 **Noble Nest Academy** · Built with ❤️ for early childhood education
 
-*Laravel 12 · Bootstrap 5 · PHP 8.2+*
+*Laravel 12 · Tailwind v4 · PHP 8.2+*
 
 </div>
 

@@ -18,9 +18,7 @@
         role="switch"
         :aria-checked="on.toString()"
         @click="on = !on"
-        :class="on
-            ? 'bg-[var(--color-brand-600)]'
-            : 'bg-[var(--color-text-muted)]'"
+        :class="on ? 'bg-[var(--color-brand-600)]' : 'bg-[var(--color-text-muted)]'"
         class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-[var(--duration-fast)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 cursor-pointer"
         {{ $attributes }}
     >

@@ -1,12 +1,12 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 <div class="container">
     <h1>Modules</h1>
-    <a href="{{ route('admin.modules.create') }}" class="btn btn-primary mb-3">Add Module</a>
+    <a href="{{ route('admin.modules.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 mb-3">Add Module</a>
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800">{{ session('success') }}</div>
     @endif
-    <table class="table table-bordered table-striped">
+    <table class="w-full text-sm border-collapse border border-gray-200 table-striped-tw">
         <thead>
             <tr>
                 <th>Title</th>
@@ -24,11 +24,11 @@
                 <td>{{ $module->order }}</td>
                 <td>{{ $module->activities->count() }}</td>
                 <td>
-                    <a href="{{ route('admin.modules.edit', $module) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ route('admin.modules.edit', $module) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm bg-amber-500 text-gray-900 hover:bg-amber-600">Edit</a>
                     <form action="{{ route('admin.modules.destroy', $module) }}" method="POST" style="display:inline-block">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this module?')">Delete</button>
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm bg-red-600 text-white hover:bg-red-700" onclick="return confirm('Delete this module?')">Delete</button>
                     </form>
                 </td>
             </tr>

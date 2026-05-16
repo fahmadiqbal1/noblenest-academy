@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('content')
 @php
 $subjectColors = ['sensory'=>'#f59e0b','motor'=>'#10b981','language'=>'#3b82f6','literacy'=>'#6366f1',
@@ -14,36 +14,36 @@ $ageTiers = [
 $minActivities = 2;
 $topLiked = $topLiked ?? [];
 @endphp
-<div class="container-fluid py-3" style="max-width:1000px">
-    <h1 class="mb-2 text-primary"><i class="bi bi-bar-chart-line"></i> Curriculum Analytics</h1>
-    <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
-        <span class="badge bg-info fs-6">{{ $totalSkills }} Subjects</span>
-        <span class="badge bg-success fs-6">{{ $totalActivities }} Activities</span>
-        <a href="?export=csv" class="btn btn-outline-secondary btn-sm ms-2"><i class="bi bi-download"></i> Export CSV</a>
-        <form method="POST" action="{{ route('admin.analytics.reportEmail') }}" class="d-inline ms-1">
+<div class="w-full px-4 py-3" style="max-width:1000px">
+    <h1 class="mb-2 text-[var(--color-primary)]"><x-ui.icon name="bar-chart" /> Curriculum Analytics</h1>
+    <div class="flex flex-wrap gap-2 mb-4 items-center">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-600 text-base">{{ $totalSkills }} Subjects</span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-600 text-base">{{ $totalActivities }} Activities</span>
+        <a href="?export=csv" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm ms-2"><x-ui.icon name="download" /> Export CSV</a>
+        <form method="POST" action="{{ route('admin.analytics.reportEmail') }}" class="inline ms-1">
             @csrf
-            <button class="btn btn-outline-primary btn-sm"><i class="bi bi-envelope"></i> Email Report</button>
+            <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="mail" /> Email Report</button>
         </form>
     </div>
 
     {{-- Coverage alerts --}}
     @foreach($coverage as $row)
         @if($row['count'] < $minActivities)
-        <div class="alert alert-warning d-flex align-items-center gap-2 py-2 mb-2">
-            <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200 text-amber-800 items-center gap-2 py-2 mb-2">
+            <x-ui.icon name="alert-triangle" />
             <span>
                 <strong>Low Coverage:</strong>
                 Subject <b>{{ ucfirst($row['subject']) }}</b> has only {{ $row['count'] }} {{ Str::plural('activity', $row['count']) }}.
-                <span data-bs-toggle="tooltip" title="This subject has fewer than {{ $minActivities }} activities. Add more to fill the gap." style="cursor:help">
-                    <i class="bi bi-info-circle text-muted"></i>
+                <span title="This subject has fewer than {{ $minActivities }} activities. Add more to fill the gap." style="cursor:help">
+                    <x-ui.icon name="info" class="text-[var(--color-text-muted)]" />
                 </span>
             </span>
             <a href="{{ route('admin.activities.index') }}?openAdd=1&subject={{ urlencode($row['subject']) }}"
-               class="btn btn-sm btn-outline-primary ms-auto">
-               <i class="bi bi-plus-circle"></i> Add Activity
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white ms-auto">
+               <x-ui.icon name="circle-plus" /> Add Activity
             </a>
             <a href="{{ route('admin.curriculum') }}?subject={{ urlencode($row['subject']) }}"
-               class="btn btn-sm btn-outline-info">Assign</a>
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-sky-600 text-sky-600 hover:bg-sky-600 hover:text-white">Assign</a>
         </div>
         @endif
     @endforeach
@@ -54,20 +54,20 @@ $topLiked = $topLiked ?? [];
         $tierRows = collect($coverage)->filter(fn($r) => ($r['age_min'] ?? 99) <= $range[1] && ($r['age_max'] ?? 0) >= $range[0])->values();
     @endphp
     <div class="mb-4">
-        <h5 class="text-muted fw-bold mb-2">📊 {{ $tierLabel }}</h5>
+        <h5 class="text-[var(--color-text-muted)] font-bold mb-2">📊 {{ $tierLabel }}</h5>
         @if($tierRows->isEmpty())
-            <p class="text-muted small">No subjects in this age range yet.</p>
+            <p class="text-[var(--color-text-muted)] text-sm">No subjects in this age range yet.</p>
         @else
-        <div class="row g-2 mb-2">
+        <div class="flex flex-wrap gap-2 mb-2">
             @foreach($tierRows as $row)
             @php $color = $subjectColors[$row['subject'] ?? ''] ?? '#9ca3af'; @endphp
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="p-2 rounded-3 border" style="border-left: 4px solid {{ $color }} !important; background: {{ $color }}11">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold small">{{ ucfirst($row['subject']) }}</span>
-                        <span class="badge" style="background:{{ $color }};color:#fff">{{ $row['count'] }}</span>
+            <div class="w-6/12 md:w-4/12 lg:w-3/12">
+                <div class="p-2 rounded-lg border" style="border-left: 4px solid {{ $color }} !important; background: {{ $color }}11">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm">{{ ucfirst($row['subject']) }}</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:{{ $color }};color:#fff">{{ $row['count'] }}</span>
                     </div>
-                    <div class="text-muted" style="font-size:0.72rem">Ages {{ $row['age_min'] }}–{{ $row['age_max'] }}</div>
+                    <div class="text-[var(--color-text-muted)]" style="font-size:0.72rem">Ages {{ $row['age_min'] }}–{{ $row['age_max'] }}</div>
                 </div>
             </div>
             @endforeach
@@ -78,9 +78,9 @@ $topLiked = $topLiked ?? [];
 
     {{-- Top Liked --}}
     <div class="my-4">
-        <h4 class="text-success mb-3"><i class="bi bi-heart-fill"></i> Most Liked Activities</h4>
-        <table class="table table-striped table-bordered bg-white">
-            <thead class="table-light">
+        <h4 class="text-emerald-600 mb-3"><x-ui.icon name="heart" /> Most Liked Activities</h4>
+        <table class="w-full text-sm border-collapse table-striped-tw border border-gray-200 bg-white">
+            <thead class="bg-gray-50">
                 <tr>
                     <th>Activity</th><th>Subject</th><th>Likes</th><th>Age Range</th>
                 </tr>
@@ -90,26 +90,26 @@ $topLiked = $topLiked ?? [];
                 <tr>
                     <td>{{ $activity->title }}</td>
                     <td>{{ $activity->subject }}</td>
-                    <td><span class="badge bg-danger fs-6">{{ $activity->likes_count }}</span></td>
+                    <td><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-600 text-base">{{ $activity->likes_count }}</span></td>
                     <td>{{ $activity->age_min }}–{{ $activity->age_max }}</td>
                 </tr>
                 @empty
-                <tr><td colspan="4" class="text-center text-muted">No likes data yet.</td></tr>
+                <tr><td colspan="4" class="text-center text-[var(--color-text-muted)]">No likes data yet.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
     {{-- Full Coverage Table --}}
-    <table class="table table-bordered table-hover bg-white">
-        <thead class="table-light">
+    <table class="w-full text-sm border-collapse border border-gray-200 table-hover-tw bg-white">
+        <thead class="bg-gray-50">
             <tr><th>Subject</th><th>Activities</th><th>Age Range</th></tr>
         </thead>
         <tbody>
             @foreach($coverage as $row)
             <tr>
                 <td>{{ ucfirst($row['subject']) }}</td>
-                <td><span class="badge bg-primary">{{ $row['count'] }}</span></td>
+                <td><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]">{{ $row['count'] }}</span></td>
                 <td>{{ $row['age_min'] }}–{{ $row['age_max'] }}</td>
             </tr>
             @endforeach
@@ -123,9 +123,6 @@ $topLiked = $topLiked ?? [];
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// Bootstrap tooltips
-document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-
 const ctx = document.getElementById('coverageChart').getContext('2d');
 const subjectColors = @json($subjectColors);
 const labels = @json(array_column($coverage, 'subject'));

@@ -106,10 +106,7 @@
             @foreach($subjects as $key => $s)
             @php $isActive = ($activeSubject ?? '') === $key; @endphp
             <a href="{{ route('child.activities', $child) }}{{ $key ? '?subject='.$key : '' }}"
-               class="shrink-0 snap-start inline-flex items-center gap-1.5 px-4 py-2 min-h-[2.5rem] rounded-full font-display font-bold text-sm border-[2px] transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 whitespace-nowrap
-                   {{ $isActive
-                       ? 'bg-[var(--color-brand-600)] border-[var(--color-brand-600)] text-white shadow-[var(--shadow-clay)]'
-                       : 'bg-[var(--color-surface-strong)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand-400)] hover:text-[var(--color-primary)]' }}"
+               class="shrink-0 snap-start inline-flex items-center gap-1.5 px-4 py-2 min-h-[2.5rem] rounded-full font-display font-bold text-sm border-[2px] transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 whitespace-nowrap {{ $isActive ? 'bg-[var(--color-brand-600)] border-[var(--color-brand-600)] text-white shadow-[var(--shadow-clay)]' : 'bg-[var(--color-surface-strong)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-brand-400)] hover:text-[var(--color-primary)]' }}"
                @if($isActive) aria-current="page" @endif>
                 <span aria-hidden="true">{{ $s['emoji'] }}</span>{{ $s['label'] }}
             </a>

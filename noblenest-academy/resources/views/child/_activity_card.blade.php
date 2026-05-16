@@ -22,9 +22,7 @@
     $isIslamic   = in_array($activity->subject ?? '', ['quran', 'islamic_studies', 'arabic', 'islamic']);
 @endphp
 
-<div class="relative flex flex-col rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] overflow-hidden h-full transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-clay-hover)]
-    {{ $isLocked ? 'opacity-85' : '' }}
-    {{ $isIslamic ? 'bg-gradient-to-b from-emerald-50 to-white' : '' }}">
+<div class="relative flex flex-col rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] bg-[var(--color-surface-strong)] overflow-hidden h-full transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-clay-hover)] {{ $isLocked ? 'opacity-85' : '' }} $isIslamic 'bg-gradient-to-b from-emerald-50 to-white'">
 
     {{-- Colour top stripe --}}
     <div class="h-1.5 w-full shrink-0" style="background: {{ $cardColor }};"></div>

@@ -233,50 +233,16 @@
     </x-ui.card>
     @endif
 
-    {{-- ── Completion zone ── --}}
-    @php $actType = $activity->activity_type ?? ''; @endphp
+    {{-- ── Player dispatch (Phase 2) ── --}}
+    @php
+        // ActivityRendererResolver owns the (activity_type, content) → renderer
+        // mapping. The matching blade lives at activities/players/<slug>.blade.php.
+        // Replaces the hand-written CTA-per-type ladder.
+        $renderer  = $activity->renderer();
+        $childQuery = $childQuery ?? '';
+    @endphp
     <div class="mb-8 space-y-3">
-        {{-- Activity type CTA --}}
-        @if($actType === 'tracing')
-            <x-ui.button variant="primary" href="{{ route('activities.tracing', $activity) . $childQuery }}" icon="pencil" size="lg" class="w-full justify-center">
-                Start Tracing ✏️
-            </x-ui.button>
-        @elseif($actType === 'drawing')
-            <x-ui.button variant="primary" href="{{ route('activities.drawing', $activity) . $childQuery }}" icon="brush" size="lg" class="w-full justify-center">
-                Start Drawing 🎨
-            </x-ui.button>
-        @elseif($actType === 'puzzle')
-            <x-ui.button variant="primary" href="{{ route('activities.puzzle', $activity) . $childQuery }}" icon="puzzle-piece" size="lg" class="w-full justify-center">
-                Start Puzzle 🧩
-            </x-ui.button>
-        @elseif($actType === 'quiz' && ($activity->quiz_id ?? false))
-            <x-ui.button variant="primary" href="{{ route('quizzes.show', $activity->quiz_id) . $childQuery }}" icon="target" size="lg" class="w-full justify-center">
-                Take Quiz 🧠
-            </x-ui.button>
-        @elseif($actType === 'video' || $activity->video_url)
-            <x-ui.button variant="primary" href="{{ route('activities.video', $activity) . $childQuery }}" icon="play" size="lg" class="w-full justify-center">
-                Watch Video 🎬
-            </x-ui.button>
-        @elseif(in_array($actType, ['slides', 'simulation']))
-            <x-ui.button variant="primary" href="{{ route('activities.slides', $activity) . $childQuery }}" icon="layers" size="lg" class="w-full justify-center">
-                Start Lesson Slides 📖
-            </x-ui.button>
-        @elseif($activity->steps && $activity->steps->count() > 0)
-            <x-ui.button variant="primary" href="{{ route('activities.slides', $activity) . $childQuery }}" icon="layers" size="lg" class="w-full justify-center">
-                Interactive Lesson View 🎯
-            </x-ui.button>
-            <x-ui.card variant="clay" padding="md" class="text-center">
-                <div class="text-3xl mb-2" aria-hidden="true">🌟</div>
-                <h3 class="font-display font-bold text-[var(--color-text)] mb-1">Or Work Through the Steps Above</h3>
-                <p class="text-sm text-[var(--color-text-muted)]">Read each step, then come back when you're done!</p>
-            </x-ui.card>
-        @else
-            <x-ui.card variant="clay" padding="md" class="text-center">
-                <div class="text-3xl mb-2" aria-hidden="true">🌟</div>
-                <h3 class="font-display font-bold text-[var(--color-text)] mb-1">You're Ready to Begin!</h3>
-                <p class="text-sm text-[var(--color-text-muted)]">Work through the steps above and come back when you're done.</p>
-            </x-ui.card>
-        @endif
+        @include('activities.players.' . $renderer)
 
         {{-- Mark complete --}}
         @if(isset($child) && $child)
@@ -288,7 +254,7 @@
                 class="w-full flex items-center gap-4 px-5 py-4 min-h-[4rem] rounded-[var(--radius-card)] border-[3px] border-emerald-500 bg-gradient-to-br from-emerald-500 to-emerald-400 text-white shadow-[var(--shadow-clay)] hover:-translate-y-[2px] hover:shadow-[var(--shadow-clay-hover)] active:scale-95 transition-all focus-visible:outline-2 focus-visible:outline-emerald-600 focus-visible:outline-offset-2 cursor-pointer"
             >
                 <span class="text-3xl shrink-0" aria-hidden="true">🎉</span>
-                <span class="flex-1 text-start">
+                <span class="flex-1 text-left">
                     <strong class="block font-display font-black text-base leading-tight">I Finished This Activity!</strong>
                     <small class="text-emerald-100 text-sm">Mark complete &amp; earn your badge</small>
                 </span>

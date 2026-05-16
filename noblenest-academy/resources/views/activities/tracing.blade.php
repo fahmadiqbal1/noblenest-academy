@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.child')
 
 @section('content')
 @php
@@ -12,8 +12,8 @@
         <i class="bi {{ $isPlayful ? 'bi-pencil' : 'bi-vector-pen' }}"></i> {{ $activity->title }}
     </h2>
     <p class="mb-4 {{ $isPlayful ? 'playful-font' : 'professional-font' }}">{{ $activity->description }}</p>
-    <div class="mb-3 d-flex flex-column align-items-center">
-        <div class="position-relative" style="border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(255,105,180,0.08);border:4px solid {{ $isPlayful ? '#ffb6f9' : '#dee2e6' }};background:{{ $isPlayful ? '#fff0fa' : '#fff' }};">
+    <div class="mb-3 flex flex-col items-center">
+        <div class="relative" style="border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(255,105,180,0.08);border:4px solid {{ $isPlayful ? '#ffb6f9' : '#dee2e6' }};background:{{ $isPlayful ? '#fff0fa' : '#fff' }};">
             <canvas id="tracing-canvas" width="400" height="300" style="display:block;{{ $isRTL ? 'transform:scaleX(-1);' : '' }}"></canvas>
             @if($activity->sample_image)
                 <img src="{{ $activity->sample_image }}" alt="Sample" style="position:absolute;top:0;left:0;width:400px;height:300px;opacity:0.18;pointer-events:none;z-index:1;{{ $isRTL ? 'transform:scaleX(-1);' : '' }}">
@@ -24,31 +24,31 @@
         </div>
     </div>
     {{-- Color Picker --}}
-    <div class="d-flex gap-2 justify-content-center mb-2 flex-wrap">
+    <div class="flex gap-2 justify-center mb-2 flex-wrap">
         @foreach(['#ff69b4', '#7ed6a5', '#85c1e9', '#f8c471', '#bb8fce', '#f1948a'] as $color)
-        <button class="btn btn-sm rounded-circle trace-color-btn" data-color="{{ $color }}" style="width:36px;height:36px;background:{{ $color }};border:3px solid transparent;transition:border 0.2s;" title="{{ $color }}"></button>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm rounded-full trace-color-btn" data-color="{{ $color }}" style="width:36px;height:36px;background:{{ $color }};border:3px solid transparent;transition:border 0.2s;" title="{{ $color }}"></button>
         @endforeach
     </div>
 
     {{-- Difficulty --}}
-    <div class="d-flex gap-2 justify-content-center mb-2">
-        <span class="small text-muted">Difficulty:</span>
-        <button class="btn btn-sm btn-outline-success trace-difficulty active" data-opacity="0.25">Easy</button>
-        <button class="btn btn-sm btn-outline-warning trace-difficulty" data-opacity="0.12">Medium</button>
-        <button class="btn btn-sm btn-outline-danger trace-difficulty" data-opacity="0.04">Hard</button>
+    <div class="flex gap-2 justify-center mb-2">
+        <span class="text-sm text-[var(--color-text-muted)]">Difficulty:</span>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white trace-difficulty active" data-opacity="0.25">Easy</button>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-gray-900 trace-difficulty" data-opacity="0.12">Medium</button>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white trace-difficulty" data-opacity="0.04">Hard</button>
     </div>
 
-    <div class="d-flex gap-3 justify-content-center mb-3">
-        <button id="undo-canvas" class="btn btn-lg btn-outline-warning"><i class="bi bi-arrow-counterclockwise"></i> Undo</button>
-        <button id="clear-canvas" class="btn btn-lg {{ $isPlayful ? 'btn-pink' : 'btn-secondary' }}"><i class="bi bi-eraser"></i> {{ I18n::get('clear') }}</button>
-        <button id="save-canvas" class="btn btn-lg {{ $isPlayful ? 'btn-success' : 'btn-primary' }}"><i class="bi bi-check2-circle"></i> {{ I18n::get('save') }}</button>
+    <div class="flex gap-3 justify-center mb-3">
+        <button id="undo-canvas" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-gray-900"><x-ui.icon name="rotate-ccw" /> Undo</button>
+        <button id="clear-canvas" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg {{ $isPlayful ? 'bg-pink-500 text-white hover:bg-pink-600' : 'bg-gray-500 text-white hover:bg-gray-600' }}"><x-ui.icon name="eraser" /> {{ I18n::get('clear') }}</button>
+        <button id="save-canvas" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg {{ $isPlayful ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-violet-600 text-white hover:bg-violet-700' }}"><x-ui.icon name="check-circle" /> {{ I18n::get('save') }}</button>
     </div>
     <div id="save-status" class="mt-2 text-center"></div>
-    <div class="mt-4 d-flex flex-column align-items-center">
-        <div class="progress w-50 mb-2" style="height:1.2rem;">
-            <div class="progress-bar {{ $isPlayful ? 'bg-pink' : 'bg-primary' }}" role="progressbar" style="width:{{ $progress ?? 0 }}%">{{ $progress ?? 0 }}%</div>
+    <div class="mt-4 flex flex-col items-center">
+        <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden w-1/2 mb-2" style="height:1.2rem;">
+            <div class="h-full bg-violet-600 transition-all {{ $isPlayful ? 'bg-pink' : 'bg-primary' }}" role="progressbar" style="width:{{ $progress ?? 0 }}%">{{ $progress ?? 0 }}%</div>
         </div>
-        <a href="/activities" class="btn btn-outline-info mt-2"><i class="bi bi-arrow-right-circle"></i> {{ I18n::get('next_activity') }}</a>
+        <a href="/activities" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-sky-600 text-sky-600 hover:bg-sky-600 hover:text-white mt-2"><x-ui.icon name="circle-arrow-right" /> {{ I18n::get('next_activity') }}</a>
     </div>
 </div>
 @endsection
@@ -89,7 +89,7 @@ document.querySelectorAll('.trace-difficulty').forEach(btn => {
 document.getElementById('clear-canvas').onclick = () => { signaturePad.clear(); undoHistory = []; };
 document.getElementById('save-canvas').onclick = function() {
     if (signaturePad.isEmpty()) {
-        document.getElementById('save-status').innerHTML = '<span class="text-danger">{{ I18n::get('please_trace_something') }}</span>';
+        document.getElementById('save-status').innerHTML = '<span class="text-red-600">{{ I18n::get('please_trace_something') }}</span>';
         return;
     }
     const dataUrl = signaturePad.toDataURL();
@@ -103,11 +103,11 @@ document.getElementById('save-canvas').onclick = function() {
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById('save-status').innerHTML = '<span class="text-success">' + (data.message || 'Saved!') + '</span>';
+        document.getElementById('save-status').innerHTML = '<span class="text-emerald-600">' + (data.message || 'Saved!') + '</span>';
         setTimeout(() => location.reload(), 1200);
     })
     .catch(() => {
-        document.getElementById('save-status').innerHTML = '<span class="text-danger">{{ I18n::get('save_failed') ?? 'Save failed. Try again.' }}</span>';
+        document.getElementById('save-status').innerHTML = '<span class="text-red-600">{{ I18n::get('save_failed') ?? 'Save failed. Try again.' }}</span>';
     });
 };
 </script>

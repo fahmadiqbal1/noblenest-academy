@@ -117,8 +117,8 @@
           size="lg"
           type="submit"
           class="w-full"
-          :loading="loading"
-          :disabled="loading"
+          x-bind:disabled="loading"
+          x-bind:aria-busy="loading"
         >
           <span x-show="!loading">{{ I18n::get('login') }}</span>
           <span x-show="loading" x-cloak>Signing in&hellip;</span>

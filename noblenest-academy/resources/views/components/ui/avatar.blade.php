@@ -49,11 +49,11 @@
         <img
             src="{{ $src }}"
             alt="{{ $name ?? 'Avatar' }}"
-            class="{{ $s['outer'] }} rounded-full object-cover {{ $ringClass }}"
+            class="{{ $s['outer'] }} rounded-full object-cover $ringClass"
         />
     @else
         <span
-            class="{{ $s['outer'] }} {{ $ringClass }} rounded-full inline-flex items-center justify-center font-bold text-white {{ $s['text'] }}"
+            class="{{ $s['outer'] }} $ringClass rounded-full inline-flex items-center justify-center font-bold text-white $s['text']"
             style="background-color: {{ $bgColor }};"
             aria-label="{{ $name ?? 'Avatar' }}"
         >
@@ -63,7 +63,7 @@
 
     @if($status && isset($statusColors[$status]))
         <span
-            class="absolute bottom-0 right-0 {{ $s['status'] }} rounded-full {{ $statusColors[$status] }} ring-2 ring-white"
+            class="absolute bottom-0 right-0 {{ $s['status'] }} rounded-full $statusColors[$status] ring-2 ring-white"
             aria-label="Status: {{ $status }}"
         ></span>
     @endif

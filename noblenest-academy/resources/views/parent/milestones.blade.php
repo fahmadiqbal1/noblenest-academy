@@ -44,10 +44,7 @@
                         @csrf
                         <button
                             type="submit"
-                            class="w-8 h-8 min-h-[2rem] rounded-full border-[2px] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 cursor-pointer
-                                {{ $milestone->completed
-                                    ? 'bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600'
-                                    : 'bg-[var(--color-surface-strong)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-emerald-400 hover:text-emerald-600' }}"
+                            class="w-8 h-8 min-h-[2rem] rounded-full border-[2px] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 cursor-pointer {{ $milestone->completed ? 'bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600' : 'bg-[var(--color-surface-strong)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-emerald-400 hover:text-emerald-600' }}"
                             title="{{ $milestone->completed ? 'Mark incomplete' : 'Mark complete' }}"
                             aria-label="{{ $milestone->completed ? 'Mark ' . $milestone->title . ' incomplete' : 'Mark ' . $milestone->title . ' complete' }}"
                         >

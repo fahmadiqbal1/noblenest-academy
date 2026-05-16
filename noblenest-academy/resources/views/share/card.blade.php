@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.marketing')
 
 @section('title', $shareCard->childProfile->name . ' — Noble Nest Academy')
 
@@ -20,15 +20,15 @@
         <img src="{{ $shareCard->image_url }}" alt="Share Card" class="img-fluid rounded shadow" style="max-width: 600px; width: 100%;">
     </div>
 
-    <h2 class="fw-bold mb-2">{{ $shareCard->childProfile->name }} is on a learning adventure! 🚀</h2>
-    <p class="lead text-muted mb-4">Join Noble Nest Academy — where every child discovers the joy of learning</p>
+    <h2 class="font-bold mb-2">{{ $shareCard->childProfile->name }} is on a learning adventure! 🚀</h2>
+    <p class="text-lg leading-relaxed text-[var(--color-text-muted)] mb-4">Join Noble Nest Academy — where every child discovers the joy of learning</p>
 
-    <div class="d-flex justify-content-center gap-3">
-        <a href="{{ route('register') }}" class="btn btn-primary btn-lg fw-semibold px-5">
+    <div class="flex justify-center gap-3">
+        <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 px-5 py-3 text-lg">
             Start Free Today
         </a>
         <a href="https://wa.me/?text={{ urlencode('Look what ' . $shareCard->childProfile->name . ' achieved! Join me on Noble Nest Academy: ' . request()->url()) }}"
-           class="btn btn-success btn-lg" target="_blank" rel="noopener noreferrer">
+           class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700 px-5 py-3 text-lg" target="_blank" rel="noopener noreferrer">
             📱 Share
         </a>
     </div>

@@ -186,7 +186,7 @@
     {{-- Top bar --}}
     <div class="nn-slides-topbar">
         <a href="{{ $backUrl }}" class="nn-slides-topbar-back" aria-label="Back">
-            <i class="bi bi-arrow-left"></i>
+            <x-ui.icon name="arrow-left" />
         </a>
         <div class="nn-slides-topbar-title">{{ $activity->emoji ?? '🎯' }} {{ $activity->title }}</div>
         <span class="nn-slides-topbar-counter" x-text="(current + 1) + ' / ' + {{ $totalSlides }}"></span>
@@ -242,13 +242,13 @@
             <form action="{{ route('child.activity.complete', [$child, $activity]) }}" method="POST" style="display:inline;">
                 @csrf
                 <button type="submit" class="nn-slides-complete-btn">
-                    <i class="bi bi-check-circle-fill"></i>
+                    <x-ui.icon name="check-circle" />
                     Collect My Badge! 🏆
                 </button>
             </form>
             @else
             <a href="{{ $backUrl }}" class="nn-slides-complete-btn">
-                <i class="bi bi-house-fill"></i> Back to Activity
+                <x-ui.icon name="home" /> Back to Activity
             </a>
             @endif
         </div>
@@ -257,10 +257,11 @@
     {{-- Bottom navigation --}}
     <div class="nn-slides-bar">
         <button class="nn-slides-bar-btn" @click="prev()" :disabled="current === 0" title="Previous">
-            <i class="bi bi-skip-backward-fill"></i>
+            <x-ui.icon name="skip-back" />
         </button>
         <button class="nn-slides-bar-btn" @click="playPause()" :title="playing ? 'Pause' : 'Auto-play'">
-            <i :class="playing ? 'bi bi-pause-fill' : 'bi bi-play-fill'"></i>
+            <x-ui.icon name="pause" x-show="playing" />
+            <x-ui.icon name="play" x-show="!playing" />
         </button>
 
         <div class="nn-slides-bar-dots">
@@ -275,7 +276,7 @@
         <button class="nn-slides-bar-btn" @click="next()"
                 :disabled="current >= {{ max($totalSlides - 1, 0) }} && !completed"
                 title="Next">
-            <i class="bi bi-skip-forward-fill"></i>
+            <x-ui.icon name="skip-forward" />
         </button>
     </div>
 </div>

@@ -47,7 +47,21 @@
 @endphp
 
 @if($allSteps->isNotEmpty())
-<div class="nn-step-player" x-data="stepPlayer()" x-init="init()">
+<div
+    class="nn-step-player"
+    x-data="stepPlayer()"
+    x-init="init()"
+    role="region"
+    aria-roledescription="Step-by-step activity walkthrough"
+    aria-label="Activity steps"
+    @keydown.window.left.prevent="prev()"
+    @keydown.window.right.prevent="next()"
+    @keydown.window.space.prevent="togglePlay()"
+    tabindex="0"
+>
+    {{-- Screen-reader-only live announcer for step changes --}}
+    <p class="sr-only" aria-live="polite" aria-atomic="true"
+       x-text="`Step ${currentIndex + 1} of ${steps.length}: ${currentStep?.title || ''}. ${currentStep?.instruction || ''}`"></p>
     <style>
         .nn-step-player { position: relative; border-radius: var(--radius-card, 16px); overflow: hidden; box-shadow: var(--shadow-clay, 0 8px 32px rgba(0,0,0,0.12)); }
 
@@ -190,6 +204,26 @@
             font-family: var(--font-display, 'Baloo 2', sans-serif); font-weight: 700;
             font-size: 0.82rem; color: var(--color-text-muted, #6B7280); white-space: nowrap;
         }
+
+        /* Accessibility: respect the OS-level reduce-motion preference. */
+        @media (prefers-reduced-motion: reduce) {
+            .nn-step-player__img,
+            .nn-scene-bubble,
+            .nn-anim-bounce,
+            .nn-anim-pulse,
+            .nn-anim-wiggle,
+            .nn-anim-float,
+            .nn-anim-spin {
+                animation: none !important;
+            }
+            .nn-step-player__img { transform: none !important; }
+            .nn-sp-btn:hover:not(:disabled) { transform: none !important; }
+            .nn-sp-progress-fill { transition: none !important; }
+        }
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+        }
     </style>
 
     {{-- Stage --}}
@@ -248,32 +282,49 @@
 
     {{-- Dot nav --}}
     <div class="nn-step-player__dots"
+         role="tablist"
+         aria-label="Jump to step"
          style="background:linear-gradient(135deg,{{ $pal['from'] }},{{ $pal['to'] }});">
         <template x-for="(step, i) in steps" :key="i">
             <button class="nn-step-dot"
                     :class="{ active: i === currentIndex }"
-                    @click="goTo(i)" :title="'Step ' + (i+1)"></button>
+                    @click="goTo(i)"
+                    :title="'Step ' + (i+1) + ': ' + step.title"
+                    :aria-label="'Go to step ' + (i+1) + ': ' + step.title"
+                    :aria-current="i === currentIndex ? 'step' : null"
+                    role="tab"></button>
         </template>
     </div>
 
     {{-- Controls --}}
-    <div class="nn-step-player__controls">
-        <button class="nn-sp-btn" @click="prev()" :disabled="currentIndex === 0" title="Previous">
-            <i class="bi bi-skip-backward-fill"></i>
+    <div class="nn-step-player__controls" role="group" aria-label="Step playback controls">
+        <button class="nn-sp-btn" @click="prev()" :disabled="currentIndex === 0"
+                aria-label="Previous step" title="Previous (left arrow)">
+            <x-ui.icon name="skip-back" />
         </button>
-        <button class="nn-sp-btn" @click="togglePlay()" :title="playing ? 'Pause' : 'Play'">
-            <i :class="playing ? 'bi bi-pause-fill' : 'bi bi-play-fill'"></i>
+        <button class="nn-sp-btn" @click="togglePlay()"
+                :aria-label="playing ? 'Pause auto-advance' : 'Play auto-advance'"
+                :aria-pressed="playing"
+                :title="playing ? 'Pause (space)' : 'Play (space)'">
+            <x-ui.icon name="pause" x-show="playing" />
+            <x-ui.icon name="play" x-show="!playing" />
         </button>
         <button class="nn-sp-btn" @click="next()"
-                :disabled="currentIndex >= steps.length - 1" title="Next">
-            <i class="bi bi-skip-forward-fill"></i>
+                :disabled="currentIndex >= steps.length - 1"
+                aria-label="Next step" title="Next (right arrow)">
+            <x-ui.icon name="skip-forward" />
         </button>
 
-        <div class="nn-sp-progress">
+        <div class="nn-sp-progress"
+             role="progressbar"
+             aria-label="Progress through steps"
+             :aria-valuenow="currentIndex + 1"
+             :aria-valuemin="1"
+             :aria-valuemax="steps.length">
             <div class="nn-sp-progress-fill"
                  :style="'width:' + ((currentIndex + 1) / steps.length * 100) + '%'"></div>
         </div>
-        <span class="nn-sp-counter" x-text="(currentIndex + 1) + ' / ' + steps.length"></span>
+        <span class="nn-sp-counter" aria-hidden="true" x-text="(currentIndex + 1) + ' / ' + steps.length"></span>
     </div>
 
     {{-- Audio element --}}

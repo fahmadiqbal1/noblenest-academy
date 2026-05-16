@@ -5,9 +5,10 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "fonts": "bash scripts/fetch-fonts.sh",
         "a11y": "pa11y-ci",
         "lighthouse": "lhci autorun",
-        "launch:checks": "npm run build && npm run a11y && npm run lighthouse"
+        "launch:checks": "npm run fonts && npm run build && npm run a11y && npm run lighthouse"
     },
     "devDependencies": {
         "@lhci/cli": "^0.14.0",

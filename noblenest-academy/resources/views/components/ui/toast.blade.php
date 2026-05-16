@@ -19,12 +19,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            :class="{
-                'border-emerald-300 bg-emerald-50 text-emerald-800': toast.type === 'success',
-                'border-[var(--color-coral-300)] bg-[var(--color-coral-50)] text-[var(--color-coral-800)]': toast.type === 'error',
-                'border-blue-300 bg-blue-50 text-blue-800': toast.type === 'info',
-                'border-amber-300 bg-amber-50 text-amber-800': toast.type === 'warn',
-            }"
+            :class="{ 'border-emerald-300 bg-emerald-50 text-emerald-800': toast.type === 'success', 'border-[var(--color-coral-300)] bg-[var(--color-coral-50)] text-[var(--color-coral-800)]': 'error', 'border-blue-300 bg-blue-50 text-blue-800': 'info', 'border-amber-300 bg-amber-50 text-amber-800': 'warn', }"
             class="pointer-events-auto flex items-start gap-3 rounded-[var(--radius-sm)] border-[2px] p-4 shadow-[var(--shadow-clay)]"
             role="status"
         >
