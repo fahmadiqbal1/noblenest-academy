@@ -263,14 +263,54 @@ class HealthCheckController extends Controller
             $results['ai_providers_configured'] = count($aiProviders);
         }
 
-        // Test payment providers
-        $stripeKey = config('services.stripe.secret');
-        $results['stripe_configured'] = !empty($stripeKey);
+        // Phase 6: actually ping Stripe (cheap GET — no side effects, ~150ms typical).
+        $results['stripe'] = $this->checkStripe();
 
         return [
-            'pass' => true,
+            'pass' => ($results['stripe']['pass'] ?? true) !== false,
             'details' => $results,
             'message' => 'External API credentials present',
         ];
+    }
+
+    /**
+     * Phase 6 — live Stripe connectivity probe.
+     *
+     * Issues a single Account::retrieve() against the configured secret key.
+     * That's a cheap call that exercises the network path + auth without
+     * creating any side effects. Failure shape carries the exception class
+     * so the dashboard can distinguish "wrong key" from "rate-limited" from
+     * "Stripe down".
+     */
+    private function checkStripe(): array
+    {
+        if (! class_exists(\Stripe\Stripe::class)) {
+            return ['pass' => null, 'configured' => false, 'message' => 'Stripe SDK not installed'];
+        }
+        $secret = config('services.stripe.secret');
+        if (empty($secret)) {
+            return ['pass' => null, 'configured' => false, 'message' => 'STRIPE_SECRET_KEY not set'];
+        }
+        try {
+            $start = microtime(true);
+            \Stripe\Stripe::setApiKey($secret);
+            $account = \Stripe\Account::retrieve();
+            $ms = round((microtime(true) - $start) * 1000, 1);
+
+            return [
+                'pass'       => true,
+                'configured' => true,
+                'time_ms'    => $ms,
+                'account_id' => $account->id ?? null,
+                'message'    => "Stripe reachable ({$ms}ms)",
+            ];
+        } catch (\Stripe\Exception\AuthenticationException $e) {
+            return ['pass' => false, 'configured' => true, 'error' => 'AuthenticationException', 'message' => 'Stripe key invalid'];
+        } catch (\Stripe\Exception\RateLimitException $e) {
+            return ['pass' => false, 'configured' => true, 'error' => 'RateLimitException', 'message' => 'Stripe rate-limited'];
+        } catch (\Throwable $e) {
+            Log::warning('Stripe health probe failed', ['error' => $e->getMessage()]);
+            return ['pass' => false, 'configured' => true, 'error' => class_basename($e), 'message' => substr($e->getMessage(), 0, 200)];
+        }
     }
 }
