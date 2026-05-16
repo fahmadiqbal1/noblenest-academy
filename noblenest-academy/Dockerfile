@@ -77,8 +77,9 @@ RUN mkdir -p \
 # Install application dependencies
 RUN composer install --no-dev --classmap-authoritative
 
-# Generate optimized autoloader
-RUN php artisan optimize
+# Pre-warm the autoloader class map only — full optimize (config/route/view cache)
+# runs at container startup via docker-entrypoint.sh once real env vars are available.
+RUN composer dump-autoload --optimize --no-dev
 
 # Copy Nginx and Supervisor configuration
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
@@ -95,5 +96,8 @@ HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
 # Expose ports
 EXPOSE 80 443
 
-# Run Supervisor (manages PHP-FPM, Nginx, Horizon)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Entrypoint: waits for DB/Redis, runs migrations, seeds, then launches Supervisor
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
