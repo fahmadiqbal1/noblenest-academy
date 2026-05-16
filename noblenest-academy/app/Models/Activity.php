@@ -151,4 +151,46 @@ class Activity extends Model
     {
         return $this->hasMany(ActivityMedia::class)->orderBy('order');
     }
+
+    /**
+     * Phase 3: per-locale translations of translatable fields.
+     */
+    public function translations()
+    {
+        return $this->hasMany(ActivityTranslation::class);
+    }
+
+    /**
+     * Helper: translated value of a field for a given locale, or the canonical
+     * value on this row if no translation exists. Uses the relationship if it's
+     * already eager-loaded; otherwise issues a single SELECT.
+     */
+    public function localized(string $field, ?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+        if ($locale === 'en') {
+            return $this->{$field} ?? null;
+        }
+        if ($this->relationLoaded('translations')) {
+            $row = $this->translations->firstWhere(fn ($t) => $t->locale === $locale && $t->field === $field);
+        } else {
+            $row = $this->translations()->where('locale', $locale)->where('field', $field)->first();
+        }
+        return $row ? $row->value : ($this->{$field} ?? null);
+    }
+
+    /**
+     * Phase 2: resolve which canonical player renders this activity.
+     * Memoised on the instance so repeated calls in a single view render are cheap.
+     */
+    public function renderer(): string
+    {
+        if (! isset($this->cachedRenderer)) {
+            $this->cachedRenderer = app(\App\Services\ActivityRendererResolver::class)->resolve($this);
+        }
+        return $this->cachedRenderer;
+    }
+
+    /** @var string|null */
+    protected $cachedRenderer = null;
 }
