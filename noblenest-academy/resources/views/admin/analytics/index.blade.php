@@ -1,12 +1,18 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container py-4">
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-[var(--color-primary)] mb-0"><x-ui.icon name="bar-chart" /> Curriculum Analytics</h1>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+    {{-- Header --}}
+    <div class="flex flex-wrap justify-between items-center gap-4">
+        <h1 class="text-2xl font-bold text-[var(--color-primary)] flex items-center gap-2">
+            <x-ui.icon name="bar-chart" /> Curriculum Analytics
+        </h1>
         <form method="POST" action="{{ route('admin.analytics.reportEmail') }}">
             @csrf
-            <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="mail" /> Email Monthly Report</button>
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white transition">
+                <x-ui.icon name="mail" /> Email Monthly Report
+            </button>
         </form>
     </div>
 
@@ -17,104 +23,92 @@
         <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800">{{ session('error') }}</div>
     @endif
 
-    <div class="flex flex-wrap gap-3 mb-4">
-        <div class="md:w-3/12">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-[var(--color-primary)]">
-                <div class="p-5 text-center">
-                    <div class="text-4xl font-bold">{{ $totalSkills }}</div>
-                    <div class="text-sm">Total Skills / Domains</div>
-                </div>
-            </div>
+    {{-- Stat cards --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-xl p-5 text-center text-white bg-[var(--color-primary)] shadow-sm">
+            <div class="text-4xl font-bold">{{ $totalSkills }}</div>
+            <div class="text-sm mt-1 opacity-90">Total Skills / Domains</div>
         </div>
-        <div class="md:w-3/12">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-emerald-600">
-                <div class="p-5 text-center">
-                    <div class="text-4xl font-bold">{{ $totalActivities }}</div>
-                    <div class="text-sm">Total Activities</div>
-                </div>
-            </div>
+        <div class="rounded-xl p-5 text-center text-white bg-emerald-600 shadow-sm">
+            <div class="text-4xl font-bold">{{ $totalActivities }}</div>
+            <div class="text-sm mt-1 opacity-90">Total Activities</div>
         </div>
-        <div class="md:w-3/12">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-sky-600">
-                <div class="p-5 text-center">
-                    <div class="text-4xl font-bold">{{ $monthlyCompletions->sum('completions') }}</div>
-                    <div class="text-sm">Total Completions</div>
-                </div>
-            </div>
+        <div class="rounded-xl p-5 text-center text-white bg-sky-600 shadow-sm">
+            <div class="text-4xl font-bold">{{ $monthlyCompletions->sum('completions') }}</div>
+            <div class="text-sm mt-1 opacity-90">Total Completions</div>
         </div>
-        <div class="md:w-3/12">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-amber-600">
-                <div class="p-5 text-center">
-                    <div class="text-4xl font-bold">{{ $coverage ? collect($coverage)->where('count', '<', 2)->count() : 0 }}</div>
-                    <div class="text-sm">Low Coverage Skills</div>
-                </div>
-            </div>
+        <div class="rounded-xl p-5 text-center text-white bg-amber-500 shadow-sm">
+            <div class="text-4xl font-bold">{{ $coverage ? collect($coverage)->where('count', '<', 2)->count() : 0 }}</div>
+            <div class="text-sm mt-1 opacity-90">Low Coverage Skills</div>
         </div>
     </div>
 
     {{-- Coverage Alerts --}}
     @foreach($coverage as $row)
         @if($row['count'] < 2)
-            <div class="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200 text-amber-800 py-2 mb-2">
+            <div class="flex flex-wrap items-center gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200 text-amber-800 text-sm">
                 <strong>Low coverage:</strong> Skill <b>{{ $row['skill'] }}</b> has only {{ $row['count'] }} activities.
-                <a href="{{ route('admin.activities.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white ms-2">Add Activity</a>
+                <a href="{{ route('admin.activities.create') }}" class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-semibold border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white transition">Add Activity</a>
             </div>
         @endif
     @endforeach
 
-    <div class="flex flex-wrap gap-4 mt-2">
-        {{-- Coverage Chart --}}
-        <div class="lg:w-8/12">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div class="px-5 py-3 border-b border-gray-200 font-semibold font-bold"><x-ui.icon name="trending-up" /> Activities per Skill</div>
-                <div class="p-5">
-                    <canvas id="coverageChart" height="100"></canvas>
-                </div>
+    {{-- Charts --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="px-5 py-3 border-b border-gray-200 font-semibold flex items-center gap-2">
+                <x-ui.icon name="trending-up" /> Activities per Skill
+            </div>
+            <div class="p-5">
+                <canvas id="coverageChart" height="120"></canvas>
             </div>
         </div>
 
-        {{-- Monthly Completions --}}
-        <div class="lg:w-4/12">
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div class="px-5 py-3 border-b border-gray-200 font-semibold font-bold"><x-ui.icon name="clipboard-check" /> Monthly Completions</div>
-                <div class="p-5">
-                    <canvas id="completionsChart" height="200"></canvas>
-                </div>
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="px-5 py-3 border-b border-gray-200 font-semibold flex items-center gap-2">
+                <x-ui.icon name="clipboard-check" /> Monthly Completions
+            </div>
+            <div class="p-5">
+                <canvas id="completionsChart" height="220"></canvas>
             </div>
         </div>
     </div>
 
     {{-- Coverage Table --}}
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm mt-4">
-        <div class="px-5 py-3 border-b border-gray-200 font-semibold font-bold"><x-ui.icon name="table" /> Skill Coverage Detail</div>
-        <div class="p-5 p-0">
-            <table class="w-full text-sm border-collapse table-hover-tw mb-0">
-                <thead class="bg-gray-50">
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-200 font-semibold flex items-center gap-2">
+            <x-ui.icon name="table" /> Skill Coverage Detail
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-left">
                     <tr>
-                        <th>Skill / Domain</th>
-                        <th>Activities</th>
-                        <th>Age Range</th>
-                        <th>Status</th>
+                        <th class="px-5 py-3 font-semibold text-gray-600">Skill / Domain</th>
+                        <th class="px-5 py-3 font-semibold text-gray-600">Activities</th>
+                        <th class="px-5 py-3 font-semibold text-gray-600">Age Range</th>
+                        <th class="px-5 py-3 font-semibold text-gray-600">Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     @forelse($coverage as $row)
-                    <tr>
-                        <td>{{ $row['skill'] }}</td>
-                        <td><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]">{{ $row['count'] }}</span></td>
-                        <td>{{ $row['age_min'] ?? '?' }}–{{ $row['age_max'] ?? '?' }}</td>
-                        <td>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-3 font-medium">{{ $row['skill'] }}</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)] text-white">{{ $row['count'] }}</span>
+                        </td>
+                        <td class="px-5 py-3 text-gray-500">{{ $row['age_min'] ?? '?' }}–{{ $row['age_max'] ?? '?' }}</td>
+                        <td class="px-5 py-3">
                             @if($row['count'] < 2)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-600 text-gray-900">Low</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Low</span>
                             @elseif($row['count'] < 5)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-600 text-gray-900">Fair</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">Fair</span>
                             @else
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-600">Good</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Good</span>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="text-center text-[var(--color-text-muted)] py-4">No data yet. Add activities to see coverage.</td></tr>
+                    <tr><td colspan="4" class="px-5 py-8 text-center text-[var(--color-text-muted)]">No data yet. Add activities to see coverage.</td></tr>
                     @endforelse
                 </tbody>
             </table>

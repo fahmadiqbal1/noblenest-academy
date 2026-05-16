@@ -78,7 +78,7 @@ class OrchestratorController extends Controller
         $data = $request->validate([
             'name'         => 'required|string|max:100',
             'slug'         => 'required|string|max:60|unique:ai_provider_configs,slug',
-            'driver'       => 'nullable|string|in:openai,anthropic,gemini,github,stability,elevenlabs,replicate,runway,openai-image',
+            'driver'       => 'nullable|string|in:anthropic,grok',
             'api_base_url' => 'nullable|url|max:255',
             'api_key'      => 'nullable|string|max:500',
             'model'        => 'nullable|string|max:100',
@@ -202,6 +202,137 @@ class OrchestratorController extends Controller
     {
         $job->delete();
         return back()->with('status', 'Job deleted.');
+    }
+
+    // ------------------------------------------------------------------
+    // Orchestrator: auto-fill curriculum gaps via AgentScope sidecar
+    // ------------------------------------------------------------------
+
+    public function fillGaps(Request $request)
+    {
+        $data = $request->validate([
+            'provider_slug' => 'required|string|exists:ai_provider_configs,slug',
+            'limit'         => 'nullable|integer|min:1|max:30',
+        ]);
+
+        $provider = AIProviderConfig::where('slug', $data['provider_slug'])
+                                    ->where('is_active', true)
+                                    ->first();
+
+        if (! $provider || ! $provider->api_key_encrypted) {
+            return response()->json(['error' => 'Provider not configured or has no API key.'], 422);
+        }
+
+        $service = app(CurriculumHealthService::class);
+        $gaps    = $service->getGaps();
+
+        if (empty($gaps)) {
+            return response()->json(['message' => 'No gaps found — curriculum is well covered!', 'generated' => 0]);
+        }
+
+        $limit  = $data['limit'] ?? 10;
+        $gaps   = array_slice($gaps, 0, $limit);
+        $apiKey = \Illuminate\Support\Facades\Crypt::decryptString($provider->api_key_encrypted);
+
+        $driver = data_get($provider->extra_config, 'driver', 'anthropic');
+        $driver = in_array($driver, ['grok', 'anthropic'], true) ? $driver : 'anthropic';
+
+        // Map gaps to sidecar format
+        $gapPayload = collect($gaps)->map(fn ($g) => [
+            'age_min' => $g['age_min'] ?? ($g['age'] ?? 0),
+            'age_max' => $g['age_max'] ?? ($g['age'] ?? 10),
+            'skill'   => $g['subject'] ?? $g['skill'] ?? 'General',
+            'count'   => 1,
+        ])->values()->all();
+
+        $generated = 0;
+        $errors    = [];
+
+        // Try Python sidecar first
+        try {
+            $response = Http::timeout(120)->post('http://127.0.0.1:8001/fill-gaps', [
+                'gaps'     => $gapPayload,
+                'provider' => $driver,
+                'model'    => $provider->model ?: null,
+                'api_key'  => $apiKey,
+            ]);
+
+            if ($response->successful()) {
+                $result = $response->json();
+                foreach ($result['activities'] ?? [] as $act) {
+                    Activity::create([
+                        'title'            => $act['title'],
+                        'description'      => $act['description'],
+                        'instructions'     => $act['instructions'],
+                        'materials_needed' => $act['materials'] ?? [],
+                        'duration_minutes' => $act['duration_minutes'],
+                        'difficulty'       => $act['difficulty'],
+                        'subject'          => $act['subject'],
+                        'age_min'          => $act['age_min'],
+                        'age_max'          => $act['age_max'],
+                        'language'         => $act['language'] ?? 'en',
+                        'is_free'          => $act['is_free'] ?? true,
+                        'activity_type'    => 'lesson',
+                    ]);
+                    $generated++;
+                }
+                $errors = $result['errors'] ?? [];
+
+                Log::info("fillGaps: sidecar generated {$generated} activities.");
+            } else {
+                throw new \RuntimeException('Sidecar HTTP ' . $response->status());
+            }
+        } catch (\Throwable $e) {
+            // Fallback: use PHP gateway directly
+            Log::warning('fillGaps: sidecar unavailable (' . $e->getMessage() . '), using PHP gateway fallback.');
+
+            $systemPrompt = "You are Noble Nest Academy's curriculum designer. Return ONLY a valid JSON object with keys: title, description, instructions (numbered steps), materials (array), duration_minutes, difficulty (easy|medium|hard), subject, age_min, age_max.";
+
+            foreach ($gapPayload as $gap) {
+                try {
+                    $prompt = "Create a '{$gap['skill']}' activity for children aged {$gap['age_min']}–{$gap['age_max']} years. JSON only.";
+                    $chat   = $this->gateway->chat($provider, $prompt, [
+                        'system_prompt' => $systemPrompt,
+                        'max_tokens'    => 800,
+                        'temperature'   => 0.7,
+                    ]);
+
+                    $content = $chat['content'] ?? '';
+                    $parsed  = null;
+                    if (str_contains($content, '{')) {
+                        $start   = strpos($content, '{');
+                        $end     = strrpos($content, '}') + 1;
+                        $parsed  = json_decode(substr($content, $start, $end - $start), true);
+                    }
+
+                    Activity::create([
+                        'title'            => $parsed['title'] ?? "AI: {$gap['skill']} Activity",
+                        'description'      => $parsed['description'] ?? $content,
+                        'instructions'     => $parsed['instructions'] ?? null,
+                        'materials_needed' => $parsed['materials'] ?? [],
+                        'duration_minutes' => $parsed['duration_minutes'] ?? 15,
+                        'difficulty'       => $parsed['difficulty'] ?? 'easy',
+                        'subject'          => $parsed['subject'] ?? $gap['skill'],
+                        'age_min'          => $parsed['age_min'] ?? $gap['age_min'],
+                        'age_max'          => $parsed['age_max'] ?? $gap['age_max'],
+                        'language'         => 'en',
+                        'is_free'          => true,
+                        'activity_type'    => 'lesson',
+                    ]);
+                    $generated++;
+                } catch (\Throwable $ex) {
+                    $errors[] = "Gap '{$gap['skill']}': " . $ex->getMessage();
+                    Log::error('fillGaps gateway error: ' . $ex->getMessage());
+                }
+            }
+        }
+
+        return response()->json([
+            'generated'   => $generated,
+            'gaps_found'  => count($gaps),
+            'errors'      => $errors,
+            'message'     => "Generated {$generated} of " . count($gaps) . " activities successfully.",
+        ]);
     }
 
     // ------------------------------------------------------------------

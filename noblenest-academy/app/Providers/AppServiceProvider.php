@@ -7,6 +7,8 @@ use App\Services\AIProviderGateway;
 use App\Services\Providers\ChatProviderService;
 use App\Services\Providers\ImageGenerationService;
 use App\Services\Providers\MediaGenerationService;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -52,6 +54,23 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production') || str_starts_with($appUrl, 'https://')) {
             URL::forceScheme('https');
         }
+
+        // Redirect authenticated users away from guest-only routes (login, register)
+        // to their role-appropriate dashboard instead of the marketing home page.
+        RedirectIfAuthenticated::redirectUsing(function ($request) {
+            $user = Auth::user();
+            if (!$user) {
+                return route('noble.home');
+            }
+            return match ($user->role) {
+                'Parent'       => route('parent.dashboard'),
+                'Teacher'      => route('teacher.dashboard'),
+                'Student'      => route('marketplace.index'),
+                'Practitioner' => route('practitioner.dashboard'),
+                'Admin'        => route('admin.analytics.index'),
+                default        => route('noble.home'),
+            };
+        });
 
         // Horizon dashboard: only admins can access /horizon
         Horizon::auth(function ($request) {

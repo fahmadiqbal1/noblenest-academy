@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
  */
 class ChatProviderService
 {
-    protected array $supportedDrivers = ['anthropic', 'openai', 'gemini'];
+    protected array $supportedDrivers = ['anthropic', 'grok', 'openai', 'gemini'];
 
     /**
      * Verify provider connectivity and credentials
@@ -338,8 +338,9 @@ class ChatProviderService
     {
         $default = match ($driver) {
             'anthropic' => 'https://api.anthropic.com/v1',
-            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
-            default => 'https://api.openai.com/v1',
+            'grok'      => 'https://api.x.ai/v1',
+            'gemini'    => 'https://generativelanguage.googleapis.com/v1beta',
+            default     => 'https://api.openai.com/v1',
         };
 
         $baseUrl = rtrim($baseUrl ?: $default, '/');
@@ -371,6 +372,9 @@ class ChatProviderService
         if (Str::contains($haystack, ['anthropic', 'claude'])) {
             return 'anthropic';
         }
+        if (Str::contains($haystack, ['grok', 'x.ai', 'xai'])) {
+            return 'grok';
+        }
         if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) {
             return 'gemini';
         }
@@ -381,9 +385,10 @@ class ChatProviderService
     protected function defaultModelFor(string $driver): string
     {
         return match ($driver) {
-            'anthropic' => 'claude-3-5-haiku-latest',
-            'gemini' => 'gemini-1.5-flash',
-            default => 'gpt-4o-mini',
+            'anthropic' => 'claude-haiku-4-5-20251001',
+            'grok'      => 'grok-beta',
+            'gemini'    => 'gemini-1.5-flash',
+            default     => 'gpt-4o-mini',
         };
     }
 

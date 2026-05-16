@@ -27,7 +27,7 @@ $langFlags  = ['en'=>'🇬🇧','fr'=>'🇫🇷','ru'=>'🇷🇺','zh'=>'🇨�
     <x-ui.page-header
         :title="__('Activities')"
         :breadcrumbs="[
-            ['label' => __('Admin'), 'url' => route('admin.dashboard')],
+            ['label' => __('Admin'), 'url' => route('admin.analytics.index')],
             ['label' => __('Activities')],
         ]"
     >

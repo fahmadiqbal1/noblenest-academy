@@ -41,8 +41,9 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     // Curriculum explorer
     Route::get('curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'index'])->name('curriculum');
 
-    // Analytics
+    // Analytics (also aliased as admin.dashboard for breadcrumb/redirect compatibility)
     Route::get('analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('dashboard', fn () => redirect()->route('admin.analytics.index'))->name('dashboard');
     Route::post('analytics/report', [\App\Http\Controllers\Admin\AnalyticsController::class, 'reportEmail'])->name('analytics.reportEmail');
     Route::get('analytics/most-liked', [\App\Http\Controllers\Admin\AnalyticsController::class, 'mostLiked'])->name('analytics.mostLiked');
     Route::get('analytics/monthly-completions', [\App\Http\Controllers\Admin\AnalyticsController::class, 'monthlyCompletions'])->name('analytics.monthlyCompletions');
@@ -70,13 +71,13 @@ Route::post('/set-language', [\App\Http\Controllers\SettingsController::class, '
 Route::post('/dismiss-onboarding', [\App\Http\Controllers\SettingsController::class, 'dismissOnboarding'])->name('dismiss-onboarding');
 
 // Language switcher route (with security allowlist)
-Route::get('/lang/{lang}', function ($lang) {
+Route::get('/lang/{lang}', function (\Illuminate\Http\Request $request, $lang) {
     $allowed = ['en', 'fr', 'ru', 'zh', 'es', 'ko', 'ur', 'ar'];
     if (!in_array($lang, $allowed, true)) {
         abort(400, 'Invalid language code');
     }
-    session(['lang' => $lang]);
-    return redirect()->back();
+    $request->session()->put('lang', $lang);
+    return redirect()->back(302, [], route('noble.home'));
 })->name('lang.switch');
 
 // Root route for default home and test coverage
@@ -186,6 +187,7 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
     Route::post('orchestrator/jobs/{job}/retry', [\App\Http\Controllers\Admin\OrchestratorController::class, 'retryJob'])->name('orchestrator.retry');
     Route::delete('orchestrator/jobs/{job}', [\App\Http\Controllers\Admin\OrchestratorController::class, 'destroyJob'])->name('orchestrator.destroyJob');
     Route::get('orchestrator/scan', [\App\Http\Controllers\Admin\OrchestratorController::class, 'scanCurriculum'])->name('orchestrator.scan');
+    Route::post('orchestrator/fill-gaps', [\App\Http\Controllers\Admin\OrchestratorController::class, 'fillGaps'])->name('orchestrator.fillGaps');
     Route::post('orchestrator/media', [\App\Http\Controllers\Admin\OrchestratorController::class, 'generateMedia'])->name('orchestrator.generateMedia');
     Route::get('orchestrator/media/{job}/status', [\App\Http\Controllers\Admin\OrchestratorController::class, 'mediaJobStatus'])->name('orchestrator.mediaJobStatus');
 });

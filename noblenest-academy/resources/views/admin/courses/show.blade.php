@@ -4,143 +4,161 @@
 
 @section('content')
 @php
-    $color = $course->color ?: '#64B5F6';
-    $emoji = $course->emoji ?: '📘';
-    $ageLabel = ($course->age_min !== null && $course->age_max !== null)
+    $color       = $course->color ?: '#64B5F6';
+    $emoji       = $course->emoji ?: '📘';
+    $ageLabel    = ($course->age_min !== null && $course->age_max !== null)
         ? ($course->age_min === $course->age_max ? "Age {$course->age_min}" : "Ages {$course->age_min}–{$course->age_max}")
         : null;
     $totalActivities = $course->modules->sum(fn($m) => $m->activities->count());
 @endphp
 
-<div class="w-full px-4 py-4">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
     {{-- Header --}}
-    <div class="flex items-center gap-3 mb-4">
-        <a href="{{ route('admin.courses.index') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm">
+    <div class="flex items-start gap-4">
+        <a href="{{ route('admin.courses.index') }}"
+           class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition shrink-0">
             <x-ui.icon name="arrow-left" />
         </a>
-        <div class="rounded-lg flex items-center justify-center flex-shrink-0"
-             style="width:56px;height:56px;background:{{ $color }}22;font-size:1.8rem">
-            {{ $emoji }}
-        </div>
-        <div>
-            <h2 class="font-bold mb-0">{{ $course->title }}</h2>
-            <div class="flex gap-2 items-center mt-1">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border text-sm">{{ $course->slug }}</span>
-                @if($ageLabel)
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium" style="background:{{ $color }}22;color:{{ $color }}">🎂 {{ $ageLabel }}</span>
-                @endif
-                <span class="text-[var(--color-text-muted)] text-sm"><x-ui.icon name="folder" /> {{ $course->modules->count() }} modules</span>
-                <span class="text-[var(--color-text-muted)] text-sm"><x-ui.icon name="zap" /> {{ $totalActivities }} activities</span>
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center text-3xl shrink-0"
+                 style="background:{{ $color }}22">{{ $emoji }}</div>
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold text-gray-900 truncate">{{ $course->title }}</h1>
+                <div class="flex flex-wrap items-center gap-2 mt-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border">{{ $course->slug }}</span>
+                    @if($ageLabel)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                              style="background:{{ $color }}22;color:{{ $color }}">🎂 {{ $ageLabel }}</span>
+                    @endif
+                    <span class="text-sm text-gray-500">
+                        <x-ui.icon name="folder" /> {{ $course->modules->count() }} modules
+                    </span>
+                    <span class="text-sm text-gray-500">
+                        <x-ui.icon name="zap" /> {{ $totalActivities }} activities
+                    </span>
+                </div>
             </div>
         </div>
-        <div class="ms-auto flex gap-2">
-            <a href="{{ route('admin.courses.edit', $course) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm">
-                <x-ui.icon name="pencil" class="me-1" />Edit Course
-            </a>
-        </div>
+        <a href="{{ route('admin.courses.edit', $course) }}"
+           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white transition shrink-0">
+            <x-ui.icon name="pencil" /> Edit Course
+        </a>
     </div>
 
     @if($course->description)
-        <p class="text-[var(--color-text-muted)] mb-4">{{ $course->description }}</p>
+        <p class="text-gray-500">{{ $course->description }}</p>
     @endif
 
-    {{-- Modules accordion --}}
-    <div class="flex flex-col gap-2" id="modulesAccordion">
+    {{-- Modules accordion (native <details>) --}}
+    <div class="space-y-3">
         @forelse($course->modules as $mi => $module)
-            @php $collapseId = "module-{$module->id}"; @endphp
-            <div class="border border-gray-200 rounded-lg overflow-hidden bg-white border-0 shadow-sm mb-3">
-                <h2 class="">
-                    <button class="w-full text-left px-4 py-3 flex items-center justify-between font-medium hover:bg-gray-50 {{ $mi > 0 ? 'collapsed' : '' }} font-semibold"
-                            type="button">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700 me-2">{{ $mi + 1 }}</span>
-                        {{ $module->title }}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 ms-auto me-3">
-                            {{ $module->activities->count() }} activities &middot; {{ $module->lessons->count() }} lessons
-                        </span>
-                    </button>
-                </h2>
-                <div id="{{ $collapseId }}" class="{{ $mi === 0 ? 'show' : '' }}"
->
-                    <div class="px-4 py-3 p-0">
-                        {{-- Activities table --}}
-                        @if($module->activities->count())
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm border-collapse table-hover-tw align-middle mb-0">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th style="width:40px">#</th>
-                                            <th>Activity</th>
-                                            <th style="width:100px">Type</th>
-                                            <th style="width:80px">Difficulty</th>
-                                            <th style="width:80px">Duration</th>
-                                            <th style="width:60px">Free?</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($module->activities as $ai => $activity)
-                                            <tr>
-                                                <td class="text-[var(--color-text-muted)]">{{ $ai + 1 }}</td>
-                                                <td>
-                                                    <div class="font-medium">{{ $activity->title }}</div>
-                                                    @if($activity->description)
-                                                        <small class="text-[var(--color-text-muted)]" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">
-                                                            {{ $activity->description }}
-                                                        </small>
-                                                    @endif
-                                                </td>
-                                                <td><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-800">{{ $activity->activity_type }}</span></td>
-                                                <td>
-                                                    @php
-                                                        $diffBadge = match($activity->difficulty) {
-                                                            'easy'   => 'bg-emerald-50 text-emerald-800',
-                                                            'medium' => 'bg-amber-50 text-amber-800',
-                                                            'hard'   => 'bg-red-50 text-red-800',
-                                                            default  => 'bg-gray-50 text-gray-800',
-                                                        };
-                                                    @endphp
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $diffBadge }}">{{ ucfirst($activity->difficulty ?? '-') }}</span>
-                                                </td>
-                                                <td class="text-[var(--color-text-muted)]">{{ $activity->duration_minutes ? $activity->duration_minutes . 'min' : '-' }}</td>
-                                                <td>{!! $activity->is_free ? '<x-ui.icon name="check-circle" class="text-emerald-600" />' : '<x-ui.icon name="lock" class="text-[var(--color-text-muted)]" />' !!}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="text-center text-[var(--color-text-muted)] py-4">
-                                <x-ui.icon name="inbox" class="text-3xl block mb-1" />
-                                No activities in this module yet.
-                            </div>
-                        @endif
+            <details class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden" {{ $mi === 0 ? 'open' : '' }}>
+                <summary class="flex items-center gap-3 px-5 py-4 cursor-pointer select-none hover:bg-gray-50 list-none [&::-webkit-details-marker]:hidden">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold shrink-0">
+                        {{ $mi + 1 }}
+                    </span>
+                    <span class="font-semibold text-gray-900 flex-1">{{ $module->title }}</span>
+                    <span class="text-xs text-gray-500 mr-2">
+                        {{ $module->activities->count() }} activities · {{ $module->lessons->count() }} lessons
+                    </span>
+                    <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </summary>
 
-                        {{-- Lessons --}}
-                        @if($module->lessons->count())
-                            <div class="border-t px-3 py-3">
-                                <h6 class="font-semibold mb-2"><x-ui.icon name="book" class="me-1" />Lessons</h6>
-                                <div class="divide-y divide-gray-200 border border-gray-200 rounded-lg bg-white rounded-none border-0">
-                                    @foreach($module->lessons as $lesson)
-                                        <div class="px-4 py-3 px-0 border-0">
-                                            <div class="flex items-center gap-2">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">{{ $lesson->order }}</span>
-                                                <span class="font-medium">{{ $lesson->title }}</span>
-                                                @if($lesson->duration)
-                                                    <span class="text-[var(--color-text-muted)] text-sm ms-auto">{{ $lesson->duration }}min</span>
+                <div class="border-t border-gray-100">
+                    {{-- Activities table --}}
+                    @if($module->activities->count())
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50 text-left">
+                                    <tr>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-10">#</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs">Activity</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-28">Type</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-24">Difficulty</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-20">Duration</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-16">Free?</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach($module->activities as $ai => $activity)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-5 py-3 text-gray-400">{{ $ai + 1 }}</td>
+                                            <td class="px-5 py-3">
+                                                <div class="font-medium text-gray-900">{{ $activity->title }}</div>
+                                                @if($activity->description)
+                                                    <div class="text-xs text-gray-500 line-clamp-1">{{ $activity->description }}</div>
                                                 @endif
-                                            </div>
-                                        </div>
+                                            </td>
+                                            <td class="px-5 py-3">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                                                    {{ $activity->activity_type }}
+                                                </span>
+                                            </td>
+                                            <td class="px-5 py-3">
+                                                @php
+                                                    $diffBadge = match($activity->difficulty) {
+                                                        'easy'   => 'bg-emerald-100 text-emerald-800',
+                                                        'medium' => 'bg-amber-100 text-amber-800',
+                                                        'hard'   => 'bg-red-100 text-red-800',
+                                                        default  => 'bg-gray-100 text-gray-700',
+                                                    };
+                                                @endphp
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $diffBadge }}">
+                                                    {{ ucfirst($activity->difficulty ?? '—') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-5 py-3 text-gray-500">
+                                                {{ $activity->duration_minutes ? $activity->duration_minutes . 'min' : '—' }}
+                                            </td>
+                                            <td class="px-5 py-3">
+                                                @if($activity->is_free)
+                                                    <x-ui.icon name="check-circle" class="text-emerald-600" />
+                                                @else
+                                                    <x-ui.icon name="lock" class="text-gray-400" />
+                                                @endif
+                                            </td>
+                                        </tr>
                                     @endforeach
-                                </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center text-gray-400 py-8">
+                            <x-ui.icon name="inbox" class="text-3xl block mb-1 mx-auto" />
+                            <p class="text-sm">No activities in this module yet.</p>
+                        </div>
+                    @endif
+
+                    {{-- Lessons --}}
+                    @if($module->lessons->count())
+                        <div class="border-t border-gray-100 px-5 py-4">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+                                <x-ui.icon name="book" /> Lessons
+                            </h3>
+                            <div class="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
+                                @foreach($module->lessons as $lesson)
+                                    <div class="flex items-center gap-3 px-4 py-3 bg-white">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 shrink-0">
+                                            {{ $lesson->order }}
+                                        </span>
+                                        <span class="font-medium text-sm text-gray-900 flex-1">{{ $lesson->title }}</span>
+                                        @if($lesson->duration)
+                                            <span class="text-xs text-gray-500">{{ $lesson->duration }}min</span>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </div>
-            </div>
+            </details>
         @empty
-            <div class="text-center text-[var(--color-text-muted)] py-5">
-                <x-ui.icon name="folder-open" class="text-5xl block mb-2" />
-                No modules in this course yet.
+            <div class="text-center text-gray-400 py-12">
+                <x-ui.icon name="folder-open" class="text-5xl block mb-2 mx-auto" />
+                <p class="text-sm">No modules in this course yet.</p>
             </div>
         @endforelse
     </div>

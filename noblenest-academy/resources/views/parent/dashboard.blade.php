@@ -195,11 +195,11 @@
         <x-ui.button variant="secondary" href="{{ route('children.create') }}" icon="person-add" class="justify-start">
             Add Child
         </x-ui.button>
-        <x-ui.button variant="secondary" href="{{ route('milestones') }}" icon="trophy" class="justify-start">
+        <x-ui.button variant="secondary" href="{{ route('parent.milestones') }}" icon="trophy" class="justify-start">
             View Milestones
         </x-ui.button>
         @if($children->isNotEmpty())
-        <x-ui.button variant="secondary" href="{{ route('share-card', $children->first()) }}" icon="share-2" class="justify-start">
+        <x-ui.button variant="secondary" href="{{ route('parent.share-card', $children->first()) }}" icon="share-2" class="justify-start">
             Share Card
         </x-ui.button>
         @endif

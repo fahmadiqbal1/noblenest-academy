@@ -9,7 +9,7 @@
         :title="__('Courses')"
         :subtitle="$courses->total() . ' ' . __('course(s) across all age groups')"
         :breadcrumbs="[
-            ['label' => __('Admin'), 'url' => route('admin.dashboard')],
+            ['label' => __('Admin'), 'url' => route('admin.analytics.index')],
             ['label' => __('Courses')],
         ]"
     >

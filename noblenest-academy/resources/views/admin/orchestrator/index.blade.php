@@ -1,361 +1,288 @@
 @extends('layouts.admin')
 
 @section('content')
-<style>
-    .orch-hero,
-    .orch-card,
-    .provider-card,
-    .job-card,
-    .stat-card {
-        background: rgba(255,255,255,0.82);
-        border: 1px solid rgba(24, 34, 47, 0.08);
-        box-shadow: 0 24px 48px rgba(24, 34, 47, 0.10);
-    }
-    .orch-hero {
-        position: relative;
-        overflow: hidden;
-        border-radius: 1.75rem;
-        padding: 1.8rem;
-        margin-bottom: 1.5rem;
-        background:
-            radial-gradient(circle at 14% 20%, rgba(242,165,65,0.16), transparent 20%),
-            radial-gradient(circle at 92% 12%, rgba(13,92,99,0.16), transparent 24%),
-            linear-gradient(145deg, rgba(255,255,255,0.96), rgba(238,244,246,0.94));
-    }
-    .orch-hero::after {
-        content: '';
-        position: absolute;
-        inset: auto -10% -22% auto;
-        width: 260px;
-        height: 260px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(13,92,99,0.16), transparent 70%);
-    }
-    .orch-card,
-    .provider-card,
-    .job-card,
-    .stat-card {
-        border-radius: 1.4rem;
-    }
-    .orch-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-    .stat-card {
-        padding: 1.1rem 1.2rem;
-        height: 100%;
-    }
-    .stat-card__value {
-        font-size: 2.2rem;
-        font-weight: 800;
-        line-height: 1;
-    }
-    .provider-stack {
-        display: grid;
-        gap: 1rem;
-    }
-    .provider-card {
-        padding: 1rem;
-    }
-    .provider-card__top {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        align-items: flex-start;
-    }
-    .provider-card__meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.45rem;
-        margin-top: 0.85rem;
-    }
-    .status-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        border-radius: 999px;
-        padding: 0.38rem 0.75rem;
-        font-size: 0.76rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-    .status-pill--live { background: rgba(22, 134, 107, 0.12); color: #16866b; }
-    .status-pill--failed { background: rgba(196, 69, 54, 0.12); color: #c44536; }
-    .status-pill--unchecked,
-    .status-pill--configured { background: rgba(124, 58, 237, 0.10); color: #7C3AED; }
-    .provider-helper {
-        color: #5f6c7b;
-        font-size: 0.9rem;
-        line-height: 1.55;
-    }
-    .job-feed {
-        display: grid;
-        gap: 1rem;
-    }
-    .job-card {
-        padding: 1.15rem;
-    }
-    .job-card__result {
-        white-space: pre-wrap;
-        max-height: 150px;
-        overflow-y: auto;
-        background: rgba(241, 247, 248, 0.86);
-        border-radius: 1rem;
-        padding: 0.9rem;
-        border: 1px solid rgba(24, 34, 47, 0.06);
-    }
-    .orch-form .form-control,
-    .orch-form .form-select {
-        border-radius: 1rem;
-        border-color: rgba(24, 34, 47, 0.12);
-        min-height: 48px;
-    }
-    .orch-form textarea.form-control {
-        min-height: 130px;
-    }
-    .orch-section-title {
-        font-size: 0.78rem;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        font-weight: 800;
-        color: #7C3AED;
-    }
-</style>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-<div class="w-full px-4 py-2 py-lg-3">
-    <div class="orch-hero">
-        <div class="flex justify-between items-start gap-3 flex-wrap relative" style="z-index: 1;">
-            <div class="w-full xl:w-7/12 px-0">
-                <div class="orch-section-title mb-2">AI control center</div>
-                <h1 class="mb-2 text-[var(--color-primary)]"><x-ui.icon name="bot" /> AI Orchestrator</h1>
-                <p class="text-[var(--color-text-muted)] mb-0">Connect providers, validate whether they are truly reachable, dispatch generation jobs, and keep moderation and publishing in one place.</p>
+    {{-- Hero header --}}
+    <div class="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-white via-slate-50 to-teal-50 border border-gray-200 shadow-sm">
+        <div class="flex flex-wrap justify-between items-start gap-4 relative z-10">
+            <div class="max-w-xl">
+                <div class="text-xs font-bold uppercase tracking-widest text-violet-600 mb-1">AI Control Center</div>
+                <h1 class="text-2xl font-bold text-[var(--color-primary)] flex items-center gap-2">
+                    <x-ui.icon name="bot" /> AI Orchestrator
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">Connect providers, validate live status, dispatch generation jobs, and manage moderation in one place.</p>
             </div>
             <div class="flex gap-2 flex-wrap">
-                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-sky-600 text-sky-600 hover:bg-sky-600 hover:text-white px-3 py-1.5 text-sm" id="scanBtn" onclick="scanCurriculum()">
-                <x-ui.icon name="search" /> Scan Curriculum Gaps
-            </button>
-            <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 px-3 py-1.5 text-sm">
-                <x-ui.icon name="plug" /> Add AI Provider
-            </button>
+                <button id="scanBtn" onclick="scanCurriculum()"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-sky-600 text-sky-600 hover:bg-sky-600 hover:text-white transition">
+                    <x-ui.icon name="search" /> Scan Curriculum Gaps
+                </button>
+                <button onclick="openProviderModal()"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 transition">
+                    <x-ui.icon name="plug" /> Add AI Provider
+                </button>
+            </div>
         </div>
-    </div>
     </div>
 
     @if(session('status'))
-        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800">{{ session('status') }}<button type="button" class=""></button></div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800 text-sm">{{ session('status') }}</div>
     @endif
     @if(session('error'))
-        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800">{{ session('error') }}<button type="button" class=""></button></div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800 text-sm">{{ session('error') }}</div>
     @endif
 
-    {{-- Stats Row --}}
-    <div class="flex flex-wrap gap-3 mb-4">
-        <div class="w-6/12 md:w-2/12">
-            <div class="stat-card text-center">
-                <div>
-                    <div class="text-2xl font-bold text-gray-500">{{ $stats['queued'] }}</div>
-                    <div class="text-sm text-[var(--color-text-muted)]">Queued</div>
-                </div>
-            </div>
+    {{-- Stats row --}}
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        @foreach([
+            ['label' => 'Queued',       'value' => $stats['queued'],             'color' => 'text-gray-600'],
+            ['label' => 'Running',      'value' => $stats['running'],            'color' => 'text-[var(--color-primary)]'],
+            ['label' => 'Completed',    'value' => $stats['completed'],          'color' => 'text-emerald-600'],
+            ['label' => 'Failed',       'value' => $stats['failed'],             'color' => 'text-red-600'],
+            ['label' => 'Needs Review', 'value' => $stats['pending_moderation'], 'color' => 'text-amber-600'],
+        ] as $stat)
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 text-center">
+            <div class="text-3xl font-extrabold {{ $stat['color'] }}">{{ $stat['value'] }}</div>
+            <div class="text-xs text-gray-500 mt-0.5">{{ $stat['label'] }}</div>
         </div>
-        <div class="w-6/12 md:w-2/12">
-            <div class="stat-card text-center">
+        @endforeach
+    </div>
+
+    {{-- Scan result + Auto-Fill --}}
+    <div id="scanResult" class="hidden space-y-3">
+        <div class="flex flex-wrap items-start gap-3 p-4 rounded-lg border bg-sky-50 border-sky-200 text-sky-800 text-sm" id="scanResultContent"></div>
+
+        {{-- Auto-fill panel — shown after a scan with gaps --}}
+        <div id="fillGapsPanel" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <div class="text-xs font-bold uppercase tracking-widest text-violet-600 mb-1">Auto-Generate</div>
+            <div class="font-bold text-gray-900 flex items-center gap-1.5 mb-3">
+                <x-ui.icon name="sparkles" /> Fill Curriculum Gaps with AI
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 <div>
-                    <div class="text-2xl font-bold text-[var(--color-primary)]">{{ $stats['running'] }}</div>
-                    <div class="text-sm text-[var(--color-text-muted)]">Running</div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Provider <span class="text-red-500">*</span></label>
+                    <select id="fillProvider"
+                            class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                        @foreach($providers->where('is_active', true) as $p)
+                            @php $pDriver = data_get($p->extra_config, 'driver', ''); @endphp
+                            @if(in_array($pDriver, ['anthropic', 'grok']))
+                                <option value="{{ $p->slug }}">{{ $p->name }} ({{ strtoupper($pDriver) }})</option>
+                            @endif
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-gray-400 mt-1">Only Grok / Anthropic providers shown.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Batch Limit</label>
+                    <select id="fillLimit"
+                            class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                        <option value="5">5 activities</option>
+                        <option value="10" selected>10 activities</option>
+                        <option value="20">20 activities</option>
+                        <option value="30">30 activities</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="fillGapsBtn" onclick="fillGaps()"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 transition">
+                        <x-ui.icon name="sparkles" /> Auto-Fill Gaps
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="w-6/12 md:w-2/12">
-            <div class="stat-card text-center">
-                <div>
-                    <div class="text-2xl font-bold text-emerald-600">{{ $stats['completed'] }}</div>
-                    <div class="text-sm text-[var(--color-text-muted)]">Completed</div>
-                </div>
-            </div>
-        </div>
-        <div class="w-6/12 md:w-2/12">
-            <div class="stat-card text-center">
-                <div>
-                    <div class="text-2xl font-bold text-red-600">{{ $stats['failed'] }}</div>
-                    <div class="text-sm text-[var(--color-text-muted)]">Failed</div>
-                </div>
-            </div>
-        </div>
-        <div class="w-6/12 md:w-2/12">
-            <div class="stat-card text-center">
-                <div>
-                    <div class="text-2xl font-bold text-amber-600">{{ $stats['pending_moderation'] }}</div>
-                    <div class="text-sm text-[var(--color-text-muted)]">Needs Review</div>
-                </div>
-            </div>
+            <div id="fillGapsResult" class="hidden text-sm"></div>
         </div>
     </div>
 
-    <div class="flex flex-wrap gap-4">
-        {{-- Left: Provider + Dispatch --}}
-        <div class="lg:w-4/12">
+    {{-- Main two-column grid --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {{-- Left: Providers + Dispatch --}}
+        <div class="space-y-6">
 
             {{-- Connected Providers --}}
-            <div class="orch-card p-3 mb-4">
-                <div class="orch-card-header">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 space-y-4">
+                <div class="flex items-center justify-between">
                     <div>
-                        <div class="orch-section-title mb-1">Providers</div>
-                        <div class="font-bold"><x-ui.icon name="plug" class="text-emerald-600" /> Connected AI Providers</div>
+                        <div class="text-xs font-bold uppercase tracking-widest text-violet-600 mb-0.5">Providers</div>
+                        <div class="font-bold text-gray-900 flex items-center gap-1.5">
+                            <x-ui.icon name="plug" class="text-emerald-600" /> Connected AI Providers
+                        </div>
                     </div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-900 border">{{ $providers->count() }} total</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border">
+                        {{ $providers->count() }} total
+                    </span>
                 </div>
-                <div class="provider-stack">
+
+                <div class="space-y-3">
                     @forelse($providers as $p)
-                    <div class="provider-card">
-                        <div class="provider-card__top">
-                            <div>
+                    <div class="rounded-xl border border-gray-200 p-4 bg-gray-50/50">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <span class="font-semibold">{{ $p->name }}</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border">{{ $p->slug }}</span>
-                                    <span class="status-pill status-pill--{{ in_array($p->connection_status, ['live', 'failed', 'configured'], true) ? $p->connection_status : 'unchecked' }}"
-                                          id="status-pill-{{ $p->id }}">
-                                        <x-ui.icon name="{{ $p->connection_status === 'live' ? 'circle-play' : ($p->connection_status === 'failed' ? 'octagon-alert' : 'clock') }}" />
+                                    <span class="font-semibold text-sm text-gray-900">{{ $p->name }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border">{{ $p->slug }}</span>
+                                    @php
+                                        $statusClass = match($p->connection_status) {
+                                            'live'       => 'bg-emerald-100 text-emerald-800',
+                                            'failed'     => 'bg-red-100 text-red-700',
+                                            'configured' => 'bg-violet-100 text-violet-700',
+                                            default      => 'bg-gray-100 text-gray-600',
+                                        };
+                                    @endphp
+                                    <span id="status-pill-{{ $p->id }}"
+                                          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide {{ $statusClass }}">
                                         {{ $p->connection_status ?? 'unchecked' }}
                                     </span>
                                 </div>
-                                <div class="provider-helper mt-2">{{ $p->connection_message ?: 'Provider added, but no verification details are available yet.' }}</div>
-                                <div class="provider-card__meta">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Driver: {{ strtoupper(data_get($p->extra_config, 'driver', 'auto')) }}</span>
+                                <p class="text-xs text-gray-500 mt-1.5 leading-snug">{{ $p->connection_message ?: 'Provider added, no verification details yet.' }}</p>
+                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 border">Driver: {{ strtoupper(data_get($p->extra_config, 'driver', 'auto')) }}</span>
                                     @if($p->model)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Model: {{ $p->model }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 border">Model: {{ $p->model }}</span>
                                     @endif
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $p->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $p->is_active ? 'Active' : 'Disabled' }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $p->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500' }}">
+                                        {{ $p->is_active ? 'Active' : 'Disabled' }}
+                                    </span>
                                     @if($p->last_checked_at)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Checked {{ $p->last_checked_at->diffForHumans() }}</span>
-                                    @endif
-                                    @if($p->last_live_at)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Last live {{ $p->last_live_at->diffForHumans() }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">Checked {{ $p->last_checked_at->diffForHumans() }}</span>
                                     @endif
                                     @foreach($p->capabilities ?? [] as $cap)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">{{ $cap }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 border">{{ $cap }}</span>
                                     @endforeach
                                 </div>
                             </div>
-                            <div class="flex gap-1 flex-wrap justify-end">
-                                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm"
-                                        id="verify-btn-{{ $p->id }}"
+                            <div class="flex gap-1 shrink-0">
+                                <button id="verify-btn-{{ $p->id }}"
                                         title="Verify live status"
-                                        onclick="verifyProvider({{ $p->id }}, '{{ route('admin.orchestrator.verifyProvider', $p) }}', this)">
+                                        onclick="verifyProvider({{ $p->id }}, '{{ route('admin.orchestrator.verifyProvider', $p) }}', this)"
+                                        class="p-2 rounded-lg border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white transition">
                                     <x-ui.icon name="rotate-cw" />
                                 </button>
-                                <form method="POST" action="{{ route('admin.orchestrator.toggleProvider', $p) }}" style="display:inline">
+                                <form method="POST" action="{{ route('admin.orchestrator.toggleProvider', $p) }}">
                                     @csrf
-                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm {{ $p->is_active ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border-2 border-gray-300 text-gray-700 hover:bg-gray-100' }}" title="{{ $p->is_active ? 'Disable' : 'Enable' }}">
+                                    <button type="submit" title="{{ $p->is_active ? 'Disable' : 'Enable' }}"
+                                            class="p-2 rounded-lg transition {{ $p->is_active ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border-2 border-gray-300 text-gray-600 hover:bg-gray-100' }}">
                                         <x-ui.icon name="{{ $p->is_active ? 'check-circle' : 'x-circle' }}" />
                                     </button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.orchestrator.destroyProvider', $p) }}" onsubmit="return confirm('Remove provider?')">
                                     @csrf @method('DELETE')
-                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="trash" /></button>
+                                    <button type="submit" class="p-2 rounded-lg border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition">
+                                        <x-ui.icon name="trash" />
+                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
                     @empty
-                    <div class="text-center text-[var(--color-text-muted)] py-3 text-sm">No providers yet. Add one to get started.</div>
+                    <div class="text-center text-gray-400 py-6 text-sm">No providers yet. Add one to get started.</div>
                     @endforelse
                 </div>
             </div>
 
             {{-- Dispatch Job --}}
-            <div class="orch-card p-3">
-                <div class="orch-card-header">
-                    <div>
-                        <div class="orch-section-title mb-1">Dispatch</div>
-                        <div class="font-bold"><x-ui.icon name="send" class="text-[var(--color-primary)]" /> Generate Content</div>
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <div class="mb-4">
+                    <div class="text-xs font-bold uppercase tracking-widest text-violet-600 mb-0.5">Dispatch</div>
+                    <div class="font-bold text-gray-900 flex items-center gap-1.5">
+                        <x-ui.icon name="send" class="text-[var(--color-primary)]" /> Generate Content
                     </div>
                 </div>
-                <div>
-                    <form method="POST" action="{{ route('admin.orchestrator.dispatch') }}" class="orch-form">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Job Type</label>
-                            <select name="type" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" required>
-                                @foreach($jobTypes as $val => $label)
-                                    <option value="{{ $val }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">AI Provider</label>
-                            <select name="provider" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm">
-                                <option value="mock">Mock (no API key needed)</option>
-                                @foreach($providers->where('is_active', true) as $p)
-                                    <option value="{{ $p->slug }}">{{ $p->name }} @if($p->connection_status) · {{ $p->connection_status }} @endif</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Language / Locale</label>
-                            <select name="locale" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm">
-                                @foreach($locales as $code => $name)
-                                    <option value="{{ $code }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Prompt / Brief <span class="text-red-600">*</span></label>
-                            <textarea name="prompt" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" rows="4"
-                                placeholder="e.g. Create a 15-minute tracing activity for numbers 1-5 for age 3-4..." required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Repo URL (optional)</label>
-                            <input type="url" name="repo_url" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm"
-                                placeholder="https://github.com/owner/repo">
-                            <div class="mt-1 text-sm text-[var(--color-text-muted)]">Extract educational content from a public GitHub repo.</div>
-                        </div>
-                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 w-full">
-                            <x-ui.icon name="zap" /> Dispatch Job
-                        </button>
-                    </form>
-                </div>
+                <form method="POST" action="{{ route('admin.orchestrator.dispatch') }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Job Type</label>
+                        <select name="type" class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none" required>
+                            @foreach($jobTypes as $val => $label)
+                                <option value="{{ $val }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">AI Provider</label>
+                        <select name="provider" class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                            <option value="mock">Mock (no API key needed)</option>
+                            @foreach($providers->where('is_active', true) as $p)
+                                <option value="{{ $p->slug }}">{{ $p->name }}@if($p->connection_status) · {{ $p->connection_status }}@endif</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Language / Locale</label>
+                        <select name="locale" class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                            @foreach($locales as $code => $name)
+                                <option value="{{ $code }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Prompt / Brief <span class="text-red-500">*</span></label>
+                        <textarea name="prompt" rows="4"
+                                  class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none resize-none"
+                                  placeholder="e.g. Create a 15-minute tracing activity for numbers 1-5 for age 3-4…" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">GitHub Repo URL (optional)</label>
+                        <input type="url" name="repo_url"
+                               class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none"
+                               placeholder="https://github.com/owner/repo">
+                        <p class="text-xs text-gray-500 mt-1">Extract educational content from a public GitHub repo.</p>
+                    </div>
+                    <button type="submit"
+                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 transition">
+                        <x-ui.icon name="zap" /> Dispatch Job
+                    </button>
+                </form>
             </div>
         </div>
 
-        {{-- Right: Job Queue --}}
-        <div class="lg:w-8/12">
-            <div class="orch-card p-3">
-                <div class="orch-card-header">
+        {{-- Right: Job queue --}}
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 h-full flex flex-col">
+                <div class="flex items-center justify-between mb-4">
                     <div>
-                        <div class="orch-section-title mb-1">Queue</div>
-                        <span class="font-bold"><x-ui.icon name="list-checks" /> Job Queue</span>
+                        <div class="text-xs font-bold uppercase tracking-widest text-violet-600 mb-0.5">Queue</div>
+                        <div class="font-bold text-gray-900 flex items-center gap-1.5">
+                            <x-ui.icon name="list-checks" /> Job Queue
+                        </div>
                     </div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500">{{ $jobs->total() }} total</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border">
+                        {{ $jobs->total() }} total
+                    </span>
                 </div>
-                <div class="job-feed" style="max-height: 75vh; overflow-y: auto; padding-right: 0.25rem;">
+
+                <div class="space-y-3 overflow-y-auto" style="max-height: 72vh">
                     @forelse($jobs as $job)
-                    <div class="job-card">
-                        <div class="flex justify-between items-start gap-2 flex-wrap">
-                            <div>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $job->status === 'completed' ? 'bg-emerald-100 text-emerald-700' : ($job->status === 'failed' ? 'bg-red-100 text-red-700' : ($job->status === 'running' ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-700')) }}">{{ $job->status }}</span>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $job->moderation_status === 'approved' ? 'bg-emerald-100 text-emerald-700' : ($job->moderation_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800') }} ms-1">
-                                    {{ $job->moderation_status }}
-                                </span>
-                                <span class="font-semibold ms-2">{{ $job->type }}</span>
-                                <span class="text-[var(--color-text-muted)] text-sm ms-1">· {{ strtoupper($job->locale) }} · {{ $job->provider }}</span>
+                    <div class="rounded-xl border border-gray-200 p-4 bg-gray-50/40">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                @php
+                                    $jobStatus = match($job->status) {
+                                        'completed' => 'bg-emerald-100 text-emerald-700',
+                                        'failed'    => 'bg-red-100 text-red-700',
+                                        'running'   => 'bg-violet-100 text-violet-700',
+                                        default     => 'bg-gray-100 text-gray-600',
+                                    };
+                                    $modStatus = match($job->moderation_status) {
+                                        'approved' => 'bg-emerald-100 text-emerald-700',
+                                        'rejected' => 'bg-red-100 text-red-700',
+                                        default    => 'bg-amber-100 text-amber-800',
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $jobStatus }}">{{ $job->status }}</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $modStatus }}">{{ $job->moderation_status }}</span>
+                                <span class="font-semibold text-sm text-gray-900">{{ $job->type }}</span>
+                                <span class="text-xs text-gray-500">· {{ strtoupper($job->locale) }} · {{ $job->provider }}</span>
                             </div>
-                            <div class="text-[var(--color-text-muted)] text-sm">
-                                #{{ $job->id }} · {{ $job->created_at->diffForHumans() }}
-                            </div>
+                            <div class="text-xs text-gray-400">#{{ $job->id }} · {{ $job->created_at->diffForHumans() }}</div>
                         </div>
 
-                        {{-- Prompt --}}
-                        <div class="mt-1 text-[var(--color-text-muted)] text-sm">
+                        <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
                             <x-ui.icon name="message-square-quote" />
                             {{ Str::limit($job->payload['prompt'] ?? '—', 120) }}
-                        </div>
+                        </p>
 
-                        {{-- Result --}}
                         @if($job->result)
                         @php
                             $res     = $job->result;
@@ -363,175 +290,181 @@
                             $resUrl  = $res['url'] ?? null;
                             $resTxt  = $res['content'] ?? json_encode($res);
                         @endphp
-                        <div class="job-card__result mt-2 text-sm">
+                        <div class="mt-2 text-xs bg-slate-50 rounded-lg p-3 border border-slate-200 overflow-y-auto max-h-36 whitespace-pre-wrap">
                             @if($resType === 'image' && $resUrl)
-                                <img src="{{ $resUrl }}" alt="Generated image" class="img-fluid rounded mb-1" style="max-height:200px">
+                                <img src="{{ $resUrl }}" alt="Generated image" class="rounded mb-1.5 max-h-48">
                             @elseif($resType === 'audio' && $resUrl)
-                                <audio controls class="w-full mb-1"><source src="{{ $resUrl }}" type="audio/mpeg"></audio>
+                                <audio controls class="w-full mb-1.5"><source src="{{ $resUrl }}" type="audio/mpeg"></audio>
                             @elseif($resType === 'video' && $resUrl)
-                                <video controls class="w-full mb-1" style="max-height:200px"><source src="{{ $resUrl }}"></video>
+                                <video controls class="w-full mb-1.5 max-h-48"><source src="{{ $resUrl }}"></video>
                             @endif
-                            <div style="white-space:pre-wrap">{{ $resTxt }}</div>
+                            {{ $resTxt }}
                         </div>
                         @endif
 
-                        {{-- Error --}}
                         @if($job->error_message)
-                        <div class="mt-1 text-red-600 text-sm"><x-ui.icon name="alert-circle" /> {{ $job->error_message }}</div>
+                        <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                            <x-ui.icon name="alert-circle" /> {{ $job->error_message }}
+                        </p>
                         @endif
 
-                        {{-- Actions --}}
-                        <div class="mt-2 flex gap-2 flex-wrap">
+                        <div class="mt-3 flex flex-wrap gap-2">
                             @if($job->status === 'completed' && $job->moderation_status === 'pending')
                                 <form method="POST" action="{{ route('admin.orchestrator.approve', $job) }}">
                                     @csrf
-                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 text-sm"><x-ui.icon name="check-circle" /> Approve & Publish</button>
+                                    <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition">
+                                        <x-ui.icon name="check-circle" /> Approve &amp; Publish
+                                    </button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.orchestrator.reject', $job) }}">
                                     @csrf
-                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="x-circle" /> Reject</button>
+                                    <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition">
+                                        <x-ui.icon name="x-circle" /> Reject
+                                    </button>
                                 </form>
                             @endif
                             @if($job->status === 'failed')
                                 <form method="POST" action="{{ route('admin.orchestrator.retry', $job) }}">
                                     @csrf
-                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-amber-500 text-gray-900 hover:bg-amber-600 px-3 py-1.5 text-sm"><x-ui.icon name="rotate-cw" /> Retry</button>
+                                    <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-white hover:bg-amber-600 transition">
+                                        <x-ui.icon name="rotate-cw" /> Retry
+                                    </button>
                                 </form>
                             @endif
                             <form method="POST" action="{{ route('admin.orchestrator.destroyJob', $job) }}" onsubmit="return confirm('Delete this job?')">
                                 @csrf @method('DELETE')
-                                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm"><x-ui.icon name="trash" /></button>
+                                <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-2 border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                                    <x-ui.icon name="trash" />
+                                </button>
                             </form>
                         </div>
                     </div>
                     @empty
-                    <div class="text-center text-[var(--color-text-muted)] py-5">
-                        <x-ui.icon name="bot" class="text-4xl font-bold block mb-2" />
-                        No jobs yet. Use the form to generate your first piece of content!
+                    <div class="text-center text-gray-400 py-12">
+                        <x-ui.icon name="bot" class="text-4xl block mb-2 mx-auto" />
+                        <p class="text-sm">No jobs yet. Use the form to generate your first piece of content!</p>
                     </div>
                     @endforelse
                 </div>
+
                 @if($jobs->hasPages())
-                <div class="pt-3">{{ $jobs->links() }}</div>
+                <div class="pt-4 border-t border-gray-100 mt-4">{{ $jobs->links() }}</div>
                 @endif
             </div>
         </div>
     </div>
 </div>
 
-{{-- Scan result panel --}}
-<div id="scanResult" class="mt-3" style="display:none">
-    <div class="flex items-start gap-3 p-4 rounded-lg border bg-sky-50 border-sky-200 text-sky-800" id="scanResultContent"></div>
-</div>
+    @include('admin.orchestrator.media-panel')
 
-@include('admin.orchestrator.media-panel')
+</div>{{-- /max-w-7xl --}}
 
 {{-- Add Provider Modal --}}
-<div class="fixed inset-0 z-50 hidden" id="addProviderModal" tabindex="-1">
-    <div class="relative w-full max-w-lg mx-auto mt-12">
-        <div class="bg-white rounded-xl shadow-xl border border-gray-200">
-            <div class="px-5 py-3 border-b border-gray-200 font-semibold flex items-center justify-between">
-                <h5 class="text-lg font-bold"><x-ui.icon name="plug" /> Add AI Provider</h5>
-                <button type="button" class=""></button>
-            </div>
-            <form method="POST" action="{{ route('admin.orchestrator.storeProvider') }}">
-                @csrf
-                <div class="p-5">
-                    @if($errors->any())
-                        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800 py-2 text-sm mb-3">
-                            <ul class="mb-0 ps-3">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Provider Family</label>
-                        <select name="driver" id="driverSelect" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" onchange="onDriverChange(this.value)">
-                            <option value="openai">OpenAI compatible (GPT-4o, etc.)</option>
-                            <option value="anthropic">Anthropic Claude</option>
-                            <option value="gemini">Google Gemini</option>
-                            <option value="github">GitHub repository source</option>
-                            <option value="stability">Stability AI (image generation)</option>
-                            <option value="elevenlabs">ElevenLabs (text-to-speech)</option>
-                            <option value="replicate">Replicate (video / image models)</option>
-                            <option value="runway">RunwayML (video generation)</option>
-                            <option value="openai-image">OpenAI DALL-E (image generation)</option>
-                        </select>
-                        <div id="driverHelp" class="mt-1 text-sm text-[var(--color-text-muted)]">Pick the provider family so health checks and requests use the correct API contract.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Display Name <span class="text-red-600">*</span></label>
-                        <input type="text" name="name" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="e.g. OpenAI GPT-4o" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Slug (unique ID) <span class="text-red-600">*</span></label>
-                        <input type="text" name="slug" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="e.g. openai" required pattern="[a-z0-9_-]+">
-                        <div class="mt-1 text-sm text-[var(--color-text-muted)]">Lowercase letters, numbers, hyphens only.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">API Base URL</label>
-                        <input type="url" name="api_base_url" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="https://api.openai.com/v1">
-                        <div class="mt-1 text-sm text-[var(--color-text-muted)]">Leave blank for OpenAI-compatible default. Use for Anthropic, Gemini proxies, or self-hosted LLMs.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-                        <input type="password" name="api_key" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="sk-...">
-                        <div class="mt-1 text-sm text-[var(--color-text-muted)]">Stored encrypted. Leave blank for public APIs or GitHub repo extraction.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Default Model</label>
-                        <input type="text" name="model" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="e.g. gpt-4o-mini, claude-3-haiku-20240307">
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Capabilities</label>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach(['text','image','tts','video','translation','quiz'] as $cap)
-                                <div class="flex items-center gap-2 inline-flex">
-                                    <input class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500" type="checkbox" name="capabilities[]" value="{{ $cap }}" id="cap_{{ $cap }}">
-                                    <label class="text-sm" for="cap_{{ $cap }}">{{ ucfirst($cap) }}</label>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Repo URL (for repo extraction)</label>
-                        <input type="url" name="repo_url" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="https://github.com/owner/curriculum-repo">
-                    </div>
-                </div>
-                <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
-                    <button type="button" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
-                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700">Add Provider</button>
-                </div>
-            </form>
+<div id="addProviderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeProviderModal()"></div>
+    <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <x-ui.icon name="plug" /> Add AI Provider
+            </h2>
+            <button type="button" onclick="closeProviderModal()" class="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition">
+                <x-ui.icon name="x" />
+            </button>
         </div>
+        <form method="POST" action="{{ route('admin.orchestrator.storeProvider') }}">
+            @csrf
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                @if($errors->any())
+                    <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                        <ul class="list-disc list-inside space-y-0.5">
+                            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                        </ul>
+                    </div>
+                @endif
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Provider Family</label>
+                    <select name="driver" id="driverSelect" onchange="onDriverChange(this.value)"
+                            class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="grok">Grok / xAI</option>
+                    </select>
+                    <p id="driverHelp" class="text-xs text-gray-500 mt-1">Pick the provider family so health checks use the correct API contract.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Display Name <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" required placeholder="e.g. OpenAI GPT-4o"
+                           class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Slug (unique ID) <span class="text-red-500">*</span></label>
+                    <input type="text" name="slug" required pattern="[a-z0-9_-]+" placeholder="e.g. openai"
+                           class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Lowercase letters, numbers, hyphens only.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">API Base URL</label>
+                    <input type="url" name="api_base_url" placeholder="https://api.openai.com/v1"
+                           class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Leave blank for OpenAI-compatible default.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">API Key</label>
+                    <input type="password" name="api_key" placeholder="sk-..."
+                           class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Stored encrypted. Leave blank for public APIs.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Default Model</label>
+                    <input type="text" name="model" placeholder="e.g. gpt-4o-mini, claude-3-haiku-20240307"
+                           class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-2">Capabilities</label>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach(['text','image','tts','video','translation','quiz'] as $cap)
+                            <label class="flex items-center gap-1.5 text-sm cursor-pointer">
+                                <input type="checkbox" name="capabilities[]" value="{{ $cap }}" id="cap_{{ $cap }}"
+                                       class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500">
+                                {{ ucfirst($cap) }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">GitHub Repo URL (for repo extraction)</label>
+                    <input type="url" name="repo_url" placeholder="https://github.com/owner/curriculum-repo"
+                           class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
+                <button type="button" onclick="closeProviderModal()"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold bg-violet-600 text-white hover:bg-violet-700 transition">
+                    Add Provider
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-// Fix Bootstrap modal stacking context: .app-main has z-index which traps the modal behind the backdrop
-document.addEventListener('DOMContentLoaded', function() {
-    var modal = document.getElementById('addProviderModal');
-    if (modal) {
-        document.body.appendChild(modal);
-    }
-});
+function openProviderModal()  { document.getElementById('addProviderModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+function closeProviderModal() { document.getElementById('addProviderModal').classList.add('hidden');    document.body.style.overflow = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProviderModal(); });
+
+@if($errors->any())
+document.addEventListener('DOMContentLoaded', openProviderModal);
+@endif
 
 const DRIVER_META = {
-    openai:       { help: 'OpenAI-compatible: GPT-4o, GPT-4o-mini, etc. API key: sk-... Base URL optional for proxies.', cap: 'text' },
-    anthropic:    { help: 'Anthropic Claude — use key starting with sk-ant-... No base URL needed.', cap: 'text' },
-    gemini:       { help: 'Google Gemini — get key from Google AI Studio (aistudio.google.com).', cap: 'text' },
-    github:       { help: 'GitHub Repo — paste a public repo URL. No API key needed. Extracts README curriculum content.', cap: 'github' },
-    stability:    { help: 'Stability AI — generates images. Key from platform.stability.ai. No base URL needed.', cap: 'image' },
-    elevenlabs:   { help: 'ElevenLabs TTS — text-to-speech mp3. Key from elevenlabs.io. Optionally set voice_id in extra_config.', cap: 'tts' },
-    replicate:    { help: 'Replicate — runs open-source video/image models (e.g. minimax/video-01). Key from replicate.com.', cap: 'video' },
-    runway:       { help: 'RunwayML Gen-4 Turbo — text-to-video. Key from dev.runwayml.com. No base URL needed.', cap: 'video' },
-    'openai-image': { help: 'OpenAI DALL-E 3 — image generation using your existing OpenAI key. No base URL needed.', cap: 'image' },
+    anthropic: { help: 'Anthropic Claude — enter your API key (sk-ant-...). Model: claude-haiku-4-5-20251001 or claude-sonnet-4-6.' },
+    grok:      { help: 'Grok / xAI — enter your xAI API key. Model: grok-beta or grok-2. Base URL auto-set to api.x.ai.' },
 };
-
 function onDriverChange(val) {
     const meta = DRIVER_META[val] || {};
     document.getElementById('driverHelp').textContent = meta.help || 'Pick the provider family so health checks use the correct API contract.';
@@ -540,12 +473,12 @@ function onDriverChange(val) {
 function scanCurriculum() {
     const btn = document.getElementById('scanBtn');
     const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-    if (!csrfMeta) { alert('CSRF token missing — please reload the page.'); return; }
-    if (btn.dataset.scanning === '1') return; // debounce
+    if (!csrfMeta) { alert('CSRF token missing — please reload.'); return; }
+    if (btn.dataset.scanning === '1') return;
 
     btn.dataset.scanning = '1';
     btn.disabled = true;
-    btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4"></span> Scanning...';
+    btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Scanning…';
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
@@ -556,33 +489,83 @@ function scanCurriculum() {
     })
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(data => {
-        const panel = document.getElementById('scanResult');
+        const panel   = document.getElementById('scanResult');
         const content = document.getElementById('scanResultContent');
-        let html = `<strong><x-ui.icon name="search" /> Curriculum Scan:</strong> ${data.total_gaps} gap(s) found.<br>${data.suggestion || ''}`;
-        if (data.gaps && data.gaps.length) {
-            html += '<ul class="mt-2 mb-0">';
-            data.gaps.slice(0, 10).forEach(g => {
-                html += `<li>Age <b>${g.age}</b>: missing <b>${g.subject || g.skill}</b></li>`;
-            });
-            if (data.gaps.length > 10) html += `<li>...and ${data.gaps.length - 10} more</li>`;
+        let html = `<strong>Curriculum Scan:</strong> ${data.total_gaps} gap(s) found.<br>${data.suggestion || ''}`;
+        if (data.gaps?.length) {
+            html += '<ul class="mt-2 list-disc list-inside">';
+            data.gaps.slice(0, 10).forEach(g => { html += `<li>Age <b>${g.age ?? (g.age_min ?? '')+'–'+(g.age_max ?? '')}</b>: missing <b>${g.subject || g.skill}</b></li>`; });
+            if (data.gaps.length > 10) html += `<li>…and ${data.gaps.length - 10} more</li>`;
             html += '</ul>';
         }
         content.innerHTML = html;
-        panel.style.display = 'block';
+        panel.classList.remove('hidden');
+        // Show fill panel if there are gaps
+        const fillPanel = document.getElementById('fillGapsPanel');
+        if (fillPanel) {
+            if (data.total_gaps > 0) fillPanel.classList.remove('hidden');
+            else fillPanel.classList.add('hidden');
+        }
         panel.scrollIntoView({ behavior: 'smooth' });
     })
     .catch(err => {
-        if (err.name === 'AbortError') {
-            alert('Scan timed out after 30 seconds. Please try again.');
-        } else {
-            alert('Scan failed: ' + err.message);
-        }
+        if (err.name === 'AbortError') alert('Scan timed out after 30 seconds. Please try again.');
+        else alert('Scan failed: ' + err.message);
     })
     .finally(() => {
         clearTimeout(timeout);
         btn.dataset.scanning = '';
         btn.disabled = false;
-        btn.innerHTML = '<x-ui.icon name="search" /> Scan Curriculum Gaps';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35"/></svg> Scan Curriculum Gaps';
+    });
+}
+
+function fillGaps() {
+    const btn       = document.getElementById('fillGapsBtn');
+    const resultEl  = document.getElementById('fillGapsResult');
+    const csrfMeta  = document.querySelector('meta[name="csrf-token"]');
+    const provider  = document.getElementById('fillProvider')?.value;
+    const limit     = document.getElementById('fillLimit')?.value || 10;
+
+    if (!provider) { alert('Please select a provider first.'); return; }
+    if (btn.dataset.running === '1') return;
+
+    btn.dataset.running = '1';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Generating…';
+    resultEl.className = 'text-sm text-gray-500';
+    resultEl.textContent = 'Calling AI agent… this may take 30–120 seconds depending on batch size.';
+    resultEl.classList.remove('hidden');
+
+    fetch('{{ route("admin.orchestrator.fillGaps") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfMeta.content,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ provider_slug: provider, limit: parseInt(limit) }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) throw new Error(data.error);
+        let html = `<span class="text-emerald-700 font-semibold">✓ ${data.generated} activit${data.generated === 1 ? 'y' : 'ies'} generated</span> from ${data.gaps_found} gaps.`;
+        if (data.errors?.length) {
+            html += `<ul class="mt-1 list-disc list-inside text-red-600 text-xs">`;
+            data.errors.forEach(e => { html += `<li>${e}</li>`; });
+            html += '</ul>';
+        }
+        html += ' <a href="/admin/activities" class="underline text-violet-600">View in library →</a>';
+        resultEl.innerHTML = html;
+        resultEl.className = 'text-sm mt-1';
+    })
+    .catch(err => {
+        resultEl.innerHTML = `<span class="text-red-600">✗ ${err.message}</span>`;
+    })
+    .finally(() => {
+        btn.dataset.running = '';
+        btn.disabled = false;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3l14 9-14 9V3z"/></svg> Auto-Fill Gaps';
     });
 }
 
@@ -592,7 +575,6 @@ function verifyProvider(id, url, btn) {
     if (!csrfMeta) { alert('CSRF token missing — please reload.'); return; }
     if (btn.dataset.verifying === '1') return;
 
-    // Cancel any in-flight request for this provider
     if (_verifyControllers[id]) _verifyControllers[id].abort();
     const controller = new AbortController();
     _verifyControllers[id] = controller;
@@ -600,47 +582,32 @@ function verifyProvider(id, url, btn) {
 
     btn.dataset.verifying = '1';
     btn.disabled = true;
-    btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4"></span>';
+    btn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>';
 
     fetch(url, {
         method: 'POST',
         signal: controller.signal,
-        headers: {
-            'X-CSRF-TOKEN': csrfMeta.content,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
+        headers: { 'X-CSRF-TOKEN': csrfMeta.content, 'Accept': 'application/json', 'Content-Type': 'application/json' }
     })
     .then(r => r.json())
     .then(data => {
         const pill = document.getElementById('status-pill-' + id);
         if (pill) {
             const isOk = data.status === 'live' || data.ok;
-            pill.className = 'badge rounded-pill ' + (isOk ? 'bg-success' : 'bg-warning text-dark');
+            pill.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ' +
+                (isOk ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700');
             pill.textContent = data.status || (isOk ? 'live' : 'error');
         }
-        const msg = data.message || (data.ok ? 'Provider is live.' : 'Check failed.');
-        btn.title = msg;
+        btn.title = data.message || (data.ok ? 'Provider is live.' : 'Check failed.');
     })
-    .catch(err => {
-        if (err.name !== 'AbortError') btn.title = 'Verify failed: ' + err.message;
-    })
+    .catch(err => { if (err.name !== 'AbortError') btn.title = 'Verify failed: ' + err.message; })
     .finally(() => {
         clearTimeout(timeout);
         delete _verifyControllers[id];
         btn.dataset.verifying = '';
         btn.disabled = false;
-        btn.innerHTML = '<x-ui.icon name="rotate-cw" />';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
     });
 }
-
-// Auto-reopen Add Provider modal if there were validation errors.
-// TODO(phase-5): migrate this modal to Alpine.js; Bootstrap JS is no longer loaded.
-@if($errors->any())
-document.addEventListener('DOMContentLoaded', function () {
-    if (!window.bootstrap || !window.bootstrap.Modal) return;
-    new window.bootstrap.Modal(document.getElementById('addProviderModal')).show();
-});
-@endif
 </script>
 @endsection

@@ -3,60 +3,74 @@
 @section('title', 'Children')
 
 @section('content')
-<div class="w-full px-4 py-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between">
         <div>
-            <h2 class="font-bold mb-0">Children</h2>
-            <small class="text-[var(--color-text-muted)]">All registered child profiles</small>
+            <h1 class="text-2xl font-bold text-[var(--color-text)]">Children</h1>
+            <p class="text-sm text-[var(--color-text-muted)] mt-0.5">All registered child profiles</p>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0">
-        <div class="p-5 px-4 pt-3">
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div class="p-5 space-y-4">
 
             {{-- Filters --}}
-            <form method="GET" action="{{ route('admin.children.index') }}" class="flex gap-2 flex-wrap mb-3">
-                <div class="flex w-full items-stretch" style="max-width:320px">
-                    <span class="inline-flex items-center px-3 bg-gray-50 border border-gray-300 bg-white border-end-0"><x-ui.icon name="search" class="text-[var(--color-text-muted)]" /></span>
-                    <input type="text" name="q" value="{{ request('q') }}"
-                           class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 border-start-0 ps-0"
-                           placeholder="Search by name or nickname…">
+            <form method="GET" action="{{ route('admin.children.index') }}" class="flex flex-wrap gap-2 items-end">
+                <div class="flex-1 min-w-[200px] max-w-xs">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
+                            <x-ui.icon name="search" />
+                        </span>
+                        <input type="text" name="q" value="{{ request('q') }}"
+                               class="block w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none"
+                               placeholder="Name or nickname…">
+                    </div>
                 </div>
-                <select name="language" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" style="max-width:180px">
-                    <option value="">All Languages</option>
-                    @foreach($languages as $lang)
-                        <option value="{{ $lang }}" {{ request('language') === $lang ? 'selected' : '' }}>
-                            {{ strtoupper($lang) }}
-                        </option>
-                    @endforeach
-                </select>
-                <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100">Filter</button>
-                @if(request()->hasAny(['q','language']))
-                    <a href="{{ route('admin.children.index') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-violet-600 hover:underline shadow-none text-[var(--color-text-muted)]">Clear</a>
-                @endif
+                <div class="w-44">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Language</label>
+                    <select name="language" class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
+                        <option value="">All Languages</option>
+                        @foreach($languages as $lang)
+                            <option value="{{ $lang }}" {{ request('language') === $lang ? 'selected' : '' }}>
+                                {{ strtoupper($lang) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition">
+                        Filter
+                    </button>
+                    @if(request()->hasAny(['q', 'language']))
+                        <a href="{{ route('admin.children.index') }}" class="inline-flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 transition">
+                            Clear
+                        </a>
+                    @endif
+                </div>
             </form>
 
             {{-- Table --}}
             @if($children->isEmpty())
-                <div class="text-center py-5 text-[var(--color-text-muted)]">
-                    <x-ui.icon name="users" class="text-5xl block mb-2" />
-                    No child profiles found.
+                <div class="text-center py-12 text-[var(--color-text-muted)]">
+                    <x-ui.icon name="users" class="text-4xl block mb-2 mx-auto" />
+                    <p class="text-sm">No child profiles found.</p>
                 </div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm border-collapse table-hover-tw align-middle mb-0">
-                        <thead class="bg-gray-50 text-sm uppercase text-[var(--color-text-muted)]">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-left">
                             <tr>
-                                <th>Child</th>
-                                <th>Age</th>
-                                <th>Gender</th>
-                                <th>Language</th>
-                                <th>Parent</th>
-                                <th>Joined</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Child</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Age</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Gender</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Language</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Parent</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Joined</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-gray-100">
                             @foreach($children as $child)
                                 @php
                                     $langFlags = [
@@ -64,52 +78,48 @@
                                         'zh' => '🇨🇳', 'es' => '🇪🇸', 'ko' => '🇰🇷',
                                         'ur' => '🇵🇰', 'ar' => '🇸🇦',
                                     ];
-                                    $flag = $langFlags[$child->preferred_language ?? ''] ?? '🌐';
+                                    $flag     = $langFlags[$child->preferred_language ?? ''] ?? '🌐';
                                     $initials = strtoupper(substr($child->name, 0, 1));
                                 @endphp
-                                <tr>
-                                    <td>
-                                        <div class="flex items-center gap-2">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-3">
                                             @if($child->avatar_url)
                                                 <img src="{{ $child->avatar_url }}" alt=""
-                                                     class="rounded-full object-fit-cover"
-                                                     style="width:36px;height:36px;flex-shrink:0">
+                                                     class="w-9 h-9 rounded-full object-cover shrink-0">
                                             @else
-                                                <div class="rounded-full bg-sky-600 bg-opacity-10 text-sky-600 font-bold flex items-center justify-center"
-                                                     style="width:36px;height:36px;font-size:.9rem;flex-shrink:0">
+                                                <div class="w-9 h-9 rounded-full bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-sm shrink-0">
                                                     {{ $initials }}
                                                 </div>
                                             @endif
                                             <div>
-                                                <div class="font-medium">{{ $child->name }}</div>
+                                                <div class="font-medium text-gray-900">{{ $child->name }}</div>
                                                 @if($child->nickname && $child->nickname !== $child->name)
-                                                    <small class="text-[var(--color-text-muted)]">"{{ $child->nickname }}"</small>
+                                                    <div class="text-xs text-gray-500">"{{ $child->nickname }}"</div>
                                                 @endif
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-[var(--color-text-muted)] text-sm">
+                                    <td class="px-4 py-3 text-gray-500">
                                         @if($child->date_of_birth)
                                             {{ \Carbon\Carbon::parse($child->date_of_birth)->diffInYears() }} yrs
                                         @else
                                             —
                                         @endif
                                     </td>
-                                    <td class="text-[var(--color-text-muted)] text-sm">{{ ucfirst($child->gender ?? '—') }}</td>
-                                    <td>
-                                        <span title="{{ strtoupper($child->preferred_language ?? '') }}" style="font-size:1.2rem">
-                                            {{ $flag }}
-                                        </span>
+                                    <td class="px-4 py-3 text-gray-500">{{ ucfirst($child->gender ?? '—') }}</td>
+                                    <td class="px-4 py-3">
+                                        <span title="{{ strtoupper($child->preferred_language ?? '') }}" class="text-xl">{{ $flag }}</span>
                                     </td>
-                                    <td>
+                                    <td class="px-4 py-3">
                                         @if($child->parent)
-                                            <div class="font-medium text-sm">{{ $child->parent->name }}</div>
-                                            <div class="text-[var(--color-text-muted)]" style="font-size:.75rem">{{ $child->parent->email }}</div>
+                                            <div class="font-medium text-gray-900 text-sm">{{ $child->parent->name }}</div>
+                                            <div class="text-xs text-gray-500">{{ $child->parent->email }}</div>
                                         @else
-                                            <span class="text-[var(--color-text-muted)]">—</span>
+                                            <span class="text-gray-400">—</span>
                                         @endif
                                     </td>
-                                    <td class="text-[var(--color-text-muted)] text-sm">{{ $child->created_at->format('d M Y') }}</td>
+                                    <td class="px-4 py-3 text-gray-500">{{ $child->created_at->format('d M Y') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -117,7 +127,7 @@
                 </div>
 
                 @if($children->hasPages())
-                    <div class="flex justify-end mt-3">
+                    <div class="flex justify-end pt-2">
                         {{ $children->withQueryString()->links() }}
                     </div>
                 @endif
