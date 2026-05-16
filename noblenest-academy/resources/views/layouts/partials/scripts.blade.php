@@ -7,6 +7,9 @@
 {{-- Phase 8: EU-compliant cookie consent banner — shows once until cookie set. --}}
 <x-app.cookie-banner />
 
+{{-- Phase 8: Plausible analytics — only fires after analytics opt-in. --}}
+<x-seo.plausible />
+
 {{-- Toast viewport --}}
 <x-ui.toast />
 

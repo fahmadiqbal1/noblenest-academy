@@ -125,6 +125,9 @@ Route::post('/quizzes/{quiz}/submit', [\App\Http\Controllers\QuizController::cla
 // Public static pages
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/terms', 'terms')->name('terms');
+// Phase 8 follow-up: marketing pages.
+Route::view('/about',   'about')->name('about');
+Route::view('/contact', 'contact')->name('contact');
 
 // Authenticated pages
 Route::middleware(['auth'])->group(function () {
