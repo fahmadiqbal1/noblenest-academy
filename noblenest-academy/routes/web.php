@@ -256,7 +256,9 @@ Route::middleware(['auth', 'role:Parent'])->prefix('parent')->name('parent.')->g
 });
 
 // --- Child activity feed (parent views on behalf of child) ---
-Route::middleware(['auth'])->group(function () {
+// Phase 5 follow-up: parental.consent middleware applied — under-13 children
+// can't use these routes until parental_consent_at is recorded on the profile.
+Route::middleware(['auth', 'parental.consent'])->group(function () {
     Route::get('/child/{child}/activities', [\App\Http\Controllers\ChildActivityController::class, 'index'])->name('child.activities');
     Route::post('/child/{child}/activities/{activity}/complete', [\App\Http\Controllers\ChildActivityController::class, 'complete'])->name('child.activity.complete');
 
@@ -318,7 +320,9 @@ Route::post('/scholarship/apply', [\App\Http\Controllers\Admin\ScholarshipContro
 Route::get('/milestones', [\App\Http\Controllers\MilestoneWallController::class, 'index'])->name('milestones.wall');
 
 // --- Child dashboard + assessment (parent auth) ---
-Route::middleware(['auth', 'role:Parent'])->group(function () {
+// Phase 5 follow-up: parental.consent applied. Under-13 child profiles
+// without recorded consent are redirected to the consent page.
+Route::middleware(['auth', 'role:Parent', 'parental.consent'])->group(function () {
     Route::get('/child/{child}/dashboard', [\App\Http\Controllers\Child\DashboardController::class, 'show'])->name('child.dashboard');
     Route::get('/child/{child}/assessment', [\App\Http\Controllers\AssessmentController::class, 'index'])->name('child.assessment');
 });
