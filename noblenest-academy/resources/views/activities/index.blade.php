@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.parent')
 
 @section('content')
 @php
@@ -74,15 +74,15 @@
         </form>
 
         {{-- Playful Activity Cards --}}
-        <div class="row g-4">
+        <div class="flex flex-wrap gap-4">
             @foreach($activities as $idx => $act)
             @php
                 $color = $subjectColors[$act->subject] ?? '#A78BFA';
                 $emoji = $subjectEmojis[$act->subject] ?? ($act->emoji ?? '🎯');
                 $cta = $funCtas[$idx % count($funCtas)];
             @endphp
-            <div class="col-md-6 col-lg-4">
-                <a href="{{ route('activities.show', $act) }}" class="text-decoration-none">
+            <div class="md:w-6/12 lg:w-4/12">
+                <a href="{{ route('activities.show', $act) }}" class="no-underline">
                     <div class="nn-activity-card" style="--card-color: {{ $color }};">
                         <div class="nn-card-ribbon" style="background: {{ $color }};"></div>
                         <div class="nn-card-emoji">{{ $emoji }}</div>
@@ -117,43 +117,43 @@
     @else
     <div class="text-center py-5 mb-5">
         <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
-        <h4 class="fw-bold" style="color:var(--nn-text,#1F2937);font-family:'Baloo 2',sans-serif;">No activities found</h4>
+        <h4 class="font-bold" style="color:var(--nn-text,#1F2937);font-family:'Baloo 2',sans-serif;">No activities found</h4>
         <p class="mb-0" style="color:var(--nn-text-muted,#6B7280);font-family:'Comic Neue',sans-serif;">Try adjusting your filters or age range.</p>
     </div>
     @endif
 
     {{-- Curriculum Roadmap --}}
     <h2 class="nn-section-title"><span class="nn-section-emoji">🗺️</span> Learning Roadmap</h2>
-    <p class="text-center text-muted mb-4" style="font-family:'Comic Neue',sans-serif;font-size:1.1rem;">Follow the path and unlock new skills at every age!</p>
+    <p class="text-center text-[var(--color-text-muted)] mb-4" style="font-family:'Comic Neue',sans-serif;font-size:1.1rem;">Follow the path and unlock new skills at every age!</p>
 
     <div class="nn-roadmap" id="curriculumAccordion">
         @forelse($roadmap as $i => $ageActivities)
-        <div class="accordion-item mb-3 shadow-sm rounded-3">
-            <h2 class="accordion-header" id="heading{{ $loop->index }}">
-                <button class="accordion-button fw-bold fs-5 {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $loop->index }}">
-                    <span class="badge bg-info me-2" style="font-size:1rem;">{{ $i }}</span>
+        <div class="border border-gray-200 rounded-lg overflow-hidden bg-white mb-3 shadow-sm">
+            <h2 class="" id="heading{{ $loop->index }}">
+                <button class="w-full text-left px-4 py-3 flex items-center justify-between font-medium hover:bg-gray-50 font-bold text-xl {{ $loop->first ? '' : 'collapsed' }}" type="button" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $loop->index }}">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-600 me-2" style="font-size:1rem;">{{ $i }}</span>
                     <span>{{ $ageActivities->first()->subject ? ucfirst($ageActivities->first()->subject) : 'Activities' }} & more</span>
                 </button>
             </h2>
-            <div id="collapse{{ $loop->index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="heading{{ $loop->index }}" data-bs-parent="#curriculumAccordion">
-                <div class="accordion-body bg-light rounded-bottom-3">
-                    <div class="row g-4">
+            <div id="collapse{{ $loop->index }}" class="{{ $loop->first ? 'show' : '' }}" aria-labelledby="heading{{ $loop->index }}">
+                <div class="px-4 py-3 bg-gray-50 rounded-bottom-3">
+                    <div class="flex flex-wrap gap-4">
                         @foreach($ageActivities->groupBy('subject') as $subjectName => $subjectActivities)
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm curriculum-skill-card">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary fw-bold mb-2"><i class="bi bi-lightbulb"></i> {{ $subjectName ? ucfirst($subjectName) : 'General' }}</h5>
+                        <div class="md:w-6/12 lg:w-4/12">
+                            <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full border-0 curriculum-skill-card">
+                                <div class="p-5">
+                                    <h5 class="text-lg font-bold mb-2 text-[var(--color-primary)]"><x-ui.icon name="lightbulb" /> {{ $subjectName ? ucfirst($subjectName) : 'General' }}</h5>
                                     <ul class="list-unstyled mb-2">
                                         @foreach($subjectActivities as $roadmapActivity)
                                         <li>
-                                            <i class="bi bi-check-circle text-success me-1"></i>
-                                            <a href="{{ route('activities.show', $roadmapActivity) }}" class="text-decoration-none">{{ $roadmapActivity->title }}</a>
+                                            <x-ui.icon name="check-circle" class="text-emerald-600 me-1" />
+                                            <a href="{{ route('activities.show', $roadmapActivity) }}" class="no-underline">{{ $roadmapActivity->title }}</a>
                                         </li>
                                         @endforeach
                                     </ul>
                                 </div>
-                                <div class="card-footer bg-white border-0 text-end">
-                                    <a href="{{ route('activities.show', $subjectActivities->first()) }}" class="btn btn-outline-primary btn-sm">View Activity</a>
+                                <div class="px-5 py-3 border-t border-gray-200 bg-white border-0 text-right">
+                                    <a href="{{ route('activities.show', $subjectActivities->first()) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm">View Activity</a>
                                 </div>
                             </div>
                         </div>
@@ -164,12 +164,12 @@
         </div>
         @empty
         <div class="text-center py-4">
-            <p class="text-muted">No roadmap activities found yet.</p>
+            <p class="text-[var(--color-text-muted)]">No roadmap activities found yet.</p>
         </div>
         @endforelse
     </div>
     <div class="mt-5 text-center">
-        <a href="/profile" class="nn-btn nn-btn-reset"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+        <a href="/profile" class="nn-btn nn-btn-reset"><x-ui.icon name="arrow-left" /> Back to Dashboard</a>
     </div>
 </div>
 @endsection

@@ -1,89 +1,119 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Services\PricingService;
-use Illuminate\Http\Request;
+use App\Models\PricingTier;
 use App\Models\Subscription;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use App\Services\PricingService;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Phase 4 — real subscriptions, real lifecycle.
+ *
+ * - mode: subscription (not payment).
+ * - server-side price_id resolution via PricingTier (no client-supplied amounts).
+ * - Stripe Customer Portal for cancel/upgrade/card-update.
+ * - 7-day free trial for first-time subscribers.
+ * - automatic_tax + Stripe Radar enabled.
+ * - 6 webhook event handlers (idempotent via stripe_webhook_events row dedup):
+ *     checkout.session.completed
+ *     customer.subscription.updated
+ *     customer.subscription.deleted
+ *     invoice.payment_succeeded
+ *     invoice.payment_failed
+ *     customer.updated
+ * - PayPal removed.
+ */
 class PaymentController extends Controller
 {
     public function __construct(private readonly PricingService $pricing) {}
 
     /**
-     * Resolve plan type from explicit plan parameter.
-     * Falls back to amount heuristic only if plan param is absent.
+     * Server-side price + plan resolution. Never trusts client input.
+     * Looks up the PricingTier for the requesting country and returns the
+     * corresponding stripe_price_id for the chosen interval.
      */
-    private function resolvePlan(int $amountCents, string $planParam = ''): array
+    private function resolvePrice(Request $request, string $planParam): array
     {
-        if ($planParam === 'annual') {
-            return ['plan' => 'annual', 'months' => 12];
+        $interval = $planParam === 'annual' ? 'yearly' : 'monthly';
+
+        // PricingService figures out the right tier from request locale / IP.
+        $tier = $this->pricing->resolveTier($request) ?? PricingTier::query()
+            ->where('region_code', 'GLOBAL')
+            ->orWhere('region_code', 'US')
+            ->where('is_active', true)
+            ->first();
+
+        if (! $tier) {
+            throw new \RuntimeException('No active PricingTier found.');
         }
-        if ($planParam === 'monthly') {
-            return ['plan' => 'monthly', 'months' => 1];
+
+        $priceId = $interval === 'yearly' ? $tier->stripe_price_id_yearly : $tier->stripe_price_id_monthly;
+        if (! $priceId) {
+            throw new \RuntimeException("PricingTier#{$tier->id} has no stripe_price_id for {$interval}. Run `php artisan stripe:sync-prices`.");
         }
-        // Fallback: annual if >= $20 USD equivalent
-        if ($amountCents >= 2000) {
-            return ['plan' => 'annual', 'months' => 12];
-        }
-        return ['plan' => 'monthly', 'months' => 1];
+
+        return [
+            'price_id' => $priceId,
+            'interval' => $interval,
+            'months'   => $interval === 'yearly' ? 12 : 1,
+            'plan'     => $interval === 'yearly' ? 'annual' : 'monthly',
+            'tier'     => $tier,
+        ];
     }
 
-    // Stripe checkout — requires SDK and valid secret key. NO fallback to free access.
     public function stripeCheckout(Request $request)
     {
-        // SECURITY: Validate all payment parameters server-side
         $validated = $request->validate([
-            'amount'      => 'required|integer|min:50|max:999900',
-            'currency'    => 'required|string|size:3',
-            'description' => 'nullable|string|max:255',
-            'plan'        => 'nullable|in:monthly,annual',
+            'plan' => 'required|in:monthly,annual',
         ]);
 
-        $amount   = (int) $validated['amount'];
-        $currency = strtoupper($validated['currency']);
-        $description = $validated['description'] ?? 'Noble Nest Plan';
-        $planParam   = $validated['plan'] ?? '';
-
-        // SECURITY: Require Stripe SDK — no free-access fallback if missing
-        if (!class_exists(\Stripe\Checkout\Session::class) || !class_exists(\Stripe\Stripe::class)) {
+        if (! class_exists(\Stripe\Checkout\Session::class) || ! class_exists(\Stripe\Stripe::class)) {
             Log::error('Stripe SDK not installed. Payment processing unavailable.');
             return back()->with('error', 'Payment service is temporarily unavailable. Please contact support.');
         }
-
         $secret = config('services.stripe.secret');
         if (empty($secret)) {
             Log::error('STRIPE_SECRET_KEY is not configured.');
             return back()->with('error', 'Payment service is not configured. Please contact support.');
         }
-
         \Stripe\Stripe::setApiKey($secret);
-        $planInfo = $this->resolvePlan($amount, $planParam);
+
+        try {
+            $resolved = $this->resolvePrice($request, $validated['plan']);
+        } catch (\Throwable $e) {
+            Log::error('Stripe price resolution failed: ' . $e->getMessage());
+            return back()->with('error', 'Pricing is being configured. Please try again shortly.');
+        }
+
+        $user = Auth::user();
 
         try {
             $session = \Stripe\Checkout\Session::create([
+                'mode'                 => 'subscription',
                 'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency'     => strtolower($currency),
-                        'product_data' => ['name' => $description],
-                        'unit_amount'  => $amount,
-                    ],
+                'line_items'           => [[
+                    'price'    => $resolved['price_id'],
                     'quantity' => 1,
                 ]],
-                'mode'          => 'payment',
-                'success_url'   => route('payment.success', ['provider' => 'stripe']) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url'    => route('payment.cancel', ['provider' => 'stripe']),
-                'customer_email' => optional(Auth::user())->email,
-                'metadata' => [
-                    'user_id'  => Auth::id(),
-                    'plan'     => $planInfo['plan'],
-                    'months'   => $planInfo['months'],
-                    'amount'   => $amount,
-                    'currency' => $currency,
+                'subscription_data'    => [
+                    'trial_period_days' => (int) config('billing.trial_days', 7),
+                    'metadata'          => [
+                        'user_id' => $user?->id,
+                        'plan'    => $resolved['plan'],
+                    ],
+                ],
+                'automatic_tax'        => ['enabled' => (bool) config('billing.tax_enabled', true)],
+                'allow_promotion_codes'=> true,
+                'success_url'          => route('payment.success', ['provider' => 'stripe']) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url'           => route('payment.cancel',  ['provider' => 'stripe']),
+                'customer_email'       => $user?->email,
+                'metadata'             => [
+                    'user_id' => $user?->id,
+                    'plan'    => $resolved['plan'],
                 ],
             ]);
             return redirect($session->url);
@@ -97,34 +127,61 @@ class PaymentController extends Controller
             Log::error('Stripe checkout failed: ' . $e->getMessage());
             return back()->with('error', 'Payment processing failed. Please try again or contact support.');
         }
-        // SECURITY: No fallback — we never reach here, but we never grant free access.
     }
 
-    // Stripe webhook — signature verification is MANDATORY. Unsigned payloads are rejected.
+    /**
+     * Stripe Customer Portal — cancel, upgrade, update card, download invoices.
+     */
+    public function stripeBillingPortal(Request $request)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+        if (! class_exists(\Stripe\BillingPortal\Session::class)) {
+            return back()->with('error', 'Billing portal unavailable. Please contact support.');
+        }
+        $secret = config('services.stripe.secret');
+        if (empty($secret)) {
+            return back()->with('error', 'Billing is not configured.');
+        }
+        \Stripe\Stripe::setApiKey($secret);
+
+        $customerId = $user->stripe_customer_id ?? null;
+        if (! $customerId) {
+            return back()->with('error', 'No billing customer record found yet. Subscribe first to manage billing.');
+        }
+
+        try {
+            $session = \Stripe\BillingPortal\Session::create([
+                'customer'   => $customerId,
+                'return_url' => url(config('billing.portal.return_url', '/')),
+            ]);
+            return redirect($session->url);
+        } catch (\Throwable $e) {
+            Log::error('Stripe portal session failed: ' . $e->getMessage());
+            return back()->with('error', 'Billing portal failed to open. Please try again.');
+        }
+    }
+
     public function stripeWebhook(Request $request)
     {
         $payload   = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
         $whSecret  = config('services.stripe.webhook_secret');
 
-        // SECURITY: Reject if SDK is missing or webhook secret is not configured
-        if (!class_exists(\Stripe\Webhook::class)) {
+        if (! class_exists(\Stripe\Webhook::class)) {
             Log::error('Stripe SDK not available — webhook rejected');
             return response('Webhook infrastructure not configured', 500);
         }
-
         if (empty($whSecret)) {
-            Log::error('STRIPE_WEBHOOK_SECRET not configured — rejecting all webhooks to prevent fraud');
+            Log::error('STRIPE_WEBHOOK_SECRET not configured — rejecting all webhooks');
             return response('Webhook secret not configured', 500);
         }
-
-        // SECURITY: Reject unsigned payloads
         if (empty($sigHeader)) {
             Log::warning('Stripe webhook received without Stripe-Signature header');
             return response('Signature required', 400);
         }
-
-        // Verify cryptographic signature
         try {
             $event = \Stripe\Webhook::constructEvent($payload, $sigHeader, $whSecret);
         } catch (\Stripe\Exception\SignatureVerificationException $e) {
@@ -135,135 +192,181 @@ class PaymentController extends Controller
             return response('Parse error', 400);
         }
 
-        Log::info('Stripe webhook received', ['type' => $event->type]);
+        // Idempotency: dedup on event.id via stripe_webhook_events row.
+        if ($this->webhookAlreadyProcessed($event->id)) {
+            Log::info('Stripe webhook already processed — skipping duplicate', ['event_id' => $event->id]);
+            return response()->noContent();
+        }
 
-        if ($event->type === 'checkout.session.completed') {
-            $session   = $event->data->object;
-            $sessionId = $session->id ?? null;
+        Log::info('Stripe webhook received', ['type' => $event->type, 'event_id' => $event->id]);
 
-            // IDEMPOTENCY: Reject duplicate webhook deliveries (Stripe retries on 5xx)
-            if ($sessionId && Subscription::where('provider', 'stripe')
-                    ->where('provider_id', $sessionId)->exists()) {
-                Log::info('Stripe webhook already processed — skipping duplicate', ['session_id' => $sessionId]);
-                return response()->noContent(); // 204 — idempotent success
-            }
-
-            $metadata = $session->metadata;
-            if ($metadata) {
-                $userId   = $metadata->user_id ?? null;
-                $plan     = $metadata->plan ?? 'individual';
-                $months   = (int) ($metadata->months ?? 1);
-                $amount   = (int) ($metadata->amount ?? 1000);
-                $currency = $metadata->currency ?? 'USD';
-
-                if ($userId) {
-                    $user = \App\Models\User::find($userId);
-                    if ($user) {
-                        $this->activateSubscription('stripe', $user, $amount, $currency, $plan, $months, $sessionId);
-                        Log::info('Stripe subscription activated via webhook', [
-                            'user_id'    => $userId,
-                            'plan'       => $plan,
-                            'session_id' => $sessionId,
-                        ]);
-                    }
-                }
-            }
+        try {
+            match ($event->type) {
+                'checkout.session.completed'    => $this->handleCheckoutCompleted($event),
+                'customer.subscription.updated' => $this->handleSubscriptionUpdated($event),
+                'customer.subscription.deleted' => $this->handleSubscriptionDeleted($event),
+                'invoice.payment_succeeded'     => $this->handleInvoicePaid($event),
+                'invoice.payment_failed'        => $this->handleInvoiceFailed($event),
+                'customer.updated'              => $this->handleCustomerUpdated($event),
+                default                         => Log::info("Stripe webhook unhandled type: {$event->type}"),
+            };
+            $this->recordWebhookProcessed($event->id, $event->type);
+        } catch (\Throwable $e) {
+            Log::error('Stripe webhook handler crashed', ['event_id' => $event->id, 'error' => $e->getMessage()]);
+            return response('Handler error', 500);    // Stripe will retry
         }
 
         return response()->noContent();
     }
 
-    // PayPal checkout — SDK deprecated. Returns user-friendly error. NO free-access fallback.
-    public function paypalCheckout(Request $request)
+    private function webhookAlreadyProcessed(string $eventId): bool
     {
-        Log::info('PayPal checkout attempted but not available', ['user_id' => Auth::id()]);
-        return back()->with('error', 'PayPal payments are not yet available. Please use a credit or debit card.');
+        return DB::table('stripe_webhook_events')->where('event_id', $eventId)->exists();
     }
 
-    // Payment success — activates subscription on redirect back from payment provider
+    private function recordWebhookProcessed(string $eventId, string $type): void
+    {
+        DB::table('stripe_webhook_events')->insertOrIgnore([
+            'event_id'   => $eventId,
+            'type'       => $type,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    private function handleCheckoutCompleted($event): void
+    {
+        $session = $event->data->object;
+        $userId  = $session->metadata->user_id ?? null;
+        $plan    = $session->metadata->plan    ?? 'monthly';
+        $customerId = $session->customer ?? null;
+        $subscriptionId = $session->subscription ?? null;
+
+        if (! $userId) return;
+        $user = \App\Models\User::find($userId);
+        if (! $user) return;
+
+        if ($customerId && empty($user->stripe_customer_id)) {
+            $user->forceFill(['stripe_customer_id' => $customerId])->saveQuietly();
+        }
+        $this->activateSubscription('stripe', $user, $plan, $session->id, $subscriptionId);
+        Log::info('Stripe subscription activated via webhook', [
+            'user_id'         => $userId,
+            'plan'            => $plan,
+            'session_id'      => $session->id,
+            'subscription_id' => $subscriptionId,
+        ]);
+    }
+
+    private function handleSubscriptionUpdated($event): void
+    {
+        $sub = $event->data->object;
+        Subscription::where('provider', 'stripe')
+            ->where('provider_id', $sub->id)
+            ->update([
+                'ends_at' => $sub->current_period_end ? Carbon::createFromTimestamp($sub->current_period_end) : null,
+                'active'  => in_array($sub->status, ['active', 'trialing'], true),
+            ]);
+    }
+
+    private function handleSubscriptionDeleted($event): void
+    {
+        $sub = $event->data->object;
+        Subscription::where('provider', 'stripe')
+            ->where('provider_id', $sub->id)
+            ->update([
+                'active'      => false,
+                'cancelled_at'=> now(),
+            ]);
+    }
+
+    private function handleInvoicePaid($event): void
+    {
+        $invoice = $event->data->object;
+        if ($subscriptionId = $invoice->subscription ?? null) {
+            Subscription::where('provider', 'stripe')
+                ->where('provider_id', $subscriptionId)
+                ->update([
+                    'ends_at' => $invoice->lines->data[0]->period->end ?? null
+                        ? Carbon::createFromTimestamp($invoice->lines->data[0]->period->end)
+                        : null,
+                    'active'  => true,
+                ]);
+        }
+    }
+
+    private function handleInvoiceFailed($event): void
+    {
+        $invoice = $event->data->object;
+        $customerId = $invoice->customer ?? null;
+        Log::warning('Stripe invoice payment failed', [
+            'subscription' => $invoice->subscription ?? null,
+            'customer'     => $customerId,
+            'attempt'      => $invoice->attempt_count ?? null,
+        ]);
+
+        // Phase 5: dunning notification (queued).
+        if ($customerId) {
+            $user = \App\Models\User::where('stripe_customer_id', $customerId)->first();
+            if ($user) {
+                $user->notify(new \App\Notifications\InvoicePaymentFailed(
+                    invoiceId:    (string) ($invoice->id ?? 'unknown'),
+                    attemptCount: (int) ($invoice->attempt_count ?? 1),
+                    amountCents:  isset($invoice->amount_due) ? (int) $invoice->amount_due : null,
+                    currency:     strtoupper((string) ($invoice->currency ?? 'USD')),
+                ));
+            }
+        }
+    }
+
+    private function handleCustomerUpdated($event): void
+    {
+        $customer = $event->data->object;
+        if (! empty($customer->email)) {
+            \App\Models\User::where('stripe_customer_id', $customer->id)->update(['email' => $customer->email]);
+        }
+    }
+
     public function paymentSuccess(Request $request, $provider)
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
-
-        // If returning from Stripe, verify the session to get plan details
-        if ($provider === 'stripe' && $request->has('session_id') && class_exists(\Stripe\Checkout\Session::class)) {
-            $secret = config('services.stripe.secret');
-            if (!empty($secret)) {
-                try {
-                    \Stripe\Stripe::setApiKey($secret);
-                    $session  = \Stripe\Checkout\Session::retrieve($request->input('session_id'));
-                    $metadata = $session->metadata;
-                    $plan     = $metadata->plan ?? 'individual';
-                    $months   = (int) ($metadata->months ?? 1);
-                    $amount   = (int) ($metadata->amount ?? 1000);
-                    $currency = $metadata->currency ?? 'USD';
-
-                    // IDEMPOTENCY: Check if webhook already activated this session
-                    if ($session->id && Subscription::where('provider', 'stripe')
-                            ->where('provider_id', $session->id)->exists()) {
-                        Log::info('Subscription already activated via webhook', ['session_id' => $session->id]);
-                        return redirect('/')->with('status', 'Your subscription is active. Welcome to Noble Nest Academy!');
-                    }
-
-                    return $this->activateSubscription('stripe', $user, $amount, $currency, $plan, $months, $session->id);
-                } catch (\Throwable $e) {
-                    Log::error('Stripe session retrieval failed: ' . $e->getMessage());
-                    return redirect('/')
-                        ->with('error', 'Unable to verify payment. Please contact support with session ID: ' . $request->input('session_id'));
-                }
-            }
-        }
-
-        // Non-Stripe success page without session verification — no free-access fallback
-        return redirect('/')->with('status', 'Subscription is being processed. You will be notified when it is active.');
+        if (! $user) return redirect()->route('login');
+        return redirect('/')->with('status', 'Subscription is being processed. You will receive a confirmation shortly.');
     }
 
     public function paymentCancel(Request $request, $provider)
     {
-        return redirect()->route('checkout')->with('error', ucfirst($provider).' payment was cancelled.');
+        return redirect()->route('checkout')->with('error', ucfirst($provider) . ' payment was cancelled.');
     }
 
+    /**
+     * Activate / extend a subscription row. Caller passes the Stripe session id
+     * AND the Stripe subscription id so the row carries both for webhook dedup.
+     */
     protected function activateSubscription(
         string $provider,
         $user,
-        int $amountCents = 1000,
-        string $currency = 'USD',
-        ?string $plan = null,
-        ?int $months = null,
-        ?string $providerId = null,
+        string $plan = 'monthly',
+        ?string $sessionId = null,
+        ?string $subscriptionId = null,
     ) {
-        if (!$user) {
-            return redirect()->route('login');
-        }
+        $months = $plan === 'annual' ? 12 : 1;
+        $now    = Carbon::now();
+        $endsAt = $now->copy()->addMonths($months);
 
-        $planInfo = $plan ? ['plan' => $plan, 'months' => $months ?? 1]
-                         : $this->resolvePlan($amountCents);
-
-        $now = Carbon::now();
-        $endsAt = $now->copy()->addMonths($planInfo['months']);
-
-        // IDEMPOTENCY: Include provider_id in match key to prevent duplicate activations
         Subscription::updateOrCreate(
             [
                 'user_id'     => $user->id,
-                'plan'        => $planInfo['plan'],
-                'provider_id' => $providerId,
+                'provider_id' => $subscriptionId ?: $sessionId,
             ],
             [
+                'plan'            => $plan,
                 'provider'        => $provider,
-                'provider_id'     => $providerId,
-                'idempotency_key' => $providerId,
-                'amount'          => $amountCents / 100,
-                'currency'        => $currency,
+                'idempotency_key' => $subscriptionId ?: $sessionId,
                 'starts_at'       => $now,
                 'ends_at'         => $endsAt,
                 'active'          => true,
             ]
         );
-
-        return redirect('/')->with('status', 'Subscription activated! Enjoy Noble Nest Academy.');
     }
 }

@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /privacy/
+Disallow: /webhook/
+Disallow: /api/
+Disallow: /_styleguide
+Disallow: /onboarding/
+Disallow: /billing/
+Disallow: /payment/
+
+Sitemap: /sitemap.xml

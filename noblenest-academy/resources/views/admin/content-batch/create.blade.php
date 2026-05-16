@@ -1,35 +1,35 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('meta_title', 'Batch Content Generation – Admin')
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="d-flex align-items-center gap-3 mb-4">
-        <a href="{{ route('admin.orchestrator.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
-            <i class="bi bi-arrow-left"></i> Back
+<div class="w-full px-4 py-4">
+    <div class="flex items-center gap-3 mb-4">
+        <a href="{{ route('admin.orchestrator.index') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm rounded-full">
+            <x-ui.icon name="arrow-left" /> Back
         </a>
-        <h1 class="h4 fw-bold mb-0">Batch Content Generator</h1>
+        <h1 class="h4 font-bold mb-0">Batch Content Generator</h1>
     </div>
 
-    <div class="row g-4">
-        <div class="col-lg-7">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
+    <div class="flex flex-wrap gap-4">
+        <div class="lg:w-7/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0">
+                <div class="p-5 p-4">
                     <form method="POST" action="{{ route('admin.content-batch.store') }}">
                         @csrf
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Subject</label>
-                                <select name="subject" class="form-select rounded-3 @error('subject') is-invalid @enderror">
+                        <div class="flex flex-wrap gap-3">
+                            <div class="md:w-6/12">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 font-semibold">Subject</label>
+                                <select name="subject" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 rounded-lg @error('subject') is-invalid @enderror">
                                     @foreach(['literacy','numeracy','creativity','stem','social','motor'] as $s)
                                         <option value="{{ $s }}" @selected(old('subject') === $s)>{{ ucfirst($s) }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Age Tier</label>
-                                <select name="age_tier" class="form-select rounded-3 @error('age_tier') is-invalid @enderror">
+                            <div class="md:w-6/12">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 font-semibold">Age Tier</label>
+                                <select name="age_tier" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 rounded-lg @error('age_tier') is-invalid @enderror">
                                     <option value="baby">Baby (0-23m)</option>
                                     <option value="toddler">Toddler (24-47m)</option>
                                     <option value="preschool">Preschool (48-71m)</option>
@@ -37,15 +37,15 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Count</label>
-                                <input type="number" name="count" min="1" max="50" class="form-control rounded-3"
+                            <div class="md:w-4/12">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 font-semibold">Count</label>
+                                <input type="number" name="count" min="1" max="50" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 rounded-lg"
                                        value="{{ old('count', 10) }}" required>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Language</label>
-                                <select name="language" class="form-select rounded-3">
+                            <div class="md:w-4/12">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 font-semibold">Language</label>
+                                <select name="language" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 rounded-lg">
                                     <option value="en">English</option>
                                     <option value="fr">French</option>
                                     <option value="ar">Arabic</option>
@@ -57,45 +57,45 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Free Tier?</label>
-                                <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox" name="is_free" id="is_free" value="1"
+                            <div class="md:w-4/12">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 font-semibold">Free Tier?</label>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <input class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500" type="checkbox" name="is_free" id="is_free" value="1"
                                            @checked(old('is_free'))>
-                                    <label class="form-check-label" for="is_free">Mark as free activities</label>
+                                    <label class="text-sm" for="is_free">Mark as free activities</label>
                                 </div>
                             </div>
 
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Activity Types</label>
-                                <div class="d-flex flex-wrap gap-2">
+                            <div class="w-full">
+                                <label class="block text-sm font-medium text-gray-700 mb-1 font-semibold">Activity Types</label>
+                                <div class="flex flex-wrap gap-2">
                                     @foreach(['tracing','puzzle','drawing','quiz','matching','story'] as $type)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
+                                        <div class="flex items-center gap-2">
+                                            <input class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500" type="checkbox"
                                                    name="activity_types[]" value="{{ $type }}"
                                                    id="type_{{ $type }}"
                                                    @checked(in_array($type, old('activity_types', ['tracing','quiz'])))>
-                                            <label class="form-check-label" for="type_{{ $type }}">{{ ucfirst($type) }}</label>
+                                            <label class="text-sm" for="type_{{ $type }}">{{ ucfirst($type) }}</label>
                                         </div>
                                     @endforeach
                                 </div>
-                                @error('activity_types')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                                @error('activity_types')<div class="text-red-600 text-sm mt-1">{{ $message }}</div>@enderror
                             </div>
                         </div>
 
                         <hr class="my-4">
-                        <button type="submit" class="btn btn-dark rounded-pill px-4 fw-semibold">
-                            <i class="bi bi-lightning-charge me-1"></i> Queue Batch Job
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-900 text-white hover:bg-gray-800 rounded-full">
+                            <x-ui.icon name="zap" class="me-1" /> Queue Batch Job
                         </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 bg-light">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">How It Works</h5>
+        <div class="lg:w-5/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 bg-gray-50">
+                <div class="p-5 p-4">
+                    <h5 class="font-bold mb-3">How It Works</h5>
                     <ol class="ps-3 mb-0" style="font-size:0.875rem;line-height:2">
                         <li>Choose subject, age tier, language, and types</li>
                         <li>The AI provider generates content via your configured model</li>

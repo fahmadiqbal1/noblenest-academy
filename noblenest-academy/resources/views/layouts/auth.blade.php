@@ -6,23 +6,7 @@
 <!doctype html>
 <html lang="{{ $lang }}" dir="{{ $dir }}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'NobleNest Global Academy')</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#7C3AED">
-    {{-- Critical font preloads — fonts must exist in public/fonts/ (see resources/fonts/README.md) --}}
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Baloo2-Regular.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Baloo2-Bold.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Nunito-Regular.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Inter-Regular.woff2">
-    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/Inter-SemiBold.woff2">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="{{ asset('css/playful.css') }}" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-    @stack('head')
+    @include('layouts.partials.head')
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--color-brand-50)] via-[var(--color-bg)] to-[var(--color-accent-50)] py-12 px-4">
 
@@ -41,8 +25,6 @@
         </x-ui.card>
     </div>
 
-    <x-ui.toast />
-    <x-app.flash-messages />
-    @stack('scripts')
+    @include('layouts.partials.scripts')
 </body>
 </html>

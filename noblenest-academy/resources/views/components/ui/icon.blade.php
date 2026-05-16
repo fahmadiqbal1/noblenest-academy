@@ -1,8 +1,12 @@
 @props(['name', 'class' => 'w-5 h-5'])
 @php
-    /** @var \App\View\Components\Ui\Icon $component */
-    $paths = $component->svgPaths();
-    $known = $component->isKnown();
+    // Resolve SVG paths directly from the static registry so the blade works
+    // both as an anonymous component (no $component injected) and as the body
+    // of a class-based component. Previously this referenced $component which
+    // is only injected in the latter path, breaking HTTP renders.
+    $registry = \App\View\Components\Ui\Icon::$registry;
+    $paths = $registry[$name] ?? '';
+    $known = isset($registry[$name]);
 @endphp
 @if($known)
 <svg

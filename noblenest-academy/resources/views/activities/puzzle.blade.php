@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.child')
 
 @section('content')
 @php
@@ -10,13 +10,13 @@
     </h2>
     <p class="mb-4 {{ $isPlayful ? 'playful-font' : 'professional-font' }}">{{ $activity->description }}</p>
     {{-- Difficulty + Timer --}}
-    <div class="d-flex gap-3 justify-content-center mb-3 align-items-center flex-wrap">
-        <span class="small text-muted">Difficulty:</span>
-        <button class="btn btn-sm btn-outline-success puzzle-diff active" data-count="4">Easy (4)</button>
-        <button class="btn btn-sm btn-outline-warning puzzle-diff" data-count="6">Medium (6)</button>
-        <button class="btn btn-sm btn-outline-danger puzzle-diff" data-count="8">Hard (8)</button>
+    <div class="flex gap-3 justify-center mb-3 items-center flex-wrap">
+        <span class="text-sm text-[var(--color-text-muted)]">Difficulty:</span>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white puzzle-diff active" data-count="4">Easy (4)</button>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-gray-900 puzzle-diff" data-count="6">Medium (6)</button>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white puzzle-diff" data-count="8">Hard (8)</button>
         <span class="mx-2">|</span>
-        <span class="small text-muted"><i class="bi bi-stopwatch"></i> <span id="puzzleTimer">0:00</span></span>
+        <span class="text-sm text-[var(--color-text-muted)]"><x-ui.icon name="timer" /> <span id="puzzleTimer">0:00</span></span>
     </div>
 
     @php
@@ -28,7 +28,7 @@
     @endphp
 
     <div class="mb-3">
-        <div class="d-flex flex-wrap gap-3 justify-content-center" id="puzzlePiecesContainer">
+        <div class="flex flex-wrap gap-3 justify-center" id="puzzlePiecesContainer">
             @foreach(array_slice($pieceData, 0, 4) as $i => $label)
             <div class="puzzle-piece" draggable="true" id="piece{{ $i+1 }}" data-value="{{ is_string($label) ? $label : ($i+1) }}"
                 style="width:80px;height:80px;background:{{ $colors[$i % count($colors)] }};border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;cursor:grab;box-shadow:0 2px 8px {{ $colors[$i % count($colors)] }}55;transition:transform 0.2s;">
@@ -36,7 +36,7 @@
             </div>
             @endforeach
         </div>
-        <div class="d-flex flex-wrap gap-3 justify-content-center mt-4" id="puzzleDropsContainer">
+        <div class="flex flex-wrap gap-3 justify-center mt-4" id="puzzleDropsContainer">
             @foreach(array_slice($pieceData, 0, 4) as $i => $label)
             <div class="puzzle-drop" id="drop{{ $i+1 }}" data-expected="{{ is_string($label) ? $label : ($i+1) }}"
                 style="width:80px;height:80px;border:3px dashed #bbb;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;background:{{ $isPlayful ? '#fff0fa' : '#f8f9fa' }};transition:background 0.2s;">
@@ -46,16 +46,16 @@
         </div>
     </div>
     <div id="puzzle-status" class="mt-3 text-center"></div>
-    <div class="d-flex gap-3 justify-content-center mt-2">
-        <button onclick="resetPuzzle()" class="btn btn-lg {{ $isPlayful ? 'btn-pink shadow' : 'btn-outline-primary' }}">
-            <i class="bi bi-arrow-repeat"></i> {{ I18n::get('reset_puzzle') }}
+    <div class="flex gap-3 justify-center mt-2">
+        <button onclick="resetPuzzle()" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg {{ $isPlayful ? 'bg-pink-500 text-white hover:bg-pink-600 shadow' : 'border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white' }}">
+            <x-ui.icon name="rotate-cw" /> {{ I18n::get('reset_puzzle') }}
         </button>
-        <a href="/activities" class="btn btn-lg {{ $isPlayful ? 'btn-info shadow' : 'btn-outline-info' }}">
-            <i class="bi bi-arrow-right-circle"></i> {{ I18n::get('next_activity') }}
+        <a href="/activities" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg {{ $isPlayful ? 'bg-sky-500 text-white hover:bg-sky-600 shadow' : 'border-2 border-sky-600 text-sky-600 hover:bg-sky-600 hover:text-white' }}">
+            <x-ui.icon name="circle-arrow-right" /> {{ I18n::get('next_activity') }}
         </a>
     </div>
     <div class="mt-3 text-center">
-        <strong><i class="bi bi-lightbulb"></i> {{ I18n::get('hint') }}:</strong> {{ I18n::get('drag_letters_in_order') }} (A, B, C, D)
+        <strong><x-ui.icon name="lightbulb" /> {{ I18n::get('hint') }}:</strong> {{ I18n::get('drag_letters_in_order') }} (A, B, C, D)
     </div>
     @if($isPlayful)
     <div class="mt-4 text-center">
@@ -177,7 +177,7 @@ function checkPuzzle() {
         clearInterval(timerInterval);
         const s = Math.floor((Date.now() - timerStart) / 1000);
         const timeStr = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
-        document.getElementById('puzzle-status').innerHTML = '<span class="text-success fw-bold">🎉 {{ I18n::get("puzzle_completed") }} in ' + timeStr + '!</span>';
+        document.getElementById('puzzle-status').innerHTML = '<span class="text-emerald-600 font-bold">🎉 {{ I18n::get("puzzle_completed") }} in ' + timeStr + '!</span>';
         if({{ $isPlayful ? 'true' : 'false' }}) {
             import('https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js').then(({default:confetti})=>{
                 confetti({particleCount:100,spread:90,origin:{y:0.7}});

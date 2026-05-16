@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.parent')
 
 @section('content')
 @php
@@ -17,78 +17,62 @@
 @endphp
 <div class="container py-5">
     <h2 class="mb-2 text-center {{ $isPlayful ? 'playful-font text-pink' : 'professional-font text-primary' }}">
-        <i class="bi bi-heart-fill"></i> Invest in Your Child's Future
+        <x-ui.icon name="heart" /> Invest in Your Child's Future
     </h2>
-    <p class="text-center text-muted mb-4">Weekly learning packs adapted for your child's age — fresh content every week.</p>
+    <p class="text-center text-[var(--color-text-muted)] mb-4">Weekly learning packs adapted for your child's age — fresh content every week.</p>
 
     @if(session('error'))
-        <div class="alert alert-danger text-center">{{ session('error') }}</div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800 text-center">{{ session('error') }}</div>
     @endif
     @if(session('status'))
-        <div class="alert alert-success text-center">{{ session('status') }}</div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800 text-center">{{ session('status') }}</div>
     @endif
 
-    <div class="row row-cols-1 row-cols-md-2 g-4 mb-4 justify-content-center" style="max-width: 700px; margin: 0 auto;">
+    <div class="flex flex-wrap row-cols-1 row-cols-md-2 gap-4 mb-4 justify-center" style="max-width: 700px; margin: 0 auto;">
         {{-- Monthly Plan --}}
-        <div class="col">
-            <div class="card h-100 shadow-sm border-0 {{ $isPlayful ? 'playful-font' : 'professional-font' }}">
-                <div class="card-body text-center">
-                    <h4 class="card-title mb-2"><i class="bi bi-calendar-month text-primary"></i> Monthly</h4>
-                    <p class="card-text small text-muted">All children, weekly drip packs, cancel anytime</p>
-                    <div class="display-6 fw-bold mb-1">${{ number_format($monthlyPrice, 2) }}</div>
-                    <div class="text-muted small mb-3">per month</div>
-                    <form method="POST" action="{{ route('checkout.stripe') }}" class="d-grid gap-2">
+        <div class="flex-1">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full border-0 {{ $isPlayful ? 'playful-font' : 'professional-font' }}">
+                <div class="p-5 text-center">
+                    <h4 class="text-lg font-bold mb-2"><x-ui.icon name="calendar" class="text-[var(--color-primary)]" /> Monthly</h4>
+                    <p class="text-sm text-[var(--color-text-muted)]">All children, weekly drip packs, cancel anytime</p>
+                    <div class="text-2xl font-bold mb-1">${{ number_format($monthlyPrice, 2) }}</div>
+                    <div class="text-[var(--color-text-muted)] text-sm mb-3">per month</div>
+                    <form method="POST" action="{{ route('checkout.stripe') }}" class="grid gap-2">
                         @csrf
-                        <input type="hidden" name="amount" value="{{ $monthlyCents }}">
-                        <input type="hidden" name="currency" value="{{ $currency }}">
-                        <input type="hidden" name="description" value="Noble Nest Monthly Plan">
-                        <button type="submit" class="btn btn-lg btn-primary"><i class="bi bi-credit-card"></i> Pay with Stripe</button>
-                    </form>
-                    <form method="POST" action="{{ route('checkout.paypal') }}" class="d-grid gap-2 mt-2">
-                        @csrf
-                        <input type="hidden" name="amount" value="{{ $monthlyCents }}">
-                        <input type="hidden" name="currency" value="{{ $currency }}">
-                        <input type="hidden" name="description" value="Noble Nest Monthly Plan">
-                        <button type="submit" class="btn btn-lg btn-outline-info"><i class="bi bi-paypal"></i> Pay with PayPal</button>
+                        <input type="hidden" name="plan" value="monthly">
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg bg-violet-600 text-white hover:bg-violet-700"><x-ui.icon name="credit-card" /> Subscribe — Monthly</button>
+                        <p class="text-xs text-[var(--color-text-muted)] mt-1">7-day free trial. Cancel anytime via the billing portal.</p>
                     </form>
                 </div>
             </div>
         </div>
 
         {{-- Annual Plan --}}
-        <div class="col">
-            <div class="card h-100 shadow border-2 border-primary {{ $isPlayful ? 'playful-font' : 'professional-font' }}">
-                <div class="card-body text-center">
-                    <h4 class="card-title mb-2"><i class="bi bi-calendar-heart text-danger"></i> Annual</h4>
-                    <p class="card-text small text-muted">Everything in Monthly + save {{ $yearlySavings }}%</p>
-                    <div class="display-6 fw-bold mb-1">${{ number_format($yearlyPrice, 2) }}</div>
-                    <div class="text-muted small mb-3">per year (~${{ number_format($yearlyPrice / 12, 2) }}/mo)</div>
-                    <form method="POST" action="{{ route('checkout.stripe') }}" class="d-grid gap-2">
+        <div class="flex-1">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full shadow border-2 border-primary {{ $isPlayful ? 'playful-font' : 'professional-font' }}">
+                <div class="p-5 text-center">
+                    <h4 class="text-lg font-bold mb-2"><x-ui.icon name="calendar" class="text-red-600" /> Annual</h4>
+                    <p class="text-sm text-[var(--color-text-muted)]">Everything in Monthly + save {{ $yearlySavings }}%</p>
+                    <div class="text-2xl font-bold mb-1">${{ number_format($yearlyPrice, 2) }}</div>
+                    <div class="text-[var(--color-text-muted)] text-sm mb-3">per year (~${{ number_format($yearlyPrice / 12, 2) }}/mo)</div>
+                    <form method="POST" action="{{ route('checkout.stripe') }}" class="grid gap-2">
                         @csrf
-                        <input type="hidden" name="amount" value="{{ $yearlyCents }}">
-                        <input type="hidden" name="currency" value="{{ $currency }}">
-                        <input type="hidden" name="description" value="Noble Nest Annual Plan">
-                        <button type="submit" class="btn btn-lg btn-primary"><i class="bi bi-credit-card"></i> Pay with Stripe</button>
-                    </form>
-                    <form method="POST" action="{{ route('checkout.paypal') }}" class="d-grid gap-2 mt-2">
-                        @csrf
-                        <input type="hidden" name="amount" value="{{ $yearlyCents }}">
-                        <input type="hidden" name="currency" value="{{ $currency }}">
-                        <input type="hidden" name="description" value="Noble Nest Annual Plan">
-                        <button type="submit" class="btn btn-lg btn-outline-info"><i class="bi bi-paypal"></i> Pay with PayPal</button>
+                        <input type="hidden" name="plan" value="annual">
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg bg-violet-600 text-white hover:bg-violet-700"><x-ui.icon name="credit-card" /> Subscribe — Annual</button>
+                        <p class="text-xs text-[var(--color-text-muted)] mt-1">7-day free trial. Save {{ $yearlySavings }}% vs monthly.</p>
                     </form>
                 </div>
-                <div class="card-footer text-center bg-primary text-white fw-bold">Best Value — Save {{ $yearlySavings }}%</div>
+                <div class="px-5 py-3 border-t border-gray-200 text-center bg-[var(--color-primary)] text-white font-bold">Best Value — Save {{ $yearlySavings }}%</div>
             </div>
         </div>
     </div>
 
-    <div class="text-center text-muted small mt-3 mb-4">
-        <i class="bi bi-geo-alt"></i> Pricing for <strong>{{ $region }}</strong> region. All prices in {{ $currency }}.
+    <div class="text-center text-[var(--color-text-muted)] text-sm mt-3 mb-4">
+        <x-ui.icon name="map-pin" /> Pricing for <strong>{{ $region }}</strong> region. All prices in {{ $currency }}.
     </div>
 
     <div class="text-center mt-2">
-        <a href="/" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back to Home</a>
+        <a href="/" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-500 text-white hover:bg-gray-600"><x-ui.icon name="arrow-left" /> Back to Home</a>
     </div>
 </div>
 @endsection
@@ -97,7 +81,7 @@
 // Animated feedback for payment buttons
 [...document.querySelectorAll('form[action*="checkout"] button')].forEach(btn => {
     btn.addEventListener('click', function() {
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+        btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4 me-2"></span>Processing...';
         btn.disabled = true;
         setTimeout(()=>btn.disabled=false, 6000);
     });

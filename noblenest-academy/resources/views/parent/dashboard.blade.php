@@ -166,7 +166,7 @@
     <div class="rounded-[var(--radius-card)] border-[3px] border-[var(--color-border)] shadow-[var(--shadow-clay)] divide-y divide-[var(--color-border)] overflow-hidden bg-[var(--color-surface-strong)]">
         @foreach($recentActivity as $item)
         <div class="flex items-center gap-3 px-4 py-3">
-            <div class="w-10 h-10 min-w-[2.5rem] rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-content-center justify-center" aria-hidden="true">
+            <div class="w-10 h-10 min-w-[2.5rem] rounded-[var(--radius-sm)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] flex items-center justify-center" aria-hidden="true">
                 <x-ui.icon name="book-open" class="w-5 h-5" />
             </div>
             <div class="flex-1 min-w-0">

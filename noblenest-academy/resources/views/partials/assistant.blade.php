@@ -1,27 +1,27 @@
-<div class="modal fade" id="assistantModal" tabindex="-1" aria-labelledby="assistantLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content assistant-shell border-0 overflow-hidden">
+<div class="fixed inset-0 z-50 hidden" id="assistantModal" tabindex="-1" aria-labelledby="assistantLabel" aria-hidden="true">
+    <div class="relative w-full max-w-lg mx-auto mt-12 flex items-center min-h-full max-h-[90vh] overflow-y-auto max-w-2xl">
+        <div class="bg-white rounded-xl shadow-xl border border-gray-200 assistant-shell border-0 overflow-hidden">
             <div class="assistant-shell__glow"></div>
-            <div class="modal-header border-0 pb-0">
+            <div class="px-5 py-3 border-b border-gray-200 font-semibold flex items-center justify-between border-0 pb-0">
                 <div>
                     <div class="assistant-eyebrow">
                         <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest logo" style="width:22px;height:22px;border-radius:0.45rem;">
                         AI Companion
                     </div>
-                    <h5 class="modal-title fw-semibold" id="assistantLabel">{{ I18n::get('ai_onboarding_assistant') }}</h5>
-                    <p class="text-muted mb-0 small">Ask for weekly plans, activity ideas, onboarding help, or curriculum suggestions.</p>
+                    <h5 class="text-lg font-bold font-semibold" id="assistantLabel">{{ I18n::get('ai_onboarding_assistant') }}</h5>
+                    <p class="text-[var(--color-text-muted)] mb-0 text-sm">Ask for weekly plans, activity ideas, onboarding help, or curriculum suggestions.</p>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="" aria-label="Close"></button>
             </div>
-            <div class="modal-body pt-3">
+            <div class="p-5 pt-3">
                 <div class="assistant-chat" id="assistant-chat"></div>
                 <form id="assistant-form" class="assistant-form mt-3">
                     <div class="assistant-form__field">
-                        <i class="bi bi-stars"></i>
-                        <input type="text" id="assistant-input" class="form-control border-0 shadow-none" placeholder="{{ I18n::get('ask_ai_placeholder') }}" autocomplete="off" required>
+                        <x-ui.icon name="sparkles" />
+                        <input type="text" id="assistant-input" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 border-0 shadow-none" placeholder="{{ I18n::get('ask_ai_placeholder') }}" autocomplete="off" required>
                     </div>
-                    <button type="submit" class="btn btn-primary assistant-send">
-                        <i class="bi bi-send-fill"></i>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 assistant-send">
+                        <x-ui.icon name="send" />
                     </button>
                 </form>
                 <div class="assistant-suggestions mt-3" id="assistant-suggestions"></div>
@@ -69,7 +69,7 @@
 
     function setSuggestions(items) {
         suggestions.innerHTML = (items || []).map((item) => {
-            return '<button type="button" class="btn btn-sm btn-outline-secondary assistant-chip">' + escapeHtml(item) + '</button>';
+            return '<button type="button" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-100 assistant-chip">' + escapeHtml(item) + '</button>';
         }).join('');
 
         suggestions.querySelectorAll('button').forEach((button) => {

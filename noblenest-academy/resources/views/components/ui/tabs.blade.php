@@ -29,9 +29,7 @@
                 @click="active = '{{ $id }}'"
                 @keydown.arrow-right.prevent="$focus.next()"
                 @keydown.arrow-left.prevent="$focus.previous()"
-                :class="active === '{{ $id }}'
-                    ? 'border-[var(--color-brand-600)] text-[var(--color-brand-700)] font-bold'
-                    : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]'"
+                :class="active === '{{ $id }}' ? 'border-[var(--color-brand-600)] text-[var(--color-brand-700)] font-bold' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-border)]'"
                 class="inline-flex items-center gap-1.5 shrink-0 px-4 py-2.5 text-sm font-medium border-b-[2px] -mb-[2px] transition-colors duration-[var(--duration-fast)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-0 cursor-pointer"
                 id="tab-{{ $id }}"
                 aria-controls="panel-{{ $id }}"

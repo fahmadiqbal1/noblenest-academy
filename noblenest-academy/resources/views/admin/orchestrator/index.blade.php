@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 <style>
@@ -126,143 +126,143 @@
     }
 </style>
 
-<div class="container-fluid py-2 py-lg-3">
+<div class="w-full px-4 py-2 py-lg-3">
     <div class="orch-hero">
-        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap position-relative" style="z-index: 1;">
-            <div class="col-12 col-xl-7 px-0">
+        <div class="flex justify-between items-start gap-3 flex-wrap relative" style="z-index: 1;">
+            <div class="w-full xl:w-7/12 px-0">
                 <div class="orch-section-title mb-2">AI control center</div>
-                <h1 class="mb-2 text-primary"><i class="bi bi-robot"></i> AI Orchestrator</h1>
-                <p class="text-muted mb-0">Connect providers, validate whether they are truly reachable, dispatch generation jobs, and keep moderation and publishing in one place.</p>
+                <h1 class="mb-2 text-[var(--color-primary)]"><x-ui.icon name="bot" /> AI Orchestrator</h1>
+                <p class="text-[var(--color-text-muted)] mb-0">Connect providers, validate whether they are truly reachable, dispatch generation jobs, and keep moderation and publishing in one place.</p>
             </div>
-            <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-outline-info btn-sm" id="scanBtn" onclick="scanCurriculum()">
-                <i class="bi bi-search"></i> Scan Curriculum Gaps
+            <div class="flex gap-2 flex-wrap">
+                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-sky-600 text-sky-600 hover:bg-sky-600 hover:text-white px-3 py-1.5 text-sm" id="scanBtn" onclick="scanCurriculum()">
+                <x-ui.icon name="search" /> Scan Curriculum Gaps
             </button>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProviderModal">
-                <i class="bi bi-plug"></i> Add AI Provider
+            <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 px-3 py-1.5 text-sm">
+                <x-ui.icon name="plug" /> Add AI Provider
             </button>
         </div>
     </div>
     </div>
 
     @if(session('status'))
-        <div class="alert alert-success alert-dismissible fade show">{{ session('status') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800">{{ session('status') }}<button type="button" class=""></button></div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800">{{ session('error') }}<button type="button" class=""></button></div>
     @endif
 
     {{-- Stats Row --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-2">
+    <div class="flex flex-wrap gap-3 mb-4">
+        <div class="w-6/12 md:w-2/12">
             <div class="stat-card text-center">
                 <div>
-                    <div class="fs-4 fw-bold text-secondary">{{ $stats['queued'] }}</div>
-                    <div class="small text-muted">Queued</div>
+                    <div class="text-2xl font-bold text-gray-500">{{ $stats['queued'] }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)]">Queued</div>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
+        <div class="w-6/12 md:w-2/12">
             <div class="stat-card text-center">
                 <div>
-                    <div class="fs-4 fw-bold text-primary">{{ $stats['running'] }}</div>
-                    <div class="small text-muted">Running</div>
+                    <div class="text-2xl font-bold text-[var(--color-primary)]">{{ $stats['running'] }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)]">Running</div>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
+        <div class="w-6/12 md:w-2/12">
             <div class="stat-card text-center">
                 <div>
-                    <div class="fs-4 fw-bold text-success">{{ $stats['completed'] }}</div>
-                    <div class="small text-muted">Completed</div>
+                    <div class="text-2xl font-bold text-emerald-600">{{ $stats['completed'] }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)]">Completed</div>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
+        <div class="w-6/12 md:w-2/12">
             <div class="stat-card text-center">
                 <div>
-                    <div class="fs-4 fw-bold text-danger">{{ $stats['failed'] }}</div>
-                    <div class="small text-muted">Failed</div>
+                    <div class="text-2xl font-bold text-red-600">{{ $stats['failed'] }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)]">Failed</div>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-2">
+        <div class="w-6/12 md:w-2/12">
             <div class="stat-card text-center">
                 <div>
-                    <div class="fs-4 fw-bold text-warning">{{ $stats['pending_moderation'] }}</div>
-                    <div class="small text-muted">Needs Review</div>
+                    <div class="text-2xl font-bold text-amber-600">{{ $stats['pending_moderation'] }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)]">Needs Review</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="flex flex-wrap gap-4">
         {{-- Left: Provider + Dispatch --}}
-        <div class="col-lg-4">
+        <div class="lg:w-4/12">
 
             {{-- Connected Providers --}}
             <div class="orch-card p-3 mb-4">
                 <div class="orch-card-header">
                     <div>
                         <div class="orch-section-title mb-1">Providers</div>
-                        <div class="fw-bold"><i class="bi bi-plug-fill text-success"></i> Connected AI Providers</div>
+                        <div class="font-bold"><x-ui.icon name="plug" class="text-emerald-600" /> Connected AI Providers</div>
                     </div>
-                    <span class="badge text-bg-light border">{{ $providers->count() }} total</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-900 border">{{ $providers->count() }} total</span>
                 </div>
                 <div class="provider-stack">
                     @forelse($providers as $p)
                     <div class="provider-card">
                         <div class="provider-card__top">
                             <div>
-                                <div class="d-flex flex-wrap align-items-center gap-2">
-                                    <span class="fw-semibold">{{ $p->name }}</span>
-                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ $p->slug }}</span>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-semibold">{{ $p->name }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border">{{ $p->slug }}</span>
                                     <span class="status-pill status-pill--{{ in_array($p->connection_status, ['live', 'failed', 'configured'], true) ? $p->connection_status : 'unchecked' }}"
                                           id="status-pill-{{ $p->id }}">
-                                        <i class="bi bi-{{ $p->connection_status === 'live' ? 'broadcast-pin' : ($p->connection_status === 'failed' ? 'x-octagon' : 'activity') }}"></i>
+                                        <x-ui.icon name="{{ $p->connection_status === 'live' ? 'circle-play' : ($p->connection_status === 'failed' ? 'octagon-alert' : 'clock') }}" />
                                         {{ $p->connection_status ?? 'unchecked' }}
                                     </span>
                                 </div>
                                 <div class="provider-helper mt-2">{{ $p->connection_message ?: 'Provider added, but no verification details are available yet.' }}</div>
                                 <div class="provider-card__meta">
-                                    <span class="badge bg-light text-dark border">Driver: {{ strtoupper(data_get($p->extra_config, 'driver', 'auto')) }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Driver: {{ strtoupper(data_get($p->extra_config, 'driver', 'auto')) }}</span>
                                     @if($p->model)
-                                        <span class="badge bg-light text-dark border">Model: {{ $p->model }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Model: {{ $p->model }}</span>
                                     @endif
-                                    <span class="badge {{ $p->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $p->is_active ? 'Active' : 'Disabled' }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $p->is_active ? 'text-bg-success' : 'text-bg-secondary' }}">{{ $p->is_active ? 'Active' : 'Disabled' }}</span>
                                     @if($p->last_checked_at)
-                                        <span class="badge bg-light text-dark border">Checked {{ $p->last_checked_at->diffForHumans() }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Checked {{ $p->last_checked_at->diffForHumans() }}</span>
                                     @endif
                                     @if($p->last_live_at)
-                                        <span class="badge bg-light text-dark border">Last live {{ $p->last_live_at->diffForHumans() }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">Last live {{ $p->last_live_at->diffForHumans() }}</span>
                                     @endif
                                     @foreach($p->capabilities ?? [] as $cap)
-                                        <span class="badge bg-light text-dark border">{{ $cap }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-900 border">{{ $cap }}</span>
                                     @endforeach
                                 </div>
                             </div>
-                            <div class="d-flex gap-1 flex-wrap justify-content-end">
-                                <button class="btn btn-outline-primary btn-sm"
+                            <div class="flex gap-1 flex-wrap justify-end">
+                                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm"
                                         id="verify-btn-{{ $p->id }}"
                                         title="Verify live status"
                                         onclick="verifyProvider({{ $p->id }}, '{{ route('admin.orchestrator.verifyProvider', $p) }}', this)">
-                                    <i class="bi bi-arrow-repeat"></i>
+                                    <x-ui.icon name="rotate-cw" />
                                 </button>
                                 <form method="POST" action="{{ route('admin.orchestrator.toggleProvider', $p) }}" style="display:inline">
                                     @csrf
-                                    <button class="btn btn-sm {{ $p->is_active ? 'btn-success' : 'btn-outline-secondary' }}" title="{{ $p->is_active ? 'Disable' : 'Enable' }}">
-                                        <i class="bi bi-{{ $p->is_active ? 'toggle-on' : 'toggle-off' }}"></i>
+                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm {{ $p->is_active ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border-2 border-gray-300 text-gray-700 hover:bg-gray-100' }}" title="{{ $p->is_active ? 'Disable' : 'Enable' }}">
+                                        <x-ui.icon name="{{ $p->is_active ? 'check-circle' : 'x-circle' }}" />
                                     </button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.orchestrator.destroyProvider', $p) }}" onsubmit="return confirm('Remove provider?')">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="trash" /></button>
                                 </form>
                             </div>
                         </div>
                     </div>
                     @empty
-                    <div class="text-center text-muted py-3 small">No providers yet. Add one to get started.</div>
+                    <div class="text-center text-[var(--color-text-muted)] py-3 text-sm">No providers yet. Add one to get started.</div>
                     @endforelse
                 </div>
             </div>
@@ -272,23 +272,23 @@
                 <div class="orch-card-header">
                     <div>
                         <div class="orch-section-title mb-1">Dispatch</div>
-                        <div class="fw-bold"><i class="bi bi-send text-primary"></i> Generate Content</div>
+                        <div class="font-bold"><x-ui.icon name="send" class="text-[var(--color-primary)]" /> Generate Content</div>
                     </div>
                 </div>
                 <div>
                     <form method="POST" action="{{ route('admin.orchestrator.dispatch') }}" class="orch-form">
                         @csrf
                         <div class="mb-3">
-                            <label class="form-label small">Job Type</label>
-                            <select name="type" class="form-select form-select-sm" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Job Type</label>
+                            <select name="type" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" required>
                                 @foreach($jobTypes as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small">AI Provider</label>
-                            <select name="provider" class="form-select form-select-sm">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">AI Provider</label>
+                            <select name="provider" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm">
                                 <option value="mock">Mock (no API key needed)</option>
                                 @foreach($providers->where('is_active', true) as $p)
                                     <option value="{{ $p->slug }}">{{ $p->name }} @if($p->connection_status) · {{ $p->connection_status }} @endif</option>
@@ -296,26 +296,26 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small">Language / Locale</label>
-                            <select name="locale" class="form-select form-select-sm">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Language / Locale</label>
+                            <select name="locale" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm">
                                 @foreach($locales as $code => $name)
                                     <option value="{{ $code }}">{{ $name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small">Prompt / Brief <span class="text-danger">*</span></label>
-                            <textarea name="prompt" class="form-control form-control-sm" rows="4"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prompt / Brief <span class="text-red-600">*</span></label>
+                            <textarea name="prompt" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" rows="4"
                                 placeholder="e.g. Create a 15-minute tracing activity for numbers 1-5 for age 3-4..." required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small">GitHub Repo URL (optional)</label>
-                            <input type="url" name="repo_url" class="form-control form-control-sm"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Repo URL (optional)</label>
+                            <input type="url" name="repo_url" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm"
                                 placeholder="https://github.com/owner/repo">
-                            <div class="form-text">Extract educational content from a public GitHub repo.</div>
+                            <div class="mt-1 text-sm text-[var(--color-text-muted)]">Extract educational content from a public GitHub repo.</div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-lightning-charge"></i> Dispatch Job
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 w-full">
+                            <x-ui.icon name="zap" /> Dispatch Job
                         </button>
                     </form>
                 </div>
@@ -323,39 +323,35 @@
         </div>
 
         {{-- Right: Job Queue --}}
-        <div class="col-lg-8">
+        <div class="lg:w-8/12">
             <div class="orch-card p-3">
                 <div class="orch-card-header">
                     <div>
                         <div class="orch-section-title mb-1">Queue</div>
-                        <span class="fw-bold"><i class="bi bi-list-task"></i> Job Queue</span>
+                        <span class="font-bold"><x-ui.icon name="list-checks" /> Job Queue</span>
                     </div>
-                    <span class="badge bg-secondary">{{ $jobs->total() }} total</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500">{{ $jobs->total() }} total</span>
                 </div>
                 <div class="job-feed" style="max-height: 75vh; overflow-y: auto; padding-right: 0.25rem;">
                     @forelse($jobs as $job)
                     <div class="job-card">
-                        <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                        <div class="flex justify-between items-start gap-2 flex-wrap">
                             <div>
-                                <span class="badge bg-{{
-                                    $job->status === 'completed' ? 'success' :
-                                    ($job->status === 'failed' ? 'danger' :
-                                    ($job->status === 'running' ? 'primary' : 'secondary'))
-                                }}">{{ $job->status }}</span>
-                                <span class="badge bg-{{ $job->moderation_status === 'approved' ? 'success' : ($job->moderation_status === 'rejected' ? 'danger' : 'warning text-dark') }} ms-1">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $job->status === 'completed' ? 'bg-emerald-100 text-emerald-700' : ($job->status === 'failed' ? 'bg-red-100 text-red-700' : ($job->status === 'running' ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-700')) }}">{{ $job->status }}</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $job->moderation_status === 'approved' ? 'bg-emerald-100 text-emerald-700' : ($job->moderation_status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800') }} ms-1">
                                     {{ $job->moderation_status }}
                                 </span>
-                                <span class="fw-semibold ms-2">{{ $job->type }}</span>
-                                <span class="text-muted small ms-1">· {{ strtoupper($job->locale) }} · {{ $job->provider }}</span>
+                                <span class="font-semibold ms-2">{{ $job->type }}</span>
+                                <span class="text-[var(--color-text-muted)] text-sm ms-1">· {{ strtoupper($job->locale) }} · {{ $job->provider }}</span>
                             </div>
-                            <div class="text-muted small">
+                            <div class="text-[var(--color-text-muted)] text-sm">
                                 #{{ $job->id }} · {{ $job->created_at->diffForHumans() }}
                             </div>
                         </div>
 
                         {{-- Prompt --}}
-                        <div class="mt-1 text-muted small">
-                            <i class="bi bi-chat-left-quote"></i>
+                        <div class="mt-1 text-[var(--color-text-muted)] text-sm">
+                            <x-ui.icon name="message-square-quote" />
                             {{ Str::limit($job->payload['prompt'] ?? '—', 120) }}
                         </div>
 
@@ -367,13 +363,13 @@
                             $resUrl  = $res['url'] ?? null;
                             $resTxt  = $res['content'] ?? json_encode($res);
                         @endphp
-                        <div class="job-card__result mt-2 small">
+                        <div class="job-card__result mt-2 text-sm">
                             @if($resType === 'image' && $resUrl)
                                 <img src="{{ $resUrl }}" alt="Generated image" class="img-fluid rounded mb-1" style="max-height:200px">
                             @elseif($resType === 'audio' && $resUrl)
-                                <audio controls class="w-100 mb-1"><source src="{{ $resUrl }}" type="audio/mpeg"></audio>
+                                <audio controls class="w-full mb-1"><source src="{{ $resUrl }}" type="audio/mpeg"></audio>
                             @elseif($resType === 'video' && $resUrl)
-                                <video controls class="w-100 mb-1" style="max-height:200px"><source src="{{ $resUrl }}"></video>
+                                <video controls class="w-full mb-1" style="max-height:200px"><source src="{{ $resUrl }}"></video>
                             @endif
                             <div style="white-space:pre-wrap">{{ $resTxt }}</div>
                         </div>
@@ -381,36 +377,36 @@
 
                         {{-- Error --}}
                         @if($job->error_message)
-                        <div class="mt-1 text-danger small"><i class="bi bi-exclamation-circle"></i> {{ $job->error_message }}</div>
+                        <div class="mt-1 text-red-600 text-sm"><x-ui.icon name="alert-circle" /> {{ $job->error_message }}</div>
                         @endif
 
                         {{-- Actions --}}
-                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                        <div class="mt-2 flex gap-2 flex-wrap">
                             @if($job->status === 'completed' && $job->moderation_status === 'pending')
                                 <form method="POST" action="{{ route('admin.orchestrator.approve', $job) }}">
                                     @csrf
-                                    <button class="btn btn-success btn-sm"><i class="bi bi-check-circle"></i> Approve & Publish</button>
+                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 text-white hover:bg-emerald-700 px-3 py-1.5 text-sm"><x-ui.icon name="check-circle" /> Approve & Publish</button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.orchestrator.reject', $job) }}">
                                     @csrf
-                                    <button class="btn btn-outline-danger btn-sm"><i class="bi bi-x-circle"></i> Reject</button>
+                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="x-circle" /> Reject</button>
                                 </form>
                             @endif
                             @if($job->status === 'failed')
                                 <form method="POST" action="{{ route('admin.orchestrator.retry', $job) }}">
                                     @csrf
-                                    <button class="btn btn-warning btn-sm"><i class="bi bi-arrow-clockwise"></i> Retry</button>
+                                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-amber-500 text-gray-900 hover:bg-amber-600 px-3 py-1.5 text-sm"><x-ui.icon name="rotate-cw" /> Retry</button>
                                 </form>
                             @endif
                             <form method="POST" action="{{ route('admin.orchestrator.destroyJob', $job) }}" onsubmit="return confirm('Delete this job?')">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-trash"></i></button>
+                                <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm"><x-ui.icon name="trash" /></button>
                             </form>
                         </div>
                     </div>
                     @empty
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-robot display-4 d-block mb-2"></i>
+                    <div class="text-center text-[var(--color-text-muted)] py-5">
+                        <x-ui.icon name="bot" class="text-4xl font-bold block mb-2" />
                         No jobs yet. Use the form to generate your first piece of content!
                     </div>
                     @endforelse
@@ -425,24 +421,24 @@
 
 {{-- Scan result panel --}}
 <div id="scanResult" class="mt-3" style="display:none">
-    <div class="alert alert-info" id="scanResultContent"></div>
+    <div class="flex items-start gap-3 p-4 rounded-lg border bg-sky-50 border-sky-200 text-sky-800" id="scanResultContent"></div>
 </div>
 
 @include('admin.orchestrator.media-panel')
 
 {{-- Add Provider Modal --}}
-<div class="modal fade" id="addProviderModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-plug"></i> Add AI Provider</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="fixed inset-0 z-50 hidden" id="addProviderModal" tabindex="-1">
+    <div class="relative w-full max-w-lg mx-auto mt-12">
+        <div class="bg-white rounded-xl shadow-xl border border-gray-200">
+            <div class="px-5 py-3 border-b border-gray-200 font-semibold flex items-center justify-between">
+                <h5 class="text-lg font-bold"><x-ui.icon name="plug" /> Add AI Provider</h5>
+                <button type="button" class=""></button>
             </div>
             <form method="POST" action="{{ route('admin.orchestrator.storeProvider') }}">
                 @csrf
-                <div class="modal-body">
+                <div class="p-5">
                     @if($errors->any())
-                        <div class="alert alert-danger py-2 small mb-3">
+                        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800 py-2 text-sm mb-3">
                             <ul class="mb-0 ps-3">
                                 @foreach($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -451,8 +447,8 @@
                         </div>
                     @endif
                     <div class="mb-3">
-                        <label class="form-label">Provider Family</label>
-                        <select name="driver" id="driverSelect" class="form-select" onchange="onDriverChange(this.value)">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Provider Family</label>
+                        <select name="driver" id="driverSelect" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" onchange="onDriverChange(this.value)">
                             <option value="openai">OpenAI compatible (GPT-4o, etc.)</option>
                             <option value="anthropic">Anthropic Claude</option>
                             <option value="gemini">Google Gemini</option>
@@ -463,50 +459,50 @@
                             <option value="runway">RunwayML (video generation)</option>
                             <option value="openai-image">OpenAI DALL-E (image generation)</option>
                         </select>
-                        <div id="driverHelp" class="form-text mt-1">Pick the provider family so health checks and requests use the correct API contract.</div>
+                        <div id="driverHelp" class="mt-1 text-sm text-[var(--color-text-muted)]">Pick the provider family so health checks and requests use the correct API contract.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Display Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. OpenAI GPT-4o" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Display Name <span class="text-red-600">*</span></label>
+                        <input type="text" name="name" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="e.g. OpenAI GPT-4o" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Slug (unique ID) <span class="text-danger">*</span></label>
-                        <input type="text" name="slug" class="form-control" placeholder="e.g. openai" required pattern="[a-z0-9_-]+">
-                        <div class="form-text">Lowercase letters, numbers, hyphens only.</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Slug (unique ID) <span class="text-red-600">*</span></label>
+                        <input type="text" name="slug" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="e.g. openai" required pattern="[a-z0-9_-]+">
+                        <div class="mt-1 text-sm text-[var(--color-text-muted)]">Lowercase letters, numbers, hyphens only.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">API Base URL</label>
-                        <input type="url" name="api_base_url" class="form-control" placeholder="https://api.openai.com/v1">
-                        <div class="form-text">Leave blank for OpenAI-compatible default. Use for Anthropic, Gemini proxies, or self-hosted LLMs.</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">API Base URL</label>
+                        <input type="url" name="api_base_url" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="https://api.openai.com/v1">
+                        <div class="mt-1 text-sm text-[var(--color-text-muted)]">Leave blank for OpenAI-compatible default. Use for Anthropic, Gemini proxies, or self-hosted LLMs.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">API Key</label>
-                        <input type="password" name="api_key" class="form-control" placeholder="sk-...">
-                        <div class="form-text">Stored encrypted. Leave blank for public APIs or GitHub repo extraction.</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                        <input type="password" name="api_key" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="sk-...">
+                        <div class="mt-1 text-sm text-[var(--color-text-muted)]">Stored encrypted. Leave blank for public APIs or GitHub repo extraction.</div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Default Model</label>
-                        <input type="text" name="model" class="form-control" placeholder="e.g. gpt-4o-mini, claude-3-haiku-20240307">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Default Model</label>
+                        <input type="text" name="model" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="e.g. gpt-4o-mini, claude-3-haiku-20240307">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Capabilities</label>
-                        <div class="d-flex flex-wrap gap-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Capabilities</label>
+                        <div class="flex flex-wrap gap-2">
                             @foreach(['text','image','tts','video','translation','quiz'] as $cap)
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="capabilities[]" value="{{ $cap }}" id="cap_{{ $cap }}">
-                                    <label class="form-check-label" for="cap_{{ $cap }}">{{ ucfirst($cap) }}</label>
+                                <div class="flex items-center gap-2 inline-flex">
+                                    <input class="w-4 h-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500" type="checkbox" name="capabilities[]" value="{{ $cap }}" id="cap_{{ $cap }}">
+                                    <label class="text-sm" for="cap_{{ $cap }}">{{ ucfirst($cap) }}</label>
                                 </div>
                             @endforeach
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">GitHub Repo URL (for repo extraction)</label>
-                        <input type="url" name="repo_url" class="form-control" placeholder="https://github.com/owner/curriculum-repo">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">GitHub Repo URL (for repo extraction)</label>
+                        <input type="url" name="repo_url" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" placeholder="https://github.com/owner/curriculum-repo">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Provider</button>
+                <div class="px-5 py-3 border-t border-gray-200 flex justify-end gap-2">
+                    <button type="button" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-500 text-white hover:bg-gray-600">Cancel</button>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700">Add Provider</button>
                 </div>
             </form>
         </div>
@@ -549,7 +545,7 @@ function scanCurriculum() {
 
     btn.dataset.scanning = '1';
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Scanning...';
+    btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4"></span> Scanning...';
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
@@ -562,7 +558,7 @@ function scanCurriculum() {
     .then(data => {
         const panel = document.getElementById('scanResult');
         const content = document.getElementById('scanResultContent');
-        let html = `<strong><i class="bi bi-search"></i> Curriculum Scan:</strong> ${data.total_gaps} gap(s) found.<br>${data.suggestion || ''}`;
+        let html = `<strong><x-ui.icon name="search" /> Curriculum Scan:</strong> ${data.total_gaps} gap(s) found.<br>${data.suggestion || ''}`;
         if (data.gaps && data.gaps.length) {
             html += '<ul class="mt-2 mb-0">';
             data.gaps.slice(0, 10).forEach(g => {
@@ -586,7 +582,7 @@ function scanCurriculum() {
         clearTimeout(timeout);
         btn.dataset.scanning = '';
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-search"></i> Scan Curriculum Gaps';
+        btn.innerHTML = '<x-ui.icon name="search" /> Scan Curriculum Gaps';
     });
 }
 
@@ -604,7 +600,7 @@ function verifyProvider(id, url, btn) {
 
     btn.dataset.verifying = '1';
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4"></span>';
 
     fetch(url, {
         method: 'POST',
@@ -634,15 +630,16 @@ function verifyProvider(id, url, btn) {
         delete _verifyControllers[id];
         btn.dataset.verifying = '';
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+        btn.innerHTML = '<x-ui.icon name="rotate-cw" />';
     });
 }
 
-// Auto-reopen Add Provider modal if there were validation errors
+// Auto-reopen Add Provider modal if there were validation errors.
+// TODO(phase-5): migrate this modal to Alpine.js; Bootstrap JS is no longer loaded.
 @if($errors->any())
 document.addEventListener('DOMContentLoaded', function () {
-    var modal = new bootstrap.Modal(document.getElementById('addProviderModal'));
-    modal.show();
+    if (!window.bootstrap || !window.bootstrap.Modal) return;
+    new window.bootstrap.Modal(document.getElementById('addProviderModal')).show();
 });
 @endif
 </script>

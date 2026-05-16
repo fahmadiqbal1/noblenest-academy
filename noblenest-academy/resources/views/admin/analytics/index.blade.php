@@ -1,52 +1,52 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="text-primary mb-0"><i class="bi bi-bar-chart-line"></i> Curriculum Analytics</h1>
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-[var(--color-primary)] mb-0"><x-ui.icon name="bar-chart" /> Curriculum Analytics</h1>
         <form method="POST" action="{{ route('admin.analytics.reportEmail') }}">
             @csrf
-            <button class="btn btn-outline-primary btn-sm"><i class="bi bi-envelope"></i> Email Monthly Report</button>
+            <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm"><x-ui.icon name="mail" /> Email Monthly Report</button>
         </form>
     </div>
 
     @if(session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800">{{ session('status') }}</div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800">{{ session('error') }}</div>
     @endif
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary shadow-sm">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold">{{ $totalSkills }}</div>
-                    <div class="small">Total Skills / Domains</div>
+    <div class="flex flex-wrap gap-3 mb-4">
+        <div class="md:w-3/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-[var(--color-primary)]">
+                <div class="p-5 text-center">
+                    <div class="text-4xl font-bold">{{ $totalSkills }}</div>
+                    <div class="text-sm">Total Skills / Domains</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success shadow-sm">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold">{{ $totalActivities }}</div>
-                    <div class="small">Total Activities</div>
+        <div class="md:w-3/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-emerald-600">
+                <div class="p-5 text-center">
+                    <div class="text-4xl font-bold">{{ $totalActivities }}</div>
+                    <div class="text-sm">Total Activities</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-info shadow-sm">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold">{{ $monthlyCompletions->sum('completions') }}</div>
-                    <div class="small">Total Completions</div>
+        <div class="md:w-3/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-sky-600">
+                <div class="p-5 text-center">
+                    <div class="text-4xl font-bold">{{ $monthlyCompletions->sum('completions') }}</div>
+                    <div class="text-sm">Total Completions</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning shadow-sm">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold">{{ $coverage ? collect($coverage)->where('count', '<', 2)->count() : 0 }}</div>
-                    <div class="small">Low Coverage Skills</div>
+        <div class="md:w-3/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm text-white bg-amber-600">
+                <div class="p-5 text-center">
+                    <div class="text-4xl font-bold">{{ $coverage ? collect($coverage)->where('count', '<', 2)->count() : 0 }}</div>
+                    <div class="text-sm">Low Coverage Skills</div>
                 </div>
             </div>
         </div>
@@ -55,29 +55,29 @@
     {{-- Coverage Alerts --}}
     @foreach($coverage as $row)
         @if($row['count'] < 2)
-            <div class="alert alert-warning py-2 mb-2">
+            <div class="flex items-start gap-3 p-4 rounded-lg border bg-amber-50 border-amber-200 text-amber-800 py-2 mb-2">
                 <strong>Low coverage:</strong> Skill <b>{{ $row['skill'] }}</b> has only {{ $row['count'] }} activities.
-                <a href="{{ route('admin.activities.create') }}" class="btn btn-sm btn-outline-primary ms-2">Add Activity</a>
+                <a href="{{ route('admin.activities.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white ms-2">Add Activity</a>
             </div>
         @endif
     @endforeach
 
-    <div class="row g-4 mt-2">
+    <div class="flex flex-wrap gap-4 mt-2">
         {{-- Coverage Chart --}}
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold"><i class="bi bi-graph-up"></i> Activities per Skill</div>
-                <div class="card-body">
+        <div class="lg:w-8/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-200 font-semibold font-bold"><x-ui.icon name="trending-up" /> Activities per Skill</div>
+                <div class="p-5">
                     <canvas id="coverageChart" height="100"></canvas>
                 </div>
             </div>
         </div>
 
         {{-- Monthly Completions --}}
-        <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold"><i class="bi bi-calendar-check"></i> Monthly Completions</div>
-                <div class="card-body">
+        <div class="lg:w-4/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div class="px-5 py-3 border-b border-gray-200 font-semibold font-bold"><x-ui.icon name="clipboard-check" /> Monthly Completions</div>
+                <div class="p-5">
                     <canvas id="completionsChart" height="200"></canvas>
                 </div>
             </div>
@@ -85,11 +85,11 @@
     </div>
 
     {{-- Coverage Table --}}
-    <div class="card shadow-sm mt-4">
-        <div class="card-header fw-bold"><i class="bi bi-table"></i> Skill Coverage Detail</div>
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm mt-4">
+        <div class="px-5 py-3 border-b border-gray-200 font-semibold font-bold"><x-ui.icon name="table" /> Skill Coverage Detail</div>
+        <div class="p-5 p-0">
+            <table class="w-full text-sm border-collapse table-hover-tw mb-0">
+                <thead class="bg-gray-50">
                     <tr>
                         <th>Skill / Domain</th>
                         <th>Activities</th>
@@ -101,20 +101,20 @@
                     @forelse($coverage as $row)
                     <tr>
                         <td>{{ $row['skill'] }}</td>
-                        <td><span class="badge bg-primary">{{ $row['count'] }}</span></td>
+                        <td><span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]">{{ $row['count'] }}</span></td>
                         <td>{{ $row['age_min'] ?? '?' }}–{{ $row['age_max'] ?? '?' }}</td>
                         <td>
                             @if($row['count'] < 2)
-                                <span class="badge bg-warning text-dark">Low</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-600 text-gray-900">Low</span>
                             @elseif($row['count'] < 5)
-                                <span class="badge bg-info text-dark">Fair</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-600 text-gray-900">Fair</span>
                             @else
-                                <span class="badge bg-success">Good</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-600">Good</span>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="text-center text-muted py-4">No data yet. Add activities to see coverage.</td></tr>
+                    <tr><td colspan="4" class="text-center text-[var(--color-text-muted)] py-4">No data yet. Add activities to see coverage.</td></tr>
                     @endforelse
                 </tbody>
             </table>

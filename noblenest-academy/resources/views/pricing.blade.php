@@ -163,7 +163,7 @@
     <table class="w-full text-sm">
       <thead>
         <tr class="border-b-[2px] border-[var(--color-border)]">
-          <th class="text-start p-4 font-bold text-[var(--color-text)]">Feature</th>
+          <th class="text-left p-4 font-bold text-[var(--color-text)]">Feature</th>
           <th class="p-4 font-bold text-[var(--color-text)] text-center">Free</th>
           <th class="p-4 font-bold text-[var(--color-brand-600)] text-center">Monthly</th>
           <th class="p-4 font-bold text-emerald-600 text-center">Annual</th>
@@ -217,13 +217,13 @@
     <div class="border-[2px] border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden">
       <button
         type="button"
-        class="w-full flex items-center justify-between gap-4 p-4 text-start font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-strong)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-[-2px]"
+        class="w-full flex items-center justify-between gap-4 p-4 text-left font-semibold text-[var(--color-text)] hover:bg-[var(--color-surface-strong)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-[-2px]"
         @click="open = open === {{ $i }} ? null : {{ $i }}"
         :aria-expanded="open === {{ $i }}"
         aria-controls="faq-{{ $i }}"
       >
         {{ $faq['q'] }}
-        <x-ui.icon name="chevron-down" class="w-5 h-5 shrink-0 text-[var(--color-text-muted)] transition-transform duration-[var(--duration-base)]" :class="open === {{ $i }} ? 'rotate-180' : ''" />
+        <x-ui.icon name="chevron-down" class="w-5 h-5 shrink-0 text-[var(--color-text-muted)] transition-transform duration-[var(--duration-base)]" x-bind:class="open === {{ $i }} ? 'rotate-180' : ''" />
       </button>
       <div id="faq-{{ $i }}" x-show="open === {{ $i }}" x-collapse class="px-4 pb-4 text-sm text-[var(--color-text-muted)]">
         {{ $faq['a'] }}

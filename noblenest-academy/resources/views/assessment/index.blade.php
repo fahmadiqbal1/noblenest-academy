@@ -1,52 +1,52 @@
-@extends('layouts.app')
+@extends('layouts.student')
 @section('meta_title', $child->name . ''s Learning Assessment')
 
 @section('content')
 <div class="container py-5" style="max-width:860px">
 
-    <div class="d-flex align-items-center gap-3 mb-4">
-        <a href="{{ route('parent.child', $child) }}" class="btn btn-outline-secondary btn-sm rounded-pill">
-            <i class="bi bi-arrow-left"></i> Back
+    <div class="flex items-center gap-3 mb-4">
+        <a href="{{ route('parent.child', $child) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 text-sm rounded-full">
+            <x-ui.icon name="arrow-left" /> Back
         </a>
         <div>
-            <h1 class="h4 fw-bold mb-0">{{ $child->name }}'s Learning Assessment</h1>
-            <p class="text-muted small mb-0">{{ $child->age_display }} · Personalised path based on activity history</p>
+            <h1 class="h4 font-bold mb-0">{{ $child->name }}'s Learning Assessment</h1>
+            <p class="text-[var(--color-text-muted)] text-sm mb-0">{{ $child->age_display }} · Personalised path based on activity history</p>
         </div>
     </div>
 
     {{-- Progress Overview --}}
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body text-center py-4">
+    <div class="flex flex-wrap gap-3 mb-4">
+        <div class="md:w-4/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
+                <div class="p-5 text-center py-4">
                     <div style="font-size:2.5rem;font-weight:800;color:#7C3AED">{{ $summary['pct'] }}%</div>
-                    <div class="text-muted small fw-semibold">Curriculum Coverage</div>
-                    <div class="progress mt-2" style="height:6px">
-                        <div class="progress-bar" style="width:{{ $summary['pct'] }}%;background:#7C3AED"></div>
+                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">Curriculum Coverage</div>
+                    <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mt-2" style="height:6px">
+                        <div class="h-full bg-violet-600 transition-all" style="width:{{ $summary['pct'] }}%;background:#7C3AED"></div>
                     </div>
-                    <div class="text-muted" style="font-size:0.72rem;margin-top:4px">
+                    <div class="text-[var(--color-text-muted)]" style="font-size:0.72rem;margin-top:4px">
                         {{ $summary['completed'] }} / {{ $summary['total'] }} activities
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body text-center py-4">
+        <div class="md:w-4/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
+                <div class="p-5 text-center py-4">
                     <div style="font-size:2.5rem;font-weight:800;color:#f59e0b">🔥 {{ $summary['streak'] }}</div>
-                    <div class="text-muted small fw-semibold">Day Streak</div>
+                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">Day Streak</div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body text-center py-4">
+        <div class="md:w-4/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
+                <div class="p-5 text-center py-4">
                     <div style="font-size:2.5rem;font-weight:800;color:#7c3aed">{{ count($summary['gaps']) }}</div>
-                    <div class="text-muted small fw-semibold">Subject Gaps</div>
+                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">Subject Gaps</div>
                     @if(!empty($summary['gaps']))
                         <div class="mt-2">
                             @foreach($summary['gaps'] as $gap)
-                                <span class="badge bg-warning-subtle text-warning rounded-pill me-1">{{ ucfirst($gap) }}</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-600 me-1">{{ ucfirst($gap) }}</span>
                             @endforeach
                         </div>
                     @endif
@@ -55,24 +55,24 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="flex flex-wrap gap-4">
         {{-- Subject Breakdown --}}
-        <div class="col-md-5">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">Subject Breakdown</h6>
+        <div class="md:w-5/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
+                <div class="p-5 p-4">
+                    <h6 class="font-bold mb-3">Subject Breakdown</h6>
                     @if(empty($summary['subject_breakdown']))
-                        <p class="text-muted small">No completed activities yet.</p>
+                        <p class="text-[var(--color-text-muted)] text-sm">No completed activities yet.</p>
                     @else
                         @foreach($summary['subject_breakdown'] as $subject => $count)
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="small fw-semibold">{{ ucfirst($subject) }}</span>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress" style="width:120px;height:8px">
-                                        <div class="progress-bar bg-info"
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-semibold">{{ ucfirst($subject) }}</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden" style="width:120px;height:8px">
+                                        <div class="h-full bg-violet-600 transition-all bg-sky-600"
                                              style="width:{{ min(100, $count * 10) }}%"></div>
                                     </div>
-                                    <span class="text-muted" style="font-size:0.72rem;width:20px">{{ $count }}</span>
+                                    <span class="text-[var(--color-text-muted)]" style="font-size:0.72rem;width:20px">{{ $count }}</span>
                                 </div>
                             </div>
                         @endforeach
@@ -82,21 +82,21 @@
         </div>
 
         {{-- Today's Recommended Path --}}
-        <div class="col-md-7">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">Recommended for Today</h6>
+        <div class="md:w-7/12">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0">
+                <div class="p-5 p-4">
+                    <h6 class="font-bold mb-3">Recommended for Today</h6>
                     @if($daily->isEmpty())
-                        <p class="text-muted small">No activities to recommend — all done! 🎉</p>
+                        <p class="text-[var(--color-text-muted)] text-sm">No activities to recommend — all done! 🎉</p>
                     @else
-                        <div class="row g-2">
+                        <div class="flex flex-wrap gap-2">
                             @foreach($daily as $activity)
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center gap-2 bg-light rounded-3 p-2">
+                                <div class="w-6/12">
+                                    <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
                                         <span style="font-size:1.4rem">{{ $activity->emoji ?? '📚' }}</span>
                                         <div>
-                                            <div class="fw-semibold" style="font-size:0.8rem;line-height:1.2">{{ $activity->title }}</div>
-                                            <div class="text-muted" style="font-size:0.65rem">{{ ucfirst($activity->subject ?? '') }}</div>
+                                            <div class="font-semibold" style="font-size:0.8rem;line-height:1.2">{{ $activity->title }}</div>
+                                            <div class="text-[var(--color-text-muted)]" style="font-size:0.65rem">{{ ucfirst($activity->subject ?? '') }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -111,14 +111,14 @@
     {{-- Next Milestones --}}
     @if($next->isNotEmpty())
         <div class="mt-4">
-            <h6 class="fw-bold mb-3">Upcoming Milestones</h6>
-            <div class="row g-3">
+            <h6 class="font-bold mb-3">Upcoming Milestones</h6>
+            <div class="flex flex-wrap gap-3">
                 @foreach($next as $milestone)
-                    <div class="col-md-4">
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-body p-3">
-                                <div class="fw-semibold small">{{ $milestone->name }}</div>
-                                <div class="text-muted" style="font-size:0.72rem;margin-top:2px">
+                    <div class="md:w-4/12">
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0">
+                            <div class="p-5 p-3">
+                                <div class="font-semibold text-sm">{{ $milestone->name }}</div>
+                                <div class="text-[var(--color-text-muted)]" style="font-size:0.72rem;margin-top:2px">
                                     {{ ucfirst($milestone->domain ?? '') }} · ~{{ $milestone->typical_age_months }}m
                                 </div>
                             </div>

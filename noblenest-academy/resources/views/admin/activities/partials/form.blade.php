@@ -204,7 +204,7 @@ $objectivesText = is_array($activity->learning_objectives ?? null)
                             class="sr-only peer"
                             @checked(old('difficulty', $activity->difficulty ?? 'easy') === $d)
                         />
-                        <span class="px-4 py-1.5 rounded-full text-sm font-bold border-2 transition-all peer-checked:border-current peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-brand-600)] {{ $tc }} {{ $bg }} {{ $bc }} peer-not-checked:border-transparent">
+                        <span class="px-4 py-1.5 rounded-full text-sm font-bold border-2 transition-all peer-checked:border-current peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-brand-600)] {{ $tc }} $bg $bc peer-not-checked:border-transparent">
                             {{ ucfirst($d) }}
                         </span>
                     </label>

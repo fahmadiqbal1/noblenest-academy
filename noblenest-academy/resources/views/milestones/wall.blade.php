@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.parent')
 @section('meta_title', 'Milestone Wall – NobleNest Community')
 @section('meta_description', 'Celebrate children's milestones together. A community wall of learning achievements from families worldwide.')
 
@@ -6,19 +6,19 @@
 <div class="container py-5" style="max-width:900px">
     <div class="text-center mb-5">
         <div style="font-size:3rem;line-height:1">🏆</div>
-        <h1 class="fw-bold mt-2 mb-1">Milestone Wall</h1>
-        <p class="text-muted">Celebrating learning achievements from families around the world.</p>
+        <h1 class="font-bold mt-2 mb-1">Milestone Wall</h1>
+        <p class="text-[var(--color-text-muted)]">Celebrating learning achievements from families around the world.</p>
     </div>
 
     {{-- Filter bar --}}
-    <div class="d-flex flex-wrap gap-2 justify-content-center mb-5">
+    <div class="flex flex-wrap gap-2 justify-center mb-5">
         <a href="{{ route('milestones.wall') }}"
-           class="badge rounded-pill px-3 py-2 text-decoration-none fs-6 @if(!request('domain')) bg-dark text-white @else bg-light text-dark @endif">
+           class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium px-3 py-2 no-underline text-base @if(!request('domain')) bg-gray-900 text-white @else bg-gray-50 text-gray-900 @endif">
             All
         </a>
         @foreach(['literacy','numeracy','creativity','social','motor','stem'] as $domain)
             <a href="{{ route('milestones.wall', ['domain' => $domain]) }}"
-               class="badge rounded-pill px-3 py-2 text-decoration-none fs-6 @if(request('domain') === $domain) bg-dark text-white @else bg-light text-dark @endif">
+               class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium px-3 py-2 no-underline text-base @if(request('domain') === $domain) bg-gray-900 text-white @else bg-gray-50 text-gray-900 @endif">
                 {{ ucfirst($domain) }}
             </a>
         @endforeach
@@ -27,24 +27,24 @@
     {{-- Wall grid --}}
     @if($achievements->isEmpty())
         <div class="text-center py-5">
-            <p class="text-muted">No milestones yet. Be the first to reach one!</p>
+            <p class="text-[var(--color-text-muted)]">No milestones yet. Be the first to reach one!</p>
         </div>
     @else
-        <div class="row g-3">
+        <div class="flex flex-wrap gap-3">
             @foreach($achievements as $achievement)
                 @php
                     $milestone = $achievement->achievable;
                     $child = $achievement->child;
                 @endphp
                 @if(!$milestone || !$child) @continue @endif
-                <div class="col-sm-6 col-md-4">
-                    <div class="milestone-card h-100">
+                <div class="sm:w-6/12 md:w-4/12">
+                    <div class="milestone-card h-full">
                         <div class="milestone-card__confetti">🎉</div>
                         <div class="milestone-card__child">{{ $child->name }}</div>
                         <div class="milestone-card__age">{{ $child->age_display }}</div>
                         <div class="milestone-card__milestone">{{ $milestone->name }}</div>
                         @if($milestone->domain)
-                            <span class="badge bg-info-subtle text-info rounded-pill mt-1" style="font-size:0.65rem">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-600 mt-1" style="font-size:0.65rem">
                                 {{ ucfirst($milestone->domain) }}
                             </span>
                         @endif
@@ -58,9 +58,9 @@
 
     {{-- Share CTA --}}
     @auth
-        <div class="mt-5 p-4 rounded-4 text-center bg-light border">
-            <p class="fw-bold mb-2">Has your child reached a milestone? Share it!</p>
-            <a href="{{ route('parent.milestones') }}" class="btn btn-dark rounded-pill px-4">
+        <div class="mt-5 p-4 rounded-xl text-center bg-gray-50 border">
+            <p class="font-bold mb-2">Has your child reached a milestone? Share it!</p>
+            <a href="{{ route('parent.milestones') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-900 text-white hover:bg-gray-800 rounded-full">
                 Track Milestones
             </a>
         </div>

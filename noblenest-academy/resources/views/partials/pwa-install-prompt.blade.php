@@ -1,13 +1,13 @@
 {{-- PWA Install Prompt + Service Worker Registration --}}
-<div id="pwa-install-banner" class="pwa-banner d-none">
+<div id="pwa-install-banner" class="pwa-banner hidden">
     <div class="pwa-banner__inner">
-        <img src="{{ asset('brand/icon-72.png') }}" width="40" height="40" alt="NobleNest" class="rounded-2" onerror="this.style.display='none'">
+        <img src="{{ asset('brand/icon-72.png') }}" width="40" height="40" alt="NobleNest" class="rounded" onerror="this.style.display='none'">
         <div class="flex-grow-1">
             <div class="pwa-banner__title">Add NobleNest to Home Screen</div>
             <div class="pwa-banner__sub">One tap access, works offline</div>
         </div>
-        <button id="pwa-install-btn" class="btn btn-sm btn-dark rounded-pill px-3 fw-semibold">Install</button>
-        <button id="pwa-dismiss-btn" class="btn btn-sm btn-outline-secondary rounded-pill px-2" aria-label="Dismiss">✕</button>
+        <button id="pwa-install-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm bg-gray-900 text-white hover:bg-gray-800 rounded-full">Install</button>
+        <button id="pwa-dismiss-btn" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-100 rounded-full px-2" aria-label="Dismiss">✕</button>
     </div>
 </div>
 

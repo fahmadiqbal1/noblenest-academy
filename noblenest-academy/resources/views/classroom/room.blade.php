@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $session->title }} — Noble Nest Classroom</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    {{-- Self-hosted Tailwind v4 + design tokens. No Bootstrap, no bi-* icons. --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <style>
         body { background: #1a1a2e; color: #eee; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; margin: 0; overflow: hidden; }
         #room { display: flex; height: 100vh; flex-direction: column; }
@@ -38,26 +39,26 @@
 <div id="room">
     {{-- Top bar --}}
     <div id="topbar">
-        <div class="d-flex align-items-center gap-3">
-            <a href="/" class="text-decoration-none">
+        <div class="flex items-center gap-3">
+            <a href="/" class="no-underline">
                 <span style="background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;font-size:1.1rem">Noble Nest</span>
             </a>
             <div>
-                <span class="fw-semibold">{{ $session->title }}</span>
-                <span class="text-muted ms-2 small">{{ $session->course->title ?? '' }}</span>
+                <span class="font-semibold">{{ $session->title }}</span>
+                <span class="text-[var(--color-text-muted)] ms-2 text-sm">{{ $session->course->title ?? '' }}</span>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-3">
-            <span id="sessionStatus" class="badge bg-{{ $session->status === 'live' ? 'danger' : 'secondary' }}">
+        <div class="flex items-center gap-3">
+            <span id="sessionStatus" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $session->status === 'live' ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700' }}">
                 {{ strtoupper($session->status) }}
             </span>
-            <span class="text-muted small" id="sessionTimer">00:00</span>
-            <span class="badge bg-info" id="participantCount">0 in room</span>
+            <span class="text-[var(--color-text-muted)] text-sm" id="sessionTimer">00:00</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-600" id="participantCount">0 in room</span>
             @if($isTeacher)
-                <form method="POST" action="{{ route('teacher.sessions.end', $session) }}" class="d-inline">
+                <form method="POST" action="{{ route('teacher.sessions.end', $session) }}" class="inline">
                     @csrf
-                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('End the session for everyone?')">
-                        <i class="bi bi-stop-circle"></i> End Session
+                    <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white" onclick="return confirm('End the session for everyone?')">
+                        <x-ui.icon name="circle-stop" /> End Session
                     </button>
                 </form>
             @endif
@@ -72,51 +73,57 @@
                 <div class="video-tile" id="localTile">
                     <video id="localVideo" autoplay muted playsinline></video>
                     <div class="peer-label">
-                        <i class="bi bi-person-fill me-1"></i> You {{ $isTeacher ? '(Teacher)' : '' }}
+                        <x-ui.icon name="user" class="me-1" /> You {{ $isTeacher ? '(Teacher)' : '' }}
                     </div>
                 </div>
             </div>
             {{-- Controls --}}
             <div id="controls">
                 <button class="ctrl-btn active" id="btnMic" title="Mute/Unmute" onclick="toggleMic()">
-                    <i class="bi bi-mic-fill" id="micIcon"></i>
+                    <x-ui.icon name="mic" class="when-on" />
+                    <x-ui.icon name="mic-off" class="when-off" />
                 </button>
                 <button class="ctrl-btn active" id="btnCam" title="Camera on/off" onclick="toggleCam()">
-                    <i class="bi bi-camera-video-fill" id="camIcon"></i>
+                    <x-ui.icon name="video" class="when-on" />
+                    <x-ui.icon name="video-off" class="when-off" />
                 </button>
                 <button class="ctrl-btn inactive" id="btnScreen" title="Share screen" onclick="toggleScreen()">
-                    <i class="bi bi-display" id="screenIcon"></i>
+                    <x-ui.icon name="monitor" id="screenIcon" />
                 </button>
                 <button class="ctrl-btn inactive" id="btnChat" title="Chat" onclick="toggleSidebar()">
-                    <i class="bi bi-chat-dots"></i>
+                    <x-ui.icon name="message-circle" />
                 </button>
                 <button class="ctrl-btn" style="background:#e74c3c;color:white" title="Leave" onclick="leaveRoom()">
-                    <i class="bi bi-telephone-x-fill"></i>
+                    <x-ui.icon name="phone-off" />
                 </button>
             </div>
         </div>
 
         {{-- Sidebar: participants + chat --}}
-        <div id="sidebar">
-            <ul class="nav nav-tabs nav-fill" style="background:#16213e">
-                <li class="nav-item">
-                    <a class="nav-link active text-light small" data-bs-toggle="tab" href="#tabChat">Chat</a>
+        <div id="sidebar" x-data="{ tab: 'chat' }">
+            <ul class="flex border-b border-gray-200 flex-wrap" style="background:#16213e">
+                <li>
+                    <button type="button" @click="tab = 'chat'"
+                            :class="tab === 'chat' ? 'text-white font-semibold' : 'text-gray-300'"
+                            class="px-4 py-2 rounded-md hover:bg-white/10 text-sm font-medium">Chat</button>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-light small" data-bs-toggle="tab" href="#tabPeople">People</a>
+                <li>
+                    <button type="button" @click="tab = 'people'"
+                            :class="tab === 'people' ? 'text-white font-semibold' : 'text-gray-300'"
+                            class="px-4 py-2 rounded-md hover:bg-white/10 text-sm font-medium">People</button>
                 </li>
             </ul>
-            <div class="tab-content flex-grow-1 d-flex flex-column overflow-hidden">
-                <div class="tab-pane fade show active d-flex flex-column" id="tabChat" style="flex:1;overflow:hidden">
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <div x-show="tab === 'chat'" class="flex flex-col" id="tabChat" style="flex:1;overflow:hidden">
                     <div id="chatBox"></div>
-                    <form id="chatForm" class="p-2 border-top border-secondary" onsubmit="sendChat(event)">
-                        <div class="input-group input-group-sm">
-                            <input type="text" class="form-control bg-dark text-light border-secondary" id="chatInput" placeholder="Type a message…" autocomplete="off">
-                            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i></button>
+                    <form id="chatForm" class="p-2 border-t border-white/10" onsubmit="sendChat(event)">
+                        <div class="flex w-full items-stretch text-sm">
+                            <input type="text" class="block w-full px-3 py-2 rounded-l-md border border-gray-700 bg-gray-900 text-gray-200 focus:border-violet-500 focus:outline-none" id="chatInput" placeholder="Type a message…" autocomplete="off">
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-r-md font-semibold transition bg-violet-600 text-white hover:bg-violet-700 text-sm"><x-ui.icon name="send" /></button>
                         </div>
                     </form>
                 </div>
-                <div class="tab-pane fade" id="tabPeople" style="flex:1;overflow-y:auto">
+                <div x-show="tab === 'people'" id="tabPeople" style="flex:1;overflow-y:auto">
                     <div id="participantsList"></div>
                 </div>
             </div>
@@ -124,7 +131,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script>
 // ─── Peer identity ──────────────────────────────────────────────────────────
 const PEER_INFO = JSON.parse(atob('{{ $peerToken }}'));
@@ -148,10 +154,10 @@ async function startMedia() {
         // Camera/mic denied — show placeholder
         document.getElementById('localTile').innerHTML = `
             <div class="no-video">
-                <i class="bi bi-camera-video-off fs-1 d-block mb-2"></i>
-                <p class="small">${e.name === 'NotAllowedError' ? 'Camera/mic access denied' : 'No camera/mic found'}</p>
+                <x-ui.icon name="video-off" class="text-5xl block mb-2" />
+                <p class="text-sm">${e.name === 'NotAllowedError' ? 'Camera/mic access denied' : 'No camera/mic found'}</p>
             </div>
-            <div class="peer-label"><i class="bi bi-person-fill me-1"></i> You</div>`;
+            <div class="peer-label"><x-ui.icon name="user" class="me-1" /> You</div>`;
         micEnabled = false; camEnabled = false;
         updateControls();
     }
@@ -216,8 +222,8 @@ function updateControls() {
     document.getElementById('btnMic').className   = `ctrl-btn ${micEnabled ? 'active' : 'inactive'}`;
     document.getElementById('btnCam').className   = `ctrl-btn ${camEnabled ? 'active' : 'inactive'}`;
     document.getElementById('btnScreen').className = `ctrl-btn ${screenSharing ? 'active' : 'inactive'}`;
-    document.getElementById('micIcon').className  = `bi bi-mic${micEnabled ? '-fill' : '-mute-fill'}`;
-    document.getElementById('camIcon').className  = `bi bi-camera-video${camEnabled ? '-fill' : '-off'}`;
+    // Icon state is driven by CSS rules keyed off the parent's `.active`/`.inactive`
+    // class — see `.ctrl-btn .when-on / .when-off` in resources/css/app.css.
 }
 
 function toggleSidebar() {
@@ -301,7 +307,7 @@ function createPeerConnection(peerId, peerName) {
             tile = document.createElement('div');
             tile.className = 'video-tile';
             tile.id = 'peer-' + peerId;
-            tile.innerHTML = `<video autoplay playsinline></video><div class="peer-label"><i class="bi bi-person-fill me-1"></i>${escHtml(peerName)}</div>`;
+            tile.innerHTML = `<video autoplay playsinline></video><div class="peer-label"><x-ui.icon name="user" class="me-1" />${escHtml(peerName)}</div>`;
             document.getElementById('videoGrid').appendChild(tile);
         }
         tile.querySelector('video').srcObject = e.streams[0];
@@ -368,10 +374,10 @@ async function refreshParticipants() {
         const data = await r.json();
         const list = document.getElementById('participantsList');
         list.innerHTML = data.participants.map(p =>
-            `<div class="d-flex align-items-center gap-2 p-2 border-bottom border-secondary">
+            `<div class="flex items-center gap-2 p-2 border-b border-secondary">
                 <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${p.id}" style="width:28px;height:28px;border-radius:50%">
                 <span>${escHtml(p.name)}</span>
-                <span class="badge bg-${p.role==='teacher'?'warning text-dark':'info'} status-badge ms-auto">${p.role}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-${p.role==='teacher'?'warning text-dark':'info'} status-badge ms-auto">${p.role}</span>
             </div>`
         ).join('');
         document.getElementById('participantCount').textContent = data.participants.length + ' in room';

@@ -132,11 +132,11 @@
     {{-- Top bar --}}
     <div class="nn-vp-header">
         <a href="{{ $backUrl }}" class="nn-vp-back" aria-label="Back">
-            <i class="bi bi-arrow-left"></i>
+            <x-ui.icon name="arrow-left" />
         </a>
         <div class="nn-vp-header-title">{{ $activity->emoji ?? '🎬' }} {{ $activity->title }}</div>
         <span class="nn-vp-header-badge">
-            <i class="bi bi-play-circle-fill"></i> Video
+            <x-ui.icon name="circle-play" /> Video
         </span>
     </div>
 
@@ -204,7 +204,7 @@
 
     {{-- Info panel --}}
     <div class="nn-vp-info">
-        <div class="d-flex flex-wrap gap-2 mb-3">
+        <div class="flex flex-wrap gap-2 mb-3">
             @if($activity->subject)
             <span class="nn-vp-skill-chip" style="background:{{ $subjectColor }}22;border-color:{{ $subjectColor }}44;color:{{ $subjectColor }};">
                 {{ ucfirst($activity->subject) }}
@@ -231,7 +231,7 @@
         @endif
 
         @if($activity->skills_improved && count($activity->skills_improved))
-        <div class="d-flex flex-wrap gap-2 mb-4">
+        <div class="flex flex-wrap gap-2 mb-4">
             <span style="font-size:0.82rem;font-weight:700;color:rgba(255,255,255,0.55);me-1">🌟 Skills:</span>
             @foreach($activity->skills_improved as $skill)
             <span class="nn-vp-skill-chip">{{ ucwords(str_replace('_', ' ', $skill)) }}</span>
@@ -278,7 +278,7 @@
         </form>
         @else
         <a href="{{ route('activities.show', $activity) }}" class="nn-vp-complete-btn" style="background:linear-gradient(135deg,#7C3AED,#A78BFA);border-color:#7C3AED;">
-            <i class="bi bi-arrow-left" style="font-size:1.1rem;"></i>
+            <x-ui.icon name="arrow-left" style="font-size:1.1rem;" />
             Back to Activity Details
         </a>
         @endif

@@ -1,29 +1,29 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Users')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4">
 
     {{-- Header --}}
-    <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="flex items-center justify-between mb-4">
         <div>
-            <h2 class="fw-bold mb-0">Users</h2>
-            <small class="text-muted">Manage platform accounts and roles</small>
+            <h2 class="font-bold mb-0">Users</h2>
+            <small class="text-[var(--color-text-muted)]">Manage platform accounts and roles</small>
         </div>
     </div>
 
     {{-- Flash messages --}}
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800" role="alert">
             {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class=""></button>
         </div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800" role="alert">
             {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class=""></button>
         </div>
     @endif
 
@@ -31,19 +31,25 @@
     @php
         $tabs = ['', 'Admin', 'Teacher', 'Parent', 'Student'];
         $tabLabels = ['' => 'All', 'Admin' => 'Admins', 'Teacher' => 'Teachers', 'Parent' => 'Parents', 'Student' => 'Students'];
-        $tabColors  = ['' => 'secondary', 'Admin' => 'danger', 'Teacher' => 'primary', 'Parent' => 'success', 'Student' => 'warning'];
+        $tabColors  = [
+            ''        => 'bg-gray-100 text-gray-700',
+            'Admin'   => 'bg-red-100 text-red-700',
+            'Teacher' => 'bg-violet-100 text-violet-700',
+            'Parent'  => 'bg-emerald-100 text-emerald-700',
+            'Student' => 'bg-amber-100 text-amber-700',
+        ];
         $currentRole = $roleFilter ?? '';
     @endphp
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white pb-0 pt-3 px-4">
-            <ul class="nav nav-tabs border-0">
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 mb-4">
+        <div class="px-5 py-3 border-b border-gray-200 font-semibold bg-white pb-0 pt-3 px-4">
+            <ul class="flex border-b border-gray-200 flex-wrap">
                 @foreach($tabs as $tab)
-                    <li class="nav-item">
-                        <a class="nav-link {{ $currentRole === $tab ? 'active fw-semibold' : 'text-muted' }}"
+                    <li class="">
+                        <a class="px-4 py-2 rounded-md hover:bg-gray-50 text-sm font-medium {{ $currentRole === $tab ? 'font-semibold text-[var(--color-text)]' : 'text-[var(--color-text-muted)]' }}"
                            href="{{ route('admin.users.index', array_filter(['role' => $tab ?: null, 'q' => request('q')])) }}">
                             {{ $tabLabels[$tab] }}
-                            <span class="badge bg-{{ $tabColors[$tab] }} bg-opacity-10 text-{{ $tabColors[$tab] }} ms-1">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $tabColors[$tab] }} ms-1">
                                 {{ $tab ? ($roleCounts[$tab] ?? 0) : $users->total() }}
                             </span>
                         </a>
@@ -52,34 +58,34 @@
             </ul>
         </div>
 
-        <div class="card-body px-4 pt-3">
+        <div class="p-5 px-4 pt-3">
             {{-- Search --}}
             <form method="GET" action="{{ route('admin.users.index') }}" class="mb-3">
                 @if($currentRole)
                     <input type="hidden" name="role" value="{{ $currentRole }}">
                 @endif
-                <div class="input-group" style="max-width:380px">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <div class="flex w-full items-stretch" style="max-width:380px">
+                    <span class="inline-flex items-center px-3 bg-gray-50 border border-gray-300 bg-white border-end-0"><x-ui.icon name="search" class="text-[var(--color-text-muted)]" /></span>
                     <input type="text" name="q" value="{{ request('q') }}"
-                           class="form-control border-start-0 ps-0"
+                           class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 border-start-0 ps-0"
                            placeholder="Search by name or email…">
                     @if(request('q'))
                         <a href="{{ route('admin.users.index', array_filter(['role' => $currentRole ?: null])) }}"
-                           class="btn btn-outline-secondary">✕</a>
+                           class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100">✕</a>
                     @endif
                 </div>
             </form>
 
             {{-- Table --}}
             @if($users->isEmpty())
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-people fs-1 d-block mb-2"></i>
+                <div class="text-center py-5 text-[var(--color-text-muted)]">
+                    <x-ui.icon name="users" class="text-5xl block mb-2" />
                     No users found.
                 </div>
             @else
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small text-uppercase text-muted">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse table-hover-tw align-middle mb-0">
+                        <thead class="bg-gray-50 text-sm uppercase text-[var(--color-text-muted)]">
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
@@ -94,47 +100,47 @@
                             @foreach($users as $user)
                                 @php
                                     $roleColor = match($user->role) {
-                                        'Admin'   => 'danger',
-                                        'Teacher' => 'primary',
-                                        'Parent'  => 'success',
-                                        'Student' => 'warning',
-                                        default   => 'secondary',
+                                        'Admin'   => 'bg-red-100 text-red-700',
+                                        'Teacher' => 'bg-violet-100 text-violet-700',
+                                        'Parent'  => 'bg-emerald-100 text-emerald-700',
+                                        'Student' => 'bg-amber-100 text-amber-700',
+                                        default   => 'bg-gray-100 text-gray-700',
                                     };
                                     $initials = strtoupper(substr($user->name, 0, 1)) . strtoupper(substr(strrchr($user->name, ' ') ?: '', 1, 1));
                                 @endphp
                                 <tr>
                                     <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle bg-{{ $roleColor }} bg-opacity-10 text-{{ $roleColor }} fw-bold d-flex align-items-center justify-content-center"
+                                        <div class="flex items-center gap-2">
+                                            <div class="rounded-full {{ $roleColor }} font-bold flex items-center justify-center"
                                                  style="width:36px;height:36px;font-size:.8rem;flex-shrink:0">
                                                 {{ $initials }}
                                             </div>
-                                            <span class="fw-medium">{{ $user->name }}</span>
+                                            <span class="font-medium">{{ $user->name }}</span>
                                         </div>
                                     </td>
-                                    <td class="text-muted small">{{ $user->email }}</td>
+                                    <td class="text-[var(--color-text-muted)] text-sm">{{ $user->email }}</td>
                                     <td>
-                                        <span class="badge rounded-pill bg-{{ $roleColor }} bg-opacity-10 text-{{ $roleColor }} fw-semibold px-3 py-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $roleColor }} font-semibold px-3 py-2">
                                             {{ $user->role }}
                                         </span>
                                     </td>
                                     <td>
                                         @if($user->email_verified_at)
-                                            <span class="text-success" title="{{ $user->email_verified_at->format('d M Y') }}">
-                                                <i class="bi bi-patch-check-fill"></i>
+                                            <span class="text-emerald-600" title="{{ $user->email_verified_at->format('d M Y') }}">
+                                                <x-ui.icon name="badge-check" />
                                             </span>
                                         @else
-                                            <span class="text-muted"><i class="bi bi-patch-check"></i></span>
+                                            <span class="text-[var(--color-text-muted)]"><x-ui.icon name="badge-check" /></span>
                                         @endif
                                     </td>
-                                    <td class="text-muted small">{{ strtoupper($user->preferred_language ?? '—') }}</td>
-                                    <td class="text-muted small">{{ $user->created_at->format('d M Y') }}</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                                data-bs-toggle="dropdown">
+                                    <td class="text-[var(--color-text-muted)] text-sm">{{ strtoupper($user->preferred_language ?? '—') }}</td>
+                                    <td class="text-[var(--color-text-muted)] text-sm">{{ $user->created_at->format('d M Y') }}</td>
+                                    <td class="text-right">
+                                        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+>
                                             Change Role
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <ul class="absolute z-10 mt-2 min-w-[10rem] bg-white border border-gray-200 rounded-lg shadow-lg py-1 hidden dropdown-menu-end shadow-sm">
                                             @foreach(['Admin','Teacher','Parent','Student'] as $role)
                                                 @if($role !== $user->role)
                                                     <li>
@@ -144,7 +150,7 @@
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="role" value="{{ $role }}">
-                                                            <button type="submit" class="dropdown-item">
+                                                            <button type="submit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                                 {{ $role }}
                                                             </button>
                                                         </form>
@@ -161,7 +167,7 @@
 
                 {{-- Pagination --}}
                 @if($users->hasPages())
-                    <div class="d-flex justify-content-end mt-3">
+                    <div class="flex justify-end mt-3">
                         {{ $users->withQueryString()->links() }}
                     </div>
                 @endif

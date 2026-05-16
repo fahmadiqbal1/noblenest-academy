@@ -25,21 +25,23 @@ Route::post('/ai/assistant/message', [\App\Http\Controllers\ChatController::clas
     ->middleware('throttle:30,1')
     ->name('ai.assistant.message');
 
-// Admin — Course management (basic CRUD)
+// Phase 1 — admin-only x-ui.* style guide (visual regression baseline).
+Route::get('/_styleguide', fn () => view('_styleguide'))
+    ->middleware(['auth', 'role:Admin'])
+    ->name('admin.styleguide');
+
+// Admin — content + analytics CRUD (Phase 5: merged from 3 adjacent groups into 1).
 Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Courses / modules / quizzes / questions
     Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class);
     Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
     Route::resource('quizzes', \App\Http\Controllers\Admin\QuizController::class)->except(['show']);
     Route::resource('quizzes.questions', \App\Http\Controllers\Admin\QuestionController::class)->except(['index', 'show']);
-});
 
-// Admin Curriculum Explorer
-Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Curriculum explorer
     Route::get('curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'index'])->name('curriculum');
-});
 
-// Add admin analytics routes
-Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Analytics
     Route::get('analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
     Route::post('analytics/report', [\App\Http\Controllers\Admin\AnalyticsController::class, 'reportEmail'])->name('analytics.reportEmail');
     Route::get('analytics/most-liked', [\App\Http\Controllers\Admin\AnalyticsController::class, 'mostLiked'])->name('analytics.mostLiked');
@@ -105,10 +107,10 @@ Route::middleware(['auth', 'subscription.active'])->group(function () {
     Route::get('/activities/{activity}/slides', [\App\Http\Controllers\ActivityController::class, 'showSlides'])->name('activities.slides');
 });
 
-// Payment routes
+// Payment routes (Phase 4: subscriptions only — PayPal removed)
 Route::middleware(['auth'])->group(function () {
     Route::post('/checkout/stripe', [\App\Http\Controllers\PaymentController::class, 'stripeCheckout'])->name('checkout.stripe');
-    Route::post('/checkout/paypal', [\App\Http\Controllers\PaymentController::class, 'paypalCheckout'])->name('checkout.paypal');
+    Route::post('/billing/portal', [\App\Http\Controllers\PaymentController::class, 'stripeBillingPortal'])->name('billing.portal');
     Route::get('/payment/success/{provider}', [\App\Http\Controllers\PaymentController::class, 'paymentSuccess'])->name('payment.success');
     Route::get('/payment/cancel/{provider}', [\App\Http\Controllers\PaymentController::class, 'paymentCancel'])->name('payment.cancel');
 });
@@ -355,6 +357,9 @@ Route::middleware(['auth'])->prefix('privacy')->name('privacy.')->group(function
     Route::get('/', [\App\Http\Controllers\PrivacyController::class, 'index'])->name('dashboard');
     Route::get('export', [\App\Http\Controllers\PrivacyController::class, 'exportData'])->name('export');
     Route::delete('delete', [\App\Http\Controllers\PrivacyController::class, 'deleteData'])->name('delete');
+    // Phase 5: under-13 Parental Consent gate (COPPA / GDPR-K).
+    Route::get('parental-consent/{child}',  [\App\Http\Controllers\PrivacyController::class, 'showParentalConsent'])->name('parental-consent');
+    Route::post('parental-consent/{child}', [\App\Http\Controllers\PrivacyController::class, 'recordParentalConsent'])->name('parental-consent.store');
 });
 
 // ===========================================================================

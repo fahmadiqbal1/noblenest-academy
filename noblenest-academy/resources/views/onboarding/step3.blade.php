@@ -87,10 +87,7 @@
                 >
                 <label
                   for="goal_{{ $key }}"
-                  class="flex items-center gap-2 w-full rounded-[var(--radius-sm)] border-2 border-[var(--color-border)] bg-[var(--color-surface-strong)] px-3 py-3 cursor-pointer select-none transition-all duration-[var(--duration-fast)]
-                         hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40
-                         peer-checked:border-[var(--color-brand-500)] peer-checked:bg-[var(--color-brand-50)] peer-checked:shadow-sm
-                         peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--color-brand-600)] peer-focus-visible:outline-offset-2"
+                  class="flex items-center gap-2 w-full rounded-[var(--radius-sm)] border-2 border-[var(--color-border)] bg-[var(--color-surface-strong)] px-3 py-3 cursor-pointer select-none transition-all duration-[var(--duration-fast)] hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40 peer-checked:border-[var(--color-brand-500)] peer-checked:bg-[var(--color-brand-50)] peer-checked:shadow-sm peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--color-brand-600)] peer-focus-visible:outline-offset-2"
                 >
                   <span class="text-lg" aria-hidden="true">{{ $goal['emoji'] }}</span>
                   <span class="text-xs font-semibold text-[var(--color-text)]">{{ $goal['label'] }}</span>

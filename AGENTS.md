@@ -1,3 +1,9 @@
+<!--
+    AGENTS.md — auto-generated mirror of the gitnexus block in CLAUDE.md.
+    Treat CLAUDE.md as canonical; this file exists for tooling that looks for
+    AGENTS.md by name. Noted as a delta in docs/launch/audit.md (Phase 1).
+-->
+
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 

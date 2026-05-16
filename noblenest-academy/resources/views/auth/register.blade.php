@@ -85,11 +85,8 @@
             @click="role = '{{ $roleKey }}'"
             @keydown.enter="role = '{{ $roleKey }}'"
             @keydown.space.prevent="role = '{{ $roleKey }}'"
-            class="relative flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border-2 p-3 text-center cursor-pointer select-none transition-all duration-[var(--duration-fast)]
-                   focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
-            :class="role === '{{ $roleKey }}'
-              ? 'border-[var(--color-brand-500)] bg-[var(--color-brand-50)] shadow-sm -translate-y-0.5'
-              : 'border-[var(--color-border)] bg-[var(--color-surface-strong)] hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40'"
+            class="relative flex flex-col items-center gap-1 rounded-[var(--radius-sm)] border-2 p-3 text-center cursor-pointer select-none transition-all duration-[var(--duration-fast)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
+            :class="role === '{{ $roleKey }}' ? 'border-[var(--color-brand-500)] bg-[var(--color-brand-50)] shadow-sm -translate-y-0.5' : 'border-[var(--color-border)] bg-[var(--color-surface-strong)] hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40'"
           >
             <x-ui.icon
               name="{{ $roleData['icon'] }}"
@@ -189,9 +186,9 @@
           >
           <label for="terms" class="text-sm text-[var(--color-text-muted)] cursor-pointer select-none leading-snug">
             I agree to the
-            <a href="{{ route('noble.terms') }}" target="_blank" class="font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">Terms of Service</a>
+            <a href="{{ url('/terms') }}" target="_blank" class="font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">Terms of Service</a>
             and
-            <a href="{{ route('noble.privacy') }}" target="_blank" class="font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">Privacy Policy</a>.
+            <a href="{{ url('/privacy') }}" target="_blank" class="font-semibold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">Privacy Policy</a>.
           </label>
         </div>
 
@@ -200,8 +197,8 @@
           size="lg"
           type="submit"
           class="w-full"
-          :loading="loading"
-          :disabled="loading"
+          x-bind:disabled="loading"
+          x-bind:aria-busy="loading"
         >
           <span x-show="!loading">{{ I18n::get('register') }}</span>
           <span x-show="loading" x-cloak>Creating account&hellip;</span>

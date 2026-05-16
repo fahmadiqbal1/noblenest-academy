@@ -82,7 +82,7 @@
                 <div class="border-b border-[var(--color-border)] last:border-0">
                     <button
                         type="button"
-                        class="w-full flex items-center justify-between gap-4 px-4 py-3 text-start font-semibold text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-[-2px]"
+                        class="w-full flex items-center justify-between gap-4 px-4 py-3 text-left font-semibold text-[var(--color-text)] hover:bg-[var(--color-border)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-[-2px]"
                         @click="open = open === {{ $loop->index }} ? null : {{ $loop->index }}"
                         :aria-expanded="open === {{ $loop->index }}"
                     >

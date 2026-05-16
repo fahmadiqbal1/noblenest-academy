@@ -122,9 +122,9 @@
             <x-ui.table :striped="true">
                 <x-slot:head>
                     <tr>
-                        <th class="px-4 py-3 text-start">{{ __('Friend') }}</th>
-                        <th class="px-4 py-3 text-start">{{ __('Date') }}</th>
-                        <th class="px-4 py-3 text-start">{{ __('Status') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Friend') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Date') }}</th>
+                        <th class="px-4 py-3 text-left">{{ __('Status') }}</th>
                     </tr>
                 </x-slot:head>
 

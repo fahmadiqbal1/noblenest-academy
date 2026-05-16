@@ -3,55 +3,55 @@
     <div class="orch-card-header">
         <div>
             <div class="orch-section-title mb-1">Media Studio</div>
-            <div class="fw-bold"><i class="bi bi-image text-primary"></i> Generate Activity Media</div>
+            <div class="font-bold"><x-ui.icon name="image" class="text-[var(--color-primary)]" /> Generate Activity Media</div>
         </div>
-        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#mediaStudioBody">
-            <i class="bi bi-chevron-down"></i>
+        <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-100" type="button">
+            <x-ui.icon name="chevron-down" />
         </button>
     </div>
-    <div class="collapse show" id="mediaStudioBody">
+    <div class="" id="mediaStudioBody">
         <form id="mediaStudioForm" class="orch-form" onsubmit="return submitMediaJob(event)">
             @csrf
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label small">Activity <span class="text-danger">*</span></label>
-                    <select name="activity_id" id="mediaActivityId" class="form-select form-select-sm" required>
+            <div class="flex flex-wrap gap-3">
+                <div class="md:w-6/12">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Activity <span class="text-red-600">*</span></label>
+                    <select name="activity_id" id="mediaActivityId" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" required>
                         <option value="">— Select activity —</option>
                     </select>
-                    <div class="form-text">Type to search or scroll. Loaded via AJAX.</div>
+                    <div class="mt-1 text-sm text-[var(--color-text-muted)]">Type to search or scroll. Loaded via AJAX.</div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label small">Media Type <span class="text-danger">*</span></label>
-                    <select name="media_type" id="mediaType" class="form-select form-select-sm" required onchange="filterMediaProviders()">
+                <div class="md:w-3/12">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Media Type <span class="text-red-600">*</span></label>
+                    <select name="media_type" id="mediaType" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" required onchange="filterMediaProviders()">
                         <option value="thumbnail">Thumbnail (Image)</option>
                         <option value="audio">Audio (TTS)</option>
                         <option value="video">Video</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label small">Provider <span class="text-danger">*</span></label>
-                    <select name="provider_id" id="mediaProvider" class="form-select form-select-sm" required>
+                <div class="md:w-3/12">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Provider <span class="text-red-600">*</span></label>
+                    <select name="provider_id" id="mediaProvider" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" required>
                         <option value="">— Select provider —</option>
                     </select>
                 </div>
             </div>
             <div class="mt-3">
-                <label class="form-label small">Custom Prompt (optional)</label>
-                <textarea name="prompt" id="mediaPrompt" class="form-control form-control-sm" rows="2"
+                <label class="block text-sm font-medium text-gray-700 mb-1">Custom Prompt (optional)</label>
+                <textarea name="prompt" id="mediaPrompt" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 px-2 py-1 text-sm" rows="2"
                     placeholder="Leave blank for auto-generated prompt based on activity metadata..."></textarea>
             </div>
-            <div class="mt-3 d-flex gap-2 align-items-center">
-                <button type="submit" class="btn btn-primary btn-sm" id="mediaSubmitBtn">
-                    <i class="bi bi-lightning-charge"></i> Generate
+            <div class="mt-3 flex gap-2 items-center">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 px-3 py-1.5 text-sm" id="mediaSubmitBtn">
+                    <x-ui.icon name="zap" /> Generate
                 </button>
-                <div id="mediaJobStatus" class="small text-muted"></div>
+                <div id="mediaJobStatus" class="text-sm text-[var(--color-text-muted)]"></div>
             </div>
         </form>
 
         {{-- Active Media Jobs --}}
         <div id="mediaJobsList" class="mt-3" style="display:none">
             <div class="orch-section-title mb-2">Active Media Jobs</div>
-            <div id="mediaJobsContainer" class="d-flex flex-column gap-2"></div>
+            <div id="mediaJobsContainer" class="flex flex-col gap-2"></div>
         </div>
     </div>
 </div>
@@ -161,7 +161,7 @@
         };
 
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Dispatching...';
+        btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4"></span> Dispatching...';
         status.textContent = '';
 
         fetch('{{ route("admin.orchestrator.generateMedia") }}', {
@@ -178,16 +178,16 @@
             return r.json();
         })
         .then(data => {
-            status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Job #' + data.job_id + ' dispatched!</span>';
+            status.innerHTML = '<span class="text-emerald-600"><x-ui.icon name="check-circle" /> Job #' + data.job_id + ' dispatched!</span>';
             addJobCard(data.job_id, body.media_type);
             pollJobStatus(data.job_id);
         })
         .catch(err => {
-            status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + err.message + '</span>';
+            status.innerHTML = '<span class="text-red-600"><x-ui.icon name="x-circle" /> ' + err.message + '</span>';
         })
         .finally(() => {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-lightning-charge"></i> Generate';
+            btn.innerHTML = '<x-ui.icon name="zap" /> Generate';
         });
 
         return false;
@@ -202,15 +202,15 @@
         card.id = 'media-job-' + jobId;
         card.className = 'job-card p-2';
         card.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="flex justify-between items-center">
                 <div>
-                    <span class="badge bg-secondary" id="media-job-status-${jobId}">queued</span>
-                    <span class="fw-semibold ms-1">#${jobId}</span>
-                    <span class="text-muted small ms-1">${mediaType}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500" id="media-job-status-${jobId}">queued</span>
+                    <span class="font-semibold ms-1">#${jobId}</span>
+                    <span class="text-[var(--color-text-muted)] text-sm ms-1">${mediaType}</span>
                 </div>
-                <span class="spinner-border spinner-border-sm text-primary" id="media-job-spin-${jobId}"></span>
+                <span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4 text-[var(--color-primary)]" id="media-job-spin-${jobId}"></span>
             </div>
-            <div id="media-job-result-${jobId}" class="mt-1 small"></div>
+            <div id="media-job-result-${jobId}" class="mt-1 text-sm"></div>
         `;
         container.prepend(card);
     }
@@ -244,12 +244,12 @@
                         const res = data.result;
                         let html = '';
                         if (res.type === 'image' && res.url) html = `<img src="${res.url}" class="img-fluid rounded" style="max-height:120px">`;
-                        else if (res.type === 'audio' && res.url) html = `<audio controls class="w-100"><source src="${res.url}" type="audio/mpeg"></audio>`;
-                        else if (res.type === 'video' && res.url) html = `<video controls class="w-100" style="max-height:120px"><source src="${res.url}"></video>`;
-                        else html = `<span class="text-success">${JSON.stringify(res)}</span>`;
+                        else if (res.type === 'audio' && res.url) html = `<audio controls class="w-full"><source src="${res.url}" type="audio/mpeg"></audio>`;
+                        else if (res.type === 'video' && res.url) html = `<video controls class="w-full" style="max-height:120px"><source src="${res.url}"></video>`;
+                        else html = `<span class="text-emerald-600">${JSON.stringify(res)}</span>`;
                         if (resultEl) resultEl.innerHTML = html;
                     } else if (data.error_message) {
-                        if (resultEl) resultEl.innerHTML = `<span class="text-danger">${data.error_message}</span>`;
+                        if (resultEl) resultEl.innerHTML = `<span class="text-red-600">${data.error_message}</span>`;
                     }
                 }
             })

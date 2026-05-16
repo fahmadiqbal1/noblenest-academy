@@ -115,10 +115,7 @@
                 >
                 <label
                   for="faith_{{ $val }}"
-                  class="flex flex-col items-center gap-1 w-full rounded-[var(--radius-sm)] border-2 border-[var(--color-border)] bg-[var(--color-surface-strong)] px-2 py-3 cursor-pointer select-none text-center transition-all duration-[var(--duration-fast)] text-xs font-semibold text-[var(--color-text)]
-                         hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40
-                         peer-checked:border-[var(--color-brand-500)] peer-checked:bg-[var(--color-brand-50)] peer-checked:shadow-sm
-                         peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--color-brand-600)] peer-focus-visible:outline-offset-2"
+                  class="flex flex-col items-center gap-1 w-full rounded-[var(--radius-sm)] border-2 border-[var(--color-border)] bg-[var(--color-surface-strong)] px-2 py-3 cursor-pointer select-none text-center transition-all duration-[var(--duration-fast)] text-xs font-semibold text-[var(--color-text)] hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)]/40 peer-checked:border-[var(--color-brand-500)] peer-checked:bg-[var(--color-brand-50)] peer-checked:shadow-sm peer-focus-visible:outline-2 peer-focus-visible:outline-[var(--color-brand-600)] peer-focus-visible:outline-offset-2"
                 >
                   <span class="text-xl" aria-hidden="true">{{ $opt['icon'] }}</span>
                   {{ $opt['label'] }}
