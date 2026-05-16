@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
             'maternal.consent' => \App\Http\Middleware\EnsureMaternalConsent::class,
             'practitioner.active' => \App\Http\Middleware\EnsurePractitionerActive::class,
+            // Phase 5: under-13 COPPA / GDPR-K parental consent gate.
+            'parental.consent' => \App\Http\Middleware\RequireParentalConsent::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

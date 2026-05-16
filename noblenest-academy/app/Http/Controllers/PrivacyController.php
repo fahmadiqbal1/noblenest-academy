@@ -22,6 +22,44 @@ class PrivacyController extends Controller
         return view('privacy.dashboard', compact('user', 'children', 'paymentCount'));
     }
 
+    /**
+     * Phase 5 — under-13 Parental Consent gate (COPPA + GDPR-K).
+     * Shows the consent confirmation page for a specific child.
+     */
+    public function showParentalConsent(Request $request, ChildProfile $child)
+    {
+        if ($child->parent_id !== Auth::id()) {
+            abort(403);
+        }
+        return view('privacy.parental-consent', compact('child'));
+    }
+
+    /**
+     * Record parental consent for a child. Captures timestamp + parent's IP
+     * and user-agent for audit trail (COPPA record-keeping requirement).
+     */
+    public function recordParentalConsent(Request $request, ChildProfile $child)
+    {
+        if ($child->parent_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'agree_terms'   => 'accepted',
+            'agree_privacy' => 'accepted',
+            'agree_coppa'   => 'accepted',
+        ]);
+
+        $child->forceFill([
+            'parental_consent_at'         => now(),
+            'parental_consent_ip'         => substr((string) $request->ip(), 0, 45),
+            'parental_consent_user_agent' => substr((string) $request->userAgent(), 0, 255),
+        ])->save();
+
+        return redirect()->route('privacy.dashboard')
+            ->with('status', "Consent recorded for {$child->name}. They can now use Noble Nest Academy.");
+    }
+
     public function exportData(Request $request)
     {
         $user = Auth::user();
