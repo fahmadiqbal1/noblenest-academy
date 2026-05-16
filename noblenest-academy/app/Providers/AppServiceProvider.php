@@ -64,9 +64,6 @@ class AppServiceProvider extends ServiceProvider
             }
             return match ($user->role) {
                 'Parent'       => route('parent.dashboard'),
-                'Teacher'      => route('teacher.dashboard'),
-                'Student'      => route('marketplace.index'),
-                'Practitioner' => route('practitioner.dashboard'),
                 'Admin'        => route('admin.analytics.index'),
                 default        => route('noble.home'),
             };

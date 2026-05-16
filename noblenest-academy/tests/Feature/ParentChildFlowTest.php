@@ -62,10 +62,10 @@ class ParentChildFlowTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function non_parent_cannot_access_children_routes(): void
     {
-        $teacher = User::factory()->create(['role' => 'Teacher']);
+        $admin = User::factory()->create(['role' => 'Admin']);
 
-        $this->actingAs($teacher)->get('/children')->assertStatus(403);
-        $this->actingAs($teacher)->post('/children', [
+        $this->actingAs($admin)->get('/children')->assertStatus(403);
+        $this->actingAs($admin)->post('/children', [
             'name' => 'Hack', 'age' => 5, 'preferred_language' => 'en',
         ])->assertStatus(403);
     }
@@ -91,9 +91,9 @@ class ParentChildFlowTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function parent_dashboard_requires_parent_role(): void
     {
-        $student = User::factory()->create(['role' => 'Student']);
+        $admin = User::factory()->create(['role' => 'Admin']);
 
-        $this->actingAs($student)
+        $this->actingAs($admin)
              ->get('/parent/dashboard')
              ->assertStatus(403);
     }
@@ -142,18 +142,6 @@ class ParentChildFlowTest extends TestCase
             'password_confirmation' => 'password123',
             'role'                  => 'Parent',
         ])->assertRedirect(route('onboarding'));
-    }
-
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function teacher_registration_redirects_to_teacher_dashboard(): void
-    {
-        $this->post('/register', [
-            'name'                  => 'New Teacher',
-            'email'                 => 'newteacher@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'password123',
-            'role'                  => 'Teacher',
-        ])->assertRedirect(route('teacher.dashboard'));
     }
 
     // ------------------------------------------------------------------

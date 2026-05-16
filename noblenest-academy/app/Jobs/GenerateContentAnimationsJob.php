@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\Activity;
-use App\Models\MaternalContent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,24 +26,7 @@ class GenerateContentAnimationsJob implements ShouldQueue
 
     public function handle(): void
     {
-        if ($this->contentType === 'maternal') {
-            $content = MaternalContent::with('steps')->find($this->contentId);
-            if (!$content) {
-                Log::warning('GenerateContentAnimationsJob: MaternalContent not found', ['id' => $this->contentId]);
-                return;
-            }
-
-            foreach ($content->steps as $step) {
-                if (!$step->visual_url || !$step->audio_url) {
-                    GenerateStepMediaJob::dispatch('maternal', $step->id);
-                }
-            }
-
-            Log::info('GenerateContentAnimationsJob: Dispatched step media jobs', [
-                'content_id' => $content->id,
-                'steps' => $content->steps->count(),
-            ]);
-        } elseif ($this->contentType === 'activity') {
+        if ($this->contentType === 'activity') {
             $activity = Activity::with('steps')->find($this->contentId);
             if (!$activity) {
                 Log::warning('GenerateContentAnimationsJob: Activity not found', ['id' => $this->contentId]);

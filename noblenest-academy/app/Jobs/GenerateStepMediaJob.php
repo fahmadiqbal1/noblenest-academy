@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\ActivityStep;
-use App\Models\MaternalContentStep;
 use App\Services\AnimationPipelineService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,14 +27,7 @@ class GenerateStepMediaJob implements ShouldQueue
 
     public function handle(AnimationPipelineService $pipeline): void
     {
-        if ($this->stepType === 'maternal') {
-            $step = MaternalContentStep::find($this->stepId);
-            if (!$step) {
-                Log::warning('GenerateStepMediaJob: Maternal step not found', ['id' => $this->stepId]);
-                return;
-            }
-            $pipeline->processStep($step);
-        } elseif ($this->stepType === 'activity') {
+        if ($this->stepType === 'activity') {
             $step = ActivityStep::find($this->stepId);
             if (!$step) {
                 Log::warning('GenerateStepMediaJob: Activity step not found', ['id' => $this->stepId]);

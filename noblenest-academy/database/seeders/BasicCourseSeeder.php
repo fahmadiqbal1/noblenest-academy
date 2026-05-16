@@ -11,11 +11,20 @@ class BasicCourseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Temporarily disable FK checks to allow truncation
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // Temporarily disable FK checks to allow truncation (db-portable).
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF');
+        }
         Module::truncate();
         Course::truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        if ($driver === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        } elseif ($driver === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON');
+        }
 
         $courses = [
             [

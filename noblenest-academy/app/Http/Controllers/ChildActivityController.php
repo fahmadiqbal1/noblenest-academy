@@ -6,14 +6,11 @@ use App\Events\ActivityCompleted;
 use App\Models\Activity;
 use App\Models\ChildProfile;
 use App\Models\ChildActivityProgress;
-use App\Models\ShareCard;
-use App\Services\ShareCardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChildActivityController extends Controller
 {
-    public function __construct(private readonly ShareCardService $shareCards) {}
 
     /**
      * List age-appropriate activities for a child.
@@ -137,20 +134,6 @@ class ChildActivityController extends Controller
             // Update streak
             $this->updateStreak($child);
 
-            // Generate viral share card on FIRST completion
-            $totalCompleted = ChildActivityProgress::where('child_profile_id', $child->id)->count();
-            if ($totalCompleted === 1) {
-                $imageUrl = $this->shareCards->generateActivityCard($child, $activity);
-                $child->update(['share_card_url' => $imageUrl]);
-
-                ShareCard::create([
-                    'child_profile_id' => $child->id,
-                    'activity_id'      => $activity->id,
-                    'card_type'        => 'activity_complete',
-                    'image_url'        => $imageUrl,
-                ]);
-            }
-
             // Dispatch ActivityCompleted event to trigger skill state update and learning path recomputation
             // Calculate mastery score from activity progress
             $masteryScore = $this->calculateMasteryScore($progress);
@@ -159,9 +142,8 @@ class ChildActivityController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'ok'        => true,
-                'new'       => $wasNew,
-                'share_url' => $child->share_card_url,
+                'ok'  => true,
+                'new' => $wasNew,
             ]);
         }
 

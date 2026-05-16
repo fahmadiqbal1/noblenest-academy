@@ -13,10 +13,7 @@
             <ul class="hidden lg:flex items-center gap-1 ml-4 flex-1" role="list">
                 <li><a href="{{ route('parent.dashboard') }}" class="px-3 py-2 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors {{ request()->routeIs('parent.dashboard') ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]' : '' }}">Dashboard</a></li>
                 <li><a href="/children" class="px-3 py-2 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors {{ request()->is('children*') ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]' : '' }}">Children</a></li>
-                @if(config('features.maternal_module'))
-                <li><a href="{{ route('maternal.dashboard') }}" class="px-3 py-2 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors {{ request()->routeIs('maternal.*') ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]' : '' }}">Maternal Wellness</a></li>
-                @endif
-                <li><a href="{{ route('marketplace.index') }}" class="px-3 py-2 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors">Marketplace</a></li>
+                <li><a href="{{ route('activities.index') }}" class="px-3 py-2 rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-text-muted)] hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)] transition-colors">Activities</a></li>
             </ul>
 
             <div class="flex items-center gap-2 ml-auto">
@@ -45,7 +42,7 @@
             <x-ui.icon name="users" class="w-5 h-5" />
             Children
         </a>
-        <a href="{{ route('marketplace.index') }}" class="flex flex-col items-center gap-0.5 px-4 py-1 text-xs font-bold {{ request()->routeIs('marketplace.*') ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]' }} transition-colors hover:text-[var(--color-primary)]">
+        <a href="{{ route('activities.index') }}" class="flex flex-col items-center gap-0.5 px-4 py-1 text-xs font-bold {{ request()->routeIs('activities.*') ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]' }} transition-colors hover:text-[var(--color-primary)]">
             <x-ui.icon name="book-open" class="w-5 h-5" />
             Learn
         </a>

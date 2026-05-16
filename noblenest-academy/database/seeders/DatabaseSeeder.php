@@ -12,10 +12,8 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      *
      * Default login credentials (all passwords: Password1!):
-     *   Admin   — admin@noblenest.test
-     *   Teacher — teacher@noblenest.test
-     *   Parent  — parent@noblenest.test
-     *   Student — student@noblenest.test
+     *   Admin  — admin@noblenest.test
+     *   Parent — parent@noblenest.test
      */
     public function run(): void
     {
@@ -32,7 +30,6 @@ class DatabaseSeeder extends Seeder
                 PricingTierSeeder::class,
                 BadgeSeeder::class,
                 MilestoneSeeder::class,
-                MaternalSeeder::class,
                 ActivitySeeder::class,
                 ActivityStepSeeder::class,
                 BabyActivitySeeder::class,
@@ -58,23 +55,9 @@ class DatabaseSeeder extends Seeder
                 'password'           => $defaultPassword,
             ],
             [
-                'name'               => 'Teacher User',
-                'email'              => 'teacher@noblenest.test',
-                'role'               => 'Teacher',
-                'email_verified_at'  => now(),
-                'password'           => $defaultPassword,
-            ],
-            [
                 'name'               => 'Parent User',
                 'email'              => 'parent@noblenest.test',
                 'role'               => 'Parent',
-                'email_verified_at'  => now(),
-                'password'           => $defaultPassword,
-            ],
-            [
-                'name'               => 'Student User',
-                'email'              => 'student@noblenest.test',
-                'role'               => 'Student',
                 'email_verified_at'  => now(),
                 'password'           => $defaultPassword,
             ],
@@ -94,9 +77,6 @@ class DatabaseSeeder extends Seeder
             PricingTierSeeder::class,
             BadgeSeeder::class,
             MilestoneSeeder::class,
-
-            // ── Maternal & prenatal track ───────────────────────────────────
-            MaternalSeeder::class,   // orchestrates all maternal sub-seeders internally
 
             // ── Age-tier activity libraries (must run before thematic maps) ─
             ActivitySeeder::class,

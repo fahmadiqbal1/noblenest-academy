@@ -119,16 +119,21 @@ Fallback to native Read/Grep only when:
 
 ## NOBLE NEST ACADEMY — Project Context
 
-**Stack:** Laravel 12 · PHP 8.5 · MySQL 8 · Redis 7 · Horizon
+**Stack:** Laravel 12 · PHP 8.3 (target VPS) / 8.4 (local) · MySQL 8 · Redis 7 · Horizon
 **Frontend:** Vite + TailwindCSS 4 · Blade templates
 **AI Sidecar:** Python (`services/curriculum-ai/`) called via HTTP from `AIAssistantService.php`
-**Branch model:** `feature/phase-0-foundation` → `feature/lms-scaffold` → `main`
-**Deployment target:** Hostinger KVM4 VPS (Ubuntu 24.04, Nginx + PHP-FPM 8.3)
+**Branch model:** `release/v1-launch` → `main` (v1 launch in progress; see `docs/SPEC.md`)
+**Deployment target:** Hostinger KVM4 VPS (Ubuntu 24.04, CyberPanel-managed Nginx + PHP-FPM 8.3)
+
+**v1 scope:** Parents + children 0–10 only. Maternal health, teacher marketplace,
+practitioner portal, payouts, scholarships, share cards, Daily.co live classes,
+and referrals were deleted in Phase 1 of the launch (see `docs/AUDIT.md`).
+Do NOT add code for those verticals.
 
 **Key directories:**
-- `app/Http/Controllers/` — role-segregated: Admin/, Parent/, Child/, Student/
-- `app/Services/` — business logic layer
-- `database/migrations/` — 35 applied migrations
+- `app/Http/Controllers/` — role-segregated: Admin/, Parent/, Child/
+- `app/Services/` — business logic layer (incl. ContentSafetyService, AIAssistantService)
+- `database/migrations/` — 53 applied migrations (squash to a single file is queued for Phase 2)
 - `resources/views/` — Blade templates by role
 - `services/curriculum-ai/` — Python LangChain sidecar
 

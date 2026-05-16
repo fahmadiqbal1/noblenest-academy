@@ -62,44 +62,6 @@ class RegistrationSecurityTest extends TestCase
     }
 
     /**
-     * Test that valid Teacher role can be registered.
-     */
-    public function test_can_register_as_teacher(): void
-    {
-        $response = $this->post('/register', [
-            'name'                  => 'Test Teacher',
-            'email'                 => 'teacher@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'password123',
-            'role'                  => 'Teacher',
-        ]);
-
-        $user = User::where('email', 'teacher@example.com')->first();
-        
-        $this->assertNotNull($user);
-        $this->assertEquals('Teacher', $user->role);
-    }
-
-    /**
-     * Test that valid Student role can be registered.
-     */
-    public function test_can_register_as_student(): void
-    {
-        $response = $this->post('/register', [
-            'name'                  => 'Test Student',
-            'email'                 => 'student@example.com',
-            'password'              => 'password123',
-            'password_confirmation' => 'password123',
-            'role'                  => 'Student',
-        ]);
-
-        $user = User::where('email', 'student@example.com')->first();
-        
-        $this->assertNotNull($user);
-        $this->assertEquals('Student', $user->role);
-    }
-
-    /**
      * Test that invalid roles are rejected.
      */
     public function test_invalid_role_rejected(): void
@@ -116,7 +78,7 @@ class RegistrationSecurityTest extends TestCase
         
         // Either user shouldn't be created, or should have a default safe role
         if ($user) {
-            $this->assertContains($user->role, ['Parent', 'Student', 'Teacher'],
+            $this->assertContains($user->role, ['Parent'],
                 'Invalid roles should fallback to a safe default');
         } else {
             // If user doesn't exist, invalid role registration was properly rejected

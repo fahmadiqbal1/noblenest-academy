@@ -2,7 +2,7 @@
 
 @section('title', 'Create Account | NobleNest Global Academy')
 @section('meta_title', 'Create Your Account | NobleNest Global Academy')
-@section('meta_description', 'Create a NobleNest Global Academy account as a student, teacher, parent, or admin and enter the right learning experience from your first session.')
+@section('meta_description', 'Create a NobleNest Global Academy parent account and start your child on a personalised, age-appropriate learning journey.')
 @section('meta_image', asset('og-register.png'))
 
 @section('content')
@@ -21,16 +21,9 @@
     <p class="text-xs font-extrabold uppercase tracking-widest text-white/80 mb-2">Get started free</p>
     <h1 class="text-2xl font-bold font-[var(--font-display)] mb-3">{{ I18n::get('register') }}</h1>
     <p class="text-white/82 text-sm leading-relaxed mb-8">
-      Start as a student, teacher, parent, or practitioner and land in the right experience from your very first session.
+      Create your parent account and give your child a personalised, age-appropriate learning journey from day one.
     </p>
     <div class="space-y-3">
-      <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
-        <div class="flex items-center gap-2 mb-1">
-          <x-ui.icon name="graduation-cap" class="w-4 h-4" />
-          <span class="font-semibold text-sm">Teachers</span>
-        </div>
-        <p class="text-xs text-white/78">Publish courses, schedule classes, and manage invitations.</p>
-      </div>
       <div class="rounded-[var(--radius-sm)] p-3 bg-white/12 border border-white/18">
         <div class="flex items-center gap-2 mb-1">
           <x-ui.icon name="users" class="w-4 h-4" />
@@ -47,7 +40,7 @@
          showPw: false,
          showPwC: false,
          loading: false,
-         role: '{{ old('role', str_contains((string) session('url.intended', ''), '/invite/') ? 'Student' : (request('role') ?? 'Parent')) }}'
+         role: 'Parent'
        }">
 
     <h2 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-1">Create your account</h2>
@@ -70,10 +63,7 @@
 
           @php
           $roles = [
-            'Parent'       => ['icon' => 'users',          'desc' => 'Monitor learning'],
-            'Teacher'      => ['icon' => 'graduation-cap', 'desc' => 'Create courses'],
-            'Student'      => ['icon' => 'book-open',      'desc' => 'Join courses'],
-            'Practitioner' => ['icon' => 'shield',         'desc' => 'Wellness review'],
+            'Parent' => ['icon' => 'users', 'desc' => 'Monitor learning'],
           ];
           @endphp
 

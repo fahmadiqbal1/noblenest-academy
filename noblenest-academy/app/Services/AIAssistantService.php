@@ -256,46 +256,6 @@ PROMPT;
     }
 
     /**
-     * Generate a batch of maternal wellness content for a content generation job.
-     * Called by GenerateMaternalContentJob when an AI provider is available.
-     */
-    public function generateMaternalBatch(
-        \App\Models\AIJob $job,
-        string $contentType,
-        string $stage,
-        string $category,
-        ?string $culturalOrigin,
-        int $count,
-        string $language,
-    ): void {
-        for ($i = 1; $i <= $count; $i++) {
-            $prompt = "Create a maternal wellness {$contentType} about {$category} for the {$stage} stage in {$language}. Return JSON with keys: title, description, benefit_explanation, instructions.";
-
-            $result = $this->chat($prompt, [
-                'language' => $language,
-                'stage'    => $stage,
-            ]);
-
-            $parsed = json_decode($result['reply'], true);
-
-            \App\Models\MaternalContent::create([
-                'title'              => $parsed['title']              ?? ucfirst($category) . " {$contentType} {$i} ({$stage})",
-                'slug'               => \Illuminate\Support\Str::slug(($parsed['title'] ?? "{$category}-{$contentType}-{$i}-{$stage}") . '-' . \Illuminate\Support\Str::random(4)),
-                'description'        => $parsed['description']        ?? 'AI-generated — please review.',
-                'benefit_explanation' => $parsed['benefit_explanation'] ?? 'Pending review.',
-                'instructions'       => $parsed['instructions']       ?? null,
-                'content_type'       => $contentType,
-                'stage'              => $stage,
-                'category'           => $category,
-                'cultural_origin'    => $culturalOrigin,
-                'language'           => $language,
-                'is_published'       => false,
-                'moderation_status'  => 'pending',
-            ]);
-        }
-    }
-
-    /**
      * Generate a batch of activities for a content generation job.
      * Called by ProcessContentBatchJob when an AI provider is available.
      */

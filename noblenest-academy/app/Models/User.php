@@ -25,7 +25,6 @@ class User extends Authenticatable
         'age',
         'preferred_language',
         'country_code',
-        'referral_code',
         'is_onboarded',
         'terms_accepted_at',
     ];
@@ -53,34 +52,6 @@ class User extends Authenticatable
             'age' => 'integer',
             'terms_accepted_at' => 'datetime',
         ];
-    }
-
-    // ------------------------------------------------------------------
-    // Teacher relationships
-    // ------------------------------------------------------------------
-
-    public function teacherCourses(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(\App\Models\TeacherCourse::class, 'teacher_id');
-    }
-
-    // ------------------------------------------------------------------
-    // Student relationships
-    // ------------------------------------------------------------------
-
-    public function teacherEnrollments(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(\App\Models\TeacherEnrollment::class, 'student_id');
-    }
-
-    public function enrolledCourses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(
-            \App\Models\TeacherCourse::class,
-            'teacher_enrollments',
-            'student_id',
-            'teacher_course_id'
-        )->wherePivot('status', 'active');
     }
 
     // ------------------------------------------------------------------
@@ -122,21 +93,6 @@ class User extends Authenticatable
         return $this->role === 'Parent';
     }
 
-    public function isTeacher(): bool
-    {
-        return $this->role === 'Teacher';
-    }
-
-    public function isStudent(): bool
-    {
-        return $this->role === 'Student';
-    }
-
-    public function isPractitioner(): bool
-    {
-        return $this->role === 'Practitioner';
-    }
-
     /**
      * Get subscriptions for this user.
      */
@@ -156,31 +112,4 @@ class User extends Authenticatable
             ->exists();
     }
 
-    // ------------------------------------------------------------------
-    // Maternal profile
-    // ------------------------------------------------------------------
-
-    public function maternalProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(\App\Models\MaternalProfile::class);
-    }
-
-    public function hasMaternalProfile(): bool
-    {
-        return $this->maternalProfile()->exists();
-    }
-
-    // ------------------------------------------------------------------
-    // Practitioner profile
-    // ------------------------------------------------------------------
-
-    public function practitionerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(\App\Models\PractitionerProfile::class);
-    }
-
-    public function hasPractitionerProfile(): bool
-    {
-        return $this->practitionerProfile()->exists();
-    }
 }

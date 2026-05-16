@@ -6,13 +6,11 @@ use App\Events\ActivityCompleted;
 use App\Events\BadgeEarned;
 use App\Events\MilestoneUnlocked;
 use App\Events\ParentDisengaged;
-use App\Events\ReferralConverted;
 use App\Events\StreakAtRisk;
 use App\Events\StruggleDetected;
 use App\Listeners\HandleBadgeEarnedListener;
 use App\Listeners\HandleMilestoneUnlockedListener;
 use App\Listeners\HandleParentDisengagedListener;
-use App\Listeners\HandleReferralConvertedListener;
 use App\Listeners\HandleStreakAtRiskListener;
 use App\Listeners\HandleStruggleDetectedListener;
 use App\Listeners\UpdateChildSkillStateListener;
@@ -31,9 +29,6 @@ class EventServiceProvider extends ServiceProvider
         ],
 
         // Viral Growth & Retention events (Phase 1 scaffold — bodies filled in later phases)
-        ReferralConverted::class => [
-            HandleReferralConvertedListener::class,
-        ],
         MilestoneUnlocked::class => [
             HandleMilestoneUnlockedListener::class,
         ],

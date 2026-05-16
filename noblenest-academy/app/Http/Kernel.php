@@ -16,7 +16,5 @@ class Kernel extends HttpKernel
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'subscription.active' => \App\Http\Middleware\EnsureSubscriptionActive::class,
         'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
-        'maternal.consent' => \App\Http\Middleware\EnsureMaternalConsent::class,
-        'practitioner.active' => \App\Http\Middleware\EnsurePractitionerActive::class,
     ];
 }

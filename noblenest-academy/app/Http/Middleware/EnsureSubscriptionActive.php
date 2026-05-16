@@ -16,7 +16,7 @@ class EnsureSubscriptionActive
         }
 
         // Staff roles can preview all content without a subscription.
-        if (in_array($user->role, ['Admin', 'Teacher', 'Practitioner'])) {
+        if (in_array($user->role, ['Admin'])) {
             return $next($request);
         }
 

@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -16,7 +15,7 @@ class AuthController extends Controller
      * NOTE: Admin is intentionally excluded - Admin accounts must be
      * created via seeder or artisan command for security.
      */
-    protected const ALLOWED_REGISTRATION_ROLES = ['Parent', 'Teacher', 'Student', 'Practitioner'];
+    protected const ALLOWED_REGISTRATION_ROLES = ['Parent'];
 
     // Show registration form
     public function showRegister()
@@ -49,37 +48,13 @@ class AuthController extends Controller
             'password'      => Hash::make($validated['password']),
             'role'          => $validated['role'],
             'country_code'  => $countryCode,
-            'referral_code' => Str::upper(Str::random(8)),
         ]);
-
-        // Apply referred-by tracking if referral code present
-        if ($request->filled('ref')) {
-            $referrer = User::where('referral_code', strtoupper($request->ref))->first();
-            if ($referrer && $referrer->id !== $user->id) {
-                \App\Models\Referral::create([
-                    'referrer_id' => $referrer->id,
-                    'referred_id' => $user->id,
-                    'code'        => strtoupper($request->ref),
-                    'status'      => 'signed_up',
-                    'signed_up_at' => now(),
-                ]);
-            }
-        }
 
         Auth::login($user);
 
         $intended = session()->pull('url.intended');
         if ($intended) {
             return redirect()->to($intended);
-        }
-
-        // Teachers go to profile setup, others go to onboarding wizard
-        if ($user->role === 'Teacher') {
-            return redirect()->route('teacher.dashboard');
-        }
-
-        if ($user->role === 'Practitioner') {
-            return redirect()->route('practitioner.profile.setup');
         }
 
         return redirect()->route('onboarding');
@@ -110,9 +85,6 @@ class AuthController extends Controller
 
             return match ($user->role) {
                 'Parent'       => redirect()->route('parent.dashboard'),
-                'Teacher'      => redirect()->route('teacher.dashboard'),
-                'Student'      => redirect()->route('marketplace.index'),
-                'Practitioner' => redirect()->route('practitioner.dashboard'),
                 'Admin'        => redirect()->route('home'),
                 default        => redirect('/'),
             };

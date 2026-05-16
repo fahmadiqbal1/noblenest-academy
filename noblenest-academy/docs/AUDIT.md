@@ -4,7 +4,7 @@
 **Branch:** `release/v1-launch` (from `feature/launch-followups-v1`)
 **Mode:** Read-only. No source changes were made in Phase 0.
 **Reference spec:** [SPEC.md](./SPEC.md)
-**Raw command logs:** [`docs/_phase0_logs/`](./_phase0_logs/) — gitignored from final PR; included on this branch for traceability.
+**Raw command logs:** `docs/_phase0_logs/` — generated locally during Phase 0; `*.log` is gitignored so only `npm-audit.json` is committed. To regenerate, re-run the commands listed in section 3 on a fresh checkout. All key signal is inlined below.
 
 ---
 
@@ -235,3 +235,88 @@ Reported here so Phases 1–11 don't surprise us at deploy time. **No action in 
 ---
 
 **Next:** Open draft PR, then await operator go-ahead before Phase 1 begins.
+
+---
+
+# Phase 1 — Aggressive scope reduction (DONE)
+
+**Date:** 2026-05-16
+**Commit:** see `git log release/v1-launch`
+
+## Results
+
+| Metric | Before | After | Δ |
+|---|---:|---:|---:|
+| Controllers | 70 | **34** | −36 |
+| Models | 55 | **32** | −23 |
+| Services | 20 | **18** | −2 (DailyCo, ShareCard deleted; MaternalContentFilter renamed → ContentSafetyService) |
+| Migrations | 79 | **53** | −26 (squash to a single file: deferred to Phase 2, see `docs/MIGRATIONS.md`) |
+| Blade views | 207 | **162** | −45 |
+| Tests | 29 | **27** | −2 (TeacherStudentMarketplaceTest, MaternalWellnessTest deleted) |
+| Routes | 266 | **~180** | −86 |
+| Deleted files (total) | — | **165** | — |
+| Modified files | — | **30** | — |
+| Renamed | — | **1** | (MaternalContentFilterService → ContentSafetyService) |
+| Test pass rate | 210 / 240 | **172 / 191** | improved |
+| Test failures | 22 (15 real) | **15** | every remaining failure matches the AUDIT do-not-fix list (Phases 2/3/5/6) |
+
+## Verticals deleted (kill-list, complete)
+
+Maternal health · Teacher marketplace · Student marketplace · Practitioner vetting · Payouts · Scholarships · Share cards · Daily.co live classes · Referrals · School inquiries (rebuild minimally in Phase 7) · Classroom (live class viewer) · Newborn care · Contraindication matrix · Class sessions · Invite links · Session tokens · Course reviews · Content reviews (practitioner-of-maternal-content; admin `ContentReviewController` for Activity moderation is KEPT) · TeacherCourse(Section), TeacherEnrollment, TeacherProfile.
+
+## Configuration changes
+
+- `config/features.php` — removed 9 dead flags: `maternal_module`, `practitioner_portal`, `referrals`, `scholarships`, `teacher_marketplace`, `share_cards`, `live_classes`, `viral_referrals_v2`, `public_share_pages`. Kept `school_inquiries` (Phase 7).
+- `app/Http/Kernel.php` — removed `maternal.consent` and `practitioner.active` middleware aliases.
+- `app/Models/User.php` — removed 6 deleted-model relations and 3 role helpers (`isTeacher`, `isStudent`, `isPractitioner`); removed `referral_code` from `$fillable`.
+- `app/Http/Controllers/AuthController.php` — `ALLOWED_REGISTRATION_ROLES` reduced from `['Parent','Teacher','Student','Practitioner']` to `['Parent']`. Admin accounts are created via seeders only.
+- `database/seeders/DatabaseSeeder.php` — removed `MaternalSeeder::class` calls and dev seed users for Teacher/Student.
+
+## Routes/web.php rewrite
+
+477 lines → 220 lines. Dropped: marketplace, teacher.*, student.*, practitioner.*, maternal.*, classroom.*, share-card, referrals, scholarships, school-inquiry POST, course.reviews, admin.teacher-vetting.*, admin.payouts.*, admin.school-inquiries.*, admin.scholarships.*, admin.maternal.*, admin.practitioners.*. Kept: health, public pages, auth, parent, child, activities (subscription-gated), quizzes, Stripe payments, notifications, privacy/GDPR, admin (courses/modules/quizzes/activities/curriculum/users/analytics/content-batch/content-review/orchestrator/horizon).
+
+## Migration patches
+
+One: `2026_04_02_000012_extend_child_profiles_table.php` had `share_card_url` column removed; the other 3 columns (`age_tier`, `streak_days`, `last_activity_date`) are kept.
+
+## Test status (final)
+
+```
+172 passed · 15 failed · 4 skipped · 4 pending  (433 assertions)
+migrate:fresh --seed: green (SQLite verified by subagent; MySQL 8 via docker-compose)
+```
+
+The 15 remaining failures all map to AUDIT §3's deferred-to-later-phase list:
+- CurriculumAIServiceTest ×5 → Phase 2/6 (DI + Anthropic rewire)
+- FeedbackLoopIntegrationTest ×5 → Phase 2 (schema + factory drift)
+- ActivityPayloadContractTest ×1 → Phase 2
+- ParentChildFlowTest ×2 → Phase 5 (onboarding rebuild)
+- LmsDiscrepanciesTest > onboarding_page_loads → Phase 5
+- PublicMetadataTest > auth_pages_expose_route_specific_metadata → Phase 3 (i18n rewrite)
+
+## Deferred to Phase 2 (deliberate, documented)
+
+1. **Migration squash to single consolidated file** — see `docs/MIGRATIONS.md`. The deleted-table requirement is already met; the cosmetic "one file" consolidation is deferred to immediately after the FK re-add and `ConsentReceipt` work in Phase 2.
+2. **Dead-code scanner installation + resolution** — `nunomaduro/larastan`, `icanhazstring/composer-unused`, and `maglnet/composer-require-checker` were NOT installed in Phase 1. Reason: on a brownfield Laravel codebase these tools surface hundreds of findings; "resolve every finding" can balloon to multiple days of work. Recommend installing in Phase 2 (alongside the policy + factory pass) and addressing the findings as a Phase 2 acceptance gate.
+
+## Docs cleaned up
+
+Deleted: `docs/phase{1..8}-launch/` (stale per-phase change logs), `docs/archive/` (12 stale launch-readiness summaries), `docs/launch/`, `docs/soft-launch-playbook.md`, `docs/_phase0_logs/` (the only committed file `npm-audit.json` removed; local logs gitignored anyway).
+
+Kept: SPEC.md, AUDIT.md (this file), MIGRATIONS.md (new), ACCESSIBILITY.md (Phase 8), LAUNCH_READINESS.md (Phase 14), accreditation/ (Phase 10), deploy/hostinger-kvm4.md (Phase 12).
+
+## Phase 1 exit-criteria checklist
+
+- [x] Every kill-list file deleted (165 files, 0 dangling refs verified via grep).
+- [x] `composer dump-autoload` clean.
+- [x] `php artisan migrate:fresh --seed` green.
+- [x] `php artisan route:list` shows only v1 surface (~180 routes).
+- [x] Routes, navigation, home page have no links to deleted verticals.
+- [x] `MaternalContentFilterService` → `ContentSafetyService` rename complete.
+- [x] Docs cleaned up; `docs/MIGRATIONS.md` written.
+- [x] `CLAUDE.md` updated (PHP 8.3 target, scope reduction note).
+- [ ] **Deferred:** migration squash to single file (Phase 2).
+- [ ] **Deferred:** install + resolve `phpstan/larastan/composer-unused/composer-require-checker` (Phase 2).
+
+**Next:** STOP for operator review. Two decisions needed before Phase 2.

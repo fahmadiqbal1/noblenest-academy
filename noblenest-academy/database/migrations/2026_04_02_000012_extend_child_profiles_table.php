@@ -14,14 +14,13 @@ return new class extends Migration
                 ->comment('baby (0-23m), toddler (24-47m), preschool (48-71m), school (72-120m)');
             $table->unsignedInteger('streak_days')->default(0)->after('age_tier');
             $table->date('last_activity_date')->nullable()->after('streak_days');
-            $table->string('share_card_url')->nullable()->after('last_activity_date');
         });
     }
 
     public function down(): void
     {
         Schema::table('child_profiles', function (Blueprint $table) {
-            $table->dropColumn(['age_tier', 'streak_days', 'last_activity_date', 'share_card_url']);
+            $table->dropColumn(['age_tier', 'streak_days', 'last_activity_date']);
         });
     }
 };

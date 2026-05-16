@@ -23,17 +23,6 @@ class PublicMetadataTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function marketplace_page_exposes_route_specific_metadata(): void
-    {
-        $response = $this->get('/marketplace');
-
-        $response->assertOk();
-        $response->assertSee('<title>Find a Teacher | NobleNest Global Academy</title>', false);
-        $response->assertSee('content="Browse live online courses from expert teachers on NobleNest Global Academy. Compare subjects, age fit, pricing, and enrolment options in one marketplace."', false);
-        $response->assertSee('content="' . asset('og-marketplace.png') . '"', false);
-    }
-
-    #[\PHPUnit\Framework\Attributes\Test]
     public function auth_pages_expose_route_specific_metadata(): void
     {
         $loginResponse = $this->get('/login');
@@ -52,7 +41,6 @@ class PublicMetadataTest extends TestCase
     public function generated_social_preview_assets_exist(): void
     {
         $this->assertFileExists(public_path('og-home.png'));
-        $this->assertFileExists(public_path('og-marketplace.png'));
         $this->assertFileExists(public_path('og-login.png'));
         $this->assertFileExists(public_path('og-register.png'));
         $this->assertFileExists(public_path('og-image.png'));

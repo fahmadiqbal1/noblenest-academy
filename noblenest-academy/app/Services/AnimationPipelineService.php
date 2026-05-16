@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Models\Activity;
 use App\Models\ActivityStep;
 use App\Models\AIProviderConfig;
-use App\Models\MaternalContent;
-use App\Models\MaternalContentStep;
 use Illuminate\Support\Facades\Log;
 
 class AnimationPipelineService
@@ -64,37 +62,6 @@ class AnimationPipelineService
     }
 
     /**
-     * Process a single maternal content step: illustration + narration.
-     */
-    public function processStep(MaternalContentStep $step): void
-    {
-        $content = $step->content;
-        $context = ($content->category ?? '') . ' — ' . ($content->stage ?? '');
-
-        if (!$step->visual_url) {
-            $visualPath = $this->generateStepIllustration(
-                $step->title,
-                $step->instruction,
-                $context
-            );
-            if ($visualPath) {
-                $step->update(['visual_url' => $visualPath]);
-            }
-        }
-
-        if (!$step->audio_url) {
-            $narration = $step->instruction;
-            if ($step->tip) {
-                $narration .= ' Tip: ' . $step->tip;
-            }
-            $audioPath = $this->generateStepNarration($narration);
-            if ($audioPath) {
-                $step->update(['audio_url' => $audioPath]);
-            }
-        }
-    }
-
-    /**
      * Process a single activity step: illustration + narration.
      */
     public function processActivityStep(ActivityStep $step): void
@@ -130,9 +97,9 @@ class AnimationPipelineService
      */
     private function buildImagePrompt(string $title, string $instruction, string $context): string
     {
-        $base = "Create a warm, professional educational illustration for a maternal wellness guide. ";
-        $base .= "The illustration should be calming, using soft pastel colors (lavender, mint, cream). ";
-        $base .= "Style: clean, modern, medical-illustration quality, suitable for expectant mothers. ";
+        $base = "Create a warm, professional educational illustration for a children's learning activity. ";
+        $base .= "The illustration should be friendly, using bright, cheerful colors. ";
+        $base .= "Style: clean, modern, kid-friendly illustration quality, suitable for young learners. ";
         $base .= "No text in the image. ";
         $base .= "Topic: {$title}. ";
         $base .= "Context: {$context}. ";

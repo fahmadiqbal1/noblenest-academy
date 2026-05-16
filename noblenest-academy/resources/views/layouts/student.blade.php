@@ -10,7 +10,7 @@
 </head>
 <body class="min-h-screen flex flex-col font-[var(--font-sans)] text-[var(--color-text)]">
 
-    <x-app.nav-student />
+    <x-app.nav-parent />
 
     <main class="flex-1 py-6">
         <div class="container mx-auto px-4">

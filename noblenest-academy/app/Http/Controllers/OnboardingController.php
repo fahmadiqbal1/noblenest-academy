@@ -193,7 +193,6 @@ class OnboardingController extends Controller
 
         $route = match ($user->role ?? '') {
             'Parent'  => 'parent.dashboard',
-            'Teacher' => 'teacher.dashboard',
             default   => 'home',
         };
 

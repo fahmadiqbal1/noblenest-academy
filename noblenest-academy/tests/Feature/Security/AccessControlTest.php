@@ -52,31 +52,6 @@ class AccessControlTest extends TestCase
     }
 
     /**
-     * Test that teacher routes are protected.
-     */
-    public function test_teacher_routes_require_teacher_role(): void
-    {
-        $parent = User::factory()->create(['role' => 'Parent']);
-        
-        $response = $this->actingAs($parent)->get('/teacher/dashboard');
-        
-        // Should be forbidden or redirected
-        $this->assertContains($response->status(), [302, 403]);
-    }
-
-    /**
-     * Test that teacher can access teacher routes.
-     */
-    public function test_teacher_can_access_teacher_routes(): void
-    {
-        $teacher = User::factory()->create(['role' => 'Teacher']);
-        
-        $response = $this->actingAs($teacher)->get('/teacher/dashboard');
-        
-        $this->assertContains($response->status(), [200, 302]);
-    }
-
-    /**
      * Test that subscription-protected routes require active subscription.
      */
     public function test_subscription_routes_require_active_subscription(): void
@@ -146,7 +121,6 @@ class AccessControlTest extends TestCase
             '/activities',
             '/profile',
             '/children',
-            '/teacher/dashboard',
             '/admin/courses',
         ];
 
@@ -159,14 +133,14 @@ class AccessControlTest extends TestCase
     }
 
     /**
-     * Test parent routes are protected for parent role.
+     * Test parent routes are protected for non-parent roles.
      */
     public function test_parent_routes_require_parent_role(): void
     {
-        $student = User::factory()->create(['role' => 'Student']);
-        
-        $response = $this->actingAs($student)->get('/children');
-        
+        $admin = User::factory()->create(['role' => 'Admin']);
+
+        $response = $this->actingAs($admin)->get('/children');
+
         // Should be forbidden or redirected
         $this->assertContains($response->status(), [302, 403]);
     }

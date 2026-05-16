@@ -11,7 +11,7 @@ class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
-        $allowed = ['Admin', 'Teacher', 'Parent', 'Student'];
+        $allowed = ['Admin', 'Parent'];
         $roleFilter = in_array($request->input('role'), $allowed, true) ? $request->input('role') : null;
 
         $query = User::query();
@@ -35,7 +35,7 @@ class AdminUserController extends Controller
     public function updateRole(Request $request, User $user)
     {
         $data = $request->validate([
-            'role' => ['required', Rule::in(['Admin', 'Teacher', 'Parent', 'Student'])],
+            'role' => ['required', Rule::in(['Admin', 'Parent'])],
         ]);
 
         // Prevent a user from removing their own admin access
