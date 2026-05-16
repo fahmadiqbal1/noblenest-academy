@@ -1,63 +1,101 @@
 #!/usr/bin/env bash
-# =============================================================
-# Noble Nest Academy — Production Deploy Script
-# Run on your VPS as the "deploy" user:
-#   bash /var/www/noblenest/scripts/deploy.sh
-# =============================================================
+# Zero-downtime production deploy for Noble Nest Academy on Hostinger KVM4.
+# See docs/deploy/hostinger-kvm4.md for the initial server setup.
+#
+# Strategy:
+#   - Clone HEAD (or a specific SHA) into releases/<timestamp>/
+#   - Symlink shared .env + storage + public/fonts
+#   - composer + npm + migrate + cache warm
+#   - Atomic mv -T of the `current` symlink
+#   - Reload php-fpm + horizon
+#   - Prune old releases
+#
+# Usage (on the VPS as the `deploy` user):
+#   bash scripts/deploy.sh             # deploy HEAD of $NN_BRANCH
+#   bash scripts/deploy.sh <sha>       # deploy a specific commit
+#
+# Env (export or write to /etc/noblenest/deploy.env):
+#   NN_APP_DIR        absolute path to the app root (default /var/www/noblenest)
+#   NN_REPO           git clone URL (required)
+#   NN_BRANCH         git branch to deploy (default feature/lms-scaffold)
+#   NN_PHP_FPM_SVC    systemd service name (default php8.3-fpm)
+#   NN_HORIZON_SVC    supervisor program (default noblenest-horizon)
+#   NN_KEEP_RELEASES  number of releases to retain (default 5)
 
 set -euo pipefail
 
-APP_DIR="/var/www/noblenest"
-SIDECAR_DIR="$APP_DIR/services/curriculum-ai"
-PHP="php8.3"
+NN_APP_DIR="${NN_APP_DIR:-/var/www/noblenest}"
+NN_REPO="${NN_REPO:?NN_REPO must be set (git clone URL)}"
+NN_BRANCH="${NN_BRANCH:-feature/lms-scaffold}"
+NN_PHP_FPM_SVC="${NN_PHP_FPM_SVC:-php8.3-fpm}"
+NN_HORIZON_SVC="${NN_HORIZON_SVC:-noblenest-horizon}"
+NN_KEEP_RELEASES="${NN_KEEP_RELEASES:-5}"
+NN_INNER="noblenest-academy"
 
-echo "=============================="
-echo " Noble Nest Deploy — $(date)"
-echo "=============================="
+TARGET_SHA="${1:-}"
 
-cd "$APP_DIR"
+log()  { echo "$(date '+%F %T') · $*"; }
+fail() { echo "deploy failed: $*" >&2; exit 1; }
 
-# 1. Pull latest code
-echo "[1/8] Pulling latest code from GitHub..."
-git pull origin main
+RELEASES_DIR="$NN_APP_DIR/releases"
+CURRENT_LINK="$NN_APP_DIR/current"
+SHARED_DIR="$NN_APP_DIR/shared"
+STAMP=$(date '+%Y%m%d%H%M%S')
+RELEASE_DIR="$RELEASES_DIR/$STAMP"
 
-# 2. Install PHP dependencies (no dev packages in production)
-echo "[2/8] Installing PHP dependencies..."
-composer install --optimize-autoloader --no-dev --no-interaction --quiet
+mkdir -p "$RELEASES_DIR" "$SHARED_DIR/storage" "$SHARED_DIR/public/fonts"
+[ -f "$SHARED_DIR/.env" ] || fail "shared/.env missing — copy production .env to $SHARED_DIR/.env first"
 
-# 3. Run any new database migrations
-echo "[3/8] Running database migrations..."
-$PHP artisan migrate --force
+log "cloning $NN_REPO ($NN_BRANCH) → $RELEASE_DIR"
+git clone --branch "$NN_BRANCH" --depth 1 "$NN_REPO" "$RELEASE_DIR"
+cd "$RELEASE_DIR/$NN_INNER"
 
-# 4. Cache all Laravel config for speed
-echo "[4/8] Caching Laravel config, routes, views, events..."
-$PHP artisan config:cache
-$PHP artisan route:cache
-$PHP artisan view:cache
-$PHP artisan event:cache
-$PHP artisan icons:cache 2>/dev/null || true
+if [ -n "$TARGET_SHA" ]; then
+    log "checking out $TARGET_SHA"
+    git fetch --depth 1 origin "$TARGET_SHA"
+    git checkout "$TARGET_SHA"
+fi
+DEPLOYED_SHA=$(git rev-parse --short HEAD)
+log "deploying $DEPLOYED_SHA"
 
-# 5. Ensure storage symlink exists
-echo "[5/8] Checking storage symlink..."
-$PHP artisan storage:link --quiet 2>/dev/null || true
+# Shared symlinks.
+ln -sfn "$SHARED_DIR/.env"          .env
+rm -rf storage
+ln -sfn "$SHARED_DIR/storage"       storage
+ln -sfn "$SHARED_DIR/public/fonts"  public/fonts
 
-# 6. Update Python sidecar dependencies
-echo "[6/8] Updating curriculum AI sidecar..."
-cd "$SIDECAR_DIR"
-pip install -q -r requirements.txt
+log "composer install --no-dev --optimize-autoloader"
+composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
-# 7. Restart services
-echo "[7/8] Restarting PHP-FPM and queue workers..."
-cd "$APP_DIR"
-sudo systemctl reload php8.3-fpm
-sudo supervisorctl restart noblenest-horizon:*
-sudo supervisorctl restart noblenest-curriculum-ai 2>/dev/null || true
+log "npm ci + fonts + build"
+npm ci
+npm run fonts || log "WARN: font fetch failed — continuing with existing files"
+npm run build
 
-# 8. Gracefully restart Horizon (waits for running jobs to finish)
-echo "[8/8] Restarting Horizon..."
-$PHP artisan horizon:terminate
+log "migrate + cache warm"
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
 
-echo ""
-echo "=============================="
-echo " Deploy complete!"
-echo "=============================="
+log "atomic swap: current → $RELEASE_DIR"
+ln -sfn "$RELEASE_DIR" "$CURRENT_LINK.new"
+mv -T "$CURRENT_LINK.new" "$CURRENT_LINK"
+
+log "reload $NN_PHP_FPM_SVC"
+sudo systemctl reload "$NN_PHP_FPM_SVC"
+
+if command -v supervisorctl >/dev/null 2>&1; then
+    log "restart $NN_HORIZON_SVC"
+    sudo supervisorctl restart "$NN_HORIZON_SVC" || log "WARN: horizon restart skipped"
+fi
+
+log "stripe:sync-prices (idempotent)"
+php artisan stripe:sync-prices || log "WARN: stripe:sync-prices failed — review manually"
+
+log "pruning releases (keep $NN_KEEP_RELEASES)"
+cd "$RELEASES_DIR"
+ls -1t | tail -n +$((NN_KEEP_RELEASES + 1)) | xargs -r rm -rf
+
+log "deploy complete — current → $DEPLOYED_SHA"

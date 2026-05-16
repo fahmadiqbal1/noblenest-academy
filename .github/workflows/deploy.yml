@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches: [feature/lms-scaffold]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Specific commit SHA to deploy (defaults to head of trigger ref)'
+        required: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false   # serial deploys — never cancel one in flight
+
+jobs:
+  deploy:
+    name: Deploy → Hostinger KVM4
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - name: Checkout (for SHA resolution only)
+        uses: actions/checkout@v4
+
+      - name: Resolve target SHA
+        id: sha
+        run: |
+          if [ -n "${{ github.event.inputs.sha }}" ]; then
+            echo "value=${{ github.event.inputs.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key:      ${{ secrets.DEPLOY_SSH_KEY }}
+          port:     ${{ secrets.DEPLOY_PORT || 22 }}
+          script: |
+            set -e
+            cd /var/www/noblenest/repo/noblenest-academy
+            git fetch --quiet origin
+            bash scripts/deploy.sh ${{ steps.sha.outputs.value }}
+
+      - name: Smoke test
+        run: |
+          for path in / /pricing /sitemap.xml /up; do
+            code=$(curl -sk -o /dev/null -w "%{http_code}" "https://${{ secrets.DEPLOY_DOMAIN }}$path")
+            echo "$code $path"
+            if [ "$code" -ge 500 ]; then
+              echo "::error::smoke-test failed for $path (HTTP $code)"
+              exit 1
+            fi
+          done
