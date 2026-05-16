@@ -21,7 +21,7 @@ class ToddlerActivitySeeder extends Seeder
             Activity::firstOrCreate(['title' => $data['title']], [
                 'description' => "Toddler activity about {$data['subject']}",
                 'instructions' => 'Step-by-step guide.',
-                'materials' => [],
+                'materials_needed' => null,
                 'duration_minutes' => 15,
                 'difficulty' => 'easy',
                 'age_tier' => 'toddler',
@@ -29,12 +29,12 @@ class ToddlerActivitySeeder extends Seeder
                 'language' => 'english',
                 'is_free' => true,
                 'mess_level' => 'low',
-                'safety_warnings' => [],
-                'adaptations' => ['easier' => 'Simplify', 'harder' => 'Complicate'],
+                'safety_warnings' => null,
+                'adaptations' => json_encode(['easier' => 'Simplify', 'harder' => 'Complicate']),
                 'cognitive_domain' => $data['cognitive_domain'],
-                'developmental_domains' => ['cognitive'],
-                'materials_cost' => 0,
-                'parent_involvement' => 'high',
+                'developmental_domains' => json_encode(['cognitive']),
+                'materials_cost' => 'free',
+                'parent_involvement' => 'guided',
                 'instructions_for_parent' => 'Guide your toddler.',
             ]);
         }

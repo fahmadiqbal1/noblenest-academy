@@ -72,7 +72,7 @@ class EmotionalRegulationActivitySeeder extends Seeder
                 [
                     'description'       => "An emotional regulation activity for {$data['age_tier']} children",
                     'instructions'      => 'Follow the steps to help your child regulate emotions.',
-                    'materials'         => [],
+                    'materials_needed'  => null,
                     'duration_minutes'  => 10,
                     'difficulty'        => $data['difficulty'],
                     'age_tier'          => $data['age_tier'],
@@ -80,14 +80,14 @@ class EmotionalRegulationActivitySeeder extends Seeder
                     'language'          => 'english',
                     'is_free'           => true,
                     'mess_level'        => $data['mess_level'],
-                    'safety_warnings'   => [],
-                    'adaptations'       => [
+                    'safety_warnings'   => null,
+                    'adaptations'       => json_encode([
                         'easier' => 'Provide more guidance and support.',
                         'harder' => 'Challenge with deeper reflection questions.',
-                    ],
-                    'developmental_domains' => ['social_emotional', 'attention'],
-                    'materials_cost'    => 0,
-                    'parent_involvement' => 'moderate',
+                    ]),
+                    'developmental_domains' => json_encode(['social_emotional', 'attention']),
+                    'materials_cost'    => 'free',
+                    'parent_involvement' => 'guided',
                     'instructions_for_parent' => 'Help your child identify and name their emotions, then practice the regulation technique together.',
                 ]
             );
