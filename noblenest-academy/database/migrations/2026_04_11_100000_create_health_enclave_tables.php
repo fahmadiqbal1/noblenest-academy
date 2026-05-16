@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('signed_hash', 255);
             $table->timestamps();
 
-            $table->unique(['parent_user_id', 'child_profile_id', 'data_source']);
+            $table->unique(['parent_user_id', 'child_profile_id', 'data_source'], 'pc_parent_child_source_unique');
             $table->index('revoked_at');
         });
 

@@ -36,7 +36,7 @@ return new class extends Migration
 
         Schema::create('assessment_responses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('child_id')->nullable()->constrained('children')->nullOnDelete();
+            $table->foreignId('child_id')->nullable()->constrained('child_profiles')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('battery', 32)->default('discovery');
             $table->json('answers');                                 // [{sequence: 1, option: 2}, ...]

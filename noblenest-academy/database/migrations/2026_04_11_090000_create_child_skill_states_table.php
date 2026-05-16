@@ -52,14 +52,14 @@ return new class extends Migration
             $table->timestamps();
 
             // Indices for fast lookup
-            $table->unique(['child_profile_id', 'cognitive_domain', 'developmental_domain'])
-                  ->comment('One skill state per child per cognitive-domain combo');
-            $table->index(['child_profile_id', 'ema_score'])
-                  ->comment('Find struggling skills quickly');
-            $table->index(['child_profile_id', 'streak_struggle'])
-                  ->comment('Find kids with struggle streaks');
-            $table->index('last_updated')
-                  ->comment('For cleanup jobs');
+            // Explicit index names — MariaDB has a 64-char identifier limit.
+            $table->unique(
+                ['child_profile_id', 'cognitive_domain', 'developmental_domain'],
+                'css_child_cog_dev_unique'
+            );
+            $table->index(['child_profile_id', 'ema_score'], 'css_child_ema_idx');
+            $table->index(['child_profile_id', 'streak_struggle'], 'css_child_streak_idx');
+            $table->index('last_updated', 'css_last_updated_idx');
         });
     }
 
