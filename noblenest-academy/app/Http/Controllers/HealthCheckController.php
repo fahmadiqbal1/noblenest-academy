@@ -98,8 +98,17 @@ class HealthCheckController extends Controller
      * GET /health/detailed — Full diagnostic (includes external API checks)
      * More expensive; use for manual troubleshooting, not load balancers
      */
-    public function detailed()
+    public function detailed(\Illuminate\Http\Request $request)
     {
+        // Phase 9 — gate behind HEALTH_TOKEN bearer to avoid leaking diagnostics.
+        $expected = (string) config('app.health_token', env('HEALTH_TOKEN', ''));
+        if ($expected !== '') {
+            $auth = (string) $request->header('Authorization', '');
+            if (! str_starts_with($auth, 'Bearer ') || substr($auth, 7) !== $expected) {
+                return response()->json(['error' => 'unauthorized'], 401);
+            }
+        }
+
         $results = [
             'database' => $this->checkDatabase(),
             'cache' => $this->checkCache(),

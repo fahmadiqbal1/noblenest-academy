@@ -187,6 +187,12 @@ parameters:
 			path: app/Http/Controllers/ChildActivityController.php
 
 		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Http/Controllers/HealthCheckController.php
+
+		-
 			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$achievable\.$#'
 			identifier: property.notFound
 			count: 1
@@ -227,6 +233,12 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/QuizController.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Illuminate\\\\Support\\\\Facades\\\\Log'' and ''shareContext'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Http/Middleware/RequestId.php
 
 		-
 			message: '#^Parameter \#1 \$time of static method Carbon\\Carbon\:\:parse\(\) expects Carbon\\Month\|Carbon\\WeekDay\|DateTimeInterface\|float\|int\|string\|null, App\\Models\\Carbon given\.$#'

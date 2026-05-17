@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Global HTTP middleware — applied to every request
+        $middleware->prepend(\App\Http\Middleware\RequestId::class);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         // Resolve & apply request locale (user pref → session → header → config)

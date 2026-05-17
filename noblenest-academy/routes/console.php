@@ -39,3 +39,6 @@ Schedule::command('curriculum:auto-generate --dry-run')
 Schedule::command('media:generate --type=thumbnail --missing-only --limit=25')
     ->dailyAt('04:00')
     ->withoutOverlapping();
+
+// Phase 9 — nightly DB backup with 30-day retention.
+Schedule::command('backup:db --retention=30')->dailyAt('02:00')->onOneServer();
