@@ -13,7 +13,7 @@
     ][$ageTier] ?? 'var(--color-tier-primary)';
 @endphp
 <!doctype html>
-<html lang="{{ $lang }}" dir="{{ $dir }}" data-age-tier="{{ $ageTier }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ \App\Helpers\I18n::direction() }}" data-age-tier="{{ $ageTier }}">
 <head>
     @include('layouts.partials.head')
 </head>

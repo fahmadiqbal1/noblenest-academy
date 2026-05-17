@@ -11,7 +11,7 @@
     {{-- Step indicator --}}
     <div class="mb-8">
       {{-- Visual step orbs --}}
-      <div class="flex items-center justify-center gap-3 mb-4" role="list" aria-label="Onboarding progress">
+      <div class="flex items-center justify-center gap-3 mb-4" role="list" aria-label="{{ __('onboarding.progress_label') }}">
         {{-- Step 1 — current --}}
         <div role="listitem" class="flex flex-col items-center gap-1">
           <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--color-brand-600)] text-white font-bold text-sm shadow-sm" aria-current="step" aria-label="Step 1 of 3, current">

@@ -28,8 +28,8 @@
     {{-- Playful Hero Header --}}
     <div class="text-center mb-5 nn-hero-bounce">
         <div class="nn-hero-emoji">🎓</div>
-        <h1 class="nn-playful-title">Hey Explorer! <span class="nn-wave">👋</span></h1>
-        <p class="nn-playful-subtitle">What adventure shall we go on today?</p>
+        <h1 class="nn-playful-title">{{ __('activities.greeting') }} <span class="nn-wave">👋</span></h1>
+        <p class="nn-playful-subtitle">{{ __('activities.subtitle') }}</p>
         <div class="nn-floating-shapes">
             <span class="nn-shape nn-shape-1">⭐</span>
             <span class="nn-shape nn-shape-2">🌈</span>
@@ -117,14 +117,14 @@
     @else
     <div class="text-center py-5 mb-5">
         <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
-        <h4 class="font-bold" style="color:var(--nn-text,#1F2937);font-family:'Baloo 2',sans-serif;">No activities found</h4>
-        <p class="mb-0" style="color:var(--nn-text-muted,#6B7280);font-family:'Comic Neue',sans-serif;">Try adjusting your filters or age range.</p>
+        <h4 class="font-bold" style="color:var(--nn-text,#1F2937);font-family:'Baloo 2',sans-serif;">{{ __('activities.none_found') }}</h4>
+        <p class="mb-0" style="color:var(--nn-text-muted,#6B7280);font-family:'Comic Neue',sans-serif;">{{ __('activities.adjust_filters') }}</p>
     </div>
     @endif
 
     {{-- Curriculum Roadmap --}}
-    <h2 class="nn-section-title"><span class="nn-section-emoji">🗺️</span> Learning Roadmap</h2>
-    <p class="text-center text-[var(--color-text-muted)] mb-4" style="font-family:'Comic Neue',sans-serif;font-size:1.1rem;">Follow the path and unlock new skills at every age!</p>
+    <h2 class="nn-section-title"><span class="nn-section-emoji">🗺️</span> {{ __('activities.learning_roadmap') }}</h2>
+    <p class="text-center text-[var(--color-text-muted)] mb-4" style="font-family:'Comic Neue',sans-serif;font-size:1.1rem;">{{ __('activities.roadmap_intro') }}</p>
 
     <div class="nn-roadmap" id="curriculumAccordion">
         @forelse($roadmap as $i => $ageActivities)
@@ -132,7 +132,7 @@
             <h2 class="" id="heading{{ $loop->index }}">
                 <button class="w-full text-left px-4 py-3 flex items-center justify-between font-medium hover:bg-gray-50 font-bold text-xl {{ $loop->first ? '' : 'collapsed' }}" type="button" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="collapse{{ $loop->index }}">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-sky-600 me-2" style="font-size:1rem;">{{ $i }}</span>
-                    <span>{{ $ageActivities->first()->subject ? ucfirst($ageActivities->first()->subject) : 'Activities' }} & more</span>
+                    <span>{{ __('activities.and_more', ['subject' => $ageActivities->first()->subject ? ucfirst($ageActivities->first()->subject) : __('activities.subject_activities')]) }}</span>
                 </button>
             </h2>
             <div id="collapse{{ $loop->index }}" class="{{ $loop->first ? 'show' : '' }}" aria-labelledby="heading{{ $loop->index }}">
@@ -142,7 +142,7 @@
                         <div class="md:w-6/12 lg:w-4/12">
                             <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full border-0 curriculum-skill-card">
                                 <div class="p-5">
-                                    <h5 class="text-lg font-bold mb-2 text-[var(--color-primary)]"><x-ui.icon name="lightbulb" /> {{ $subjectName ? ucfirst($subjectName) : 'General' }}</h5>
+                                    <h5 class="text-lg font-bold mb-2 text-[var(--color-primary)]"><x-ui.icon name="lightbulb" /> {{ $subjectName ? ucfirst($subjectName) : __('activities.subject_general') }}</h5>
                                     <ul class="list-unstyled mb-2">
                                         @foreach($subjectActivities as $roadmapActivity)
                                         <li>
@@ -153,7 +153,7 @@
                                     </ul>
                                 </div>
                                 <div class="px-5 py-3 border-t border-gray-200 bg-white border-0 text-right">
-                                    <a href="{{ route('activities.show', $subjectActivities->first()) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm">View Activity</a>
+                                    <a href="{{ route('activities.show', $subjectActivities->first()) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white px-3 py-1.5 text-sm">{{ __('activities.view_activity') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +164,7 @@
         </div>
         @empty
         <div class="text-center py-4">
-            <p class="text-[var(--color-text-muted)]">No roadmap activities found yet.</p>
+            <p class="text-[var(--color-text-muted)]">{{ __('activities.no_roadmap') }}</p>
         </div>
         @endforelse
     </div>

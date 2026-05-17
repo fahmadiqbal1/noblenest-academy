@@ -20,7 +20,7 @@
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
                 <div class="p-5 text-center py-4">
                     <div style="font-size:2.5rem;font-weight:800;color:#7C3AED">{{ $summary['pct'] }}%</div>
-                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">Curriculum Coverage</div>
+                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">{{ __('activities.curriculum_coverage') }}</div>
                     <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mt-2" style="height:6px">
                         <div class="h-full bg-violet-600 transition-all" style="width:{{ $summary['pct'] }}%;background:#7C3AED"></div>
                     </div>
@@ -34,7 +34,7 @@
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
                 <div class="p-5 text-center py-4">
                     <div style="font-size:2.5rem;font-weight:800;color:#f59e0b">🔥 {{ $summary['streak'] }}</div>
-                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">Day Streak</div>
+                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">{{ __('activities.day_streak') }}</div>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
                 <div class="p-5 text-center py-4">
                     <div style="font-size:2.5rem;font-weight:800;color:#7c3aed">{{ count($summary['gaps']) }}</div>
-                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">Subject Gaps</div>
+                    <div class="text-[var(--color-text-muted)] text-sm font-semibold">{{ __('activities.subject_gaps') }}</div>
                     @if(!empty($summary['gaps']))
                         <div class="mt-2">
                             @foreach($summary['gaps'] as $gap)
@@ -60,9 +60,9 @@
         <div class="md:w-5/12">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0 h-full">
                 <div class="p-5 p-4">
-                    <h6 class="font-bold mb-3">Subject Breakdown</h6>
+                    <h6 class="font-bold mb-3">{{ __('activities.subject_breakdown') }}</h6>
                     @if(empty($summary['subject_breakdown']))
-                        <p class="text-[var(--color-text-muted)] text-sm">No completed activities yet.</p>
+                        <p class="text-[var(--color-text-muted)] text-sm">{{ __('activities.no_completed') }}</p>
                     @else
                         @foreach($summary['subject_breakdown'] as $subject => $count)
                             <div class="flex justify-between items-center mb-2">
@@ -85,9 +85,9 @@
         <div class="md:w-7/12">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0">
                 <div class="p-5 p-4">
-                    <h6 class="font-bold mb-3">Recommended for Today</h6>
+                    <h6 class="font-bold mb-3">{{ __('activities.recommended_today') }}</h6>
                     @if($daily->isEmpty())
-                        <p class="text-[var(--color-text-muted)] text-sm">No activities to recommend — all done! 🎉</p>
+                        <p class="text-[var(--color-text-muted)] text-sm">{{ __('activities.all_done') }}</p>
                     @else
                         <div class="flex flex-wrap gap-2">
                             @foreach($daily as $activity)
@@ -111,7 +111,7 @@
     {{-- Next Milestones --}}
     @if($next->isNotEmpty())
         <div class="mt-4">
-            <h6 class="font-bold mb-3">Upcoming Milestones</h6>
+            <h6 class="font-bold mb-3">{{ __('activities.upcoming_milestones') }}</h6>
             <div class="flex flex-wrap gap-3">
                 @foreach($next as $milestone)
                     <div class="md:w-4/12">

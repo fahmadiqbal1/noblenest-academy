@@ -13,10 +13,10 @@
             loading="lazy"
         >
         <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-[var(--color-text)]">Add NobleNest to Home Screen</p>
-            <p class="text-xs text-[var(--color-text-muted)]">One tap access, works offline</p>
+            <p class="text-sm font-bold text-[var(--color-text)]">{{ __('common.pwa_title') }}</p>
+            <p class="text-xs text-[var(--color-text-muted)]">{{ __('common.pwa_sub') }}</p>
         </div>
-        <x-ui.button id="pwa-install-btn" variant="primary" size="sm">Install</x-ui.button>
+        <x-ui.button id="pwa-install-btn" variant="primary" size="sm">{{ __('common.pwa_install') }}</x-ui.button>
         <button
             id="pwa-dismiss-btn"
             type="button"

@@ -83,4 +83,19 @@ return [
         'timeout' => (int) env('CURRICULUM_AI_TIMEOUT', 60),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Anthropic API
+    |--------------------------------------------------------------------------
+    | Used by the i18n:translate command for machine translation.
+    */
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY', ''),
+    ],
+
+    'groq' => [
+        'api_key' => env('GROQ_API_KEY', ''),
+    ],
+
 ];

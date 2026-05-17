@@ -11,7 +11,7 @@
     <p class="mb-4 {{ $isPlayful ? 'playful-font' : 'professional-font' }}">{{ $activity->description }}</p>
     {{-- Difficulty + Timer --}}
     <div class="flex gap-3 justify-center mb-3 items-center flex-wrap">
-        <span class="text-sm text-[var(--color-text-muted)]">Difficulty:</span>
+        <span class="text-sm text-[var(--color-text-muted)]">{{ __('activities.difficulty') }}</span>
         <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white puzzle-diff active" data-count="4">Easy (4)</button>
         <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-gray-900 puzzle-diff" data-count="6">Medium (6)</button>
         <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white puzzle-diff" data-count="8">Hard (8)</button>

@@ -6,4 +6,7 @@ export default {
         './app/View/**/*.php',
         './app/Http/**/*.php',
     ],
+    plugins: [
+        require('tailwindcss-rtl'),
+    ],
 };

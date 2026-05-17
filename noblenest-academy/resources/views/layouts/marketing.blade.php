@@ -3,7 +3,7 @@
     $dir  = in_array($lang, ['ar', 'ur']) ? 'rtl' : 'ltr';
 @endphp
 <!doctype html>
-<html lang="{{ $lang }}" dir="{{ $dir }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ \App\Helpers\I18n::direction() }}">
 <head>
     @include('layouts.partials.head')
 </head>

@@ -4,7 +4,7 @@
     if (!class_exists('I18n')) { class_alias(\App\Helpers\I18n::class, 'I18n'); }
 @endphp
 <!doctype html>
-<html lang="{{ $lang }}" dir="{{ $dir }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ \App\Helpers\I18n::direction() }}">
 <head>
     @include('layouts.partials.head')
 </head>

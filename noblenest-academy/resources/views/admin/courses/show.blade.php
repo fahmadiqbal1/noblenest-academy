@@ -32,17 +32,17 @@
                               style="background:{{ $color }}22;color:{{ $color }}">🎂 {{ $ageLabel }}</span>
                     @endif
                     <span class="text-sm text-gray-500">
-                        <x-ui.icon name="folder" /> {{ $course->modules->count() }} modules
+                        <x-ui.icon name="folder" /> {{ $course->modules->count() }} {{ __('admin.courses.modules_count') }}
                     </span>
                     <span class="text-sm text-gray-500">
-                        <x-ui.icon name="zap" /> {{ $totalActivities }} activities
+                        <x-ui.icon name="zap" /> {{ $totalActivities }} {{ __('admin.courses.activities_count') }}
                     </span>
                 </div>
             </div>
         </div>
         <a href="{{ route('admin.courses.edit', $course) }}"
            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white transition shrink-0">
-            <x-ui.icon name="pencil" /> Edit Course
+            <x-ui.icon name="pencil" /> {{ __('admin.courses.edit_course') }}
         </a>
     </div>
 
@@ -60,7 +60,7 @@
                     </span>
                     <span class="font-semibold text-gray-900 flex-1">{{ $module->title }}</span>
                     <span class="text-xs text-gray-500 mr-2">
-                        {{ $module->activities->count() }} activities · {{ $module->lessons->count() }} lessons
+                        {{ __('admin.courses.activities_lessons', ['activities' => $module->activities->count(), 'lessons' => $module->lessons->count()]) }}
                     </span>
                     <svg class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
@@ -75,11 +75,11 @@
                                 <thead class="bg-gray-50 text-left">
                                     <tr>
                                         <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-10">#</th>
-                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs">Activity</th>
-                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-28">Type</th>
-                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-24">Difficulty</th>
-                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-20">Duration</th>
-                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-16">Free?</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs">{{ __('admin.courses.col_activity') }}</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-28">{{ __('admin.courses.col_type') }}</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-24">{{ __('admin.courses.col_difficulty') }}</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-20">{{ __('admin.courses.col_duration') }}</th>
+                                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs w-16">{{ __('admin.courses.col_free') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -128,7 +128,7 @@
                     @else
                         <div class="text-center text-gray-400 py-8">
                             <x-ui.icon name="inbox" class="text-3xl block mb-1 mx-auto" />
-                            <p class="text-sm">No activities in this module yet.</p>
+                            <p class="text-sm">{{ __('admin.courses.no_activities') }}</p>
                         </div>
                     @endif
 
@@ -136,7 +136,7 @@
                     @if($module->lessons->count())
                         <div class="border-t border-gray-100 px-5 py-4">
                             <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
-                                <x-ui.icon name="book" /> Lessons
+                                <x-ui.icon name="book" /> {{ __('admin.courses.lessons') }}
                             </h3>
                             <div class="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
                                 @foreach($module->lessons as $lesson)
@@ -158,7 +158,7 @@
         @empty
             <div class="text-center text-gray-400 py-12">
                 <x-ui.icon name="folder-open" class="text-5xl block mb-2 mx-auto" />
-                <p class="text-sm">No modules in this course yet.</p>
+                <p class="text-sm">{{ __('admin.courses.no_modules') }}</p>
             </div>
         @endforelse
     </div>

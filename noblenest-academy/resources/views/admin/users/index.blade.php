@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Users')
+@section('title', __('admin.users.title'))
 
 @section('content')
 <div class="w-full px-4 py-4">
@@ -8,8 +8,8 @@
     {{-- Header --}}
     <div class="flex items-center justify-between mb-4">
         <div>
-            <h2 class="font-bold mb-0">Users</h2>
-            <small class="text-[var(--color-text-muted)]">Manage platform accounts and roles</small>
+            <h2 class="font-bold mb-0">{{ __('admin.users.title') }}</h2>
+            <small class="text-[var(--color-text-muted)]">{{ __('admin.users.subtitle') }}</small>
         </div>
     </div>
 
@@ -30,7 +30,7 @@
     {{-- Role tabs --}}
     @php
         $tabs = ['', 'Admin', 'Teacher', 'Parent', 'Student'];
-        $tabLabels = ['' => 'All', 'Admin' => 'Admins', 'Teacher' => 'Teachers', 'Parent' => 'Parents', 'Student' => 'Students'];
+        $tabLabels = ['' => __('admin.users.tab_all'), 'Admin' => __('admin.users.tab_admins'), 'Teacher' => __('admin.users.tab_teachers'), 'Parent' => __('admin.users.tab_parents'), 'Student' => __('admin.users.tab_students')];
         $tabColors  = [
             ''        => 'bg-gray-100 text-gray-700',
             'Admin'   => 'bg-red-100 text-red-700',
@@ -68,7 +68,7 @@
                     <span class="inline-flex items-center px-3 bg-gray-50 border border-gray-300 bg-white border-end-0"><x-ui.icon name="search" class="text-[var(--color-text-muted)]" /></span>
                     <input type="text" name="q" value="{{ request('q') }}"
                            class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 border-start-0 ps-0"
-                           placeholder="Search by name or email…">
+                           placeholder="{{ __('admin.users.search_placeholder') }}">
                     @if(request('q'))
                         <a href="{{ route('admin.users.index', array_filter(['role' => $currentRole ?: null])) }}"
                            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed border-2 border-gray-300 text-gray-700 hover:bg-gray-100">✕</a>
@@ -80,19 +80,19 @@
             @if($users->isEmpty())
                 <div class="text-center py-5 text-[var(--color-text-muted)]">
                     <x-ui.icon name="users" class="text-5xl block mb-2" />
-                    No users found.
+                    {{ __('admin.users.empty') }}
                 </div>
             @else
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm border-collapse table-hover-tw align-middle mb-0">
                         <thead class="bg-gray-50 text-sm uppercase text-[var(--color-text-muted)]">
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Verified</th>
-                                <th>Language</th>
-                                <th>Joined</th>
+                                <th>{{ __('admin.users.col_name') }}</th>
+                                <th>{{ __('admin.users.col_email') }}</th>
+                                <th>{{ __('admin.users.col_role') }}</th>
+                                <th>{{ __('admin.users.col_verified') }}</th>
+                                <th>{{ __('admin.users.col_language') }}</th>
+                                <th>{{ __('admin.users.col_joined') }}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -138,7 +138,7 @@
                                     <td class="text-right">
                                         <button class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-gray-300 text-gray-700 hover:bg-gray-100"
 >
-                                            Change Role
+                                            {{ __('admin.users.change_role') }}
                                         </button>
                                         <ul class="absolute z-10 mt-2 min-w-[10rem] bg-white border border-gray-200 rounded-lg shadow-lg py-1 hidden dropdown-menu-end shadow-sm">
                                             @foreach(['Admin','Teacher','Parent','Student'] as $role)
@@ -146,7 +146,7 @@
                                                     <li>
                                                         <form method="POST"
                                                               action="{{ route('admin.users.updateRole', $user) }}"
-                                                              onsubmit="return confirm('Set {{ $user->name }} as {{ $role }}?')">
+                                                              onsubmit="return confirm('{{ __('admin.users.set_role_confirm', ['name' => $user->name, 'role' => $role]) }}')">
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="role" value="{{ $role }}">

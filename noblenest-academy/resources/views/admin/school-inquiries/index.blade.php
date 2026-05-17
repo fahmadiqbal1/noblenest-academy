@@ -1,29 +1,29 @@
 @extends('layouts.admin')
 
-@section('title', 'School Inquiries')
+@section('title', __('admin.school_inquiries.index_title'))
 
 @section('content')
 <div class="w-full px-4 py-4">
-    <h1 class="h3 font-bold mb-4">School Inquiries</h1>
+    <h1 class="h3 font-bold mb-4">{{ __('admin.school_inquiries.index_title') }}</h1>
 
     @if(session('success'))
     <div class="flex items-start gap-3 p-4 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800">{{ session('success') }}</div>
     @endif
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm border-0">
-        <div class="px-5 py-3 border-b border-gray-200 font-semibold bg-white font-bold">All Inquiries</div>
+        <div class="px-5 py-3 border-b border-gray-200 font-semibold bg-white font-bold">{{ __('admin.school_inquiries.all_inquiries') }}</div>
         <div class="p-5 p-0">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm border-collapse table-hover-tw mb-0">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th>School</th>
-                            <th>Contact</th>
-                            <th>Country</th>
-                            <th>Students</th>
-                            <th>Status</th>
-                            <th>Received</th>
-                            <th>Actions</th>
+                            <th>{{ __('admin.school_inquiries.col_school') }}</th>
+                            <th>{{ __('admin.school_inquiries.col_contact') }}</th>
+                            <th>{{ __('admin.school_inquiries.col_country') }}</th>
+                            <th>{{ __('admin.school_inquiries.col_students') }}</th>
+                            <th>{{ __('admin.school_inquiries.col_status') }}</th>
+                            <th>{{ __('admin.school_inquiries.col_received') }}</th>
+                            <th>{{ __('admin.school_inquiries.col_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,11 +40,11 @@
                             </td>
                             <td>{{ $inquiry->created_at->format('d M Y') }}</td>
                             <td>
-                                <a href="{{ route('admin.school-inquiries.show', $inquiry) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white">View</a>
+                                <a href="{{ route('admin.school-inquiries.show', $inquiry) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm border-2 border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white">{{ __('admin.school_inquiries.view') }}</a>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="7" class="text-center text-[var(--color-text-muted)] py-4">No school inquiries yet.</td></tr>
+                        <tr><td colspan="7" class="text-center text-[var(--color-text-muted)] py-4">{{ __('admin.school_inquiries.empty') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>

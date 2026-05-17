@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global HTTP middleware — applied to every request
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        // Resolve & apply request locale (user pref → session → header → config)
+        $middleware->appendToGroup('web', \App\Http\Middleware\SetLocale::class);
+
         // Exclude Stripe webhook from CSRF verification
         $middleware->validateCsrfTokens(except: [
             'webhook/stripe',

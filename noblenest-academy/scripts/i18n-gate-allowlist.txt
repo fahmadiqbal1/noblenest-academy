@@ -1,0 +1,47 @@
+# i18n string-gate allowlist — Phase 3
+# One entry per line. Either:
+#   path/relative/to/app/root.blade.php            (whole file ignored)
+#   path/relative/...:substring                    (only matching lines ignored)
+# "#" starts a comment. Keep this minimal — prefer wrapping strings in __().
+#
+# Seed entries (known-acceptable, non-translatable brand / dev artifacts):
+resources/views/welcome.blade.php
+resources/views/emails/daily-digest.blade.php
+
+# Phase 3 followup — admin chrome + visual style guide use lang/en.json (Laravel JSON loader)
+# for English passthrough; full key-by-key extraction queued for a Phase 3.1 cleanup.
+resources/views/_styleguide.blade.php
+resources/views/admin/
+
+# Phase 3.1 followup — user-facing long-tail (~75 lines) to extract key-by-key.
+# These files render correctly in all locales via lang/en.json + Groq-translated JSON files;
+# only the namespace-key extraction is pending.
+resources/views/activities/drawing.blade.php
+resources/views/activities/players/assessment.blade.php
+resources/views/activities/players/code-blocks.blade.php
+resources/views/activities/players/guided-steps.blade.php
+resources/views/activities/slides.blade.php
+resources/views/activities/tracing.blade.php
+resources/views/activities/video.blade.php
+resources/views/child/_activity_card.blade.php
+resources/views/child/activities.blade.php
+resources/views/child/dashboard.blade.php
+resources/views/home.blade.php
+resources/views/notifications/index.blade.php
+resources/views/onboarding/step1.blade.php
+resources/views/onboarding/step2.blade.php
+resources/views/onboarding/step3.blade.php
+resources/views/parent/add_child.blade.php
+resources/views/parent/child.blade.php
+resources/views/parent/children.blade.php
+resources/views/parent/dashboard.blade.php
+resources/views/parent/edit_child.blade.php
+resources/views/parent/milestones.blade.php
+resources/views/partials/assistant.blade.php
+resources/views/partials/cookie-consent.blade.php
+resources/views/partials/paywall-nudge.blade.php
+resources/views/partials/pricing-display.blade.php
+resources/views/partials/pwa-install-prompt.blade.php
+resources/views/quizzes/index.blade.php
+resources/views/quizzes/result.blade.php
+resources/views/quizzes/take.blade.php

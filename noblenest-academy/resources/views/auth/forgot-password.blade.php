@@ -10,9 +10,9 @@
   <div class="inline-flex items-center justify-center w-14 h-14 rounded-[var(--radius-sm)] bg-[var(--color-brand-100)] mb-4">
     <x-ui.icon name="mail" class="w-7 h-7 text-[var(--color-brand-600)]" />
   </div>
-  <h1 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-2">Forgot your password?</h1>
+  <h1 class="text-2xl font-bold text-[var(--color-text)] font-[var(--font-display)] mb-2">{{ __('auth.forgot_heading') }}</h1>
   <p class="text-sm text-[var(--color-text-muted)] max-w-xs mx-auto">
-    No worries. Enter the email linked to your account and we&rsquo;ll send you a reset link right away.
+    {{ __('auth.forgot_desc') }}
   </p>
 </div>
 
@@ -29,7 +29,7 @@
 
   <div class="space-y-4">
 
-    <x-ui.field name="email" label="Email address" :error="$errors->first('email')" required>
+    <x-ui.field name="email" label="{{ __('auth.email') }}" :error="$errors->first('email')" required>
       <x-ui.input
         type="email"
         name="email"
@@ -48,7 +48,7 @@
       type="submit"
       class="w-full"
     >
-      Send reset link
+      {{ __('auth.send_reset_link') }}
     </x-ui.button>
 
   </div>
@@ -57,9 +57,9 @@
 <hr class="my-6 border-[var(--color-border)]">
 
 <p class="text-center text-sm text-[var(--color-text-muted)]">
-  Remember your password?
+  {{ __('auth.remember_password') }}
   <a href="{{ route('login') }}" class="font-bold text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded ms-1">
-    Back to sign in
+    {{ __('auth.back_to_sign_in') }}
   </a>
 </p>
 

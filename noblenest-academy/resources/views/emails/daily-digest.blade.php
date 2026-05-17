@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Learning Summary</title>
+  <title>{{ __('emails.digest_title') }}</title>
   <style>
     body { font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background: #f8f9fa; margin: 0; padding: 0; color: #1a1a2e; }
     .wrapper { max-width: 580px; margin: 32px auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
@@ -28,24 +28,24 @@
 <body>
   <div class="wrapper">
     <div class="header">
-      <h1>🌟 Yesterday's Learning Recap</h1>
+      <h1>🌟 {{ __('emails.digest_header_title') }}</h1>
       <p>{{ now()->subDay()->format('l, F j, Y') }}</p>
     </div>
 
     <div class="body">
-      <p class="greeting">Hi {{ $parent->name }},</p>
+      <p class="greeting">{{ __('emails.digest_greeting', ['name' => $parent->name]) }}</p>
 
       @if(!empty($digest['summaries']))
-        <p style="color:#374151; margin-bottom:20px;">Here's what your {{ count($digest['summaries']) > 1 ? 'children' : 'child' }} learned yesterday:</p>
+        <p style="color:#374151; margin-bottom:20px;">{{ count($digest['summaries']) > 1 ? __('emails.digest_intro_many') : __('emails.digest_intro_one') }}</p>
 
         <div class="stats-bar">
           <div class="stat">
             <div class="num">{{ $digest['total_completions'] }}</div>
-            <div class="label">Activities Done</div>
+            <div class="label">{{ __('emails.digest_activities_done') }}</div>
           </div>
           <div class="stat">
             <div class="num">🔥 {{ $digest['streak_max'] }}</div>
-            <div class="label">Day Streak</div>
+            <div class="label">{{ __('emails.digest_day_streak') }}</div>
           </div>
         </div>
 
@@ -53,7 +53,7 @@
           <div class="child-card">
             <div class="child-name">{{ $summary['child_name'] }} · {{ $summary['age_display'] }}</div>
             @if($summary['streak'] > 1)
-              <div class="streak">🔥 {{ $summary['streak'] }}-day streak – keep it up!</div>
+              <div class="streak">🔥 {{ __('emails.digest_streak_line', ['count' => $summary['streak']]) }}</div>
             @endif
             <div>
               @foreach($summary['activities'] as $activity)
@@ -63,16 +63,16 @@
           </div>
         @endforeach
 
-        <a href="{{ url('/parent/dashboard') }}" class="cta">View Full Dashboard →</a>
+        <a href="{{ url('/parent/dashboard') }}" class="cta">{{ __('emails.digest_view_dashboard') }}</a>
       @else
-        <p style="color:#374151;">No activities yesterday — that's okay! Consistency builds over time. Try logging in today and starting with just one activity.</p>
-        <a href="{{ url('/activities') }}" class="cta">Explore Today's Activities →</a>
+        <p style="color:#374151;">{{ __('emails.digest_empty') }}</p>
+        <a href="{{ url('/activities') }}" class="cta">{{ __('emails.digest_explore') }}</a>
       @endif
     </div>
 
     <div class="footer">
-      <p>You're receiving this because you're a NobleNest Academy parent.</p>
-      <p><a href="{{ url('/settings') }}">Manage email preferences</a> · <a href="{{ url('/privacy') }}">Privacy Policy</a></p>
+      <p>{{ __('emails.digest_footer_reason') }}</p>
+      <p><a href="{{ url('/settings') }}">{{ __('emails.digest_manage_prefs') }}</a> · <a href="{{ url('/privacy') }}">{{ __('emails.digest_privacy_policy') }}</a></p>
     </div>
   </div>
 </body>

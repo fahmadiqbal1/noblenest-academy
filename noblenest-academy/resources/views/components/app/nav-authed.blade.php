@@ -9,7 +9,7 @@
             {{-- Brand --}}
             <a href="{{ route('noble.home') }}" class="flex items-center gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded">
                 <img src="{{ asset('brand/noblenest-logo.svg') }}" alt="NobleNest Global Academy logo" class="w-9 h-9 rounded-[var(--radius-sm)] shadow-[var(--shadow-clay)]" loading="eager">
-                <span class="brand-grad font-bold hidden sm:block">NobleNest</span>
+                <span class="brand-grad font-bold hidden sm:block">{{ __('common.brand') }}</span>
             </a>
 
             {{-- Spacer --}}
@@ -26,7 +26,7 @@
                 <form action="{{ route('logout') }}" method="POST" class="inline">
                     @csrf
                     <x-ui.button type="submit" variant="ghost" size="sm" icon="log-out">
-                        <span class="hidden sm:inline">Logout</span>
+                        <span class="hidden sm:inline">{{ __('common.logout') }}</span>
                     </x-ui.button>
                 </form>
             </div>

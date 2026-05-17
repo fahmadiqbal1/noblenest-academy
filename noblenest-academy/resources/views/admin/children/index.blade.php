@@ -1,14 +1,14 @@
 @extends('layouts.admin')
 
-@section('title', 'Children')
+@section('title', __('admin.children.title'))
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-[var(--color-text)]">Children</h1>
-            <p class="text-sm text-[var(--color-text-muted)] mt-0.5">All registered child profiles</p>
+            <h1 class="text-2xl font-bold text-[var(--color-text)]">{{ __('admin.children.title') }}</h1>
+            <p class="text-sm text-[var(--color-text-muted)] mt-0.5">{{ __('admin.children.subtitle') }}</p>
         </div>
     </div>
 
@@ -18,20 +18,20 @@
             {{-- Filters --}}
             <form method="GET" action="{{ route('admin.children.index') }}" class="flex flex-wrap gap-2 items-end">
                 <div class="flex-1 min-w-[200px] max-w-xs">
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">{{ __('admin.children.search') }}</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
                             <x-ui.icon name="search" />
                         </span>
                         <input type="text" name="q" value="{{ request('q') }}"
                                class="block w-full pl-9 pr-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none"
-                               placeholder="Name or nickname…">
+                               placeholder="{{ __('admin.children.search_placeholder') }}">
                     </div>
                 </div>
                 <div class="w-44">
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Language</label>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">{{ __('admin.children.language') }}</label>
                     <select name="language" class="block w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none">
-                        <option value="">All Languages</option>
+                        <option value="">{{ __('admin.children.all_languages') }}</option>
                         @foreach($languages as $lang)
                             <option value="{{ $lang }}" {{ request('language') === $lang ? 'selected' : '' }}>
                                 {{ strtoupper($lang) }}
@@ -41,11 +41,11 @@
                 </div>
                 <div class="flex gap-2">
                     <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-100 transition">
-                        Filter
+                        {{ __('admin.children.filter') }}
                     </button>
                     @if(request()->hasAny(['q', 'language']))
                         <a href="{{ route('admin.children.index') }}" class="inline-flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 transition">
-                            Clear
+                            {{ __('admin.children.clear') }}
                         </a>
                     @endif
                 </div>
@@ -55,19 +55,19 @@
             @if($children->isEmpty())
                 <div class="text-center py-12 text-[var(--color-text-muted)]">
                     <x-ui.icon name="users" class="text-4xl block mb-2 mx-auto" />
-                    <p class="text-sm">No child profiles found.</p>
+                    <p class="text-sm">{{ __('admin.children.empty') }}</p>
                 </div>
             @else
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-left">
                             <tr>
-                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Child</th>
-                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Age</th>
-                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Gender</th>
-                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Language</th>
-                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Parent</th>
-                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Joined</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">{{ __('admin.children.col_child') }}</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">{{ __('admin.children.col_age') }}</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">{{ __('admin.children.col_gender') }}</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">{{ __('admin.children.col_language') }}</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">{{ __('admin.children.col_parent') }}</th>
+                                <th class="px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">{{ __('admin.children.col_joined') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -102,7 +102,7 @@
                                     </td>
                                     <td class="px-4 py-3 text-gray-500">
                                         @if($child->date_of_birth)
-                                            {{ \Carbon\Carbon::parse($child->date_of_birth)->diffInYears() }} yrs
+                                            {{ \Carbon\Carbon::parse($child->date_of_birth)->diffInYears() }} {{ __('admin.children.years_suffix') }}
                                         @else
                                             —
                                         @endif

@@ -19,11 +19,11 @@
     <div class="mt-1 text-sm text-[var(--color-text-muted)]">{{ I18n::get('slug_help') }}</div>
   </div>
   <div class="md:w-3/12">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Emoji</label>
+    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.courses.emoji') }}</label>
     <input type="text" name="emoji" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" value="{{ old('emoji', $course->emoji ?? '') }}" placeholder="👶" maxlength="10" id="courseEmoji">
   </div>
   <div class="md:w-3/12">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.courses.color') }}</label>
     <div class="flex w-full items-stretch">
       <input type="color" name="color" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500 h-10 w-16 cursor-pointer p-0" value="{{ old('color', $course->color ?? '#64B5F6') }}" style="max-width:3rem" id="courseColor">
       <input type="text" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" value="{{ old('color', $course->color ?? '#64B5F6') }}" id="courseColorText"
@@ -31,11 +31,11 @@
     </div>
   </div>
   <div class="md:w-3/12">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Min Age (years)</label>
+    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.courses.min_age') }}</label>
     <input type="number" name="age_min" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" value="{{ old('age_min', $course->age_min ?? '') }}" min="0" max="18" placeholder="0">
   </div>
   <div class="md:w-3/12">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Max Age (years)</label>
+    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin.courses.max_age') }}</label>
     <input type="number" name="age_max" class="block w-full px-3 py-2 rounded-md border border-gray-300 bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none disabled:bg-gray-50 disabled:text-gray-500" value="{{ old('age_max', $course->age_max ?? '') }}" min="0" max="18" placeholder="1">
   </div>
   <div class="w-full">

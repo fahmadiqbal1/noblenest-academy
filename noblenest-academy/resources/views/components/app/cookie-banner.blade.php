@@ -31,15 +31,15 @@
         <div class="grid gap-2 sm:grid-cols-3" x-show="showDetails" x-cloak>
             <label class="flex items-center gap-2 rounded-lg border p-2 text-sm cursor-pointer hover:bg-gray-50">
                 <input type="checkbox" x-model="prefs.performance" class="w-4 h-4 rounded">
-                <span><strong>Performance</strong><br><span class="text-xs text-[var(--color-text-muted)]">Speed + error logging.</span></span>
+                <span><strong>{{ __('common.cookie_performance_title') }}</strong><br><span class="text-xs text-[var(--color-text-muted)]">{{ __('common.cookie_performance_desc') }}</span></span>
             </label>
             <label class="flex items-center gap-2 rounded-lg border p-2 text-sm cursor-pointer hover:bg-gray-50">
                 <input type="checkbox" x-model="prefs.analytics" class="w-4 h-4 rounded">
-                <span><strong>Analytics</strong><br><span class="text-xs text-[var(--color-text-muted)]">Anonymous usage stats.</span></span>
+                <span><strong>{{ __('common.cookie_analytics_title') }}</strong><br><span class="text-xs text-[var(--color-text-muted)]">{{ __('common.cookie_analytics_desc') }}</span></span>
             </label>
             <label class="flex items-center gap-2 rounded-lg border p-2 text-sm cursor-pointer hover:bg-gray-50">
                 <input type="checkbox" x-model="prefs.marketing" class="w-4 h-4 rounded">
-                <span><strong>Marketing</strong><br><span class="text-xs text-[var(--color-text-muted)]">Email + retargeting.</span></span>
+                <span><strong>{{ __('common.cookie_marketing_title') }}</strong><br><span class="text-xs text-[var(--color-text-muted)]">{{ __('common.cookie_marketing_desc') }}</span></span>
             </label>
         </div>
 

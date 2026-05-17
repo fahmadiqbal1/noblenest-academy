@@ -17,9 +17,9 @@
 @endphp
 <div class="container py-5">
     <h2 class="mb-2 text-center {{ $isPlayful ? 'playful-font text-pink' : 'professional-font text-primary' }}">
-        <x-ui.icon name="heart" /> Invest in Your Child's Future
+        <x-ui.icon name="heart" /> {{ __('billing.checkout_title') }}
     </h2>
-    <p class="text-center text-[var(--color-text-muted)] mb-4">Weekly learning packs adapted for your child's age — fresh content every week.</p>
+    <p class="text-center text-[var(--color-text-muted)] mb-4">{{ __('billing.checkout_subtitle') }}</p>
 
     @if(session('error'))
         <div class="flex items-start gap-3 p-4 rounded-lg border bg-red-50 border-red-200 text-red-800 text-center">{{ session('error') }}</div>
@@ -33,15 +33,15 @@
         <div class="flex-1">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full border-0 {{ $isPlayful ? 'playful-font' : 'professional-font' }}">
                 <div class="p-5 text-center">
-                    <h4 class="text-lg font-bold mb-2"><x-ui.icon name="calendar" class="text-[var(--color-primary)]" /> Monthly</h4>
-                    <p class="text-sm text-[var(--color-text-muted)]">All children, weekly drip packs, cancel anytime</p>
+                    <h4 class="text-lg font-bold mb-2"><x-ui.icon name="calendar" class="text-[var(--color-primary)]" /> {{ __('billing.checkout_monthly') }}</h4>
+                    <p class="text-sm text-[var(--color-text-muted)]">{{ __('billing.checkout_monthly_tagline') }}</p>
                     <div class="text-2xl font-bold mb-1">${{ number_format($monthlyPrice, 2) }}</div>
-                    <div class="text-[var(--color-text-muted)] text-sm mb-3">per month</div>
+                    <div class="text-[var(--color-text-muted)] text-sm mb-3">{{ __('billing.checkout_per_month') }}</div>
                     <form method="POST" action="{{ route('checkout.stripe') }}" class="grid gap-2">
                         @csrf
                         <input type="hidden" name="plan" value="monthly">
-                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg bg-violet-600 text-white hover:bg-violet-700"><x-ui.icon name="credit-card" /> Subscribe — Monthly</button>
-                        <p class="text-xs text-[var(--color-text-muted)] mt-1">7-day free trial. Cancel anytime via the billing portal.</p>
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg bg-violet-600 text-white hover:bg-violet-700"><x-ui.icon name="credit-card" /> {{ __('billing.checkout_subscribe_monthly') }}</button>
+                        <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ __('billing.checkout_monthly_note') }}</p>
                     </form>
                 </div>
             </div>
@@ -51,28 +51,28 @@
         <div class="flex-1">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm h-full shadow border-2 border-primary {{ $isPlayful ? 'playful-font' : 'professional-font' }}">
                 <div class="p-5 text-center">
-                    <h4 class="text-lg font-bold mb-2"><x-ui.icon name="calendar" class="text-red-600" /> Annual</h4>
-                    <p class="text-sm text-[var(--color-text-muted)]">Everything in Monthly + save {{ $yearlySavings }}%</p>
+                    <h4 class="text-lg font-bold mb-2"><x-ui.icon name="calendar" class="text-red-600" /> {{ __('billing.checkout_annual') }}</h4>
+                    <p class="text-sm text-[var(--color-text-muted)]">{{ __('billing.checkout_annual_tagline', ['percent' => $yearlySavings]) }}</p>
                     <div class="text-2xl font-bold mb-1">${{ number_format($yearlyPrice, 2) }}</div>
-                    <div class="text-[var(--color-text-muted)] text-sm mb-3">per year (~${{ number_format($yearlyPrice / 12, 2) }}/mo)</div>
+                    <div class="text-[var(--color-text-muted)] text-sm mb-3">{{ __('billing.checkout_per_year', ['amount' => '$'.number_format($yearlyPrice / 12, 2)]) }}</div>
                     <form method="POST" action="{{ route('checkout.stripe') }}" class="grid gap-2">
                         @csrf
                         <input type="hidden" name="plan" value="annual">
-                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg bg-violet-600 text-white hover:bg-violet-700"><x-ui.icon name="credit-card" /> Subscribe — Annual</button>
-                        <p class="text-xs text-[var(--color-text-muted)] mt-1">7-day free trial. Save {{ $yearlySavings }}% vs monthly.</p>
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 text-lg bg-violet-600 text-white hover:bg-violet-700"><x-ui.icon name="credit-card" /> {{ __('billing.checkout_subscribe_annual') }}</button>
+                        <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ __('billing.checkout_annual_note', ['percent' => $yearlySavings]) }}</p>
                     </form>
                 </div>
-                <div class="px-5 py-3 border-t border-gray-200 text-center bg-[var(--color-primary)] text-white font-bold">Best Value — Save {{ $yearlySavings }}%</div>
+                <div class="px-5 py-3 border-t border-gray-200 text-center bg-[var(--color-primary)] text-white font-bold">{{ __('billing.checkout_best_value', ['percent' => $yearlySavings]) }}</div>
             </div>
         </div>
     </div>
 
     <div class="text-center text-[var(--color-text-muted)] text-sm mt-3 mb-4">
-        <x-ui.icon name="map-pin" /> Pricing for <strong>{{ $region }}</strong> region. All prices in {{ $currency }}.
+        <x-ui.icon name="map-pin" /> {!! __('billing.checkout_region_note', ['region' => '<strong>'.e($region).'</strong>', 'currency' => e($currency)]) !!}
     </div>
 
     <div class="text-center mt-2">
-        <a href="/" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-500 text-white hover:bg-gray-600"><x-ui.icon name="arrow-left" /> Back to Home</a>
+        <a href="/" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-500 text-white hover:bg-gray-600"><x-ui.icon name="arrow-left" /> {{ __('billing.checkout_back_home') }}</a>
     </div>
 </div>
 @endsection
@@ -81,7 +81,7 @@
 // Animated feedback for payment buttons
 [...document.querySelectorAll('form[action*="checkout"] button')].forEach(btn => {
     btn.addEventListener('click', function() {
-        btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4 me-2"></span>Processing...';
+        btn.innerHTML = '<span class="inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin w-4 h-4 me-2"></span>{{ __('billing.checkout_processing') }}';
         btn.disabled = true;
         setTimeout(()=>btn.disabled=false, 6000);
     });

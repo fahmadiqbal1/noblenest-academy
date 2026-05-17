@@ -5,7 +5,7 @@
     $metaTitle ??= ($metaTitle ?? 'Admin — NobleNest Academy');
 @endphp
 <!doctype html>
-<html lang="{{ $lang }}" dir="{{ $dir }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ \App\Helpers\I18n::direction() }}">
 <head>
     @include('layouts.partials.head')
 </head>
