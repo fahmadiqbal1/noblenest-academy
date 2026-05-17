@@ -10,6 +10,13 @@ class Payment extends Model
     protected $fillable = [
         'user_id', 'provider', 'provider_payment_id', 'amount', 'currency', 'status', 'paid_at',
     ];
+    protected function casts(): array
+    {
+        return [
+            'amount'  => 'decimal:2',
+            'paid_at' => 'datetime',
+        ];
+    }
     public function user() { return $this->belongsTo(User::class); }
 }
 

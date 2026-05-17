@@ -1,0 +1,452 @@
+# Phase 2 baseline — burn down over Phases 3-8.
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 5
+			path: app/Console/Commands/ActivityTranslateCommand.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Console/Commands/AutoGenerateCurriculumCommand.php
+
+		-
+			message: '#^Match expression does not handle remaining values\: string\|null$#'
+			identifier: match.unhandled
+			count: 1
+			path: app/Console/Commands/GenerateMediaCommand.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>email" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Console/Commands/RotateCredentialsCommand.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>Value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Console/Commands/StressAuditCommand.php
+
+		-
+			message: '#^Access to an undefined property Stripe\\Price\:\:\$_created\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/StripeSyncPricesCommand.php
+
+		-
+			message: '#^Access to an undefined property Stripe\\Product\:\:\$_created\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/StripeSyncPricesCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$steps\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ActivityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$likes_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/AnalyticsController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Activity\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Admin/AnalyticsController.php
+
+		-
+			message: '#^Parameter \#1 \$aiJobId of job class App\\Jobs\\ProcessContentBatchJob constructor expects int in App\\Jobs\\ProcessContentBatchJob\:\:dispatch\(\), App\\Models\\AIJob given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Admin/ContentBatchController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Module\:\:\$activities\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/ModuleController.php
+
+		-
+			message: '#^Relation ''course'' is not found in App\\Models\\Module model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/ModuleController.php
+
+		-
+			message: '#^Offset ''age'' on array\{age\: int, skill\: string, count\: int, target\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Http/Controllers/Admin/OrchestratorController.php
+
+		-
+			message: '#^Offset ''age_max'' on array\{age\: int, skill\: string, count\: int, target\: int\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/Admin/OrchestratorController.php
+
+		-
+			message: '#^Offset ''age_min'' on array\{age\: int, skill\: string, count\: int, target\: int\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/Admin/OrchestratorController.php
+
+		-
+			message: '#^Offset ''skill'' on array\{age\: int, skill\: string, count\: int, target\: int\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/Admin/OrchestratorController.php
+
+		-
+			message: '#^Offset ''subject'' on array\{age\: int, skill\: string, count\: int, target\: int\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/Admin/OrchestratorController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Question\:\:\$options\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/QuestionController.php
+
+		-
+			message: '#^Relation ''module'' is not found in App\\Models\\Quiz model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/Admin/QuizController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>preferred_language" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/ChatController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$is_completed\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$locked\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$modules\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$pivot_order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$unlock_week\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$starts_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:currentWeek\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:maxActivityOrder\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Relation ''modules'' is not found in App\\Models\\Activity model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ChildActivityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$achievable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/MilestoneWallController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$achievable_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/MilestoneWallController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$child\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/MilestoneWallController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$child_profile_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/MilestoneWallController.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 2
+			path: app/Http/Controllers/OnboardingController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Milestone\:\:\$completed\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Parent/MilestoneController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Relations\\Pivot\:\:\$is_completed\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Parent/MilestoneController.php
+
+		-
+			message: '#^Call to an undefined method App\\Services\\PricingService\:\:resolveTier\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/PaymentController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$birth_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/PrivacyController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$quizAttempts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/PrivacyController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\ChildProfile\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/PrivacyController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quiz\:\:\$questions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/QuizController.php
+
+		-
+			message: '#^Parameter \#1 \$time of static method Carbon\\Carbon\:\:parse\(\) expects Carbon\\Month\|Carbon\\WeekDay\|DateTimeInterface\|float\|int\|string\|null, App\\Models\\Carbon given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Middleware/RequireParentalConsent.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Http/Middleware/RequireParentalConsent.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$role$#'
+			identifier: parameter.notFound
+			count: 1
+			path: app/Http/Middleware/RoleMiddleware.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>payload" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Jobs/GenerateActivityVideoJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$steps\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/GenerateContentAnimationsJob.php
+
+		-
+			message: '#^Relation ''steps'' is not found in App\\Models\\Activity model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Jobs/GenerateContentAnimationsJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Jobs\\RecomputeLearningPathJob\:\:\$maxExceptions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/RecomputeLearningPathJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Jobs\\RecomputeLearningPathJob\:\:\$timeout\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/RecomputeLearningPathJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Jobs\\RecomputeLearningPathJob\:\:\$tries\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Jobs/RecomputeLearningPathJob.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$age_display\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/SendDailyDigestJob.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/SendDailyDigestJob.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/SendDailyDigestJob.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: app/Listeners/UpdateChildSkillStateListener.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$translations\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Activity.php
+
+		-
+			message: '#^Call to method copy\(\) on an unknown class App\\Models\\Carbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/ChildProfile.php
+
+		-
+			message: '#^Call to method diffInMonths\(\) on an unknown class App\\Models\\Carbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/ChildProfile.php
+
+		-
+			message: '#^Call to method diffInYears\(\) on an unknown class App\\Models\\Carbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/ChildProfile.php
+
+		-
+			message: '#^PHPDoc tag @property for property App\\Models\\ChildProfile\:\:\$created_at contains unknown class App\\Models\\Carbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/ChildProfile.php
+
+		-
+			message: '#^PHPDoc tag @property for property App\\Models\\ChildProfile\:\:\$date_of_birth contains unknown class App\\Models\\Carbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/ChildProfile.php
+
+		-
+			message: '#^PHPDoc tag @property for property App\\Models\\ChildProfile\:\:\$updated_at contains unknown class App\\Models\\Carbon\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/ChildProfile.php
+
+		-
+			message: '#^Relation ''modules'' is not found in App\\Models\\Activity model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Models/Course.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QuizAnswer\:\:\$attempt\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Policies/QuizAnswerPolicy.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\User\:\:hasRole\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Providers/AppServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Activity\:\:\$steps\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ActivityRendererResolver.php
+
+		-
+			message: '#^Offset ''cognitive_logic'' on array\{cognitive_logic\: ''Problem\-solver'', creative\: ''Maker / artist'', social\: ''Connector'', kinetic\: ''Mover / athlete'', naturalist\: ''Naturalist /…'', linguistic\: ''Storyteller / writer''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Services/AssessmentScoringService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:weeklyThemes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/JourneySequencerService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:weeklyThemes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/LearningPathService.php
+
+		-
+			message: '#^Constant App\\Services\\LearningPathService\:\:DAILY_ACTIVITY_TARGET is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Services/LearningPathService.php
+
+		-
+			message: '#^Match arm comparison between ''course''\|''milestone''\|''social''\|''special''\|''subject'' and ''activity'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Services/MilestoneService.php
+
+		-
+			message: '#^Variable \$lastError on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Services/Providers/ImageGenerationService.php
+
+		-
+			message: '#^Cannot cast array\<mixed, mixed\> to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: app/Services/Providers/MediaGenerationService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Services/SecureCredentialsManager.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$providerSlug \(string\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: app/Services/SecureCredentialsManager.php

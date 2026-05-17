@@ -71,7 +71,7 @@ class CurriculumAIService
             ]);
 
             $response = $this->client()
-                ->post('{$this->baseUrl}/api/activities/generate', $payload)
+                ->post("{$this->baseUrl}/api/activities/generate", $payload)
                 ->throw()
                 ->json();
 
@@ -117,7 +117,7 @@ class CurriculumAIService
                 ->get("{$this->baseUrl}/health")
                 ->json();
 
-            return $response['status'] ?? false === 'healthy';
+            return ($response['status'] ?? null) === 'healthy';
         } catch (\Exception $e) {
             Log::warning('Curriculum AI health check failed', [
                 'error' => $e->getMessage(),

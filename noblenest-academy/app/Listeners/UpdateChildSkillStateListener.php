@@ -85,14 +85,4 @@ class UpdateChildSkillStateListener implements ShouldQueue
         // Queue job to recalculate learning path based on updated skill state
         RecomputeLearningPathJob::dispatch($event->child);
     }
-
-    /**
-     * Determine if the listener should be queued.
-     * Return false to handle synchronously (faster, but blocks request).
-     * Return true to queue asynchronously (recommended for production).
-     */
-    public function shouldQueue(): bool
-    {
-        return config('queue.default') !== 'sync';
-    }
 }

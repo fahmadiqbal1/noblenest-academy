@@ -24,8 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'subscription.active' => \App\Http\Middleware\EnsureSubscriptionActive::class,
             'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
-            'maternal.consent' => \App\Http\Middleware\EnsureMaternalConsent::class,
-            'practitioner.active' => \App\Http\Middleware\EnsurePractitionerActive::class,
             // Phase 5: under-13 COPPA / GDPR-K parental consent gate.
             'parental.consent' => \App\Http\Middleware\RequireParentalConsent::class,
         ]);

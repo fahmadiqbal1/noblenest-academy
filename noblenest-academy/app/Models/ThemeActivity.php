@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ThemeActivity extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'weekly_theme_id', 'activity_id', 'subject_slot',
         'day_of_week', 'time_of_day', 'sort_order',

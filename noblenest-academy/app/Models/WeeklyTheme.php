@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WeeklyTheme extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'journey_id', 'week_number', 'theme_name',
         'theme_description', 'theme_emoji', 'big_idea',

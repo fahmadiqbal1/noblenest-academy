@@ -10,13 +10,18 @@ use JsonSchema\Constraints\Constraint;
 class ActivityPayloadContractTest extends TestCase
 {
     protected static $schema;
-    protected static $validator;
+    protected Validator $validator;
 
     public static function setUpBeforeClass(): void
     {
-        $schemaPath = base_path('services/curriculum-ai/contracts/activity_payload.schema.json');
+        $schemaPath = __DIR__ . '/../../../services/curriculum-ai/contracts/activity_payload.schema.json';
         self::$schema = json_decode(file_get_contents($schemaPath));
-        self::$validator = new Validator();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->validator = new Validator();
     }
 
     /**
@@ -48,7 +53,7 @@ class ActivityPayloadContractTest extends TestCase
             'instructions_for_parent' => 'Encourage your baby to point and repeat numbers.',
         ];
 
-        $this->validator->validate($payload, self::$schema, Constraint::CHECK_MODE_VALIDATE_SCHEMA);
+        $this->validator->validate(json_decode(json_encode($payload)), self::$schema, Constraint::CHECK_MODE_VALIDATE_SCHEMA);
         $this->assertTrue($this->validator->isValid(), json_encode($this->validator->getErrors()));
     }
 
@@ -78,7 +83,7 @@ class ActivityPayloadContractTest extends TestCase
             'instructions_for_parent' => 'Help your child.',
         ];
 
-        $this->validator->validate($payload, self::$schema);
+        $this->validator->validate(json_decode(json_encode($payload)), self::$schema);
         $this->assertFalse($this->validator->isValid());
     }
 
@@ -108,7 +113,7 @@ class ActivityPayloadContractTest extends TestCase
             'instructions_for_parent' => 'Help.',
         ];
 
-        $this->validator->validate($payload, self::$schema);
+        $this->validator->validate(json_decode(json_encode($payload)), self::$schema);
         $this->assertFalse($this->validator->isValid());
     }
 
@@ -138,7 +143,7 @@ class ActivityPayloadContractTest extends TestCase
             'instructions_for_parent' => 'Help.',
         ];
 
-        $this->validator->validate($payload, self::$schema);
+        $this->validator->validate(json_decode(json_encode($payload)), self::$schema);
         $this->assertFalse($this->validator->isValid());
     }
 
@@ -169,7 +174,7 @@ class ActivityPayloadContractTest extends TestCase
             'unexpected_field' => 'should fail', // NOT in schema
         ];
 
-        $this->validator->validate($payload, self::$schema);
+        $this->validator->validate(json_decode(json_encode($payload)), self::$schema);
         $this->assertFalse($this->validator->isValid());
     }
 }

@@ -41,7 +41,33 @@ After Phase 1: **53 migrations**, all creating or altering tables that exist in 
 
 - `2026_04_02_000012_extend_child_profiles_table.php` — removed the `share_card_url` column (the rest of the file — `age_tier`, `streak_days`, `last_activity_date` — is kept).
 
-## Migration-squash decision: DEFERRED to Phase 2
+## Phase 2 squash attempt: BLOCKED by local toolchain — re-deferred to CI (Phase 11)
+
+The Phase 2 squash (operator-approved "schema:dump + single consolidated
+migration + `_archived_pre_v1/`") was attempted and reverted. Findings:
+
+1. **Local `mysqldump`/`mysql` client is broken.** Homebrew MySQL 9.4 ships
+   without the `mysql_native_password` plugin
+   (`ERROR 2059 ... mysql_native_password.so (no such file)`), so both
+   `php artisan schema:dump` and Laravel's *native* schema-loading
+   (`migrate` auto-loads `database/schema/{driver}-schema.sql` via the DB CLI)
+   fail on this machine. This is an environment defect, not an app defect —
+   CI and the Hostinger VPS will have a matching, working client.
+2. A hand-rolled equivalent (generate DDL via `SHOW CREATE TABLE`, wrap in a
+   single `DB::unprepared()` migration) works for MySQL but the dumped DDL is
+   driver-specific and breaks the SQLite in-memory test suite (187 failures);
+   maintaining parallel `mysql-schema.sql` + `sqlite-schema.sql` re-introduces
+   exactly Laravel's native schema:dump mechanism, which needs the working CLI.
+
+**Decision:** the squash is re-deferred to **Phase 11 (CI/CD)**, where
+`php artisan schema:dump --prune` will run inside the CI container (clean
+MySQL 8 client) as a dedicated step, producing `database/schema/mysql-schema.sql`
++ `sqlite-schema.sql` the Laravel-native way and pruning the historical files.
+The core Phase 1 compliance requirement (no deleted-table migrations in
+history) remains satisfied. The 54 remaining migrations are clean, apply
+cleanly on MySQL 8 and SQLite, and `migrate:fresh --seed` is green.
+
+## Original migration-squash decision (superseded by the above)
 
 The original Phase 1 plan called for collapsing the remaining migrations into a single
 `2026_05_16_000000_consolidated_v1_schema.php` and moving the 53 historical files into

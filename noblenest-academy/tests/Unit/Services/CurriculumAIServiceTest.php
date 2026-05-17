@@ -4,7 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Services\CurriculumAIService;
 use Illuminate\Support\Facades\Http;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class CurriculumAIServiceTest extends TestCase
 {

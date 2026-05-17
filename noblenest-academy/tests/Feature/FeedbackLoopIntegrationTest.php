@@ -8,11 +8,14 @@ use App\Models\ChildActivityProgress;
 use App\Models\ChildProfile;
 use App\Models\ChildSkillState;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class FeedbackLoopIntegrationTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected User $parent;
     protected ChildProfile $child;
     protected Activity $activity;
@@ -26,8 +29,8 @@ class FeedbackLoopIntegrationTest extends TestCase
 
         // Create child profile
         $this->child = ChildProfile::factory()
-            ->for($this->parent)
-            ->create(['age_months' => 36]); // 3 years old
+            ->for($this->parent, 'parent')
+            ->create(['date_of_birth' => now()->subMonths(36)]); // 3 years old
 
         // Create an activity with cognitive domain
         $this->activity = Activity::factory()
@@ -44,8 +47,6 @@ class FeedbackLoopIntegrationTest extends TestCase
      */
     public function test_activity_completion_updates_skill_state()
     {
-        Event::fake();
-
         // Mark activity as completed with a good score
         $progress = ChildActivityProgress::create([
             'child_profile_id' => $this->child->id,
@@ -71,8 +72,6 @@ class FeedbackLoopIntegrationTest extends TestCase
      */
     public function test_success_streak_increments()
     {
-        Event::fake();
-
         // Complete activity with high score (success)
         $progress = ChildActivityProgress::create([
             'child_profile_id' => $this->child->id,
@@ -87,8 +86,8 @@ class FeedbackLoopIntegrationTest extends TestCase
             ->where('cognitive_domain', 'math')
             ->first();
 
-        $this->assertEqual($skillState->streak_success, 1);
-        $this->assertEqual($skillState->streak_struggle, 0);
+        $this->assertEquals($skillState->streak_success, 1);
+        $this->assertEquals($skillState->streak_struggle, 0);
     }
 
     /**
@@ -96,8 +95,6 @@ class FeedbackLoopIntegrationTest extends TestCase
      */
     public function test_struggle_streak_increments()
     {
-        Event::fake();
-
         // Complete activity with low score (struggle)
         $progress = ChildActivityProgress::create([
             'child_profile_id' => $this->child->id,
@@ -112,8 +109,8 @@ class FeedbackLoopIntegrationTest extends TestCase
             ->where('cognitive_domain', 'math')
             ->first();
 
-        $this->assertEqual($skillState->streak_struggle, 1);
-        $this->assertEqual($skillState->streak_success, 0);
+        $this->assertEquals($skillState->streak_struggle, 1);
+        $this->assertEquals($skillState->streak_success, 0);
     }
 
     /**

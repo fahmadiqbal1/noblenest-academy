@@ -21,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Event listeners are wired explicitly in App\Providers\EventServiceProvider.
+        // Without this, Laravel's base EventServiceProvider also auto-discovers
+        // every listener, registering each one a SECOND time (double-firing —
+        // e.g. ChildSkillState streaks incrementing by 2 per activity).
+        \Illuminate\Foundation\Support\Providers\EventServiceProvider::disableEventDiscovery();
+
         // Register AI Provider Gateway as singleton with its dependencies
         $this->app->singleton(AIProviderGateway::class, function ($app) {
             return new AIProviderGateway(

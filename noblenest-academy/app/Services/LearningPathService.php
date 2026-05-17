@@ -314,14 +314,13 @@ class LearningPathService
      * Get all ChildSkillState records for this child, indexed by cognitive_domain.
      * Used to make adaptive recommendations based on mastery and streaks.
      *
-     * @return array<string, ChildSkillState>
+     * @return \Illuminate\Support\Collection<string, ChildSkillState>
      */
-    private function getChildSkillStates(ChildProfile $child): array
+    private function getChildSkillStates(ChildProfile $child): \Illuminate\Support\Collection
     {
         return ChildSkillState::where('child_profile_id', $child->id)
             ->get()
-            ->keyBy('cognitive_domain')
-            ->toArray();
+            ->keyBy('cognitive_domain');
     }
 
     private function ageTier(int $ageMonths): string

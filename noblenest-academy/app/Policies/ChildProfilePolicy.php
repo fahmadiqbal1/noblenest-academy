@@ -7,27 +7,28 @@ use App\Models\User;
 
 class ChildProfilePolicy
 {
-    /**
-     * Parent may view their own child's profile.
-     */
+    public function viewAny(User $user): bool
+    {
+        return $user->isAdmin();
+    }
+
     public function view(User $user, ChildProfile $childProfile): bool
     {
-        return $user->id === $childProfile->parent_id;
+        return $user->isAdmin() || $user->id === $childProfile->parent_id;
     }
 
-    /**
-     * Parent may update their own child's profile.
-     */
+    public function create(User $user): bool
+    {
+        return $user->isAdmin() || $user->isParent();
+    }
+
     public function update(User $user, ChildProfile $childProfile): bool
     {
-        return $user->id === $childProfile->parent_id;
+        return $user->isAdmin() || $user->id === $childProfile->parent_id;
     }
 
-    /**
-     * Parent may delete their own child's profile.
-     */
     public function delete(User $user, ChildProfile $childProfile): bool
     {
-        return $user->id === $childProfile->parent_id;
+        return $user->isAdmin() || $user->id === $childProfile->parent_id;
     }
 }

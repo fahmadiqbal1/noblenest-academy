@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChildJourneyEnrollment extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'child_profile_id', 'journey_id', 'current_week',
         'started_at', 'completed_at', 'is_active',
