@@ -98,4 +98,29 @@ return [
         'api_key' => env('GROQ_API_KEY', ''),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Phase 6 — AI content pipeline providers
+    |--------------------------------------------------------------------------
+    | Video avatars + Whisper subtitles. NullAdapter ships by default;
+    | inject real keys via ops to flip drivers to heygen/synthesia/openai.
+    */
+
+    'video_avatar' => [
+        'driver' => env('VIDEO_AVATAR_DRIVER', 'null'), // null | heygen | synthesia
+    ],
+
+    'heygen' => [
+        'api_key' => env('HEYGEN_API_KEY', ''),
+    ],
+
+    'synthesia' => [
+        'api_key' => env('SYNTHESIA_API_KEY', ''),
+    ],
+
+    'whisper' => [
+        'driver'  => env('WHISPER_DRIVER', 'local'), // local | openai
+        'api_key' => env('WHISPER_API_KEY', env('OPENAI_API_KEY', '')),
+    ],
+
 ];

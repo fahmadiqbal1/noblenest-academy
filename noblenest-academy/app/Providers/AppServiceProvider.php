@@ -40,6 +40,24 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AIAssistantService::class, function ($app) {
             return new AIAssistantService($app->make(AIProviderGateway::class));
         });
+
+        // Phase 6 — pluggable AI content pipeline providers.
+        $this->app->singleton(\App\Services\Providers\VideoAvatarProvider::class, function ($app) {
+            return match (config('services.video_avatar.driver', 'null')) {
+                'heygen'    => new \App\Services\Providers\VideoAvatar\HeyGenAdapter((string) config('services.heygen.api_key', '')),
+                'synthesia' => new \App\Services\Providers\VideoAvatar\SynthesiaAdapter((string) config('services.synthesia.api_key', '')),
+                default     => new \App\Services\Providers\VideoAvatar\NullAdapter(),
+            };
+        });
+        $this->app->singleton(\App\Services\Providers\WhisperAdapter::class, function ($app) {
+            return match (config('services.whisper.driver', 'local')) {
+                'openai' => new \App\Services\Providers\Whisper\OpenAIWhisperAdapter((string) config('services.whisper.api_key', '')),
+                default  => new \App\Services\Providers\Whisper\LocalWhisperAdapter(),
+            };
+        });
+        $this->app->singleton(\App\Services\Providers\AnthropicTranslator::class, function ($app) {
+            return new \App\Services\Providers\AnthropicTranslator((string) config('services.groq.api_key', ''));
+        });
     }
 
     /**
