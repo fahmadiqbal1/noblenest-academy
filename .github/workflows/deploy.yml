@@ -1,57 +1,126 @@
 name: Deploy
 
+# Phase 11 — production deploy → Hostinger KVM4 (Ubuntu 24.04, nginx + php8.3-fpm).
+#
+# Required GitHub Secrets:
+#   DEPLOY_SSH_KEY  — private key (PEM) authorized on the VPS deploy user
+#   DEPLOY_SSH_HOST — VPS hostname or IP
+#   DEPLOY_SSH_USER — VPS SSH user (e.g. deploy)
+#   DEPLOY_PATH     — base path on VPS (e.g. /home/noblenestacademy.com)
+#   HEALTH_TOKEN    — bearer token for /health/detailed
+#
+# This workflow MUST NOT trigger from any branch other than main.
+
 on:
   push:
-    branches: [feature/lms-scaffold]
+    branches: [main]
   workflow_dispatch:
     inputs:
-      sha:
-        description: 'Specific commit SHA to deploy (defaults to head of trigger ref)'
+      dry_run:
+        description: 'Build + bundle only, skip scp/ssh/smoke'
         required: false
+        default: 'true'
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: false   # serial deploys — never cancel one in flight
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: noblenest-academy
 
 jobs:
   deploy:
     name: Deploy → Hostinger KVM4
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment: production
     steps:
-      - name: Checkout (for SHA resolution only)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Resolve target SHA
-        id: sha
-        run: |
-          if [ -n "${{ github.event.inputs.sha }}" ]; then
-            echo "value=${{ github.event.inputs.sha }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "value=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: SSH deploy
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
         with:
-          host:     ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key:      ${{ secrets.DEPLOY_SSH_KEY }}
-          port:     ${{ secrets.DEPLOY_PORT || 22 }}
-          script: |
-            set -e
-            cd /var/www/noblenest/repo/noblenest-academy
-            git fetch --quiet origin
-            bash scripts/deploy.sh ${{ steps.sha.outputs.value }}
+          php-version: '8.3'
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: noblenest-academy/package-lock.json
+
+      - name: Composer install (no-dev)
+        run: composer install --no-dev --optimize-autoloader --prefer-dist --no-progress --no-interaction
+
+      - name: npm ci + build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Bundle release artifact
+        run: |
+          tar -czf release-${GITHUB_SHA}.tar.gz \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=tests \
+            --exclude=storage/logs \
+            .
+          ls -lh release-${GITHUB_SHA}.tar.gz
+
+      - name: Upload artifact (always)
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: noblenest-academy/release-${{ github.sha }}.tar.gz
+          retention-days: 7
+
+      - name: Stop early if dry-run
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true'
+        run: |
+          echo "Dry-run requested — skipping scp/ssh/smoke."
+          exit 0
+
+      - name: Configure SSH
+        if: github.event_name == 'push' || github.event.inputs.dry_run != 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: SCP artifact to VPS
+        if: github.event_name == 'push' || github.event.inputs.dry_run != 'true'
+        run: |
+          REMOTE_DIR="${{ secrets.DEPLOY_PATH }}/releases/${GITHUB_RUN_ID}"
+          ssh -i ~/.ssh/deploy_key "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}" \
+            "mkdir -p $REMOTE_DIR"
+          scp -i ~/.ssh/deploy_key release-${GITHUB_SHA}.tar.gz \
+            "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}:$REMOTE_DIR/"
+          ssh -i ~/.ssh/deploy_key "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}" \
+            "cd $REMOTE_DIR && tar -xzf release-${GITHUB_SHA}.tar.gz && rm release-${GITHUB_SHA}.tar.gz"
+
+      - name: Run deploy.sh on VPS
+        if: github.event_name == 'push' || github.event.inputs.dry_run != 'true'
+        id: remote_deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}" \
+            "bash ${{ secrets.DEPLOY_PATH }}/releases/${GITHUB_RUN_ID}/scripts/deploy.sh ${GITHUB_RUN_ID}"
 
       - name: Smoke test
+        if: github.event_name == 'push' || github.event.inputs.dry_run != 'true'
+        id: smoke
+        env:
+          HEALTH_TOKEN: ${{ secrets.HEALTH_TOKEN }}
         run: |
-          for path in / /pricing /sitemap.xml /up; do
-            code=$(curl -sk -o /dev/null -w "%{http_code}" "https://${{ secrets.DEPLOY_DOMAIN }}$path")
-            echo "$code $path"
-            if [ "$code" -ge 500 ]; then
-              echo "::error::smoke-test failed for $path (HTTP $code)"
-              exit 1
-            fi
-          done
+          curl -fsS https://www.noblenestacademy.com/health
+          curl -fsS -H "Authorization: Bearer $HEALTH_TOKEN" https://www.noblenestacademy.com/health/detailed
+
+      - name: Rollback on failure
+        if: failure() && (github.event_name == 'push' || github.event.inputs.dry_run != 'true')
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.DEPLOY_SSH_USER }}@${{ secrets.DEPLOY_SSH_HOST }}" \
+            "bash ${{ secrets.DEPLOY_PATH }}/current/scripts/rollback.sh"

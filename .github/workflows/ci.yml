@@ -1,23 +1,31 @@
 name: CI
 
+# Phase 11 — PR + push validation pipeline.
+# Laravel app lives at noblenest-academy/ (outer repo root contains .github/).
+# Baseline to protect: 290 passed / 0 failed / 4 skipped, phpstan exit 0.
+
 on:
-  pull_request:
-    branches: [feature/lms-scaffold]
   push:
-    branches: [feature/lms-scaffold]
+    branches: [release/v1-launch, main]
+  pull_request:
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: noblenest-academy
+
+env:
+  APP_DIR: noblenest-academy
+
 jobs:
-  php:
-    name: PHP — lint + tests
+  lint:
+    name: Lint (Pint + npm)
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: noblenest-academy
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -25,9 +33,16 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, bcmath, intl, gd, sqlite, pdo_sqlite, redis
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
           coverage: none
           tools: composer:v2
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: noblenest-academy/package-lock.json
 
       - name: Cache Composer
         uses: actions/cache@v4
@@ -37,69 +52,292 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
 
       - name: Install Composer deps
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --no-progress --prefer-dist --no-interaction
 
-      - name: php -l on app/, config/, database/, routes/, tests/
+      - name: Install npm deps
+        run: npm ci
+
+      - name: Pint --test
+        run: vendor/bin/pint --test
+
+      - name: npm lint (if defined)
         run: |
-          find app config database routes tests -type f -name '*.php' -print0 \
-            | xargs -0 -n1 -P4 php -l > /tmp/lint.log 2>&1 || (cat /tmp/lint.log; exit 1)
-
-      - name: Pint (style — soft-gate)
-        run: ./vendor/bin/pint --test
-        continue-on-error: true
-
-      - name: PHPStan (level 6 — soft-gate)
-        run: |
-          if [ -f phpstan.neon ] || [ -f phpstan.neon.dist ]; then
-            ./vendor/bin/phpstan analyse --memory-limit=1G
+          if node -e "process.exit(!require('./package.json').scripts.lint ? 1 : 0)" 2>/dev/null; then
+            npm run lint
           else
-            echo "(no phpstan config — skipping)"
+            echo "(no npm lint script — skipping)"
           fi
-        continue-on-error: true
 
-      - name: Generate APP_KEY
-        run: |
-          cp .env.testing .env
-          php artisan key:generate --force
-
-      - name: Run gated test files (Phase 1+2+4 known-passing)
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
-        run: |
-          php artisan test \
-            tests/Unit/Services/ActivityRendererResolverTest.php \
-            tests/Feature/ActivityRendererTest.php \
-            tests/Feature/ActivityCoverageTest.php \
-            tests/Feature/StripeWebhookTest.php
-
-  frontend:
-    name: Frontend — Vite build
+  phpstan:
+    name: PHPStan
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
-    defaults:
-      run:
-        working-directory: noblenest-academy
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
+          coverage: none
+          tools: composer:v2
+      - uses: actions/cache@v4
+        with:
+          path: noblenest-academy/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('noblenest-academy/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-progress --prefer-dist --no-interaction
+      - run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+  unit-feature:
+    name: Unit + Feature (mysql + redis)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noblenest_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/cache@v4
+        with:
+          path: noblenest-academy/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('noblenest-academy/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Composer install
+        run: composer install --no-progress --prefer-dist --no-interaction
+
+      - name: Prepare .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=mysql|' .env
+          sed -i 's|^DB_HOST=.*|DB_HOST=127.0.0.1|' .env
+          sed -i 's|^DB_PORT=.*|DB_PORT=3306|' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=noblenest_test|' .env
+          sed -i 's|^DB_USERNAME=.*|DB_USERNAME=root|' .env
+          sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=root|' .env
+          if grep -q '^GROQ_API_KEY' .env; then
+            sed -i 's|^GROQ_API_KEY=.*|GROQ_API_KEY=|' .env
+          else
+            echo "GROQ_API_KEY=" >> .env
+          fi
+
+      - name: Migrate + seed
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: noblenest_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          GROQ_API_KEY: ''
+        run: php artisan migrate:fresh --seed --force
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: noblenest_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          REDIS_HOST: 127.0.0.1
+          GROQ_API_KEY: ''
+        run: php artisan test --without-tty
+
+  browser:
+    name: Browser (Dusk placeholder)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - run: echo "Dusk not configured — Phase 11.1"
+
+  a11y:
+    name: Accessibility (pa11y-ci)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    continue-on-error: true
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noblenest_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
+          tools: composer:v2
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: noblenest-academy/package-lock.json
 
-      - name: Install npm deps
-        run: npm ci
-
-      - name: Fetch fonts (best-effort)
-        run: npm run fonts || echo "(font fetch optional in CI — continuing)"
-
-      - name: Build (Vite)
-        run: npm run build
-
-      - name: Verify build output exists
+      - run: composer install --no-progress --prefer-dist --no-interaction
+      - run: npm ci
+      - name: Install pa11y-ci globally
+        run: npm i -g pa11y-ci
+      - name: Prep app
         run: |
-          test -d public/build || { echo "Vite build did not produce public/build"; exit 1; }
-          ls -lah public/build/assets | head -5
+          cp .env.example .env
+          php artisan key:generate --force
+          sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=mysql|' .env
+          sed -i 's|^DB_HOST=.*|DB_HOST=127.0.0.1|' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=noblenest_test|' .env
+          sed -i 's|^DB_USERNAME=.*|DB_USERNAME=root|' .env
+          sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=root|' .env
+          php artisan migrate:fresh --seed --force
+          npm run build
+      - name: Serve + run pa11y
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          sleep 5
+          npx pa11y-ci --config .pa11yci.json
+
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lighthouse CI (placeholder)
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            http://localhost:8000
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  audit:
+    name: Security audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
+          tools: composer:v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: noblenest-academy/package-lock.json
+      - run: composer audit --no-interaction
+      - run: npm ci
+      - name: npm audit (high+critical fail)
+        run: npm audit --omit=dev --audit-level=high
+
+  i18n-gate:
+    name: i18n string gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash noblenest-academy/scripts/i18n-string-gate.sh --strict
+
+  migration-squash-verify:
+    name: Migration squash verify (informational)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    continue-on-error: true
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noblenest_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
+          tools: composer:v2, mysql
+      - name: Install mysql client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - run: composer install --no-progress --prefer-dist --no-interaction
+      - name: Prep env
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=mysql|' .env
+          sed -i 's|^DB_HOST=.*|DB_HOST=127.0.0.1|' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=noblenest_test|' .env
+          sed -i 's|^DB_USERNAME=.*|DB_USERNAME=root|' .env
+          sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=root|' .env
+      - name: Migrate fresh (all top-level migrations)
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: noblenest_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: php artisan migrate:fresh --force
+      - name: Schema dump
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: noblenest_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: php artisan schema:dump --prune
+      - name: Diff against baseline (create baseline on first run)
+        run: |
+          mkdir -p database/schema
+          if [ -f database/schema/mysql-schema.baseline.sql ]; then
+            diff -u database/schema/mysql-schema.baseline.sql database/schema/mysql-schema.sql || {
+              echo "::warning::schema drift detected vs baseline"
+            }
+          else
+            cp database/schema/mysql-schema.sql database/schema/mysql-schema.baseline.sql
+            echo "Baseline created (first run)."
+          fi
