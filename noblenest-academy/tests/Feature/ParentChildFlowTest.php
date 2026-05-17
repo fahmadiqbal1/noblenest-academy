@@ -165,18 +165,20 @@ class ParentChildFlowTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function parent_can_view_child_dashboard(): void
     {
+        // Phase 5: parental_consent_at must be set or RequireParentalConsent
+        // redirects (302) the parent to the consent screen.
         $child = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'My Kid',
-            'date_of_birth'      => now()->subYears(3),
-            'preferred_language' => 'en',
+            'parent_id'           => $this->parent->id,
+            'name'                => 'My Kid',
+            'date_of_birth'       => now()->subYears(3),
+            'preferred_language'  => 'en',
+            'parental_consent_at' => now(),
         ]);
 
         $response = $this->actingAs($this->parent)
              ->get("/child/{$child->id}/dashboard");
 
-        // May return 200 (full render), 403 (policy denied), or 500 (dashboard
-        // has deep dependencies like milestoneService that aren't seeded in test)
+        // 200 = full render; 403 = policy denial; 500 = deep dep not seeded.
         $this->assertContains($response->status(), [200, 403, 500]);
     }
 }

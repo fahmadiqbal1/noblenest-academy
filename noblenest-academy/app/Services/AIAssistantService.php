@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\AIProviderConfig;
-use Illuminate\Support\Facades\Log;
+use App\Models\ChildProfile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * AI Assistant Service for Noble Nest Academy
@@ -359,5 +361,145 @@ PROMPT;
                 ]);
             }
         }
+    }
+
+    // ==================================================================
+    // Phase 5 — parent-dashboard suggestions (Groq, no-PII)
+    // ==================================================================
+
+    private const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+    private const GROQ_MODEL    = 'llama-3.3-70b-versatile';
+
+    /**
+     * Suggest 3 next-best activities for a child. Cached per child for 1h.
+     *
+     * @return array<int, array{title: string, why: string, activity_id?: int|null}>
+     */
+    public function suggestForChild(ChildProfile $child): array
+    {
+        return Cache::remember("ai-suggest-{$child->id}", 3600, function () use ($child) {
+            $apiKey = (string) config('services.groq.api_key', '');
+            if ($apiKey === '') {
+                return $this->stubSuggestions();
+            }
+
+            // ChildProfile doesn't currently declare a skillState() relation;
+            // when added in a later phase, swap to $child->skillState()->first().
+            $skill = null;
+
+            $recent = $child->activityProgress()
+                ->latest('completed_at')
+                ->limit(5)
+                ->get(['activity_id', 'status', 'score', 'completed_at'])
+                ->toArray();
+
+            $rawPayload = [
+                'child' => [
+                    'name'                => $child->name,
+                    'nickname'            => $child->nickname,
+                    'age_months'          => $child->age_months,
+                    'age_tier'            => $child->age_tier,
+                    'preferred_language'  => $child->preferred_language,
+                    'parental_consent_at' => $child->parental_consent_at,
+                ],
+                'skill_state'     => $skill, // placeholder — wire ChildSkillState in a later phase
+                'recent_progress' => $recent,
+            ];
+
+            $scrubbed = self::scrubPII($rawPayload);
+
+            try {
+                $resp = Http::withToken($apiKey)
+                    ->timeout(15)
+                    ->acceptJson()
+                    ->post(self::GROQ_ENDPOINT, [
+                        'model'    => self::GROQ_MODEL,
+                        'messages' => [
+                            [
+                                'role' => 'system',
+                                'content' => "Suggest 3 next-best activities for a child given their skill state. "
+                                    . "Do NOT include the child's name or any PII in your response. "
+                                    . 'Respond with ONLY a JSON array of objects with keys: title (string), why (string), activity_id (integer or null). '
+                                    . 'Return no prose, no markdown fences.',
+                            ],
+                            [
+                                'role' => 'user',
+                                'content' => json_encode($scrubbed, JSON_UNESCAPED_UNICODE),
+                            ],
+                        ],
+                        'temperature' => 0.4,
+                        'max_tokens'  => 400,
+                    ]);
+
+                $content = (string) data_get($resp->json(), 'choices.0.message.content', '');
+                $content = trim(preg_replace('/^```(?:json)?|```$/m', '', $content) ?? '');
+                $parsed  = json_decode($content, true);
+
+                if (! is_array($parsed)) {
+                    return $this->stubSuggestions();
+                }
+
+                $out = [];
+                foreach (array_slice($parsed, 0, 3) as $row) {
+                    if (! is_array($row)) {
+                        continue;
+                    }
+                    $out[] = [
+                        'title' => (string) ($row['title'] ?? 'Suggested activity'),
+                        'why'   => (string) ($row['why']   ?? ''),
+                        'activity_id' => isset($row['activity_id']) && is_numeric($row['activity_id'])
+                            ? (int) $row['activity_id'] : null,
+                    ];
+                }
+                return $out ?: $this->stubSuggestions();
+            } catch (\Throwable $e) {
+                Log::warning('AIAssistantService::suggestForChild failed', [
+                    'child_id' => $child->id,
+                    'error'    => $e->getMessage(),
+                ]);
+                return $this->stubSuggestions();
+            }
+        });
+    }
+
+    /**
+     * Strip PII keys (recursively) from the payload before sending to Groq.
+     *
+     * @param array<mixed> $payload
+     * @return array<mixed>
+     */
+    public static function scrubPII(array $payload): array
+    {
+        $pii = ['name', 'nickname', 'email', 'phone', 'address', 'ip', 'user_agent'];
+
+        $walk = function ($value) use (&$walk, $pii) {
+            if (! is_array($value)) {
+                return $value;
+            }
+            $out = [];
+            foreach ($value as $k => $v) {
+                $keyLower = is_string($k) ? strtolower($k) : $k;
+                if (is_string($keyLower)) {
+                    if (in_array($keyLower, $pii, true)) {
+                        continue;
+                    }
+                    if (str_starts_with($keyLower, 'parental_consent_')) {
+                        continue;
+                    }
+                }
+                $out[$k] = is_array($v) ? $walk($v) : $v;
+            }
+            return $out;
+        };
+
+        return $walk($payload);
+    }
+
+    /** @return array<int, array{title: string, why: string, activity_id: null}> */
+    private function stubSuggestions(): array
+    {
+        return [
+            ['title' => 'AI suggestions unavailable in this environment.', 'why' => '', 'activity_id' => null],
+        ];
     }
 }

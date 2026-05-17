@@ -102,8 +102,10 @@ class LmsDiscrepanciesTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function onboarding_page_loads_for_authenticated_user(): void
     {
+        // Phase 5: /onboarding now redirects to /onboarding/step/1 (5-step flow).
         $user = User::factory()->create(['role' => 'Parent']);
-        $this->actingAs($user)->get('/onboarding')->assertStatus(200);
+        $this->actingAs($user)->get('/onboarding')->assertRedirect(route('onboarding.step1'));
+        $this->actingAs($user)->get('/onboarding/step/1')->assertOk();
     }
 
     #[\PHPUnit\Framework\Attributes\Test]

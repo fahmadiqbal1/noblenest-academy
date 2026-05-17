@@ -189,6 +189,37 @@
 </x-ui.section>
 @endif
 
+{{-- ── Phase 5: AI suggestions widget (Groq, no PII) ── --}}
+@php
+    $firstChild   = $children->first();
+    $aiSuggestions = [];
+    if ($firstChild) {
+        try {
+            $aiSuggestions = app(\App\Services\AIAssistantService::class)->suggestForChild($firstChild);
+        } catch (\Throwable $e) {
+            $aiSuggestions = [];
+        }
+    }
+@endphp
+@if($firstChild)
+<x-ui.section title="AI suggestions for {{ $firstChild->name }}">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        @forelse($aiSuggestions as $s)
+            <div class="rounded-[var(--radius-sm)] border border-[var(--color-border)] p-4 bg-[var(--color-surface-strong)]">
+                <h4 class="font-bold text-sm mb-1">{{ $s['title'] ?? '' }}</h4>
+                @if(!empty($s['why']))
+                    <p class="text-xs text-[var(--color-text-muted)]">{{ $s['why'] }}</p>
+                @endif
+            </div>
+        @empty
+            <div class="col-span-3 text-xs text-[var(--color-text-muted)]">
+                AI suggestions unavailable in this environment.
+            </div>
+        @endforelse
+    </div>
+</x-ui.section>
+@endif
+
 {{-- ── Quick actions ── --}}
 <x-ui.section title="Quick Actions">
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">

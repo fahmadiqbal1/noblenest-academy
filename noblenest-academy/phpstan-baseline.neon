@@ -206,12 +206,6 @@ parameters:
 			path: app/Http/Controllers/MilestoneWallController.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 2
-			path: app/Http/Controllers/OnboardingController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Milestone\:\:\$completed\.$#'
 			identifier: property.notFound
 			count: 1
@@ -228,24 +222,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Controllers/PaymentController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$birth_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/PrivacyController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\ChildProfile\:\:\$quizAttempts\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/PrivacyController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\ChildProfile\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Http/Controllers/PrivacyController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Quiz\:\:\$questions\.$#'

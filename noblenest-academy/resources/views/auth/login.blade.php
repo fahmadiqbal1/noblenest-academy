@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Sign In | NobleNest Global Academy')
+@section('title', 'Login | NobleNest Global Academy')
 @section('meta_title', 'Login | NobleNest Global Academy')
 @section('meta_description', 'Log in to NobleNest Global Academy to continue learning, manage courses, monitor children, or access admin workflows from one secure account.')
 @section('meta_image', asset('og-login.png'))

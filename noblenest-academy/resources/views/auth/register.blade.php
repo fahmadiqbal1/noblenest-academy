@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Create Account | NobleNest Global Academy')
+@section('title', 'Create Your Account | NobleNest Global Academy')
 @section('meta_title', 'Create Your Account | NobleNest Global Academy')
 @section('meta_description', 'Create a NobleNest Global Academy parent account and start your child on a personalised, age-appropriate learning journey.')
 @section('meta_image', asset('og-register.png'))

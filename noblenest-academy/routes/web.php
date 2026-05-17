@@ -83,14 +83,27 @@ Route::post('/ai/assistant/message', [\App\Http\Controllers\ChatController::clas
 // ONBOARDING (Parent) — Phase 5 rebuild planned
 // ============================================================================
 Route::middleware(['auth'])->group(function () {
+    // Legacy single-page route — redirects to /onboarding/step/1.
     Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding');
     Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
-    Route::get('/onboarding/step/1', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.step1');
+
+    // Phase 5 — 5-step flow.
+    Route::get('/onboarding/step/1', [\App\Http\Controllers\OnboardingController::class, 'showStep1'])->name('onboarding.step1');
     Route::post('/onboarding/step/1', [\App\Http\Controllers\OnboardingController::class, 'storeStep1'])->name('onboarding.step1.store');
     Route::get('/onboarding/step/2', [\App\Http\Controllers\OnboardingController::class, 'showStep2'])->name('onboarding.step2');
     Route::post('/onboarding/step/2', [\App\Http\Controllers\OnboardingController::class, 'storeStep2'])->name('onboarding.step2.store');
     Route::get('/onboarding/step/3', [\App\Http\Controllers\OnboardingController::class, 'showStep3'])->name('onboarding.step3');
     Route::post('/onboarding/step/3', [\App\Http\Controllers\OnboardingController::class, 'storeStep3'])->name('onboarding.step3.store');
+    Route::get('/onboarding/step/4', [\App\Http\Controllers\OnboardingController::class, 'showStep4'])->name('onboarding.step4');
+    Route::post('/onboarding/step/4', [\App\Http\Controllers\OnboardingController::class, 'storeStep4'])->name('onboarding.step4.store');
+    Route::get('/onboarding/step/5/{child}', [\App\Http\Controllers\OnboardingController::class, 'showStep5'])->name('onboarding.step5');
+    Route::post('/onboarding/step/5/{child}', [\App\Http\Controllers\OnboardingController::class, 'completeStep5'])->name('onboarding.step5.complete');
+
+    // Parent PIN entry — the gate itself, so no parent.pin middleware here.
+    Route::get('/parent/pin', [\App\Http\Controllers\ParentPinController::class, 'show'])->name('parent.pin.show');
+    Route::post('/parent/pin', [\App\Http\Controllers\ParentPinController::class, 'verify'])
+        ->middleware('throttle:5,1')
+        ->name('parent.pin.verify');
 
     Route::view('/profile', 'profile')->name('profile');
     Route::view('/checkout', 'checkout')->name('checkout');
@@ -180,10 +193,19 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
 // ============================================================================
 Route::middleware(['auth'])->prefix('privacy')->name('privacy.')->group(function () {
     Route::get('/', [\App\Http\Controllers\PrivacyController::class, 'index'])->name('dashboard');
-    Route::get('export', [\App\Http\Controllers\PrivacyController::class, 'exportData'])->name('export');
-    Route::delete('delete', [\App\Http\Controllers\PrivacyController::class, 'deleteData'])->name('delete');
     Route::get('parental-consent/{child}', [\App\Http\Controllers\PrivacyController::class, 'showParentalConsent'])->name('parental-consent');
     Route::post('parental-consent/{child}', [\App\Http\Controllers\PrivacyController::class, 'recordParentalConsent'])->name('parental-consent.store');
+
+    // PIN-gated: data export + erase + signed download.
+    Route::middleware('parent.pin')->group(function () {
+        Route::get('export', [\App\Http\Controllers\PrivacyController::class, 'exportData'])->name('export');
+        Route::delete('delete', [\App\Http\Controllers\PrivacyController::class, 'deleteData'])->name('delete');
+    });
+
+    // Signed download (the URL itself is the auth — short TTL).
+    Route::get('export/{user}/{ts}', [\App\Http\Controllers\PrivacyController::class, 'downloadExport'])
+        ->name('export.download')
+        ->middleware('signed');
 });
 
 // ============================================================================

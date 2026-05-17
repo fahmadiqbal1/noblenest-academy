@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ExportParentDataJob;
+use App\Jobs\HardDeleteParentDataJob;
+use App\Models\AuditLogEntry;
 use App\Models\ChildProfile;
-use App\Models\ChildActivityProgress;
-use App\Models\QuizAttempt;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class PrivacyController extends Controller
 {
@@ -22,10 +24,6 @@ class PrivacyController extends Controller
         return view('privacy.dashboard', compact('user', 'children', 'paymentCount'));
     }
 
-    /**
-     * Phase 5 — under-13 Parental Consent gate (COPPA + GDPR-K).
-     * Shows the consent confirmation page for a specific child.
-     */
     public function showParentalConsent(Request $request, ChildProfile $child)
     {
         if ($child->parent_id !== Auth::id()) {
@@ -34,10 +32,6 @@ class PrivacyController extends Controller
         return view('privacy.parental-consent', compact('child'));
     }
 
-    /**
-     * Record parental consent for a child. Captures timestamp + parent's IP
-     * and user-agent for audit trail (COPPA record-keeping requirement).
-     */
     public function recordParentalConsent(Request $request, ChildProfile $child)
     {
         if ($child->parent_id !== Auth::id()) {
@@ -57,75 +51,93 @@ class PrivacyController extends Controller
         ])->save();
 
         return redirect()->route('privacy.dashboard')
-            ->with('status', "Consent recorded for {$child->name}. They can now use Noble Nest Academy.");
+            ->with('status', "Consent recorded for {$child->name}.");
     }
 
+    /**
+     * Phase 5 — dispatches a queued export job; user receives a signed link by email.
+     */
     public function exportData(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $children = ChildProfile::where('parent_id', $user->id)
-            ->with(['activityProgress.activity', 'quizAttempts'])
-            ->get();
 
-        $export = [
-            'account' => [
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'created_at' => $user->created_at->toIso8601String(),
-                'role'       => $user->role,
-            ],
-            'children' => $children->map(fn($c) => [
-                'name'              => $c->name,
-                'birth_date'        => $c->birth_date,
-                'activity_count'    => $c->activityProgress->count(),
-                'quiz_attempts'     => $c->quizAttempts->count(),
-            ])->toArray(),
-            'payments' => Payment::where('user_id', $user->id)
-                ->select(['amount', 'currency', 'status', 'created_at'])
-                ->get()
-                ->toArray(),
-            'exported_at' => now()->toIso8601String(),
-        ];
+        ExportParentDataJob::dispatch($user->id);
 
-        return response()->json($export)
-            ->header('Content-Disposition', 'attachment; filename="noblenest-my-data.json"');
+        AuditLogEntry::record(
+            actorUserId: $user->id,
+            action: 'privacy.export.requested',
+            targetType: \App\Models\User::class,
+            targetId: $user->id,
+            ip: $request->ip(),
+            userAgent: $request->userAgent(),
+        );
+
+        return redirect()->route('privacy.dashboard')
+            ->with('status', __('We are preparing your data export. You will receive an email with a download link shortly.'));
     }
 
+    /**
+     * Signed download endpoint — returns the export file if it exists.
+     */
+    public function downloadExport(Request $request, int $user, string $ts)
+    {
+        $disk = Storage::disk('local');
+        $zip  = "private/exports/{$user}/{$ts}.zip";
+        $json = "private/exports/{$user}/{$ts}.json";
+
+        if ($disk->exists($zip)) {
+            return $disk->download($zip, "noblenest-export-{$ts}.zip");
+        }
+        if ($disk->exists($json)) {
+            return $disk->download($json, "noblenest-export-{$ts}.json");
+        }
+
+        abort(404);
+    }
+
+    /**
+     * Phase 5 — GDPR erase. Soft-delete now, hard-delete in 30 days.
+     */
     public function deleteData(Request $request)
     {
         $request->validate([
-            'password'  => 'required|string',
-            'confirm'   => 'required|in:DELETE',
+            'password' => 'required|string',
+            'confirm'  => 'required|in:DELETE',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if (! Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['password' => 'Incorrect password.']);
+        if (! Hash::check($request->input('password'), $user->password)) {
+            return back()->withErrors(['password' => __('Incorrect password.')]);
         }
 
-        // Anonymise child profiles (COPPA: no orphaned child PII)
-        ChildProfile::where('parent_id', $user->id)->each(function ($child) {
-            ChildActivityProgress::where('child_profile_id', $child->id)->delete();
-            QuizAttempt::where('child_profile_id', $child->id)->delete();
-            $child->delete();
-        });
+        AuditLogEntry::record(
+            actorUserId: $user->id,
+            action: 'privacy.erase.requested',
+            targetType: \App\Models\User::class,
+            targetId: $user->id,
+            ip: $request->ip(),
+            userAgent: $request->userAgent(),
+        );
 
-        // Anonymise user — keep payment row for audit but strip PII
-        Payment::where('user_id', $user->id)->update(['stripe_customer_id' => null]);
+        // Cascade soft-delete to children + their progress.
+        $children = ChildProfile::where('parent_id', $user->id)->get();
+        foreach ($children as $child) {
+            $child->activityProgress()->delete();
+            $child->delete();
+        }
+        $userId = $user->id;
+        $user->delete();
+
+        // Schedule hard-delete in 30 days.
+        HardDeleteParentDataJob::dispatch($userId)->delay(now()->addDays(30));
 
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        $user->forceFill([
-            'name'              => 'Deleted User',
-            'email'             => 'deleted_' . $user->id . '@noblenest.invalid',
-            'password'          => Hash::make(str()->random(32)),
-            'email_verified_at' => null,
-        ])->save();
-
-        return redirect('/')->with('status', 'Your account and all associated data have been permanently deleted.');
+        return redirect('/')->with('status', __('Your account has been deleted. Final removal will complete in 30 days.'));
     }
 }

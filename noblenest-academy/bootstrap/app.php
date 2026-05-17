@@ -29,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
             // Phase 5: under-13 COPPA / GDPR-K parental consent gate.
             'parental.consent' => \App\Http\Middleware\RequireParentalConsent::class,
+            // Phase 5: 4-digit parent PIN gate for sensitive parent routes.
+            'parent.pin' => \App\Http\Middleware\RequireParentPin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

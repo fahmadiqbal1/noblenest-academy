@@ -100,4 +100,11 @@ return [
     'dashboard_type_delete_after' => 'to confirm',
     'dashboard_delete_everything' => 'Delete Everything',
 
+    // Phase 5 — COPPA consent (onboarding step 3)
+    'coppa_consent_title'    => 'Parental Consent for Children Under 13',
+    'coppa_consent_body_1'   => 'Under the U.S. Children\'s Online Privacy Protection Act (COPPA) and the EU General Data Protection Regulation Article 8 (GDPR-K), we must obtain verifiable parental consent before collecting personal information from children under 13.',
+    'coppa_consent_body_2'   => 'By proceeding you confirm you are the parent or legal guardian of the child(ren) you will add to this account. You authorise Noble Nest Academy to collect age-appropriate learning data — activity progress, scores, and time spent — solely to personalise your child\'s educational experience.',
+    'coppa_consent_body_3'   => 'You can review, export, or delete your child\'s data at any time from the Privacy dashboard. You can withdraw consent at any time, which will end your child\'s use of the service.',
+    'coppa_doc_version'      => 'Document version: :v',
+    'coppa_checkbox_label'   => 'I am the parent or legal guardian and I consent to Noble Nest Academy collecting and processing my child\'s learning data as described above.',
 ];

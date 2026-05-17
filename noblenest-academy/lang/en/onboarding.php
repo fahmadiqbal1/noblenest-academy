@@ -23,34 +23,65 @@ return [
     'start_learning' => 'Let\'s Start Learning!',
     'skip_for_now' => 'Skip for now',
 
-    // Step indicator labels (shared across step1/2/3)
-    'step_language' => 'Language',
-    'step_child' => 'Child',
-    'step_goals' => 'Goals',
-    'progress_label' => 'Onboarding progress',
+    // Step indicator labels (Phase 5 — 5-step flow)
+    'step_language'    => 'Language',
+    'step_profile'     => 'Profile',
+    'step_consent'     => 'Consent',
+    'step_child'       => 'Child',
+    'step_walkthrough' => 'Walkthrough',
+    'step_goals'       => 'Goals',
+    'step_of'          => 'Step :n of :total',
+    'progress_label'   => 'Onboarding progress',
 
     // Step 1
-    'step1_welcome' => 'Welcome to Noble Nest!',
-    'step1_question' => 'What language do you prefer?',
-    'step1_legend' => 'Preferred language',
-    'continue' => 'Continue',
+    'step1_welcome'   => 'Welcome to Noble Nest!',
+    'step1_question'  => 'What language do you prefer?',
+    'step1_legend'    => 'Preferred language',
+    'continue'        => 'Continue',
 
-    // Step 2
-    'step2_heading' => 'Tell us about your child',
-    'step2_subheading' => 'We use this to personalise the learning journey.',
-    'child_first_name' => 'Child\'s first name',
-    'child_first_name_placeholder' => 'e.g. Aisha',
-    'date_of_birth' => 'Date of birth',
-    'dob_help' => 'We calculate the age automatically — no year-based tracking.',
+    // Step 2 — parent profile + PIN
+    'step2_profile_heading' => 'A bit about you',
+    'step2_profile_sub'     => 'We use this to personalise your experience.',
+    'your_name'             => 'Your name',
+    'country_code'          => 'Country (ISO code)',
+    'parent_pin'            => '4-digit parent PIN',
+    'parent_pin_help'       => 'Used to confirm it\'s really you before sensitive actions (settings, billing, data export). Choose something you\'ll remember.',
+    'next'                  => 'Next',
+
+    // Step 3 — COPPA consent
+    'step3_consent_heading' => 'Parental consent',
+    'step3_consent_sub'     => 'Required for children under 13 (COPPA / GDPR-K).',
+    'consent_continue'      => 'I agree — continue',
+
+    // Step 4 — add child
+    'step4_child_heading'         => 'Tell us about your child',
+    'step4_child_sub'             => 'We use this to personalise the learning journey.',
+    'child_first_name'            => 'Child\'s first name',
+    'child_first_name_placeholder'=> 'e.g. Aisha',
+    'date_of_birth'               => 'Date of birth',
+    'dob_help'                    => 'We calculate the age automatically — no year-based tracking.',
+    'gender'                      => 'Gender',
+    'gender_male'                 => 'Boy',
+    'gender_female'               => 'Girl',
+    'gender_other'                => 'Other',
+    'add_child_continue'          => 'Add child & continue',
+
+    // Step 5 — walkthrough
+    'step5_walkthrough_heading' => 'You\'re all set!',
+    'step5_walkthrough_sub'     => 'Here are some activities :name (:tier tier) might enjoy.',
+    'no_samples_yet'            => 'We\'re preparing personalised activities for your child.',
+    'lets_start'                => 'Let\'s start',
+    'welcome_message'           => 'Welcome to Noble Nest Academy!',
+
+    // Legacy step 2/3 keys (kept for compat with old translations)
     'islamic_studies' => 'Islamic studies?',
-    'islamic_studies_desc' => 'If yes, we\'ll include Quran memorisation, Arabic alphabet, duas, and Islamic character activities. Non-Muslim families still have full access to all other activities.',
+    'islamic_studies_desc' => 'If yes, we\'ll include Quran memorisation, Arabic alphabet, duas, and Islamic character activities.',
     'faith_yes' => 'Yes, Muslim household',
     'faith_no' => 'Non-Muslim',
     'faith_skip' => 'Skip for now',
     'faith_change_note' => 'You can change this anytime in your child\'s profile settings.',
-    'next' => 'Next',
-
-    // Step 3
+    'step2_heading' => 'Tell us about your child',
+    'step2_subheading' => 'We use this to personalise the learning journey.',
     'step3_heading' => 'What are your goals?',
     'step3_subheading' => 'Optional — helps us recommend the best activities.',
     'learning_goals_label' => 'Learning goals',

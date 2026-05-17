@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * ChildProfile Model
@@ -30,7 +31,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class ChildProfile extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'parent_id',
@@ -46,13 +47,17 @@ class ChildProfile extends Model
         'age_tier',
         'streak_days',
         'last_activity_date',
+        'parental_consent_at',
+        'parental_consent_ip',
+        'parental_consent_user_agent',
     ];
 
     protected $casts = [
-        'date_of_birth'   => 'date',
-        'is_muslim'       => 'boolean',
-        'preferences'     => 'array',
-        'learning_goals'  => 'array',
+        'date_of_birth'       => 'date',
+        'is_muslim'           => 'boolean',
+        'preferences'         => 'array',
+        'learning_goals'      => 'array',
+        'parental_consent_at' => 'datetime',
     ];
 
     /**
