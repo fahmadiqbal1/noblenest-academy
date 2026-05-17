@@ -38,13 +38,13 @@ Route::get('/_styleguide', fn () => view('_styleguide'))
 // AUTH
 // ============================================================================
 Route::get('/register', [\App\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
-Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])->middleware(['guest', 'throttle:3,1']);
+Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])->middleware(['guest', 'throttle:register']);
 Route::get('/login', [\App\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
-Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->middleware('throttle:auth');
 Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 
 Route::get('/forgot-password', fn () => view('auth.forgot-password'))->middleware('guest')->name('password.request');
-Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'sendResetLink'])->middleware('guest')->name('password.email');
+Route::post('/forgot-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'sendResetLink'])->middleware(['guest', 'throttle:password-reset'])->name('password.email');
 Route::get('/reset-password/{token}', fn ($token) => view('auth.reset-password', ['token' => $token]))->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [\App\Http\Controllers\Auth\PasswordResetController::class, 'reset'])->middleware('guest')->name('password.update');
 
@@ -76,7 +76,7 @@ Route::post('/theme-toggle', function () {
 // AI ASSISTANT (AJAX)
 // ============================================================================
 Route::post('/ai/assistant/message', [\App\Http\Controllers\ChatController::class, 'message'])
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:ai-assistant')
     ->name('ai.assistant.message');
 
 // ============================================================================
@@ -102,7 +102,7 @@ Route::middleware(['auth'])->group(function () {
     // Parent PIN entry — the gate itself, so no parent.pin middleware here.
     Route::get('/parent/pin', [\App\Http\Controllers\ParentPinController::class, 'show'])->name('parent.pin.show');
     Route::post('/parent/pin', [\App\Http\Controllers\ParentPinController::class, 'verify'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:pin-verify')
         ->name('parent.pin.verify');
 
     Route::view('/profile', 'profile')->name('profile');

@@ -8,7 +8,10 @@ use App\Services\Providers\ChatProviderService;
 use App\Services\Providers\ImageGenerationService;
 use App\Services\Providers\MediaGenerationService;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -98,6 +101,41 @@ class AppServiceProvider extends ServiceProvider
             /** @var \App\Models\User|null $user */
             $user = $request->user();
             return $user !== null && $user->hasRole('admin');
+        });
+
+        $this->configureRateLimiters();
+    }
+
+    /**
+     * Phase 8 — named rate limiters for sensitive endpoints.
+     * Applied via route middleware `throttle:auth`, `throttle:register`, etc.
+     */
+    protected function configureRateLimiters(): void
+    {
+        RateLimiter::for('auth', function (Request $request) {
+            $email = (string) $request->input('email', '');
+            return Limit::perMinute(5)->by($request->ip() . '|' . $email);
+        });
+
+        RateLimiter::for('register', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
+        RateLimiter::for('ai-assistant', function (Request $request) {
+            return Limit::perMinute(30)->by(optional($request->user())->id ?: $request->ip());
+        });
+
+        RateLimiter::for('content-generation', function (Request $request) {
+            return Limit::perHour(10)->by(optional($request->user())->id ?: $request->ip());
+        });
+
+        RateLimiter::for('password-reset', function (Request $request) {
+            $email = (string) $request->input('email', $request->ip());
+            return Limit::perHour(3)->by($email);
+        });
+
+        RateLimiter::for('pin-verify', function (Request $request) {
+            return Limit::perMinute(5)->by(optional($request->user())->id ?: $request->ip());
         });
     }
 }
