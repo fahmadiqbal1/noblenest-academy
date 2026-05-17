@@ -203,13 +203,20 @@ class HealthCheckController extends Controller
             $issues[] = "APP_DEBUG=true (should be false — ~50% performance loss)";
         }
 
-        if (!in_array($sessionDriver, ['redis', 'memcached'])) {
-            $issues[] = "SESSION_DRIVER={$sessionDriver} (use redis/memcached for clustering)";
+        // Non-redis session/queue is a valid deployment choice (DB-backed on
+        // shared hosting). It is a scaling RECOMMENDATION, not a health failure.
+        $recommendations = [];
+        if (! in_array($sessionDriver, ['redis', 'memcached'])) {
+            $recommendations[] = "SESSION_DRIVER={$sessionDriver} (redis/memcached recommended at scale)";
+        }
+        if (! in_array($queueDriver, ['redis', 'sqs'])) {
+            $recommendations[] = "QUEUE_CONNECTION={$queueDriver} (redis recommended at scale)";
         }
 
         return [
             'pass' => count($issues) === 0,
             'issues' => $issues,
+            'recommendations' => $recommendations,
             'message' => count($issues) === 0 ? 'Configuration OK' : 'Configuration issues detected',
         ];
     }

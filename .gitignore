@@ -66,3 +66,4 @@ coverage/
 .code-review-graph/
 crg-cheatsheet.pdf
 CRG-README.md
+.env.deploy
