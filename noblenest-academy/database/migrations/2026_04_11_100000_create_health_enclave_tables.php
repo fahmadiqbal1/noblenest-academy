@@ -17,7 +17,10 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_user_id');
             $table->unsignedBigInteger('child_profile_id');
             $table->string('data_source');
-            $table->json('scope')->default('[]');
+            // MySQL 8 forbids a DEFAULT on JSON columns (err 1101); MariaDB
+            // permits it. Keep portable: nullable, default handled by the
+            // model cast / application layer.
+            $table->json('scope')->nullable();
             $table->timestamp('granted_at')->useCurrent();
             $table->timestamp('revoked_at')->nullable();
             $table->unsignedSmallInteger('version')->default(1);

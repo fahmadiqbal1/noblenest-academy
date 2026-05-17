@@ -139,7 +139,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: noblenest-academy/package-lock.json
       - run: composer install --no-progress --prefer-dist --no-interaction
-      - run: composer audit --no-interaction
+        # --abandoned=ignore: a transitive dev-only dep (azjezz/psl, pulled
+        # by the static-analysis tooling) is abandoned but has no advisory.
+        # We still fail on real vulnerabilities.
+      - run: composer audit --no-interaction --abandoned=ignore
       - run: npm ci
       - name: npm audit (high + critical fail)
         run: npm audit --omit=dev --audit-level=high
