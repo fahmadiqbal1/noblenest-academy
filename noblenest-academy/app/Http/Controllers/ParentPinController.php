@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -17,11 +18,13 @@ use Illuminate\Support\Facades\RateLimiter;
 class ParentPinController extends Controller
 {
     private const MAX_ATTEMPTS = 3;
+
     private const DECAY_SECONDS = 60;
 
     public function show()
     {
         $user = Auth::user();
+
         return view('parent.pin', [
             'has_pin' => $user !== null && ! empty($user->parent_pin_hash),
         ]);
@@ -33,12 +36,13 @@ class ParentPinController extends Controller
             'pin' => ['required', 'regex:/^\d{4}$/'],
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
-        $key  = 'parent-pin:' . $user->id;
+        $key = 'parent-pin:'.$user->id;
 
         if (RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
             $seconds = RateLimiter::availableIn($key);
+
             return back()->withErrors([
                 'pin' => __('Too many attempts. Try again in :seconds seconds.', ['seconds' => $seconds]),
             ])->withInput();
@@ -46,6 +50,7 @@ class ParentPinController extends Controller
 
         if (! $user->parent_pin_hash || ! Hash::check($request->input('pin'), $user->parent_pin_hash)) {
             RateLimiter::hit($key, self::DECAY_SECONDS);
+
             return back()->withErrors(['pin' => __('Incorrect PIN.')])->withInput();
         }
 
@@ -53,6 +58,7 @@ class ParentPinController extends Controller
         $request->session()->put('parent_pin_verified_at', Carbon::now()->toIso8601String());
 
         $intended = $request->session()->pull('parent_pin_intended');
+
         return redirect($intended ?: route('parent.dashboard'));
     }
 }

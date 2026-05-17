@@ -1,5 +1,7 @@
 <?php
+
 // Module model for Course > Module > Activity hierarchy
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,4 +33,3 @@ class Module extends Model
         return $this->hasMany(Lesson::class)->orderBy('order');
     }
 }
-

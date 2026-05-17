@@ -71,6 +71,7 @@ class ChatProviderService
 
             if ($response->successful()) {
                 $models = $response->json('data', []);
+
                 return [
                     'status' => 'live',
                     'message' => count($models) > 0
@@ -135,9 +136,9 @@ class ChatProviderService
     {
         try {
             $response = Http::withHeaders([
-                    'x-api-key' => $apiKey,
-                    'anthropic-version' => '2023-06-01',
-                ])
+                'x-api-key' => $apiKey,
+                'anthropic-version' => '2023-06-01',
+            ])
                 ->acceptJson()
                 ->timeout(20)
                 ->post("{$baseUrl}/messages", [
@@ -237,7 +238,7 @@ class ChatProviderService
                 'tokens' => data_get($data, 'usage.total_tokens'),
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException("OpenAI chat failed: " . $e->getMessage());
+            throw new \RuntimeException('OpenAI chat failed: '.$e->getMessage());
         }
     }
 
@@ -245,9 +246,9 @@ class ChatProviderService
     {
         try {
             $response = Http::withHeaders([
-                    'x-api-key' => $apiKey,
-                    'anthropic-version' => '2023-06-01',
-                ])
+                'x-api-key' => $apiKey,
+                'anthropic-version' => '2023-06-01',
+            ])
                 ->acceptJson()
                 ->timeout($options['timeout'] ?? 60)
                 ->post("{$baseUrl}/messages", [
@@ -276,7 +277,7 @@ class ChatProviderService
                 'tokens' => data_get($data, 'usage.input_tokens', 0) + data_get($data, 'usage.output_tokens', 0),
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Anthropic chat failed: " . $e->getMessage());
+            throw new \RuntimeException('Anthropic chat failed: '.$e->getMessage());
         }
     }
 
@@ -326,7 +327,7 @@ class ChatProviderService
                 'tokens' => data_get($data, 'usageMetadata.totalTokenCount'),
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Gemini chat failed: " . $e->getMessage());
+            throw new \RuntimeException('Gemini chat failed: '.$e->getMessage());
         }
     }
 
@@ -338,9 +339,9 @@ class ChatProviderService
     {
         $default = match ($driver) {
             'anthropic' => 'https://api.anthropic.com/v1',
-            'grok'      => 'https://api.x.ai/v1',
-            'gemini'    => 'https://generativelanguage.googleapis.com/v1beta',
-            default     => 'https://api.openai.com/v1',
+            'grok' => 'https://api.x.ai/v1',
+            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
+            default => 'https://api.openai.com/v1',
         };
 
         $baseUrl = rtrim($baseUrl ?: $default, '/');
@@ -349,6 +350,7 @@ class ChatProviderService
             if (! Str::contains(parse_url($baseUrl, PHP_URL_PATH) ?: '', '/v1beta')) {
                 $baseUrl .= '/v1beta';
             }
+
             return $baseUrl;
         }
 
@@ -386,9 +388,9 @@ class ChatProviderService
     {
         return match ($driver) {
             'anthropic' => 'claude-haiku-4-5-20251001',
-            'grok'      => 'grok-beta',
-            'gemini'    => 'gemini-1.5-flash',
-            default     => 'gpt-4o-mini',
+            'grok' => 'grok-beta',
+            'gemini' => 'gemini-1.5-flash',
+            default => 'gpt-4o-mini',
         };
     }
 

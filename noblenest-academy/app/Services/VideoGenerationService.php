@@ -43,19 +43,19 @@ class VideoGenerationService
             $response = Http::withHeaders(['X-Api-Key' => $apiKey])
                 ->acceptJson()
                 ->timeout(30)
-                ->post(self::HEYGEN_BASE . '/v2/video/generate', [
+                ->post(self::HEYGEN_BASE.'/v2/video/generate', [
                     'video_inputs' => [
                         [
                             'character' => [
-                                'type'      => 'avatar',
+                                'type' => 'avatar',
                                 'avatar_id' => $avatarId,
                                 'avatar_style' => 'normal',
                             ],
                             'voice' => [
-                                'type'     => 'text',
+                                'type' => 'text',
                                 'input_text' => $script,
-                                'voice_id'   => $voiceId,
-                                'speed'      => 1.0,
+                                'voice_id' => $voiceId,
+                                'speed' => 1.0,
                             ],
                         ],
                     ],
@@ -88,12 +88,13 @@ class VideoGenerationService
             $response = Http::withHeaders(['X-Api-Key' => $apiKey])
                 ->acceptJson()
                 ->timeout(15)
-                ->get(self::HEYGEN_BASE . "/v1/video_status.get?video_id={$videoId}");
+                ->get(self::HEYGEN_BASE."/v1/video_status.get?video_id={$videoId}");
 
             if ($response->successful()) {
                 $data = $response->json('data', []);
+
                 return [
-                    'status'    => $data['status'] ?? 'unknown',
+                    'status' => $data['status'] ?? 'unknown',
                     'video_url' => $data['video_url'] ?? null,
                     'thumbnail' => $data['thumbnail_url'] ?? null,
                 ];
@@ -119,7 +120,7 @@ class VideoGenerationService
 
         return match ($provider) {
             'elevenlabs' => $this->ttsViaElevenLabs($text, $language),
-            default      => $this->ttsViaOpenAI($text, $voice),
+            default => $this->ttsViaOpenAI($text, $voice),
         };
     }
 
@@ -141,8 +142,9 @@ class VideoGenerationService
                 ]);
 
             if ($response->successful()) {
-                $path = 'tts/' . Str::uuid() . '.mp3';
+                $path = 'tts/'.Str::uuid().'.mp3';
                 Storage::disk('public')->put($path, $response->body());
+
                 return $path;
             }
         } catch (\Throwable) {
@@ -166,14 +168,15 @@ class VideoGenerationService
             $response = Http::withHeaders(['xi-api-key' => $apiKey])
                 ->timeout(30)
                 ->post("https://api.elevenlabs.io/v1/text-to-speech/{$voiceId}", [
-                    'text'       => Str::limit($text, 5000),
-                    'model_id'   => 'eleven_multilingual_v2',
+                    'text' => Str::limit($text, 5000),
+                    'model_id' => 'eleven_multilingual_v2',
                     'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75],
                 ]);
 
             if ($response->successful()) {
-                $path = 'tts/' . Str::uuid() . '.mp3';
+                $path = 'tts/'.Str::uuid().'.mp3';
                 Storage::disk('public')->put($path, $response->body());
+
                 return $path;
             }
         } catch (\Throwable) {

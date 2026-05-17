@@ -13,6 +13,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
@@ -28,9 +30,7 @@ class ExportParentDataJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public int $userId)
-    {
-    }
+    public function __construct(public int $userId) {}
 
     public function handle(): void
     {
@@ -48,17 +48,17 @@ class ExportParentDataJob implements ShouldQueue
 
         $payload = [
             'account' => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'role'       => $user->role,
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
                 'created_at' => optional($user->created_at)->toIso8601String(),
             ],
             'children' => $children->map(fn (ChildProfile $c) => [
-                'id'                  => $c->id,
-                'name'                => $c->name,
-                'date_of_birth'       => optional($c->date_of_birth)->toDateString(),
-                'preferred_language'  => $c->preferred_language,
+                'id' => $c->id,
+                'name' => $c->name,
+                'date_of_birth' => optional($c->date_of_birth)->toDateString(),
+                'preferred_language' => $c->preferred_language,
                 'parental_consent_at' => optional($c->parental_consent_at)->toIso8601String(),
             ])->all(),
             'progress' => ChildActivityProgress::withTrashed()
@@ -74,7 +74,7 @@ class ExportParentDataJob implements ShouldQueue
         ];
 
         $disk = Storage::disk('local');
-        $dir  = "private/exports/{$user->id}";
+        $dir = "private/exports/{$user->id}";
         $disk->makeDirectory($dir);
 
         $jsonPath = "{$dir}/{$ts}.json";
@@ -85,7 +85,7 @@ class ExportParentDataJob implements ShouldQueue
         $zipPath = "{$dir}/{$ts}.zip";
         $zipFull = $disk->path($zipPath);
         if (class_exists(\ZipArchive::class)) {
-            $zip = new \ZipArchive();
+            $zip = new \ZipArchive;
             if ($zip->open($zipFull, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
                 $zip->addFromString('data.json', (string) $disk->get($jsonPath));
                 $zip->addFromString('children.csv', $this->toCsv($payload['children']));
@@ -111,7 +111,7 @@ class ExportParentDataJob implements ShouldQueue
 
         // Email delivery is best-effort — skip silently if mail not configured.
         try {
-            \Illuminate\Support\Facades\Mail::raw(
+            Mail::raw(
                 "Your Noble Nest Academy data export is ready. Download (link expires in 1 hour):\n\n{$signed}",
                 function ($m) use ($user) {
                     $m->to($user->email)->subject('Your Noble Nest Academy data export');
@@ -119,9 +119,9 @@ class ExportParentDataJob implements ShouldQueue
             );
         } catch (\Throwable $e) {
             // Logged via audit; do not fail the job.
-            \Illuminate\Support\Facades\Log::warning('ExportParentDataJob mail send failed', [
+            Log::warning('ExportParentDataJob mail send failed', [
                 'user_id' => $user->id,
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -130,12 +130,12 @@ class ExportParentDataJob implements ShouldQueue
     private function toCsv(array $rows): string
     {
         if (empty($rows)) {
-            return "";
+            return '';
         }
         $headers = array_keys((array) $rows[0]);
         $out = fopen('php://temp', 'r+');
         if ($out === false) {
-            return "";
+            return '';
         }
         fputcsv($out, $headers);
         foreach ($rows as $row) {
@@ -149,6 +149,7 @@ class ExportParentDataJob implements ShouldQueue
         rewind($out);
         $csv = stream_get_contents($out) ?: '';
         fclose($out);
+
         return $csv;
     }
 }

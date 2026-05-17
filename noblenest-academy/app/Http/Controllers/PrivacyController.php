@@ -7,6 +7,7 @@ use App\Jobs\HardDeleteParentDataJob;
 use App\Models\AuditLogEntry;
 use App\Models\ChildProfile;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +17,7 @@ class PrivacyController extends Controller
 {
     public function index()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $children = ChildProfile::where('parent_id', $user->id)->withCount('activityProgress')->get();
         $paymentCount = Payment::where('user_id', $user->id)->count();
@@ -29,6 +30,7 @@ class PrivacyController extends Controller
         if ($child->parent_id !== Auth::id()) {
             abort(403);
         }
+
         return view('privacy.parental-consent', compact('child'));
     }
 
@@ -39,14 +41,14 @@ class PrivacyController extends Controller
         }
 
         $request->validate([
-            'agree_terms'   => 'accepted',
+            'agree_terms' => 'accepted',
             'agree_privacy' => 'accepted',
-            'agree_coppa'   => 'accepted',
+            'agree_coppa' => 'accepted',
         ]);
 
         $child->forceFill([
-            'parental_consent_at'         => now(),
-            'parental_consent_ip'         => substr((string) $request->ip(), 0, 45),
+            'parental_consent_at' => now(),
+            'parental_consent_ip' => substr((string) $request->ip(), 0, 45),
             'parental_consent_user_agent' => substr((string) $request->userAgent(), 0, 255),
         ])->save();
 
@@ -59,7 +61,7 @@ class PrivacyController extends Controller
      */
     public function exportData(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         ExportParentDataJob::dispatch($user->id);
@@ -67,7 +69,7 @@ class PrivacyController extends Controller
         AuditLogEntry::record(
             actorUserId: $user->id,
             action: 'privacy.export.requested',
-            targetType: \App\Models\User::class,
+            targetType: User::class,
             targetId: $user->id,
             ip: $request->ip(),
             userAgent: $request->userAgent(),
@@ -83,7 +85,7 @@ class PrivacyController extends Controller
     public function downloadExport(Request $request, int $user, string $ts)
     {
         $disk = Storage::disk('local');
-        $zip  = "private/exports/{$user}/{$ts}.zip";
+        $zip = "private/exports/{$user}/{$ts}.zip";
         $json = "private/exports/{$user}/{$ts}.json";
 
         if ($disk->exists($zip)) {
@@ -103,10 +105,10 @@ class PrivacyController extends Controller
     {
         $request->validate([
             'password' => 'required|string',
-            'confirm'  => 'required|in:DELETE',
+            'confirm' => 'required|in:DELETE',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         if (! Hash::check($request->input('password'), $user->password)) {
@@ -116,7 +118,7 @@ class PrivacyController extends Controller
         AuditLogEntry::record(
             actorUserId: $user->id,
             action: 'privacy.erase.requested',
-            targetType: \App\Models\User::class,
+            targetType: User::class,
             targetId: $user->id,
             ip: $request->ip(),
             userAgent: $request->userAgent(),

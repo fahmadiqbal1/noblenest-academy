@@ -10,5 +10,6 @@ class AssessmentQuestion extends Model
     use HasFactory;
 
     protected $fillable = ['battery', 'sequence', 'age_min_months', 'age_max_months', 'prompt', 'options'];
-    protected $casts    = ['options' => 'array', 'age_min_months' => 'integer', 'age_max_months' => 'integer'];
+
+    protected $casts = ['options' => 'array', 'age_min_months' => 'integer', 'age_max_months' => 'integer'];
 }

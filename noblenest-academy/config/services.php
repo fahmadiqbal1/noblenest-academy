@@ -48,11 +48,11 @@ return [
     ],
 
     'paypal' => [
-        'client_id'  => env('PAYPAL_CLIENT_ID'),
-        'secret'     => env('PAYPAL_SECRET'),
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
         'webhook_id' => env('PAYPAL_WEBHOOK_ID'),
-        'env'        => env('PAYPAL_ENV', env('PAYPAL_MODE', 'sandbox')), // sandbox | live
-        'mode'       => env('PAYPAL_MODE', 'sandbox'), // legacy alias
+        'env' => env('PAYPAL_ENV', env('PAYPAL_MODE', 'sandbox')), // sandbox | live
+        'mode' => env('PAYPAL_MODE', 'sandbox'), // legacy alias
     ],
 
     /*
@@ -121,7 +121,7 @@ return [
     ],
 
     'whisper' => [
-        'driver'  => env('WHISPER_DRIVER', 'local'), // local | openai
+        'driver' => env('WHISPER_DRIVER', 'local'), // local | openai
         'api_key' => env('WHISPER_API_KEY', env('OPENAI_API_KEY', '')),
     ],
 

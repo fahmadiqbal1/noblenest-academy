@@ -19,6 +19,7 @@ class BadgeEarned
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public ChildProfile $child;
+
     public Badge $badge;
 
     public function __construct(

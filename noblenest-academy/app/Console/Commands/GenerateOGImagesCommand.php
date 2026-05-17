@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AIProviderConfig;
 use App\Models\Course;
 use App\Services\AIProviderGateway;
-use App\Models\AIProviderConfig;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,12 +23,14 @@ class GenerateOGImagesCommand extends Command
         $provider = $this->resolveProvider();
         if (! $provider) {
             $this->error('No active image-capable provider found. Add one in the Orchestrator or pass --provider=ID.');
+
             return self::FAILURE;
         }
 
         $pages = $this->resolvePages();
         if (empty($pages)) {
             $this->error('No pages to generate. Use --all or --page=<name>.');
+
             return self::FAILURE;
         }
 
@@ -41,7 +43,7 @@ class GenerateOGImagesCommand extends Command
                 $result = $gateway->generateImage($provider, $prompt);
 
                 if (! empty($result['path'])) {
-                    $dest = 'public/og/' . Str::slug($page['slug']) . '.png';
+                    $dest = 'public/og/'.Str::slug($page['slug']).'.png';
                     if (Storage::exists($result['path'])) {
                         Storage::copy($result['path'], $dest);
                     }
@@ -70,7 +72,7 @@ class GenerateOGImagesCommand extends Command
         return AIProviderConfig::where('is_active', true)
             ->where(function ($q) {
                 $q->whereJsonContains('capabilities', 'image')
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(extra_config, '$.driver')) IN ('gemini', 'stability', 'openai-image')");
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(extra_config, '$.driver')) IN ('gemini', 'stability', 'openai-image')");
             })->first();
     }
 
@@ -84,7 +86,7 @@ class GenerateOGImagesCommand extends Command
 
             foreach (Course::all() as $course) {
                 $pages[] = [
-                    'slug' => 'course-' . Str::slug($course->title),
+                    'slug' => 'course-'.Str::slug($course->title),
                     'title' => $course->title,
                     'desc' => Str::limit($course->description, 100),
                 ];
@@ -98,7 +100,7 @@ class GenerateOGImagesCommand extends Command
                 $course = Course::where('slug', $page)->orWhere('id', $page)->first();
                 if ($course) {
                     $pages[] = [
-                        'slug' => 'course-' . Str::slug($course->title),
+                        'slug' => 'course-'.Str::slug($course->title),
                         'title' => $course->title,
                         'desc' => Str::limit($course->description, 100),
                     ];
@@ -112,9 +114,9 @@ class GenerateOGImagesCommand extends Command
     private function buildPrompt(array $page): string
     {
         return "Create a professional Open Graph social media preview image (1200x630px) for '{$page['title']}'. "
-            . "Description: {$page['desc']}. "
-            . "Style: Blossom design with soft pastels (#2563EB blue, #F97316 orange, #F8FAFC background), "
-            . "Claymorphism 3D elements, child-friendly, educational theme. "
-            . "Include subtle Noble Nest Academy branding. No text overlay needed.";
+            ."Description: {$page['desc']}. "
+            .'Style: Blossom design with soft pastels (#2563EB blue, #F97316 orange, #F8FAFC background), '
+            .'Claymorphism 3D elements, child-friendly, educational theme. '
+            .'Include subtle Noble Nest Academy branding. No text overlay needed.';
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessContentBatchJob;
 use App\Models\Activity;
 use App\Models\AIJob;
 use Illuminate\Http\Request;
@@ -25,24 +26,24 @@ class ContentBatchController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'subject'        => ['required', Rule::in(['literacy', 'numeracy', 'creativity', 'stem', 'social', 'motor'])],
-            'age_tier'       => ['required', Rule::in(['baby', 'toddler', 'preschool', 'school'])],
-            'count'          => ['required', 'integer', 'min:1', 'max:50'],
-            'language'       => ['required', Rule::in(['en', 'fr', 'ar', 'ur', 'es', 'zh', 'ko', 'ru'])],
+            'subject' => ['required', Rule::in(['literacy', 'numeracy', 'creativity', 'stem', 'social', 'motor'])],
+            'age_tier' => ['required', Rule::in(['baby', 'toddler', 'preschool', 'school'])],
+            'count' => ['required', 'integer', 'min:1', 'max:50'],
+            'language' => ['required', Rule::in(['en', 'fr', 'ar', 'ur', 'es', 'zh', 'ko', 'ru'])],
             'activity_types' => ['required', 'array'],
             'activity_types.*' => [Rule::in(['tracing', 'puzzle', 'drawing', 'quiz', 'matching', 'story'])],
-            'is_free'        => ['nullable', 'boolean'],
+            'is_free' => ['nullable', 'boolean'],
         ]);
 
         $job = AIJob::create([
-            'type'       => 'content_batch',
-            'status'     => 'pending',
-            'payload'    => $validated,
+            'type' => 'content_batch',
+            'status' => 'pending',
+            'payload' => $validated,
             'created_by' => Auth::id(),
         ]);
 
         // Dispatch to queue
-        \App\Jobs\ProcessContentBatchJob::dispatch($job);
+        ProcessContentBatchJob::dispatch($job);
 
         return redirect()->route('admin.orchestrator.index')
             ->with('status', "Batch queued: {$validated['count']} {$validated['subject']} activities for {$validated['age_tier']} tier.");
@@ -73,6 +74,6 @@ class ContentBatchController extends Controller
             ->where('source_job_id', $job->id)
             ->update(['published' => true]);
 
-        return back()->with('status', count($ids) . ' activities published.');
+        return back()->with('status', count($ids).' activities published.');
     }
 }

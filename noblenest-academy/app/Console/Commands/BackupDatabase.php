@@ -30,7 +30,7 @@ class BackupDatabase extends Command
             mkdir($dir, 0775, true);
         }
 
-        $conn = (array) config('database.connections.' . config('database.default'));
+        $conn = (array) config('database.connections.'.config('database.default'));
         if (($conn['driver'] ?? '') !== 'mysql') {
             $this->warn('backup:db: non-mysql driver, skipping.');
 
@@ -40,7 +40,7 @@ class BackupDatabase extends Command
         $ts = Carbon::now()->format('Y-m-d_His');
         $file = "{$dir}/db-{$ts}.sql.gz";
         $cmd = sprintf(
-            "mysqldump -h%s -P%s -u%s -p%s %s | gzip > %s",
+            'mysqldump -h%s -P%s -u%s -p%s %s | gzip > %s',
             escapeshellarg((string) ($conn['host'] ?? '127.0.0.1')),
             escapeshellarg((string) ($conn['port'] ?? 3306)),
             escapeshellarg((string) ($conn['username'] ?? '')),
@@ -51,7 +51,7 @@ class BackupDatabase extends Command
 
         $result = Process::run($cmd);
         if (! $result->successful()) {
-            $this->error('mysqldump failed: ' . $result->errorOutput());
+            $this->error('mysqldump failed: '.$result->errorOutput());
 
             return self::FAILURE;
         }

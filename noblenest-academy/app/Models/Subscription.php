@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Models;
 
+use App\Services\PricingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Subscription extends Model
 {
@@ -16,30 +19,51 @@ class Subscription extends Model
     ];
 
     protected $casts = [
-        'starts_at'           => 'datetime',
-        'ends_at'             => 'datetime',
-        'active'              => 'boolean',
-        'current_period_end'  => 'datetime',
-        'cancel_at'           => 'datetime',
-        'paused_at'           => 'datetime',
-        'canceled_at'         => 'datetime',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'active' => 'boolean',
+        'current_period_end' => 'datetime',
+        'cancel_at' => 'datetime',
+        'paused_at' => 'datetime',
+        'canceled_at' => 'datetime',
     ];
 
-    public const STATUS_ACTIVE   = 'active';
-    public const STATUS_PAST_DUE = 'past_due';
-    public const STATUS_CANCELED = 'canceled';
-    public const STATUS_PAUSED   = 'paused';
+    public const STATUS_ACTIVE = 'active';
 
-    public function user() { return $this->belongsTo(User::class); }
+    public const STATUS_PAST_DUE = 'past_due';
+
+    public const STATUS_CANCELED = 'canceled';
+
+    public const STATUS_PAUSED = 'paused';
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Phase 7 — state machine helpers.
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function isActive(): bool   { return $this->status === self::STATUS_ACTIVE; }
-    public function isPastDue(): bool  { return $this->status === self::STATUS_PAST_DUE; }
-    public function isCanceled(): bool { return $this->status === self::STATUS_CANCELED; }
-    public function isPaused(): bool   { return $this->status === self::STATUS_PAUSED; }
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isPastDue(): bool
+    {
+        return $this->status === self::STATUS_PAST_DUE;
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->status === self::STATUS_CANCELED;
+    }
+
+    public function isPaused(): bool
+    {
+        return $this->status === self::STATUS_PAUSED;
+    }
 
     public function markPastDue(): void
     {
@@ -49,8 +73,8 @@ class Subscription extends Model
     public function cancel(): void
     {
         $this->forceFill([
-            'status'      => self::STATUS_CANCELED,
-            'active'      => false,
+            'status' => self::STATUS_CANCELED,
+            'active' => false,
             'canceled_at' => now(),
         ])->save();
     }
@@ -58,7 +82,7 @@ class Subscription extends Model
     public function pause(): void
     {
         $this->forceFill([
-            'status'    => self::STATUS_PAUSED,
+            'status' => self::STATUS_PAUSED,
             'paused_at' => now(),
         ])->save();
     }
@@ -66,8 +90,8 @@ class Subscription extends Model
     public function resume(): void
     {
         $this->forceFill([
-            'status'    => self::STATUS_ACTIVE,
-            'active'    => true,
+            'status' => self::STATUS_ACTIVE,
+            'active' => true,
             'paused_at' => null,
         ])->save();
     }
@@ -79,29 +103,29 @@ class Subscription extends Model
      * row with status='pending_proration'. The real Stripe invoice is issued
      * by Stripe Billing on the next cycle — this records the local intent.
      */
-    public function upgradeTo(string $newTierKey, ?string $countryCode = null): \App\Models\Payment
+    public function upgradeTo(string $newTierKey, ?string $countryCode = null): Payment
     {
-        /** @var \App\Services\PricingService $pricing */
-        $pricing = app(\App\Services\PricingService::class);
+        /** @var PricingService $pricing */
+        $pricing = app(PricingService::class);
 
         $newTier = $pricing->resolveTier($newTierKey, $countryCode);
         $oldTier = $pricing->resolveTier($this->plan ?: 'individual', $countryCode);
 
-        $cycleDays     = 30;
+        $cycleDays = 30;
         $daysRemaining = $this->ends_at
             ? max(0, (int) ceil(now()->diffInDays($this->ends_at, false)))
             : $cycleDays;
 
         $proration = $pricing->computeUpgradeProration($oldTier, $newTier, $daysRemaining, $cycleDays);
 
-        $payment = \App\Models\Payment::create([
-            'user_id'             => $this->user_id,
-            'provider'            => $this->provider ?? 'stripe',
-            'provider_payment_id' => 'proration_' . \Illuminate\Support\Str::random(16),
-            'amount'              => $proration['amount'],
-            'currency'            => $proration['currency'],
-            'status'              => 'pending_proration',
-            'paid_at'             => null,
+        $payment = Payment::create([
+            'user_id' => $this->user_id,
+            'provider' => $this->provider ?? 'stripe',
+            'provider_payment_id' => 'proration_'.Str::random(16),
+            'amount' => $proration['amount'],
+            'currency' => $proration['currency'],
+            'status' => 'pending_proration',
+            'paid_at' => null,
         ]);
 
         $this->forceFill(['plan' => $newTierKey])->save();
@@ -114,7 +138,7 @@ class Subscription extends Model
      */
     public function currentWeek(): int
     {
-        if (!$this->starts_at) {
+        if (! $this->starts_at) {
             return 1;
         }
 
@@ -132,4 +156,3 @@ class Subscription extends Model
         return $this->currentWeek() * 5;
     }
 }
-

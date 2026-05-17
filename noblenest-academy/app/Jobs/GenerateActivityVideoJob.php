@@ -13,6 +13,7 @@ class GenerateActivityVideoJob implements ShouldQueue
     use Queueable;
 
     public int $tries = 2;
+
     public int $timeout = 300; // 5 minutes for video generation
 
     public function __construct(
@@ -25,7 +26,7 @@ class GenerateActivityVideoJob implements ShouldQueue
     public function handle(VideoGenerationService $videoService): void
     {
         $activity = Activity::find($this->activityId);
-        if (!$activity) {
+        if (! $activity) {
             return;
         }
 
@@ -33,12 +34,12 @@ class GenerateActivityVideoJob implements ShouldQueue
         $audioPath = $videoService->generateSpeech($this->script, $this->language);
 
         if ($audioPath) {
-            $activity->update(['audio_url' => asset('storage/' . $audioPath)]);
+            $activity->update(['audio_url' => asset('storage/'.$audioPath)]);
         }
 
         // Attempt HeyGen avatar video if configured
         $avatarId = config('services.heygen.default_avatar_id', 'default_avatar');
-        $voiceId  = config('services.heygen.default_voice_id', 'default_voice');
+        $voiceId = config('services.heygen.default_voice_id', 'default_voice');
 
         $videoId = $videoService->generateHeyGenVideo(
             $this->script,
@@ -49,7 +50,7 @@ class GenerateActivityVideoJob implements ShouldQueue
 
         if ($videoId && $this->aiJobId) {
             AIJob::where('id', $this->aiJobId)->update([
-                'status'  => 'video_pending',
+                'status' => 'video_pending',
                 'payload' => array_merge(
                     AIJob::find($this->aiJobId)?->payload ?? [],
                     ['heygen_video_id' => $videoId, 'activity_id' => $this->activityId]

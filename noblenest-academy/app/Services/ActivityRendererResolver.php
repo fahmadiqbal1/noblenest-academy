@@ -26,19 +26,30 @@ use App\Models\Activity;
  */
 class ActivityRendererResolver
 {
-    public const RENDERER_GUIDED_STEPS      = 'guided-steps';
-    public const RENDERER_TRACING           = 'tracing-canvas';
-    public const RENDERER_DRAWING           = 'drawing-canvas';
-    public const RENDERER_DRAG_AND_MATCH    = 'drag-and-match';
-    public const RENDERER_QUIZ              = 'quiz';
+    public const RENDERER_GUIDED_STEPS = 'guided-steps';
+
+    public const RENDERER_TRACING = 'tracing-canvas';
+
+    public const RENDERER_DRAWING = 'drawing-canvas';
+
+    public const RENDERER_DRAG_AND_MATCH = 'drag-and-match';
+
+    public const RENDERER_QUIZ = 'quiz';
+
     public const RENDERER_SONG_AND_MOVEMENT = 'song-and-movement';
-    public const RENDERER_VIDEO_LESSON      = 'video-lesson';
-    public const RENDERER_CODE_BLOCKS       = 'code-blocks';
-    public const RENDERER_ASSESSMENT        = 'assessment';
+
+    public const RENDERER_VIDEO_LESSON = 'video-lesson';
+
+    public const RENDERER_CODE_BLOCKS = 'code-blocks';
+
+    public const RENDERER_ASSESSMENT = 'assessment';
+
     // Phase 4 MVP additions
-    public const RENDERER_PRONUNCIATION     = 'pronunciation';
-    public const RENDERER_PYTHON_SANDBOX    = 'python-sandbox';
-    public const RENDERER_ROBOTICS_SIM      = 'robotics-sim';
+    public const RENDERER_PRONUNCIATION = 'pronunciation';
+
+    public const RENDERER_PYTHON_SANDBOX = 'python-sandbox';
+
+    public const RENDERER_ROBOTICS_SIM = 'robotics-sim';
 
     /**
      * Every canonical renderer slug. Used by the feature test that iterates
@@ -69,65 +80,65 @@ class ActivityRendererResolver
      */
     private const TYPE_MAP = [
         // Canvas players
-        'tracing'        => self::RENDERER_TRACING,
-        'drawing'        => self::RENDERER_DRAWING,
+        'tracing' => self::RENDERER_TRACING,
+        'drawing' => self::RENDERER_DRAWING,
 
         // Drag interactions
-        'matching'       => self::RENDERER_DRAG_AND_MATCH,
-        'sorting'        => self::RENDERER_DRAG_AND_MATCH,
-        'puzzle'         => self::RENDERER_DRAG_AND_MATCH,
+        'matching' => self::RENDERER_DRAG_AND_MATCH,
+        'sorting' => self::RENDERER_DRAG_AND_MATCH,
+        'puzzle' => self::RENDERER_DRAG_AND_MATCH,
 
         // Quiz
-        'quiz'           => self::RENDERER_QUIZ,
+        'quiz' => self::RENDERER_QUIZ,
 
         // Song / movement / music
-        'song'           => self::RENDERER_SONG_AND_MOVEMENT,
-        'vocal'          => self::RENDERER_SONG_AND_MOVEMENT,
-        'movement'       => self::RENDERER_SONG_AND_MOVEMENT,
+        'song' => self::RENDERER_SONG_AND_MOVEMENT,
+        'vocal' => self::RENDERER_SONG_AND_MOVEMENT,
+        'movement' => self::RENDERER_SONG_AND_MOVEMENT,
 
         // Video
-        'video'          => self::RENDERER_VIDEO_LESSON,
-        'slides'         => self::RENDERER_VIDEO_LESSON,
-        'simulation'     => self::RENDERER_VIDEO_LESSON,
+        'video' => self::RENDERER_VIDEO_LESSON,
+        'slides' => self::RENDERER_VIDEO_LESSON,
+        'simulation' => self::RENDERER_VIDEO_LESSON,
 
         // STEM
-        'code'           => self::RENDERER_CODE_BLOCKS,
-        'coding'         => self::RENDERER_CODE_BLOCKS,
-        'blockly'        => self::RENDERER_CODE_BLOCKS,
+        'code' => self::RENDERER_CODE_BLOCKS,
+        'coding' => self::RENDERER_CODE_BLOCKS,
+        'blockly' => self::RENDERER_CODE_BLOCKS,
 
         // Assessment
-        'assessment'     => self::RENDERER_ASSESSMENT,
-        'iq'             => self::RENDERER_ASSESSMENT,
-        'personality'    => self::RENDERER_ASSESSMENT,
+        'assessment' => self::RENDERER_ASSESSMENT,
+        'iq' => self::RENDERER_ASSESSMENT,
+        'personality' => self::RENDERER_ASSESSMENT,
 
         // Phase 4 MVP players
-        'pronunciation'  => self::RENDERER_PRONUNCIATION,
-        'speech'         => self::RENDERER_PRONUNCIATION,
-        'python'         => self::RENDERER_PYTHON_SANDBOX,
+        'pronunciation' => self::RENDERER_PRONUNCIATION,
+        'speech' => self::RENDERER_PRONUNCIATION,
+        'python' => self::RENDERER_PYTHON_SANDBOX,
         'python-sandbox' => self::RENDERER_PYTHON_SANDBOX,
-        'robotics'       => self::RENDERER_ROBOTICS_SIM,
-        'robotics-sim'   => self::RENDERER_ROBOTICS_SIM,
+        'robotics' => self::RENDERER_ROBOTICS_SIM,
+        'robotics-sim' => self::RENDERER_ROBOTICS_SIM,
 
         // Default narrative shapes → guided-steps
-        'hands_on'       => self::RENDERER_GUIDED_STEPS,
-        'craft'          => self::RENDERER_GUIDED_STEPS,
-        'routine'        => self::RENDERER_GUIDED_STEPS,
-        'real_world'     => self::RENDERER_GUIDED_STEPS,
-        'mindfulness'    => self::RENDERER_GUIDED_STEPS,
-        'discussion'     => self::RENDERER_GUIDED_STEPS,
-        'outdoor'        => self::RENDERER_GUIDED_STEPS,
-        'observation'    => self::RENDERER_GUIDED_STEPS,
-        'interactive'    => self::RENDERER_GUIDED_STEPS,
-        'creative'       => self::RENDERER_GUIDED_STEPS,
-        'creative_play'  => self::RENDERER_GUIDED_STEPS,
-        'worksheet'      => self::RENDERER_GUIDED_STEPS,
-        'experiment'     => self::RENDERER_GUIDED_STEPS,
-        'sensory'        => self::RENDERER_GUIDED_STEPS,
-        'play'           => self::RENDERER_GUIDED_STEPS,
-        'reading'        => self::RENDERER_GUIDED_STEPS,
-        'story'          => self::RENDERER_GUIDED_STEPS,
-        'flashcard'      => self::RENDERER_GUIDED_STEPS,
-        'game'           => self::RENDERER_GUIDED_STEPS,
+        'hands_on' => self::RENDERER_GUIDED_STEPS,
+        'craft' => self::RENDERER_GUIDED_STEPS,
+        'routine' => self::RENDERER_GUIDED_STEPS,
+        'real_world' => self::RENDERER_GUIDED_STEPS,
+        'mindfulness' => self::RENDERER_GUIDED_STEPS,
+        'discussion' => self::RENDERER_GUIDED_STEPS,
+        'outdoor' => self::RENDERER_GUIDED_STEPS,
+        'observation' => self::RENDERER_GUIDED_STEPS,
+        'interactive' => self::RENDERER_GUIDED_STEPS,
+        'creative' => self::RENDERER_GUIDED_STEPS,
+        'creative_play' => self::RENDERER_GUIDED_STEPS,
+        'worksheet' => self::RENDERER_GUIDED_STEPS,
+        'experiment' => self::RENDERER_GUIDED_STEPS,
+        'sensory' => self::RENDERER_GUIDED_STEPS,
+        'play' => self::RENDERER_GUIDED_STEPS,
+        'reading' => self::RENDERER_GUIDED_STEPS,
+        'story' => self::RENDERER_GUIDED_STEPS,
+        'flashcard' => self::RENDERER_GUIDED_STEPS,
+        'game' => self::RENDERER_GUIDED_STEPS,
     ];
 
     public function resolve(Activity $activity): string
@@ -149,7 +160,7 @@ class ActivityRendererResolver
      */
     private function resolveByContent(Activity $activity): string
     {
-        if (!empty($activity->video_url)) {
+        if (! empty($activity->video_url)) {
             return self::RENDERER_VIDEO_LESSON;
         }
 

@@ -43,9 +43,9 @@ class I18n
      * against the "messages" namespace. If the translation is missing
      * the key itself is returned (legacy behavior).
      *
-     * @param  string       $key      Translation key
-     * @param  string|null  $lang     Language override (defaults to app locale)
-     * @param  array        $replace  Placeholder replacements
+     * @param  string  $key  Translation key
+     * @param  string|null  $lang  Language override (defaults to app locale)
+     * @param  array  $replace  Placeholder replacements
      */
     public static function get(string $key, ?string $lang = null, array $replace = []): string
     {

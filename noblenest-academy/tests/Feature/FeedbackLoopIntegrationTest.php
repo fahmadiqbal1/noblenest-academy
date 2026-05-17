@@ -17,7 +17,9 @@ class FeedbackLoopIntegrationTest extends TestCase
     use RefreshDatabase;
 
     protected User $parent;
+
     protected ChildProfile $child;
+
     protected Activity $activity;
 
     protected function setUp(): void
@@ -50,9 +52,9 @@ class FeedbackLoopIntegrationTest extends TestCase
         // Mark activity as completed with a good score
         $progress = ChildActivityProgress::create([
             'child_profile_id' => $this->child->id,
-            'activity_id'      => $this->activity->id,
-            'score'            => 85,
-            'completed_at'     => now(),
+            'activity_id' => $this->activity->id,
+            'score' => 85,
+            'completed_at' => now(),
         ]);
 
         // Dispatch event manually (normally fired by controller)
@@ -75,9 +77,9 @@ class FeedbackLoopIntegrationTest extends TestCase
         // Complete activity with high score (success)
         $progress = ChildActivityProgress::create([
             'child_profile_id' => $this->child->id,
-            'activity_id'      => $this->activity->id,
-            'score'            => 90,
-            'completed_at'     => now(),
+            'activity_id' => $this->activity->id,
+            'score' => 90,
+            'completed_at' => now(),
         ]);
 
         ActivityCompleted::dispatch($this->child, $this->activity, $progress, 0.90);
@@ -98,9 +100,9 @@ class FeedbackLoopIntegrationTest extends TestCase
         // Complete activity with low score (struggle)
         $progress = ChildActivityProgress::create([
             'child_profile_id' => $this->child->id,
-            'activity_id'      => $this->activity->id,
-            'score'            => 30,
-            'completed_at'     => now(),
+            'activity_id' => $this->activity->id,
+            'score' => 30,
+            'completed_at' => now(),
         ]);
 
         ActivityCompleted::dispatch($this->child, $this->activity, $progress, 0.30);
@@ -120,10 +122,10 @@ class FeedbackLoopIntegrationTest extends TestCase
     {
         // Create skill state with high EMA score
         $skillState = ChildSkillState::create([
-            'child_profile_id'    => $this->child->id,
-            'cognitive_domain'    => 'math',
+            'child_profile_id' => $this->child->id,
+            'cognitive_domain' => 'math',
             'developmental_domain' => 'cognitive',
-            'ema_score'           => 0.85,
+            'ema_score' => 0.85,
         ]);
 
         $this->assertTrue($skillState->isMastered());
@@ -137,10 +139,10 @@ class FeedbackLoopIntegrationTest extends TestCase
     {
         // Create skill state with low EMA score
         $skillState = ChildSkillState::create([
-            'child_profile_id'    => $this->child->id,
-            'cognitive_domain'    => 'language',
+            'child_profile_id' => $this->child->id,
+            'cognitive_domain' => 'language',
             'developmental_domain' => 'language',
-            'ema_score'           => 0.35,
+            'ema_score' => 0.35,
         ]);
 
         $this->assertTrue($skillState->isStruggling());

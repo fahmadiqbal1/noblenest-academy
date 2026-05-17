@@ -23,10 +23,10 @@ class PayPalCheckoutService
         protected ?string $webhookId = null,
         protected string $env = 'sandbox',
     ) {
-        $this->clientId     = $clientId     ?? (string) config('services.paypal.client_id');
+        $this->clientId = $clientId ?? (string) config('services.paypal.client_id');
         $this->clientSecret = $clientSecret ?? (string) config('services.paypal.secret');
-        $this->webhookId    = $webhookId    ?? (string) config('services.paypal.webhook_id');
-        $this->env          = (string) (config('services.paypal.env') ?? config('services.paypal.mode') ?? 'sandbox');
+        $this->webhookId = $webhookId ?? (string) config('services.paypal.webhook_id');
+        $this->env = (string) (config('services.paypal.env') ?? config('services.paypal.mode') ?? 'sandbox');
     }
 
     public function isStubMode(): bool
@@ -50,9 +50,9 @@ class PayPalCheckoutService
     {
         if ($this->isStubMode()) {
             return [
-                'id'     => 'STUB-' . strtoupper(bin2hex(random_bytes(8))),
+                'id' => 'STUB-'.strtoupper(bin2hex(random_bytes(8))),
                 'status' => 'CREATED',
-                'stub'   => true,
+                'stub' => true,
                 'amount' => number_format($amount, 2, '.', ''),
                 'currency_code' => strtoupper($currency),
             ];
@@ -62,19 +62,19 @@ class PayPalCheckoutService
         $resp = Http::withToken($token)
             ->asJson()
             ->acceptJson()
-            ->post($this->baseUrl() . '/v2/checkout/orders', [
-                'intent'         => 'CAPTURE',
+            ->post($this->baseUrl().'/v2/checkout/orders', [
+                'intent' => 'CAPTURE',
                 'purchase_units' => [[
                     'amount' => [
                         'currency_code' => strtoupper($currency),
-                        'value'         => number_format($amount, 2, '.', ''),
+                        'value' => number_format($amount, 2, '.', ''),
                     ],
                 ]],
             ]);
 
         if (! $resp->successful()) {
             Log::warning('PayPal createOrder failed', ['status' => $resp->status(), 'body' => $resp->body()]);
-            throw new \RuntimeException('PayPal createOrder failed: ' . $resp->status());
+            throw new \RuntimeException('PayPal createOrder failed: '.$resp->status());
         }
 
         return $resp->json();
@@ -89,9 +89,9 @@ class PayPalCheckoutService
     {
         if ($this->isStubMode()) {
             return [
-                'id'     => $orderId,
+                'id' => $orderId,
                 'status' => 'COMPLETED',
-                'stub'   => true,
+                'stub' => true,
             ];
         }
 
@@ -99,11 +99,11 @@ class PayPalCheckoutService
         $resp = Http::withToken($token)
             ->asJson()
             ->acceptJson()
-            ->post($this->baseUrl() . "/v2/checkout/orders/{$orderId}/capture");
+            ->post($this->baseUrl()."/v2/checkout/orders/{$orderId}/capture");
 
         if (! $resp->successful()) {
             Log::warning('PayPal captureOrder failed', ['status' => $resp->status(), 'body' => $resp->body()]);
-            throw new \RuntimeException('PayPal captureOrder failed: ' . $resp->status());
+            throw new \RuntimeException('PayPal captureOrder failed: '.$resp->status());
         }
 
         return $resp->json();
@@ -127,17 +127,18 @@ class PayPalCheckoutService
             $resp = Http::withToken($token)
                 ->asJson()
                 ->acceptJson()
-                ->post($this->baseUrl() . '/v1/notifications/verify-webhook-signature', [
-                    'auth_algo'         => $headers['paypal-auth-algo']         ?? $headers['PAYPAL-AUTH-ALGO']         ?? '',
-                    'cert_url'          => $headers['paypal-cert-url']          ?? $headers['PAYPAL-CERT-URL']          ?? '',
-                    'transmission_id'   => $headers['paypal-transmission-id']   ?? $headers['PAYPAL-TRANSMISSION-ID']   ?? '',
-                    'transmission_sig'  => $headers['paypal-transmission-sig']  ?? $headers['PAYPAL-TRANSMISSION-SIG']  ?? '',
+                ->post($this->baseUrl().'/v1/notifications/verify-webhook-signature', [
+                    'auth_algo' => $headers['paypal-auth-algo'] ?? $headers['PAYPAL-AUTH-ALGO'] ?? '',
+                    'cert_url' => $headers['paypal-cert-url'] ?? $headers['PAYPAL-CERT-URL'] ?? '',
+                    'transmission_id' => $headers['paypal-transmission-id'] ?? $headers['PAYPAL-TRANSMISSION-ID'] ?? '',
+                    'transmission_sig' => $headers['paypal-transmission-sig'] ?? $headers['PAYPAL-TRANSMISSION-SIG'] ?? '',
                     'transmission_time' => $headers['paypal-transmission-time'] ?? $headers['PAYPAL-TRANSMISSION-TIME'] ?? '',
-                    'webhook_id'        => $this->webhookId,
-                    'webhook_event'     => json_decode($payload, true),
+                    'webhook_id' => $this->webhookId,
+                    'webhook_event' => json_decode($payload, true),
                 ]);
         } catch (\Throwable $e) {
             Log::warning('PayPal webhook verify call threw', ['error' => $e->getMessage()]);
+
             return false;
         }
 
@@ -147,17 +148,18 @@ class PayPalCheckoutService
 
     protected function accessToken(): string
     {
-        $cacheKey = 'paypal_access_token:' . md5($this->clientId . $this->env);
+        $cacheKey = 'paypal_access_token:'.md5($this->clientId.$this->env);
+
         return Cache::remember($cacheKey, 540, function () {
             $resp = Http::asForm()
                 ->withBasicAuth($this->clientId, $this->clientSecret)
                 ->acceptJson()
-                ->post($this->baseUrl() . '/v1/oauth2/token', [
+                ->post($this->baseUrl().'/v1/oauth2/token', [
                     'grant_type' => 'client_credentials',
                 ]);
 
             if (! $resp->successful()) {
-                throw new \RuntimeException('PayPal OAuth failed: ' . $resp->status());
+                throw new \RuntimeException('PayPal OAuth failed: '.$resp->status());
             }
 
             return (string) $resp->json('access_token');

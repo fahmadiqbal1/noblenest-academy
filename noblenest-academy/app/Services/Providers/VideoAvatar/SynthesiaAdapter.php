@@ -18,15 +18,15 @@ use Illuminate\Support\Facades\Log;
 class SynthesiaAdapter implements VideoAvatarProvider
 {
     private const ENDPOINT_GENERATE = 'https://api.synthesia.io/v2/videos';
-    private const ENDPOINT_STATUS   = 'https://api.synthesia.io/v2/videos/';
+
+    private const ENDPOINT_STATUS = 'https://api.synthesia.io/v2/videos/';
 
     private const SUPPORTED_LOCALES = ['en', 'fr', 'ru', 'zh', 'es', 'ko', 'ur', 'ar'];
 
     public function __construct(
         private readonly ?string $apiKey = null,
         private readonly ?string $defaultAvatarId = null,
-    ) {
-    }
+    ) {}
 
     public function generate(string $script, string $locale, ?string $voiceId = null): VideoGenerationResult
     {
@@ -36,12 +36,12 @@ class SynthesiaAdapter implements VideoAvatarProvider
             ->acceptJson()
             ->timeout(60)
             ->post(self::ENDPOINT_GENERATE, [
-                'test'       => false,
+                'test' => false,
                 'visibility' => 'private',
-                'title'      => 'Noble Nest Academy - ' . $locale,
-                'input'      => [[
+                'title' => 'Noble Nest Academy - '.$locale,
+                'input' => [[
                     'scriptText' => $script,
-                    'avatar'     => $this->defaultAvatarId ?? (string) config('services.synthesia.default_avatar_id', 'anna_costume1_cameraA'),
+                    'avatar' => $this->defaultAvatarId ?? (string) config('services.synthesia.default_avatar_id', 'anna_costume1_cameraA'),
                     'avatarSettings' => [
                         'voice' => $voiceId ?? (string) config('services.synthesia.default_voice_id', ''),
                     ],
@@ -51,11 +51,12 @@ class SynthesiaAdapter implements VideoAvatarProvider
         if (! $response->successful()) {
             Log::warning('SynthesiaAdapter::generate non-200', [
                 'status' => $response->status(),
-                'body'   => substr((string) $response->body(), 0, 500),
+                'body' => substr((string) $response->body(), 0, 500),
             ]);
+
             return VideoGenerationResult::failed(
-                'synthesia-failed-' . substr(sha1($script . $locale), 0, 12),
-                'Synthesia API error: ' . $response->status(),
+                'synthesia-failed-'.substr(sha1($script.$locale), 0, 12),
+                'Synthesia API error: '.$response->status(),
             );
         }
 
@@ -74,7 +75,7 @@ class SynthesiaAdapter implements VideoAvatarProvider
         $response = Http::withToken($apiKey)
             ->acceptJson()
             ->timeout(30)
-            ->get(self::ENDPOINT_STATUS . rawurlencode($jobId));
+            ->get(self::ENDPOINT_STATUS.rawurlencode($jobId));
 
         if (! $response->successful()) {
             return VideoGenerationStatus::Failed;
@@ -84,9 +85,9 @@ class SynthesiaAdapter implements VideoAvatarProvider
 
         return match ($status) {
             'complete', 'completed' => VideoGenerationStatus::Completed,
-            'failed', 'error'       => VideoGenerationStatus::Failed,
-            'queued'                => VideoGenerationStatus::Queued,
-            default                 => VideoGenerationStatus::Processing,
+            'failed', 'error' => VideoGenerationStatus::Failed,
+            'queued' => VideoGenerationStatus::Queued,
+            default => VideoGenerationStatus::Processing,
         };
     }
 
@@ -101,6 +102,7 @@ class SynthesiaAdapter implements VideoAvatarProvider
         if ($key === '') {
             throw MissingProviderCredentialException::forProvider('synthesia', 'SYNTHESIA_API_KEY');
         }
+
         return $key;
     }
 }

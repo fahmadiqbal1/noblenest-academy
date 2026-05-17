@@ -23,7 +23,7 @@ class DailyDigestMail extends Mailable
         $childName = data_get($this->digest, 'summaries.0.child_name', 'your child');
 
         return new Envelope(
-            subject: "✨ {$childName}'s Learning Summary – " . now()->subDay()->format('M j'),
+            subject: "✨ {$childName}'s Learning Summary – ".now()->subDay()->format('M j'),
         );
     }
 

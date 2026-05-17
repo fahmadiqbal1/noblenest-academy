@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
+use Stripe\Account;
+use Stripe\Exception\AuthenticationException;
+use Stripe\Exception\RateLimitException;
+use Stripe\Stripe;
 
 /**
  * Health Check Endpoint for Production Monitoring
@@ -45,21 +50,21 @@ class HealthCheckController extends Controller
         // 1. Database connectivity (CRITICAL)
         $dbCheck = $this->checkDatabase();
         $results['database'] = $dbCheck;
-        if (!$dbCheck['pass']) {
+        if (! $dbCheck['pass']) {
             $criticalPassed = false;
         }
 
         // 2. Redis/Cache (CRITICAL)
         $cacheCheck = $this->checkCache();
         $results['cache'] = $cacheCheck;
-        if (!$cacheCheck['pass']) {
+        if (! $cacheCheck['pass']) {
             $criticalPassed = false;
         }
 
         // 3. Configuration (CRITICAL)
         $configCheck = $this->checkConfiguration();
         $results['configuration'] = $configCheck;
-        if (!$configCheck['pass']) {
+        if (! $configCheck['pass']) {
             $criticalPassed = false;
         }
 
@@ -75,7 +80,7 @@ class HealthCheckController extends Controller
         $elapsedMs = round((microtime(true) - $startTime) * 1000, 1);
         $status = $criticalPassed ? 'healthy' : 'unhealthy';
 
-        if ($criticalPassed && !$cachesCheck['pass']) {
+        if ($criticalPassed && ! $cachesCheck['pass']) {
             $status = 'degraded';
         }
 
@@ -90,15 +95,15 @@ class HealthCheckController extends Controller
         $statusCode = $status === 'healthy' ? 200 : ($status === 'degraded' ? 200 : 503);
 
         return response()->json($response, $statusCode)
-                       ->header('Cache-Control', 'no-store, must-revalidate')
-                       ->header('X-Health-Status', $status);
+            ->header('Cache-Control', 'no-store, must-revalidate')
+            ->header('X-Health-Status', $status);
     }
 
     /**
      * GET /health/detailed — Full diagnostic (includes external API checks)
      * More expensive; use for manual troubleshooting, not load balancers
      */
-    public function detailed(\Illuminate\Http\Request $request)
+    public function detailed(Request $request)
     {
         // Phase 9 — gate behind HEALTH_TOKEN bearer to avoid leaking diagnostics.
         $expected = (string) config('app.health_token', env('HEALTH_TOKEN', ''));
@@ -144,6 +149,7 @@ class HealthCheckController extends Controller
             ];
         } catch (\Throwable $e) {
             Log::error('Health check: Database failed', ['error' => $e->getMessage()]);
+
             return [
                 'pass' => false,
                 'time_ms' => null,
@@ -175,10 +181,11 @@ class HealthCheckController extends Controller
                 'time_ms' => $ms,
                 'driver' => $store,
                 'message' => "{$store} cache operational",
-                'recommended' => !$ok ? 'Switch to redis or memcached for production' : null,
+                'recommended' => ! $ok ? 'Switch to redis or memcached for production' : null,
             ];
         } catch (\Throwable $e) {
             Log::error('Health check: Cache failed', ['error' => $e->getMessage()]);
+
             return [
                 'pass' => false,
                 'message' => 'Cache unavailable',
@@ -200,7 +207,7 @@ class HealthCheckController extends Controller
         }
 
         if ($debug === true) {
-            $issues[] = "APP_DEBUG=true (should be false — ~50% performance loss)";
+            $issues[] = 'APP_DEBUG=true (should be false — ~50% performance loss)';
         }
 
         // Non-redis session/queue is a valid deployment choice (DB-backed on
@@ -264,7 +271,7 @@ class HealthCheckController extends Controller
             'enabled' => $enabled,
             'jit_enabled' => $jit,
             'message' => $enabled
-                ? ('OPcache ' . ($jit ? 'enabled with JIT' : 'enabled (JIT off)'))
+                ? ('OPcache '.($jit ? 'enabled with JIT' : 'enabled (JIT off)'))
                 : 'OPcache DISABLED — enable for 20-30% throughput gain',
         ];
     }
@@ -275,7 +282,7 @@ class HealthCheckController extends Controller
 
         // Test AI providers (sample — don't actually call the APIs in health check)
         $aiProviders = config('services.ai_providers', []);
-        if (!empty($aiProviders)) {
+        if (! empty($aiProviders)) {
             $results['ai_providers_configured'] = count($aiProviders);
         }
 
@@ -300,7 +307,7 @@ class HealthCheckController extends Controller
      */
     private function checkStripe(): array
     {
-        if (! class_exists(\Stripe\Stripe::class)) {
+        if (! class_exists(Stripe::class)) {
             return ['pass' => null, 'configured' => false, 'message' => 'Stripe SDK not installed'];
         }
         $secret = config('services.stripe.secret');
@@ -309,23 +316,24 @@ class HealthCheckController extends Controller
         }
         try {
             $start = microtime(true);
-            \Stripe\Stripe::setApiKey($secret);
-            $account = \Stripe\Account::retrieve();
+            Stripe::setApiKey($secret);
+            $account = Account::retrieve();
             $ms = round((microtime(true) - $start) * 1000, 1);
 
             return [
-                'pass'       => true,
+                'pass' => true,
                 'configured' => true,
-                'time_ms'    => $ms,
+                'time_ms' => $ms,
                 'account_id' => $account->id ?? null,
-                'message'    => "Stripe reachable ({$ms}ms)",
+                'message' => "Stripe reachable ({$ms}ms)",
             ];
-        } catch (\Stripe\Exception\AuthenticationException $e) {
+        } catch (AuthenticationException $e) {
             return ['pass' => false, 'configured' => true, 'error' => 'AuthenticationException', 'message' => 'Stripe key invalid'];
-        } catch (\Stripe\Exception\RateLimitException $e) {
+        } catch (RateLimitException $e) {
             return ['pass' => false, 'configured' => true, 'error' => 'RateLimitException', 'message' => 'Stripe rate-limited'];
         } catch (\Throwable $e) {
             Log::warning('Stripe health probe failed', ['error' => $e->getMessage()]);
+
             return ['pass' => false, 'configured' => true, 'error' => class_basename($e), 'message' => substr($e->getMessage(), 0, 200)];
         }
     }

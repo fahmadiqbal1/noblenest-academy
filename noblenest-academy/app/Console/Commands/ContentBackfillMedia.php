@@ -33,8 +33,8 @@ class ContentBackfillMedia extends Command
     public function handle(): int
     {
         $locale = (string) $this->option('locale');
-        $limit  = (int) $this->option('limit');
-        $cap    = (float) $this->option('cost-cap');
+        $limit = (int) $this->option('limit');
+        $cap = (float) $this->option('cost-cap');
 
         $locales = $locale === 'all' ? array_keys(I18n::SUPPORTED_LANGUAGES) : [$locale];
 

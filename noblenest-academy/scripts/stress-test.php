@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Noble Nest Academy — Stress Test Script
  *
@@ -7,14 +8,13 @@
  *
  * Usage: php scripts/stress-test.php [base_url] [total_requests] [concurrency]
  */
-
-$baseUrl      = $argv[1] ?? 'http://127.0.0.1:8000';
-$totalReqs    = (int) ($argv[2] ?? 10000);
-$concurrency  = (int) ($argv[3] ?? 200);
+$baseUrl = $argv[1] ?? 'http://127.0.0.1:8000';
+$totalReqs = (int) ($argv[2] ?? 10000);
+$concurrency = (int) ($argv[3] ?? 200);
 
 $parsed = parse_url($baseUrl);
-$host   = $parsed['host'] ?? '127.0.0.1';
-$port   = $parsed['port'] ?? 80;
+$host = $parsed['host'] ?? '127.0.0.1';
+$port = $parsed['port'] ?? 80;
 
 // ── Endpoints to hit (weighted by real-world traffic mix) ──────────────
 $endpoints = [
@@ -37,15 +37,15 @@ foreach ($endpoints as $ep) {
 
 // ── Stats ──────────────────────────────────────────────────────────────
 $stats = [
-    'total_requests'   => $totalReqs,
-    'concurrency'      => $concurrency,
-    'started_at'       => microtime(true),
-    'status_codes'     => [],
-    'endpoint_times'   => [],
-    'errors'           => 0,
-    'timeouts'         => 0,
-    'connect_errors'   => 0,
-    'completed'        => 0,
+    'total_requests' => $totalReqs,
+    'concurrency' => $concurrency,
+    'started_at' => microtime(true),
+    'status_codes' => [],
+    'endpoint_times' => [],
+    'errors' => 0,
+    'timeouts' => 0,
+    'connect_errors' => 0,
+    'completed' => 0,
 ];
 
 foreach ($endpoints as $ep) {
@@ -56,9 +56,9 @@ echo "==========================================================\n";
 echo "  Noble Nest Academy -- Stress Test\n";
 echo "==========================================================\n";
 echo "  Target:       {$baseUrl}\n";
-echo "  Total reqs:   " . number_format($totalReqs) . "\n";
+echo '  Total reqs:   '.number_format($totalReqs)."\n";
 echo "  Concurrency:  {$concurrency} parallel connections\n";
-echo "  Endpoints:    " . count($endpoints) . " weighted routes\n";
+echo '  Endpoints:    '.count($endpoints)." weighted routes\n";
 echo "==========================================================\n\n";
 
 // ── Helper: fire one request via stream_socket_client ──────────────────
@@ -76,18 +76,18 @@ function fireRequest(string $host, int $port, string $method, string $path): arr
         STREAM_CLIENT_CONNECT
     );
 
-    if (!$fp) {
+    if (! $fp) {
         return ['error' => 'connect', 'time' => (microtime(true) - $start) * 1000, 'code' => 0];
     }
 
     stream_set_timeout($fp, 30);
 
     $request = "{$method} {$path} HTTP/1.1\r\n"
-        . "Host: {$host}:{$port}\r\n"
-        . "Connection: close\r\n"
-        . "User-Agent: NobleNest-StressTest/1.0\r\n"
-        . "Accept: text/html\r\n"
-        . "\r\n";
+        ."Host: {$host}:{$port}\r\n"
+        ."Connection: close\r\n"
+        ."User-Agent: NobleNest-StressTest/1.0\r\n"
+        ."Accept: text/html\r\n"
+        ."\r\n";
 
     fwrite($fp, $request);
 
@@ -99,12 +99,13 @@ function fireRequest(string $host, int $port, string $method, string $path): arr
     $meta = stream_get_meta_data($fp);
     if ($meta['timed_out']) {
         fclose($fp);
+
         return ['error' => 'timeout', 'time' => $elapsed, 'code' => 0];
     }
 
     // Read remaining response to properly close connection
     stream_set_blocking($fp, false);
-    while (!feof($fp)) {
+    while (! feof($fp)) {
         fread($fp, 8192);
     }
     fclose($fp);
@@ -118,8 +119,8 @@ function fireRequest(string $host, int $port, string $method, string $path): arr
 }
 
 // ── Run in batches using stream sockets ────────────────────────────────
-$remaining  = $totalReqs;
-$progressW  = 50;
+$remaining = $totalReqs;
+$progressW = 50;
 
 while ($remaining > 0) {
     $batchSize = min($concurrency, $remaining);
@@ -140,19 +141,20 @@ while ($remaining > 0) {
             STREAM_CLIENT_CONNECT | STREAM_CLIENT_ASYNC_CONNECT
         );
 
-        if (!$fp) {
+        if (! $fp) {
             $stats['errors']++;
             $stats['connect_errors']++;
             $stats['completed']++;
+
             continue;
         }
 
         $connections[] = [
-            'fp'     => $fp,
-            'ep'     => $ep,
-            'start'  => $start,
-            'sent'   => false,
-            'done'   => false,
+            'fp' => $fp,
+            'ep' => $ep,
+            'start' => $start,
+            'sent' => false,
+            'done' => false,
         ];
     }
 
@@ -179,20 +181,24 @@ while ($remaining > 0) {
         $readStreams = [];
         $readIdx = [];
         foreach ($connections as $idx => &$conn) {
-            if (!$conn['done'] && is_resource($conn['fp'])) {
+            if (! $conn['done'] && is_resource($conn['fp'])) {
                 $readStreams[] = $conn['fp'];
                 $readIdx[] = $idx;
             }
         }
         unset($conn);
 
-        if (empty($readStreams)) break;
+        if (empty($readStreams)) {
+            break;
+        }
 
         $write = null;
         $except = null;
         $changed = @stream_select($readStreams, $write, $except, 1);
 
-        if ($changed === false) break;
+        if ($changed === false) {
+            break;
+        }
 
         foreach ($readStreams as $fp) {
             // Find which connection this is
@@ -203,7 +209,9 @@ while ($remaining > 0) {
                     break;
                 }
             }
-            if ($connIdx === null) continue;
+            if ($connIdx === null) {
+                continue;
+            }
 
             $data = @fread($fp, 4096);
             $elapsed = (microtime(true) - $connections[$connIdx]['start']) * 1000;
@@ -224,6 +232,7 @@ while ($remaining > 0) {
                 $connections[$connIdx]['done'] = true;
                 $stats['completed']++;
                 $pending--;
+
                 continue;
             }
 
@@ -235,7 +244,9 @@ while ($remaining > 0) {
                 $stats['endpoint_times'][$ep['name']][] = $elapsed;
 
                 // Drain and close
-                while (!feof($fp)) { @fread($fp, 8192); }
+                while (! feof($fp)) {
+                    @fread($fp, 8192);
+                }
                 @fclose($fp);
                 $connections[$connIdx]['done'] = true;
                 $stats['completed']++;
@@ -246,7 +257,7 @@ while ($remaining > 0) {
 
     // Clean up any remaining
     foreach ($connections as &$conn) {
-        if (!$conn['done'] && is_resource($conn['fp'])) {
+        if (! $conn['done'] && is_resource($conn['fp'])) {
             @fclose($conn['fp']);
             $stats['errors']++;
             $stats['timeouts']++;
@@ -258,9 +269,9 @@ while ($remaining > 0) {
     $remaining -= $batchSize;
 
     // Progress
-    $pct  = (($totalReqs - $remaining) / $totalReqs);
+    $pct = (($totalReqs - $remaining) / $totalReqs);
     $done = (int) ($pct * $progressW);
-    $bar  = str_repeat('#', $done) . str_repeat('.', $progressW - $done);
+    $bar = str_repeat('#', $done).str_repeat('.', $progressW - $done);
     $pctS = str_pad(number_format($pct * 100, 1), 6, ' ', STR_PAD_LEFT);
     $elapsed = number_format(microtime(true) - $stats['started_at'], 1);
     echo "\r  [{$bar}] {$pctS}%  ({$stats['completed']}/{$totalReqs})  {$elapsed}s";
@@ -274,12 +285,12 @@ echo "  RESULTS\n";
 echo "==========================================================\n\n";
 
 $rps = $stats['completed'] / $totalTime;
-echo "  Duration:          " . number_format($totalTime, 2) . " seconds\n";
-echo "  Requests/sec:      " . number_format($rps, 1) . " RPS\n";
-echo "  Completed:         " . number_format($stats['completed']) . "\n";
-echo "  Errors:            " . number_format($stats['errors']) . "\n";
-echo "  Timeouts:          " . number_format($stats['timeouts']) . "\n";
-echo "  Connect failures:  " . number_format($stats['connect_errors']) . "\n\n";
+echo '  Duration:          '.number_format($totalTime, 2)." seconds\n";
+echo '  Requests/sec:      '.number_format($rps, 1)." RPS\n";
+echo '  Completed:         '.number_format($stats['completed'])."\n";
+echo '  Errors:            '.number_format($stats['errors'])."\n";
+echo '  Timeouts:          '.number_format($stats['timeouts'])."\n";
+echo '  Connect failures:  '.number_format($stats['connect_errors'])."\n\n";
 
 // Status code breakdown
 echo "  -- HTTP Status Codes --\n";
@@ -287,7 +298,7 @@ ksort($stats['status_codes']);
 foreach ($stats['status_codes'] as $code => $count) {
     $successCount = max(1, $stats['completed'] - $stats['errors']);
     $pct = number_format(($count / $successCount) * 100, 1);
-    $label = match($code) {
+    $label = match ($code) {
         '200' => 'OK',
         '302' => 'Redirect',
         '301' => 'Moved',
@@ -300,79 +311,83 @@ foreach ($stats['status_codes'] as $code => $count) {
         '503' => 'Service Unavailable',
         default => $code,
     };
-    echo "    {$code} {$label}: " . number_format($count) . " ({$pct}%)\n";
+    echo "    {$code} {$label}: ".number_format($count)." ({$pct}%)\n";
 }
 
 // Per-endpoint latency
 echo "\n  -- Endpoint Latency (ms) --\n";
-echo "    " . str_pad('Endpoint', 20) . str_pad('Count', 8) . str_pad('Avg', 10) . str_pad('p50', 10) . str_pad('p95', 10) . str_pad('p99', 10) . "Max\n";
-echo "    " . str_repeat('-', 78) . "\n";
+echo '    '.str_pad('Endpoint', 20).str_pad('Count', 8).str_pad('Avg', 10).str_pad('p50', 10).str_pad('p95', 10).str_pad('p99', 10)."Max\n";
+echo '    '.str_repeat('-', 78)."\n";
 
 $allTimes = [];
 foreach ($stats['endpoint_times'] as $name => $times) {
-    if (empty($times)) continue;
+    if (empty($times)) {
+        continue;
+    }
     sort($times);
     $allTimes = array_merge($allTimes, $times);
 
     $count = count($times);
-    $avg   = array_sum($times) / $count;
-    $p50   = $times[(int) ($count * 0.50)];
-    $p95   = $times[(int) ($count * 0.95)];
-    $p99   = $times[min((int) ($count * 0.99), $count - 1)];
-    $max   = end($times);
+    $avg = array_sum($times) / $count;
+    $p50 = $times[(int) ($count * 0.50)];
+    $p95 = $times[(int) ($count * 0.95)];
+    $p99 = $times[min((int) ($count * 0.99), $count - 1)];
+    $max = end($times);
 
-    echo "    " . str_pad($name, 20)
-        . str_pad(number_format($count), 8)
-        . str_pad(number_format($avg, 1), 10)
-        . str_pad(number_format($p50, 1), 10)
-        . str_pad(number_format($p95, 1), 10)
-        . str_pad(number_format($p99, 1), 10)
-        . number_format($max, 1) . "\n";
+    echo '    '.str_pad($name, 20)
+        .str_pad(number_format($count), 8)
+        .str_pad(number_format($avg, 1), 10)
+        .str_pad(number_format($p50, 1), 10)
+        .str_pad(number_format($p95, 1), 10)
+        .str_pad(number_format($p99, 1), 10)
+        .number_format($max, 1)."\n";
 }
 
 // Overall latency
-if (!empty($allTimes)) {
+if (! empty($allTimes)) {
     sort($allTimes);
-    $total  = count($allTimes);
+    $total = count($allTimes);
     $avgAll = array_sum($allTimes) / $total;
     $p50All = $allTimes[(int) ($total * 0.50)];
     $p95All = $allTimes[(int) ($total * 0.95)];
     $p99All = $allTimes[min((int) ($total * 0.99), $total - 1)];
     $maxAll = end($allTimes);
 
-    echo "    " . str_repeat('-', 78) . "\n";
-    echo "    " . str_pad('OVERALL', 20)
-        . str_pad(number_format($total), 8)
-        . str_pad(number_format($avgAll, 1), 10)
-        . str_pad(number_format($p50All, 1), 10)
-        . str_pad(number_format($p95All, 1), 10)
-        . str_pad(number_format($p99All, 1), 10)
-        . number_format($maxAll, 1) . "\n";
+    echo '    '.str_repeat('-', 78)."\n";
+    echo '    '.str_pad('OVERALL', 20)
+        .str_pad(number_format($total), 8)
+        .str_pad(number_format($avgAll, 1), 10)
+        .str_pad(number_format($p50All, 1), 10)
+        .str_pad(number_format($p95All, 1), 10)
+        .str_pad(number_format($p99All, 1), 10)
+        .number_format($maxAll, 1)."\n";
 }
 
 echo "\n";
 
 // Verdict
 $errorRate = $stats['errors'] / max(1, $stats['completed']) * 100;
-$has5xx    = false;
+$has5xx = false;
 foreach ($stats['status_codes'] as $code => $count) {
-    if ((int) $code >= 500) $has5xx = true;
+    if ((int) $code >= 500) {
+        $has5xx = true;
+    }
 }
 
 echo "==========================================================\n";
 echo "  VERDICT\n";
 echo "==========================================================\n\n";
 
-if ($errorRate < 1 && !$has5xx && $rps > 100) {
-    echo "  [PASS] Application handled " . number_format($stats['completed']) . " requests\n";
-    echo "     at " . number_format($rps, 0) . " RPS with " . number_format($errorRate, 2) . "% error rate.\n";
+if ($errorRate < 1 && ! $has5xx && $rps > 100) {
+    echo '  [PASS] Application handled '.number_format($stats['completed'])." requests\n";
+    echo '     at '.number_format($rps, 0).' RPS with '.number_format($errorRate, 2)."% error rate.\n";
     echo "     Ready for production with proper infrastructure.\n";
 } elseif ($errorRate < 5 && $rps > 50) {
-    echo "  [MARGINAL] " . number_format($errorRate, 1) . "% error rate, " . number_format($rps, 0) . " RPS.\n";
+    echo '  [MARGINAL] '.number_format($errorRate, 1).'% error rate, '.number_format($rps, 0)." RPS.\n";
     echo "     Needs optimization before 10K concurrent users.\n";
     echo "     Check: connection pooling, query caching, worker count.\n";
 } else {
-    echo "  [NEEDS SCALING] " . number_format($errorRate, 1) . "% error rate, " . number_format($rps, 0) . " RPS.\n";
+    echo '  [NEEDS SCALING] '.number_format($errorRate, 1).'% error rate, '.number_format($rps, 0)." RPS.\n";
     echo "     Local dev server cannot handle this load (expected).\n";
     echo "     Required for production: load balancer, Redis sessions,\n";
     echo "     queue workers, horizontal scaling, CDN for static assets.\n";
@@ -381,13 +396,13 @@ if ($errorRate < 1 && !$has5xx && $rps > 100) {
 echo "\n  -- Production Scaling Recommendations --\n\n";
 
 if (isset($p95All) && $p95All > 500) {
-    echo "  [!] p95 latency >" . number_format($p95All, 0) . "ms -- add Redis page caching\n";
+    echo '  [!] p95 latency >'.number_format($p95All, 0)."ms -- add Redis page caching\n";
 }
 if ($stats['connect_errors'] > 0) {
-    echo "  [!] " . $stats['connect_errors'] . " connection failures -- increase max_connections\n";
+    echo '  [!] '.$stats['connect_errors']." connection failures -- increase max_connections\n";
 }
 if ($stats['timeouts'] > 0) {
-    echo "  [!] " . $stats['timeouts'] . " timeouts -- increase PHP-FPM workers / Apache threads\n";
+    echo '  [!] '.$stats['timeouts']." timeouts -- increase PHP-FPM workers / Apache threads\n";
 }
 if ($has5xx) {
     echo "  [!] 5xx errors detected -- check php-fpm error logs\n";

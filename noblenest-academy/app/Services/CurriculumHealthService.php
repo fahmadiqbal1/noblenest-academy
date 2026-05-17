@@ -46,9 +46,9 @@ class CurriculumHealthService
 
                 if ($count < $this->target) {
                     $gaps[] = [
-                        'age'    => $age,
-                        'skill'  => $skill,
-                        'count'  => $count,
+                        'age' => $age,
+                        'skill' => $skill,
+                        'count' => $count,
                         'target' => $this->target,
                     ];
                 }
@@ -63,7 +63,7 @@ class CurriculumHealthService
      */
     public function getHealthScore(): float
     {
-        $totalCells  = count($this->ageRange) * count($this->requiredSkills);
+        $totalCells = count($this->ageRange) * count($this->requiredSkills);
         $coveredCells = $totalCells - count($this->getGaps());
 
         return $totalCells > 0
@@ -76,7 +76,7 @@ class CurriculumHealthService
      */
     public function getGapReport(): string
     {
-        $gaps  = $this->getGaps();
+        $gaps = $this->getGaps();
         $score = $this->getHealthScore();
 
         if (empty($gaps)) {
@@ -93,7 +93,7 @@ class CurriculumHealthService
         }
 
         $lines[] = str_repeat('─', 50);
-        $lines[] = count($gaps) . ' gap(s) found. Run curriculum:auto-generate to fill them.';
+        $lines[] = count($gaps).' gap(s) found. Run curriculum:auto-generate to fill them.';
 
         return implode("\n", $lines);
     }

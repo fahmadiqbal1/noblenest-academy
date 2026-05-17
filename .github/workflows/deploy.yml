@@ -11,9 +11,11 @@ name: Deploy
 #
 # This workflow MUST NOT trigger from any branch other than main.
 
+# Manual-only: production deploy is an explicit, operator-initiated action
+# (requires the DEPLOY_SSH_* + HEALTH_TOKEN repo secrets). It does NOT run
+# on push — that would red-X every commit until secrets exist and risks an
+# unintended deploy onto the shared CyberPanel host.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       dry_run:

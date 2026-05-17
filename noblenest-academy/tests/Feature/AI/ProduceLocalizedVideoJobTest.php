@@ -3,12 +3,18 @@
 namespace Tests\Feature\AI;
 
 use App\Helpers\I18n;
+use App\Jobs\GenerateSubtitlesJob;
 use App\Jobs\ProduceLocalizedVideoJob;
 use App\Models\Activity;
 use App\Models\ActivityMedia;
 use App\Models\ActivityTranslation;
 use App\Models\AuditLogEntry;
 use App\Services\ContentSafetyService;
+use App\Services\Providers\AnthropicTranslator;
+use App\Services\Providers\VideoAvatar\NullAdapter;
+use App\Services\Providers\VideoAvatarProvider;
+use App\Services\Providers\Whisper\LocalWhisperAdapter;
+use App\Services\Providers\WhisperAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -22,15 +28,15 @@ class ProduceLocalizedVideoJobTest extends TestCase
         Queue::fake(); // capture GenerateSubtitlesJob dispatches inside the pipeline
 
         $activity = Activity::factory()->create([
-            'instructions'     => 'Read the letter A out loud and trace it three times.',
+            'instructions' => 'Read the letter A out loud and trace it three times.',
             'cognitive_domain' => 'language',
         ]);
 
         // Run the producer job inline (constructor-injected deps resolved by container).
         (new ProduceLocalizedVideoJob($activity->id))->handle(
             app(ContentSafetyService::class),
-            app(\App\Services\Providers\AnthropicTranslator::class),
-            app(\App\Services\Providers\VideoAvatarProvider::class),
+            app(AnthropicTranslator::class),
+            app(VideoAvatarProvider::class),
         );
 
         $locales = array_keys(I18n::SUPPORTED_LANGUAGES);
@@ -52,7 +58,7 @@ class ProduceLocalizedVideoJobTest extends TestCase
         );
 
         // One GenerateSubtitlesJob dispatched per locale.
-        Queue::assertPushed(\App\Jobs\GenerateSubtitlesJob::class, count($locales));
+        Queue::assertPushed(GenerateSubtitlesJob::class, count($locales));
     }
 
     public function test_unsafe_script_is_blocked_and_logged(): void
@@ -65,8 +71,8 @@ class ProduceLocalizedVideoJobTest extends TestCase
 
         (new ProduceLocalizedVideoJob($activity->id))->handle(
             app(ContentSafetyService::class),
-            app(\App\Services\Providers\AnthropicTranslator::class),
-            app(\App\Services\Providers\VideoAvatarProvider::class),
+            app(AnthropicTranslator::class),
+            app(VideoAvatarProvider::class),
         );
 
         $this->assertSame(0, ActivityMedia::where('activity_id', $activity->id)->count());
@@ -75,10 +81,10 @@ class ProduceLocalizedVideoJobTest extends TestCase
 
     public function test_provider_binding_defaults_to_null_adapter(): void
     {
-        $provider = app(\App\Services\Providers\VideoAvatarProvider::class);
-        $this->assertInstanceOf(\App\Services\Providers\VideoAvatar\NullAdapter::class, $provider);
+        $provider = app(VideoAvatarProvider::class);
+        $this->assertInstanceOf(NullAdapter::class, $provider);
 
-        $whisper = app(\App\Services\Providers\WhisperAdapter::class);
-        $this->assertInstanceOf(\App\Services\Providers\Whisper\LocalWhisperAdapter::class, $whisper);
+        $whisper = app(WhisperAdapter::class);
+        $this->assertInstanceOf(LocalWhisperAdapter::class, $whisper);
     }
 }

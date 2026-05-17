@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Lesson extends Model
 {
@@ -23,19 +25,19 @@ class Lesson extends Model
 
     protected $casts = [
         'is_published' => 'boolean',
-        'order'        => 'integer',
-        'duration'     => 'integer',
+        'order' => 'integer',
+        'duration' => 'integer',
     ];
 
-    public function module(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class);
     }
 
-    public function activities(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function activities(): BelongsToMany
     {
         return $this->belongsToMany(Activity::class, 'activity_lesson')
-                    ->withPivot('order')
-                    ->orderByPivot('order');
+            ->withPivot('order')
+            ->orderByPivot('order');
     }
 }

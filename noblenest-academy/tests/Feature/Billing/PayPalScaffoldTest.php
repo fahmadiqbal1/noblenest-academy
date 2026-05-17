@@ -14,17 +14,17 @@ class PayPalScaffoldTest extends TestCase
     {
         parent::setUp();
         config([
-            'services.paypal.client_id'  => null,
-            'services.paypal.secret'     => null,
+            'services.paypal.client_id' => null,
+            'services.paypal.secret' => null,
             'services.paypal.webhook_id' => null,
-            'services.paypal.env'        => 'sandbox',
+            'services.paypal.env' => 'sandbox',
         ]);
     }
 
     /** @test */
     public function create_order_returns_stub_when_credentials_are_empty(): void
     {
-        $svc = new PayPalCheckoutService();
+        $svc = new PayPalCheckoutService;
         $this->assertTrue($svc->isStubMode());
 
         $order = $svc->createOrder(25.00, 'USD');
@@ -38,7 +38,7 @@ class PayPalScaffoldTest extends TestCase
     /** @test */
     public function capture_order_returns_stub_when_credentials_are_empty(): void
     {
-        $svc = new PayPalCheckoutService();
+        $svc = new PayPalCheckoutService;
         $result = $svc->captureOrder('STUB-ABC123');
 
         $this->assertSame('STUB-ABC123', $result['id']);
@@ -49,7 +49,7 @@ class PayPalScaffoldTest extends TestCase
     /** @test */
     public function verify_webhook_returns_true_in_stub_mode(): void
     {
-        $svc = new PayPalCheckoutService();
+        $svc = new PayPalCheckoutService;
         $this->assertTrue($svc->verifyWebhook('{}', []));
     }
 }

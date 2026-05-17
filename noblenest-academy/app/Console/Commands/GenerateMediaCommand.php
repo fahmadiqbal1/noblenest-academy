@@ -23,6 +23,7 @@ class GenerateMediaCommand extends Command
         $type = $this->option('type');
         if (! in_array($type, ['thumbnail', 'audio', 'video'])) {
             $this->error("Invalid type '{$type}'. Must be: thumbnail, audio, or video.");
+
             return self::FAILURE;
         }
 
@@ -51,6 +52,7 @@ class GenerateMediaCommand extends Command
 
         if ($activities->isEmpty()) {
             $this->warn('No matching activities found.');
+
             return self::SUCCESS;
         }
 

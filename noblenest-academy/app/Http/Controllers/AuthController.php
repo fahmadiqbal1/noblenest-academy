@@ -28,10 +28,10 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => ['required', Rule::in(self::ALLOWED_REGISTRATION_ROLES)],
+            'role' => ['required', Rule::in(self::ALLOWED_REGISTRATION_ROLES)],
         ]);
 
         // Double-check Admin is never self-registered (defense in depth)
@@ -43,11 +43,11 @@ class AuthController extends Controller
         $countryCode = strtoupper(substr(preg_replace('/[^A-Z]/', '', $request->header('CF-IPCountry', '')), 0, 2)) ?: null;
 
         $user = User::create([
-            'name'          => $validated['name'],
-            'email'         => $validated['email'],
-            'password'      => Hash::make($validated['password']),
-            'role'          => $validated['role'],
-            'country_code'  => $countryCode,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'country_code' => $countryCode,
         ]);
 
         Auth::login($user);
@@ -84,9 +84,9 @@ class AuthController extends Controller
             }
 
             return match ($user->role) {
-                'Parent'       => redirect()->route('parent.dashboard'),
-                'Admin'        => redirect()->route('home'),
-                default        => redirect('/'),
+                'Parent' => redirect()->route('parent.dashboard'),
+                'Admin' => redirect()->route('home'),
+                default => redirect('/'),
             };
         }
 
@@ -101,7 +101,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 }
-

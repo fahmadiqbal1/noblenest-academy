@@ -30,8 +30,8 @@ class AssessmentBatterySeeder extends Seeder
                 [
                     'age_min_months' => 84,   // ~age 7
                     'age_max_months' => 132,  // ~age 11
-                    'prompt'         => $q['prompt'],
-                    'options'        => $q['options'],
+                    'prompt' => $q['prompt'],
+                    'options' => $q['options'],
                 ]
             );
         }
@@ -40,6 +40,7 @@ class AssessmentBatterySeeder extends Seeder
     private function questions(): array
     {
         $dim = fn (...$pairs) => $this->dim(...$pairs);
+
         return [
             [
                 'prompt' => 'When you have a free afternoon, what do you most want to do?',
@@ -320,6 +321,7 @@ class AssessmentBatterySeeder extends Seeder
         for ($i = 0; $i < count($pairs); $i += 2) {
             $out[$pairs[$i]] = $pairs[$i + 1];
         }
+
         return $out;
     }
 }

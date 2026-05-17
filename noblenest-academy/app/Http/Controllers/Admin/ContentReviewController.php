@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ContentReviewController extends Controller
 {
@@ -31,7 +30,7 @@ class ContentReviewController extends Controller
     {
         $activity->update(['published' => true]);
 
-        return back()->with('status', '"' . $activity->title . '" published.');
+        return back()->with('status', '"'.$activity->title.'" published.');
     }
 
     /**

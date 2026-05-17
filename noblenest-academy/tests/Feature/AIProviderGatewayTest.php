@@ -8,11 +8,12 @@ use App\Models\AIProviderConfig;
 use App\Services\AIProviderGateway;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AIProviderGatewayTest extends TestCase
 {
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function anthropic_provider_can_be_verified(): void
     {
         Http::fake([
@@ -37,7 +38,7 @@ class AIProviderGatewayTest extends TestCase
         $this->assertSame('live', $health['status']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function gemini_provider_can_generate_chat_content(): void
     {
         Http::fake([
@@ -71,7 +72,7 @@ class AIProviderGatewayTest extends TestCase
         $this->assertSame(42, $response['tokens']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function github_driver_is_marked_as_configured_without_api_calls(): void
     {
         Http::fake();

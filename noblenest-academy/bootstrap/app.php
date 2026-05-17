@@ -1,5 +1,13 @@
 <?php
 
+use App\Http\Middleware\EnsureFeatureEnabled;
+use App\Http\Middleware\EnsureSubscriptionActive;
+use App\Http\Middleware\RequestId;
+use App\Http\Middleware\RequireParentalConsent;
+use App\Http\Middleware\RequireParentPin;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,11 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Global HTTP middleware — applied to every request
-        $middleware->prepend(\App\Http\Middleware\RequestId::class);
-        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->prepend(RequestId::class);
+        $middleware->append(SecurityHeaders::class);
 
         // Resolve & apply request locale (user pref → session → header → config)
-        $middleware->appendToGroup('web', \App\Http\Middleware\SetLocale::class);
+        $middleware->appendToGroup('web', SetLocale::class);
 
         // Exclude Stripe webhook from CSRF verification
         $middleware->validateCsrfTokens(except: [
@@ -25,13 +33,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Register route middleware aliases
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'subscription.active' => \App\Http\Middleware\EnsureSubscriptionActive::class,
-            'feature' => \App\Http\Middleware\EnsureFeatureEnabled::class,
+            'role' => RoleMiddleware::class,
+            'subscription.active' => EnsureSubscriptionActive::class,
+            'feature' => EnsureFeatureEnabled::class,
             // Phase 5: under-13 COPPA / GDPR-K parental consent gate.
-            'parental.consent' => \App\Http\Middleware\RequireParentalConsent::class,
+            'parental.consent' => RequireParentalConsent::class,
             // Phase 5: 4-digit parent PIN gate for sensitive parent routes.
-            'parent.pin' => \App\Http\Middleware\RequireParentPin::class,
+            'parent.pin' => RequireParentPin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

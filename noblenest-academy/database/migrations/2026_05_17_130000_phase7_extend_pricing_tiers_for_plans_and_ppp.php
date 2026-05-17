@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Schema;
  * `key`+`country_code` row. PPP variants live as rows with the same `key`
  * but a non-null `country_code` (e.g., key=family country_code=IN).
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('pricing_tiers', function (Blueprint $table) {
@@ -37,7 +38,7 @@ return new class extends Migration {
         Schema::table('pricing_tiers', function (Blueprint $table) {
             try {
                 $table->dropUnique('pricing_tiers_region_code_unique');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // SQLite or older driver may not have the named index — ignore.
             }
         });

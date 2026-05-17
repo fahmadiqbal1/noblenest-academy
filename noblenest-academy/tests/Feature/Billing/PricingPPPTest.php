@@ -4,6 +4,7 @@ namespace Tests\Feature\Billing;
 
 use App\Models\PricingTier;
 use App\Services\PricingService;
+use Database\Seeders\PricingTierSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
@@ -15,7 +16,7 @@ class PricingPPPTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\PricingTierSeeder::class);
+        $this->seed(PricingTierSeeder::class);
     }
 
     /** @test */

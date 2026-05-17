@@ -17,8 +17,8 @@ class NullAdapter implements VideoAvatarProvider
     public function generate(string $script, string $locale, ?string $voiceId = null): VideoGenerationResult
     {
         // Deterministic id so repeated calls inside a single request can be debugged.
-        $jobId = 'null-' . substr(sha1($locale . '|' . $script . '|' . ($voiceId ?? '')), 0, 16);
-        $url   = '/storage/videos/null/' . $jobId . '.mp4';
+        $jobId = 'null-'.substr(sha1($locale.'|'.$script.'|'.($voiceId ?? '')), 0, 16);
+        $url = '/storage/videos/null/'.$jobId.'.mp4';
 
         return VideoGenerationResult::completed($jobId, $url);
     }

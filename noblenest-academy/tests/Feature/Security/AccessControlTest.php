@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\User;
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,7 +21,7 @@ class AccessControlTest extends TestCase
     {
         // Create a non-admin user
         $parent = User::factory()->create(['role' => 'Parent']);
-        
+
         $adminRoutes = [
             '/admin/courses',
             '/admin/curriculum',
@@ -31,9 +31,9 @@ class AccessControlTest extends TestCase
 
         foreach ($adminRoutes as $route) {
             $response = $this->actingAs($parent)->get($route);
-            
+
             // Should be forbidden (403) or redirected
-            $this->assertContains($response->status(), [302, 403], 
+            $this->assertContains($response->status(), [302, 403],
                 "Route {$route} should be protected for non-admin users");
         }
     }
@@ -44,9 +44,9 @@ class AccessControlTest extends TestCase
     public function test_admin_can_access_admin_routes(): void
     {
         $admin = User::factory()->create(['role' => 'Admin']);
-        
+
         $response = $this->actingAs($admin)->get('/admin/courses');
-        
+
         // Should be accessible (200 or redirect to login page setup)
         $this->assertContains($response->status(), [200, 302]);
     }
@@ -57,10 +57,10 @@ class AccessControlTest extends TestCase
     public function test_subscription_routes_require_active_subscription(): void
     {
         $user = User::factory()->create(['role' => 'Parent']);
-        
+
         // No subscription - should be blocked
         $response = $this->actingAs($user)->get('/activities');
-        
+
         $this->assertContains($response->status(), [302, 403]);
     }
 
@@ -70,21 +70,21 @@ class AccessControlTest extends TestCase
     public function test_active_subscription_grants_access(): void
     {
         $user = User::factory()->create(['role' => 'Parent']);
-        
+
         // Create active subscription
         Subscription::create([
-            'user_id'    => $user->id,
-            'plan'       => 'individual',
-            'provider'   => 'stripe',
-            'amount'     => 100,
-            'currency'   => 'USD',
-            'starts_at'  => now(),
-            'ends_at'    => now()->addMonth(),
-            'active'     => true,
+            'user_id' => $user->id,
+            'plan' => 'individual',
+            'provider' => 'stripe',
+            'amount' => 100,
+            'currency' => 'USD',
+            'starts_at' => now(),
+            'ends_at' => now()->addMonth(),
+            'active' => true,
         ]);
 
         $response = $this->actingAs($user)->get('/activities');
-        
+
         $this->assertContains($response->status(), [200, 302]);
     }
 
@@ -94,21 +94,21 @@ class AccessControlTest extends TestCase
     public function test_expired_subscription_denied_access(): void
     {
         $user = User::factory()->create(['role' => 'Parent']);
-        
+
         // Create expired subscription
         Subscription::create([
-            'user_id'    => $user->id,
-            'plan'       => 'individual',
-            'provider'   => 'stripe',
-            'amount'     => 100,
-            'currency'   => 'USD',
-            'starts_at'  => now()->subMonth(),
-            'ends_at'    => now()->subDay(), // Expired
-            'active'     => true,
+            'user_id' => $user->id,
+            'plan' => 'individual',
+            'provider' => 'stripe',
+            'amount' => 100,
+            'currency' => 'USD',
+            'starts_at' => now()->subMonth(),
+            'ends_at' => now()->subDay(), // Expired
+            'active' => true,
         ]);
 
         $response = $this->actingAs($user)->get('/activities');
-        
+
         $this->assertContains($response->status(), [302, 403]);
     }
 
@@ -126,7 +126,7 @@ class AccessControlTest extends TestCase
 
         foreach ($protectedRoutes as $route) {
             $response = $this->get($route);
-            
+
             // Guests should be redirected to login
             $response->assertStatus(302);
         }
@@ -151,9 +151,9 @@ class AccessControlTest extends TestCase
     public function test_parent_can_access_children_routes(): void
     {
         $parent = User::factory()->create(['role' => 'Parent']);
-        
+
         $response = $this->actingAs($parent)->get('/children');
-        
+
         $this->assertContains($response->status(), [200, 302]);
     }
 }

@@ -17,11 +17,10 @@ use Illuminate\Support\Facades\Log;
 class OpenAIWhisperAdapter implements WhisperAdapter
 {
     private const ENDPOINT = 'https://api.openai.com/v1/audio/transcriptions';
-    private const MODEL    = 'whisper-1';
 
-    public function __construct(private readonly ?string $apiKey = null)
-    {
-    }
+    private const MODEL = 'whisper-1';
+
+    public function __construct(private readonly ?string $apiKey = null) {}
 
     public function transcribeToVtt(string $mediaUrl, string $locale): string
     {
@@ -36,9 +35,10 @@ class OpenAIWhisperAdapter implements WhisperAdapter
             $audio = Http::timeout(60)->get($mediaUrl);
             if (! $audio->successful()) {
                 Log::warning('OpenAIWhisperAdapter: failed to fetch media', [
-                    'url'    => $mediaUrl,
+                    'url' => $mediaUrl,
                     'status' => $audio->status(),
                 ]);
+
                 return $this->fallbackVtt($locale);
             }
 
@@ -46,23 +46,26 @@ class OpenAIWhisperAdapter implements WhisperAdapter
                 ->timeout(120)
                 ->attach('file', $audio->body(), 'audio.mp4')
                 ->post(self::ENDPOINT, [
-                    'model'           => self::MODEL,
+                    'model' => self::MODEL,
                     'response_format' => 'vtt',
-                    'language'        => $locale,
+                    'language' => $locale,
                 ]);
 
             if (! $response->successful()) {
                 Log::warning('OpenAIWhisperAdapter: non-200', [
                     'status' => $response->status(),
-                    'body'   => substr((string) $response->body(), 0, 500),
+                    'body' => substr((string) $response->body(), 0, 500),
                 ]);
+
                 return $this->fallbackVtt($locale);
             }
 
             $body = trim((string) $response->body());
-            return str_starts_with($body, 'WEBVTT') ? $body : "WEBVTT\n\n" . $body;
+
+            return str_starts_with($body, 'WEBVTT') ? $body : "WEBVTT\n\n".$body;
         } catch (\Throwable $e) {
             Log::warning('OpenAIWhisperAdapter failed', ['error' => $e->getMessage()]);
+
             return $this->fallbackVtt($locale);
         }
     }

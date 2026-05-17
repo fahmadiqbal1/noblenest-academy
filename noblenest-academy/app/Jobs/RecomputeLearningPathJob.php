@@ -58,19 +58,20 @@ class RecomputeLearningPathJob implements ShouldQueue
             Cache::put($cacheKey, $dailyPath, now()->addHours(24));
 
             Log::info('RecomputeLearningPathJob: success', [
-                'child_id'  => $this->child->id,
+                'child_id' => $this->child->id,
                 'path_size' => $dailyPath->count(),
             ]);
         } catch (\Exception $e) {
             Log::error('RecomputeLearningPathJob: error', [
                 'child_id' => $this->child->id,
-                'error'    => $e->getMessage(),
-                'attempt'  => $this->attempts(),
+                'error' => $e->getMessage(),
+                'attempt' => $this->attempts(),
             ]);
 
             // Fail hard after max attempts (don't retry forever)
             if ($this->attempts() >= $this->tries) {
                 $this->fail($e);
+
                 return;
             }
 
@@ -86,7 +87,7 @@ class RecomputeLearningPathJob implements ShouldQueue
     {
         Log::error('RecomputeLearningPathJob: failed permanently', [
             'child_id' => $this->child->id,
-            'error'    => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
 
         // Could notify admin, trigger alert, etc.

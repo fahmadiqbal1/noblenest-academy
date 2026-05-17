@@ -2,26 +2,26 @@
 
 namespace Tests\Unit\Services;
 
-use PHPUnit\Framework\TestCase;
-use JsonSchema\Validator;
-use JsonSchema\SchemaStorage;
 use JsonSchema\Constraints\Constraint;
+use JsonSchema\Validator;
+use PHPUnit\Framework\TestCase;
 
 class ActivityPayloadContractTest extends TestCase
 {
     protected static $schema;
+
     protected Validator $validator;
 
     public static function setUpBeforeClass(): void
     {
-        $schemaPath = __DIR__ . '/../../../services/curriculum-ai/contracts/activity_payload.schema.json';
+        $schemaPath = __DIR__.'/../../../services/curriculum-ai/contracts/activity_payload.schema.json';
         self::$schema = json_decode(file_get_contents($schemaPath));
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->validator = new Validator();
+        $this->validator = new Validator;
     }
 
     /**

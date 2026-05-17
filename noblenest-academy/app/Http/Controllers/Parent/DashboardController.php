@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Parent;
 
 use App\Http\Controllers\Controller;
-use App\Models\ChildProfile;
 use App\Models\ChildActivityProgress;
+use App\Models\ChildProfile;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        /** @var \App\Models\User $user */
-        $user     = Auth::user();
+        /** @var User $user */
+        $user = Auth::user();
         $children = ChildProfile::where('parent_id', $user->id)
             ->withCount('activityProgress')
             ->get();

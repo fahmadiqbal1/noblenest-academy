@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\ChildProfile;
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,19 +22,19 @@ class ActivityAgeFilteringTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->parent = User::factory()->create(['role' => 'Parent']);
-        
+
         // Give parent an active subscription
         Subscription::create([
-            'user_id'   => $this->parent->id,
-            'plan'      => 'individual',
-            'provider'  => 'stripe',
-            'amount'    => 100,
-            'currency'  => 'USD',
+            'user_id' => $this->parent->id,
+            'plan' => 'individual',
+            'provider' => 'stripe',
+            'amount' => 100,
+            'currency' => 'USD',
             'starts_at' => now(),
-            'ends_at'   => now()->addMonth(),
-            'active'    => true,
+            'ends_at' => now()->addMonth(),
+            'active' => true,
         ]);
     }
 
@@ -45,15 +45,15 @@ class ActivityAgeFilteringTest extends TestCase
     {
         // Create activities for different age groups with unique titles
         $infantActivity = Activity::factory()->create([
-            'title'    => 'TestInfantSensoryPlay123',
-            'age_min'  => 0,
-            'age_max'  => 12,
+            'title' => 'TestInfantSensoryPlay123',
+            'age_min' => 0,
+            'age_max' => 12,
         ]);
 
         $toddlerActivity = Activity::factory()->create([
-            'title'    => 'TestToddlerColorSorting456',
-            'age_min'  => 13,
-            'age_max'  => 36,
+            'title' => 'TestToddlerColorSorting456',
+            'age_min' => 13,
+            'age_max' => 36,
         ]);
 
         // Test the Activity model's scope directly
@@ -80,9 +80,9 @@ class ActivityAgeFilteringTest extends TestCase
     public function test_child_profile_age_calculation(): void
     {
         $child = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'Test Child',
-            'date_of_birth'      => now()->subMonths(24), // 2 years old
+            'parent_id' => $this->parent->id,
+            'name' => 'Test Child',
+            'date_of_birth' => now()->subMonths(24), // 2 years old
             'preferred_language' => 'en',
         ]);
 
@@ -98,36 +98,36 @@ class ActivityAgeFilteringTest extends TestCase
     {
         // Infant (0-12 months)
         $infant = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'Infant',
-            'date_of_birth'      => now()->subMonths(6),
+            'parent_id' => $this->parent->id,
+            'name' => 'Infant',
+            'date_of_birth' => now()->subMonths(6),
             'preferred_language' => 'en',
         ]);
         $this->assertEquals('infant', $infant->age_bracket);
 
         // Toddler (13-36 months)
         $toddler = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'Toddler',
-            'date_of_birth'      => now()->subMonths(24),
+            'parent_id' => $this->parent->id,
+            'name' => 'Toddler',
+            'date_of_birth' => now()->subMonths(24),
             'preferred_language' => 'en',
         ]);
         $this->assertEquals('toddler', $toddler->age_bracket);
 
         // Preschool (37-60 months)
         $preschool = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'Preschooler',
-            'date_of_birth'      => now()->subMonths(48),
+            'parent_id' => $this->parent->id,
+            'name' => 'Preschooler',
+            'date_of_birth' => now()->subMonths(48),
             'preferred_language' => 'en',
         ]);
         $this->assertEquals('preschool', $preschool->age_bracket);
 
         // School-age (61-120 months)
         $schoolAge = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'School Age',
-            'date_of_birth'      => now()->subMonths(84),
+            'parent_id' => $this->parent->id,
+            'name' => 'School Age',
+            'date_of_birth' => now()->subMonths(84),
             'preferred_language' => 'en',
         ]);
         $this->assertEquals('school', $schoolAge->age_bracket);
@@ -140,27 +140,27 @@ class ActivityAgeFilteringTest extends TestCase
     {
         // Create a toddler
         $child = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'Test Toddler',
-            'date_of_birth'      => now()->subMonths(24),
+            'parent_id' => $this->parent->id,
+            'name' => 'Test Toddler',
+            'date_of_birth' => now()->subMonths(24),
             'preferred_language' => 'en',
         ]);
 
         // Create activities — age_min/age_max are stored in years
         Activity::factory()->create([
-            'title'   => 'Infant Activity',
+            'title' => 'Infant Activity',
             'age_min' => 0,
             'age_max' => 1,
         ]);
 
         $toddlerActivity = Activity::factory()->create([
-            'title'   => 'Toddler Activity',
+            'title' => 'Toddler Activity',
             'age_min' => 1,
             'age_max' => 3,
         ]);
 
         Activity::factory()->create([
-            'title'   => 'Preschool Activity',
+            'title' => 'Preschool Activity',
             'age_min' => 3,
             'age_max' => 5,
         ]);

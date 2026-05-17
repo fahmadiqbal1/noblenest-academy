@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Mail\DailyDigestMail;
 use App\Models\ChildActivityProgress;
-use App\Models\ChildProfile;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -15,6 +14,7 @@ class SendDailyDigestJob implements ShouldQueue
     use Queueable;
 
     public int $tries = 2;
+
     public int $timeout = 60;
 
     public function handle(): void
@@ -57,18 +57,18 @@ class SendDailyDigestJob implements ShouldQueue
 
             if ($completed->isNotEmpty()) {
                 $summaries[] = [
-                    'child_name'  => $child->name,
+                    'child_name' => $child->name,
                     'age_display' => $child->age_display,
-                    'activities'  => $completed->map(fn ($p) => $p->activity)->filter()->values(),
-                    'streak'      => $streak,
+                    'activities' => $completed->map(fn ($p) => $p->activity)->filter()->values(),
+                    'streak' => $streak,
                 ];
             }
         }
 
         return [
             'total_completions' => $totalCompletions,
-            'streak_max'        => $streakMax,
-            'summaries'         => $summaries,
+            'streak_max' => $streakMax,
+            'summaries' => $summaries,
         ];
     }
 }

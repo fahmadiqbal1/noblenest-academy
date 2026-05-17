@@ -8,13 +8,14 @@ use App\Models\Activity;
 use App\Models\Course;
 use App\Models\Module;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CurriculumStructureTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function course_has_many_modules(): void
     {
         $course = Course::factory()->create();
@@ -23,7 +24,7 @@ class CurriculumStructureTest extends TestCase
         $this->assertCount(3, $course->fresh()->modules);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function module_belongs_to_course(): void
     {
         $course = Course::factory()->create();
@@ -32,11 +33,11 @@ class CurriculumStructureTest extends TestCase
         $this->assertEquals($course->id, $module->course->id);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function activity_can_be_attached_to_module(): void
     {
-        $course   = Course::factory()->create();
-        $module   = Module::factory()->create(['course_id' => $course->id]);
+        $course = Course::factory()->create();
+        $module = Module::factory()->create(['course_id' => $course->id]);
         $activity = Activity::factory()->create();
 
         $module->activities()->attach($activity, ['order' => 1]);
@@ -45,10 +46,10 @@ class CurriculumStructureTest extends TestCase
         $this->assertCount(1, $module->fresh()->activities);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function activity_can_belong_to_multiple_modules(): void
     {
-        $course  = Course::factory()->create();
+        $course = Course::factory()->create();
         $module1 = Module::factory()->create(['course_id' => $course->id, 'title' => 'Module A']);
         $module2 = Module::factory()->create(['course_id' => $course->id, 'title' => 'Module B']);
         $activity = Activity::factory()->create();
@@ -59,14 +60,14 @@ class CurriculumStructureTest extends TestCase
         $this->assertCount(2, $activity->fresh()->modules);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function module_activities_are_ordered_by_pivot(): void
     {
-        $course  = Course::factory()->create();
-        $module  = Module::factory()->create(['course_id' => $course->id]);
-        $first   = Activity::factory()->create(['title' => 'First']);
-        $second  = Activity::factory()->create(['title' => 'Second']);
-        $third   = Activity::factory()->create(['title' => 'Third']);
+        $course = Course::factory()->create();
+        $module = Module::factory()->create(['course_id' => $course->id]);
+        $first = Activity::factory()->create(['title' => 'First']);
+        $second = Activity::factory()->create(['title' => 'Second']);
+        $third = Activity::factory()->create(['title' => 'Third']);
 
         $module->activities()->attach($third, ['order' => 3]);
         $module->activities()->attach($first, ['order' => 1]);
@@ -79,7 +80,7 @@ class CurriculumStructureTest extends TestCase
         $this->assertEquals('Third', $ordered[2]->title);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function course_factory_creates_valid_fields(): void
     {
         $course = Course::factory()->create();
@@ -91,7 +92,7 @@ class CurriculumStructureTest extends TestCase
         $this->assertTrue($course->age_max >= $course->age_min);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function module_factory_creates_valid_fields(): void
     {
         $course = Course::factory()->create();
@@ -101,7 +102,7 @@ class CurriculumStructureTest extends TestCase
         $this->assertEquals($course->id, $module->course_id);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function activity_factory_creates_valid_fields(): void
     {
         $activity = Activity::factory()->create();
@@ -113,7 +114,7 @@ class CurriculumStructureTest extends TestCase
         $this->assertTrue($activity->age_max >= $activity->age_min);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function deleting_course_cascades_or_removes_modules(): void
     {
         $course = Course::factory()->create();
@@ -126,11 +127,11 @@ class CurriculumStructureTest extends TestCase
         $this->assertNull(Module::find($moduleId)?->course);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function activity_json_casts_work_correctly(): void
     {
         $activity = Activity::factory()->create([
-            'materials_needed'    => ['scissors', 'glue', 'paper'],
+            'materials_needed' => ['scissors', 'glue', 'paper'],
             'learning_objectives' => ['fine motor skills', 'creativity'],
         ]);
 

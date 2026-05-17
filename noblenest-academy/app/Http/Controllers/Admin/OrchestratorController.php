@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateActivityMediaJob;
+use App\Models\Activity;
 use App\Models\AIJob;
 use App\Models\AIProviderConfig;
-use App\Models\Activity;
 use App\Services\AIProviderGateway;
 use App\Services\CurriculumHealthService;
 use Illuminate\Http\Request;
@@ -24,9 +24,7 @@ use Illuminate\Support\Facades\Log;
  */
 class OrchestratorController extends Controller
 {
-    public function __construct(protected AIProviderGateway $gateway)
-    {
-    }
+    public function __construct(protected AIProviderGateway $gateway) {}
 
     // ------------------------------------------------------------------
     // Dashboard
@@ -35,34 +33,34 @@ class OrchestratorController extends Controller
     public function index(Request $request)
     {
         $providers = AIProviderConfig::orderBy('name')->get();
-        $jobs      = AIJob::with('user')
-                          ->orderByDesc('created_at')
-                          ->paginate(20);
+        $jobs = AIJob::with('user')
+            ->orderByDesc('created_at')
+            ->paginate(20);
 
         $stats = [
-            'queued'    => AIJob::where('status', 'queued')->count(),
-            'running'   => AIJob::where('status', 'running')->count(),
+            'queued' => AIJob::where('status', 'queued')->count(),
+            'running' => AIJob::where('status', 'running')->count(),
             'completed' => AIJob::where('status', 'completed')->count(),
-            'failed'    => AIJob::where('status', 'failed')->count(),
+            'failed' => AIJob::where('status', 'failed')->count(),
             'pending_moderation' => AIJob::where('moderation_status', 'pending')
-                                         ->where('status', 'completed')
-                                         ->count(),
+                ->where('status', 'completed')
+                ->count(),
         ];
 
         $jobTypes = [
-            'lesson_plan'  => 'Generate Lesson Plan',
-            'activity'     => 'Generate Activity',
-            'translation'  => 'Translate Content',
+            'lesson_plan' => 'Generate Lesson Plan',
+            'activity' => 'Generate Activity',
+            'translation' => 'Translate Content',
             'video_lesson' => 'Generate Video Lesson',
-            'tts'          => 'Text-to-Speech',
-            'image'        => 'Generate Illustration',
-            'quiz'         => 'Generate Quiz',
+            'tts' => 'Text-to-Speech',
+            'image' => 'Generate Illustration',
+            'quiz' => 'Generate Quiz',
             'curriculum_review' => 'Review Curriculum',
-            'github_extract'    => 'Extract from GitHub Repo',
+            'github_extract' => 'Extract from GitHub Repo',
         ];
 
         $locales = ['en' => 'English', 'fr' => 'French', 'ru' => 'Russian',
-                    'zh' => 'Mandarin', 'es' => 'Spanish', 'ko' => 'Korean'];
+            'zh' => 'Mandarin', 'es' => 'Spanish', 'ko' => 'Korean'];
 
         return view('admin.orchestrator.index', compact(
             'providers', 'jobs', 'stats', 'jobTypes', 'locales'
@@ -76,28 +74,28 @@ class OrchestratorController extends Controller
     public function storeProvider(Request $request)
     {
         $data = $request->validate([
-            'name'         => 'required|string|max:100',
-            'slug'         => 'required|string|max:60|unique:ai_provider_configs,slug',
-            'driver'       => 'nullable|string|in:anthropic,grok',
+            'name' => 'required|string|max:100',
+            'slug' => 'required|string|max:60|unique:ai_provider_configs,slug',
+            'driver' => 'nullable|string|in:anthropic,grok',
             'api_base_url' => 'nullable|url|max:255',
-            'api_key'      => 'nullable|string|max:500',
-            'model'        => 'nullable|string|max:100',
+            'api_key' => 'nullable|string|max:500',
+            'model' => 'nullable|string|max:100',
             'capabilities' => 'nullable|array',
-            'repo_url'     => 'nullable|url|max:255',
+            'repo_url' => 'nullable|url|max:255',
         ]);
 
         $provider = AIProviderConfig::create([
-            'name'             => $data['name'],
-            'slug'             => $data['slug'],
-            'api_base_url'     => $data['api_base_url'] ?? null,
-            'api_key_encrypted'=> isset($data['api_key']) && $data['api_key']
+            'name' => $data['name'],
+            'slug' => $data['slug'],
+            'api_base_url' => $data['api_base_url'] ?? null,
+            'api_key_encrypted' => isset($data['api_key']) && $data['api_key']
                                     ? Crypt::encryptString($data['api_key'])
                                     : null,
-            'model'            => $data['model'] ?? null,
-            'is_active'        => true,
-            'connection_status'=> 'unchecked',
-            'capabilities'     => $data['capabilities'] ?? [],
-            'extra_config'     => array_filter([
+            'model' => $data['model'] ?? null,
+            'is_active' => true,
+            'connection_status' => 'unchecked',
+            'capabilities' => $data['capabilities'] ?? [],
+            'extra_config' => array_filter([
                 'driver' => $data['driver'] ?? null,
                 'repo_url' => $data['repo_url'] ?? null,
             ]),
@@ -105,19 +103,21 @@ class OrchestratorController extends Controller
 
         $health = $this->syncProviderStatus($provider);
 
-        return back()->with('status', 'Provider "' . $data['name'] . '" added. Status: ' . $health['message']);
+        return back()->with('status', 'Provider "'.$data['name'].'" added. Status: '.$health['message']);
     }
 
     public function destroyProvider(AIProviderConfig $provider)
     {
         $provider->delete();
+
         return back()->with('status', 'Provider removed.');
     }
 
     public function toggleProvider(AIProviderConfig $provider)
     {
         $provider->update(['is_active' => ! $provider->is_active]);
-        return back()->with('status', 'Provider ' . ($provider->is_active ? 'enabled' : 'disabled') . '.');
+
+        return back()->with('status', 'Provider '.($provider->is_active ? 'enabled' : 'disabled').'.');
     }
 
     public function verifyProvider(AIProviderConfig $provider)
@@ -126,13 +126,13 @@ class OrchestratorController extends Controller
 
         if (request()->expectsJson()) {
             return response()->json([
-                'ok'      => true,
+                'ok' => true,
                 'message' => $health['message'] ?? '',
-                'status'  => $health['status'] ?? $provider->connection_status,
+                'status' => $health['status'] ?? $provider->connection_status,
             ]);
         }
 
-        return back()->with('status', 'Provider "' . $provider->name . '" check complete. ' . $health['message']);
+        return back()->with('status', 'Provider "'.$provider->name.'" check complete. '.$health['message']);
     }
 
     // ------------------------------------------------------------------
@@ -142,24 +142,24 @@ class OrchestratorController extends Controller
     public function dispatchJob(Request $request)
     {
         $data = $request->validate([
-            'type'     => 'required|string',
-            'locale'   => 'required|string|max:8',
+            'type' => 'required|string',
+            'locale' => 'required|string|max:8',
             'provider' => 'nullable|string|exists:ai_provider_configs,slug',
-            'prompt'   => 'required|string|max:5000',
-            'context'  => 'nullable|string|max:2000',
+            'prompt' => 'required|string|max:5000',
+            'context' => 'nullable|string|max:2000',
             'repo_url' => 'nullable|url',
         ]);
 
         $job = AIJob::create([
-            'type'              => $data['type'],
-            'status'            => 'queued',
-            'provider'          => $data['provider'] ?? 'mock',
-            'locale'            => $data['locale'],
-            'user_id'           => Auth::id(),
+            'type' => $data['type'],
+            'status' => 'queued',
+            'provider' => $data['provider'] ?? 'mock',
+            'locale' => $data['locale'],
+            'user_id' => Auth::id(),
             'moderation_status' => 'pending',
-            'payload'           => [
-                'prompt'   => $data['prompt'],
-                'context'  => $data['context'] ?? null,
+            'payload' => [
+                'prompt' => $data['prompt'],
+                'context' => $data['context'] ?? null,
                 'repo_url' => $data['repo_url'] ?? null,
             ],
         ]);
@@ -167,7 +167,7 @@ class OrchestratorController extends Controller
         // Attempt immediate execution (synchronous for simple/mock providers)
         $this->runJob($job);
 
-        return back()->with('status', 'Job #' . $job->id . ' dispatched.');
+        return back()->with('status', 'Job #'.$job->id.' dispatched.');
     }
 
     // ------------------------------------------------------------------
@@ -181,26 +181,29 @@ class OrchestratorController extends Controller
         // If job produced activity content, auto-create an activity
         $this->publishJobResult($job);
 
-        return back()->with('status', 'Job #' . $job->id . ' approved and published.');
+        return back()->with('status', 'Job #'.$job->id.' approved and published.');
     }
 
     public function reject(AIJob $job)
     {
         $job->update(['moderation_status' => 'rejected']);
-        return back()->with('status', 'Job #' . $job->id . ' rejected.');
+
+        return back()->with('status', 'Job #'.$job->id.' rejected.');
     }
 
     public function retryJob(AIJob $job)
     {
         $job->update(['status' => 'queued', 'error_message' => null,
-                      'started_at' => null, 'completed_at' => null]);
+            'started_at' => null, 'completed_at' => null]);
         $this->runJob($job);
-        return back()->with('status', 'Job #' . $job->id . ' re-queued.');
+
+        return back()->with('status', 'Job #'.$job->id.' re-queued.');
     }
 
     public function destroyJob(AIJob $job)
     {
         $job->delete();
+
         return back()->with('status', 'Job deleted.');
     }
 
@@ -212,27 +215,27 @@ class OrchestratorController extends Controller
     {
         $data = $request->validate([
             'provider_slug' => 'required|string|exists:ai_provider_configs,slug',
-            'limit'         => 'nullable|integer|min:1|max:30',
+            'limit' => 'nullable|integer|min:1|max:30',
         ]);
 
         $provider = AIProviderConfig::where('slug', $data['provider_slug'])
-                                    ->where('is_active', true)
-                                    ->first();
+            ->where('is_active', true)
+            ->first();
 
         if (! $provider || ! $provider->api_key_encrypted) {
             return response()->json(['error' => 'Provider not configured or has no API key.'], 422);
         }
 
         $service = app(CurriculumHealthService::class);
-        $gaps    = $service->getGaps();
+        $gaps = $service->getGaps();
 
         if (empty($gaps)) {
             return response()->json(['message' => 'No gaps found — curriculum is well covered!', 'generated' => 0]);
         }
 
-        $limit  = $data['limit'] ?? 10;
-        $gaps   = array_slice($gaps, 0, $limit);
-        $apiKey = \Illuminate\Support\Facades\Crypt::decryptString($provider->api_key_encrypted);
+        $limit = $data['limit'] ?? 10;
+        $gaps = array_slice($gaps, 0, $limit);
+        $apiKey = Crypt::decryptString($provider->api_key_encrypted);
 
         $driver = data_get($provider->extra_config, 'driver', 'anthropic');
         $driver = in_array($driver, ['grok', 'anthropic'], true) ? $driver : 'anthropic';
@@ -241,38 +244,38 @@ class OrchestratorController extends Controller
         $gapPayload = collect($gaps)->map(fn ($g) => [
             'age_min' => $g['age_min'] ?? ($g['age'] ?? 0),
             'age_max' => $g['age_max'] ?? ($g['age'] ?? 10),
-            'skill'   => $g['subject'] ?? $g['skill'] ?? 'General',
-            'count'   => 1,
+            'skill' => $g['subject'] ?? $g['skill'] ?? 'General',
+            'count' => 1,
         ])->values()->all();
 
         $generated = 0;
-        $errors    = [];
+        $errors = [];
 
         // Try Python sidecar first
         try {
             $response = Http::timeout(120)->post('http://127.0.0.1:8001/fill-gaps', [
-                'gaps'     => $gapPayload,
+                'gaps' => $gapPayload,
                 'provider' => $driver,
-                'model'    => $provider->model ?: null,
-                'api_key'  => $apiKey,
+                'model' => $provider->model ?: null,
+                'api_key' => $apiKey,
             ]);
 
             if ($response->successful()) {
                 $result = $response->json();
                 foreach ($result['activities'] ?? [] as $act) {
                     Activity::create([
-                        'title'            => $act['title'],
-                        'description'      => $act['description'],
-                        'instructions'     => $act['instructions'],
+                        'title' => $act['title'],
+                        'description' => $act['description'],
+                        'instructions' => $act['instructions'],
                         'materials_needed' => $act['materials'] ?? [],
                         'duration_minutes' => $act['duration_minutes'],
-                        'difficulty'       => $act['difficulty'],
-                        'subject'          => $act['subject'],
-                        'age_min'          => $act['age_min'],
-                        'age_max'          => $act['age_max'],
-                        'language'         => $act['language'] ?? 'en',
-                        'is_free'          => $act['is_free'] ?? true,
-                        'activity_type'    => 'lesson',
+                        'difficulty' => $act['difficulty'],
+                        'subject' => $act['subject'],
+                        'age_min' => $act['age_min'],
+                        'age_max' => $act['age_max'],
+                        'language' => $act['language'] ?? 'en',
+                        'is_free' => $act['is_free'] ?? true,
+                        'activity_type' => 'lesson',
                     ]);
                     $generated++;
                 }
@@ -280,58 +283,58 @@ class OrchestratorController extends Controller
 
                 Log::info("fillGaps: sidecar generated {$generated} activities.");
             } else {
-                throw new \RuntimeException('Sidecar HTTP ' . $response->status());
+                throw new \RuntimeException('Sidecar HTTP '.$response->status());
             }
         } catch (\Throwable $e) {
             // Fallback: use PHP gateway directly
-            Log::warning('fillGaps: sidecar unavailable (' . $e->getMessage() . '), using PHP gateway fallback.');
+            Log::warning('fillGaps: sidecar unavailable ('.$e->getMessage().'), using PHP gateway fallback.');
 
             $systemPrompt = "You are Noble Nest Academy's curriculum designer. Return ONLY a valid JSON object with keys: title, description, instructions (numbered steps), materials (array), duration_minutes, difficulty (easy|medium|hard), subject, age_min, age_max.";
 
             foreach ($gapPayload as $gap) {
                 try {
                     $prompt = "Create a '{$gap['skill']}' activity for children aged {$gap['age_min']}–{$gap['age_max']} years. JSON only.";
-                    $chat   = $this->gateway->chat($provider, $prompt, [
+                    $chat = $this->gateway->chat($provider, $prompt, [
                         'system_prompt' => $systemPrompt,
-                        'max_tokens'    => 800,
-                        'temperature'   => 0.7,
+                        'max_tokens' => 800,
+                        'temperature' => 0.7,
                     ]);
 
                     $content = $chat['content'] ?? '';
-                    $parsed  = null;
+                    $parsed = null;
                     if (str_contains($content, '{')) {
-                        $start   = strpos($content, '{');
-                        $end     = strrpos($content, '}') + 1;
-                        $parsed  = json_decode(substr($content, $start, $end - $start), true);
+                        $start = strpos($content, '{');
+                        $end = strrpos($content, '}') + 1;
+                        $parsed = json_decode(substr($content, $start, $end - $start), true);
                     }
 
                     Activity::create([
-                        'title'            => $parsed['title'] ?? "AI: {$gap['skill']} Activity",
-                        'description'      => $parsed['description'] ?? $content,
-                        'instructions'     => $parsed['instructions'] ?? null,
+                        'title' => $parsed['title'] ?? "AI: {$gap['skill']} Activity",
+                        'description' => $parsed['description'] ?? $content,
+                        'instructions' => $parsed['instructions'] ?? null,
                         'materials_needed' => $parsed['materials'] ?? [],
                         'duration_minutes' => $parsed['duration_minutes'] ?? 15,
-                        'difficulty'       => $parsed['difficulty'] ?? 'easy',
-                        'subject'          => $parsed['subject'] ?? $gap['skill'],
-                        'age_min'          => $parsed['age_min'] ?? $gap['age_min'],
-                        'age_max'          => $parsed['age_max'] ?? $gap['age_max'],
-                        'language'         => 'en',
-                        'is_free'          => true,
-                        'activity_type'    => 'lesson',
+                        'difficulty' => $parsed['difficulty'] ?? 'easy',
+                        'subject' => $parsed['subject'] ?? $gap['skill'],
+                        'age_min' => $parsed['age_min'] ?? $gap['age_min'],
+                        'age_max' => $parsed['age_max'] ?? $gap['age_max'],
+                        'language' => 'en',
+                        'is_free' => true,
+                        'activity_type' => 'lesson',
                     ]);
                     $generated++;
                 } catch (\Throwable $ex) {
-                    $errors[] = "Gap '{$gap['skill']}': " . $ex->getMessage();
-                    Log::error('fillGaps gateway error: ' . $ex->getMessage());
+                    $errors[] = "Gap '{$gap['skill']}': ".$ex->getMessage();
+                    Log::error('fillGaps gateway error: '.$ex->getMessage());
                 }
             }
         }
 
         return response()->json([
-            'generated'   => $generated,
-            'gaps_found'  => count($gaps),
-            'errors'      => $errors,
-            'message'     => "Generated {$generated} of " . count($gaps) . " activities successfully.",
+            'generated' => $generated,
+            'gaps_found' => count($gaps),
+            'errors' => $errors,
+            'message' => "Generated {$generated} of ".count($gaps).' activities successfully.',
         ]);
     }
 
@@ -342,14 +345,14 @@ class OrchestratorController extends Controller
     public function scanCurriculum(Request $request)
     {
         $service = app(CurriculumHealthService::class);
-        $gaps    = $service->getGaps();
-        $score   = $service->getHealthScore();
+        $gaps = $service->getGaps();
+        $score = $service->getHealthScore();
 
         return response()->json([
-            'gaps'        => $gaps,
-            'total_gaps'  => count($gaps),
-            'health'      => $score . '%',
-            'suggestion'  => count($gaps)
+            'gaps' => $gaps,
+            'total_gaps' => count($gaps),
+            'health' => $score.'%',
+            'suggestion' => count($gaps)
                 ? 'Run the Orchestrator to generate activities for the identified gaps.'
                 : 'Curriculum looks well-covered! Keep adding more variety.',
         ]);
@@ -363,22 +366,22 @@ class OrchestratorController extends Controller
     {
         $data = $request->validate([
             'activity_id' => 'required|integer|exists:activities,id',
-            'media_type'  => 'required|string|in:thumbnail,audio,video',
+            'media_type' => 'required|string|in:thumbnail,audio,video',
             'provider_id' => 'required|integer|exists:ai_provider_configs,id',
-            'prompt'      => 'nullable|string|max:2000',
+            'prompt' => 'nullable|string|max:2000',
         ]);
 
         $job = AIJob::create([
-            'type'              => $data['media_type'] === 'thumbnail' ? 'image' : $data['media_type'],
-            'status'            => 'queued',
-            'provider'          => AIProviderConfig::find($data['provider_id'])->slug ?? 'unknown',
-            'locale'            => 'en',
-            'user_id'           => Auth::id(),
+            'type' => $data['media_type'] === 'thumbnail' ? 'image' : $data['media_type'],
+            'status' => 'queued',
+            'provider' => AIProviderConfig::find($data['provider_id'])->slug ?? 'unknown',
+            'locale' => 'en',
+            'user_id' => Auth::id(),
             'moderation_status' => 'pending',
-            'payload'           => [
+            'payload' => [
                 'activity_id' => $data['activity_id'],
-                'media_type'  => $data['media_type'],
-                'prompt'      => $data['prompt'] ?? null,
+                'media_type' => $data['media_type'],
+                'prompt' => $data['prompt'] ?? null,
             ],
         ]);
 
@@ -392,18 +395,18 @@ class OrchestratorController extends Controller
 
         return response()->json([
             'message' => 'Media generation job dispatched.',
-            'job_id'  => $job->id,
+            'job_id' => $job->id,
         ]);
     }
 
     public function mediaJobStatus(AIJob $job)
     {
         return response()->json([
-            'id'                => $job->id,
-            'status'            => $job->status,
+            'id' => $job->id,
+            'status' => $job->status,
             'moderation_status' => $job->moderation_status,
-            'result'            => $job->result,
-            'error_message'     => $job->error_message,
+            'result' => $job->result,
+            'error_message' => $job->error_message,
         ]);
     }
 
@@ -418,16 +421,16 @@ class OrchestratorController extends Controller
         try {
             $result = $this->callProvider($job);
             $job->update([
-                'status'       => 'completed',
-                'result'       => $result,
+                'status' => 'completed',
+                'result' => $result,
                 'completed_at' => now(),
             ]);
         } catch (\Throwable $e) {
-            Log::error('AIJob #' . $job->id . ' failed: ' . $e->getMessage());
+            Log::error('AIJob #'.$job->id.' failed: '.$e->getMessage());
             $job->update([
-                'status'        => 'failed',
+                'status' => 'failed',
                 'error_message' => $e->getMessage(),
-                'completed_at'  => now(),
+                'completed_at' => now(),
             ]);
         }
     }
@@ -435,8 +438,8 @@ class OrchestratorController extends Controller
     protected function callProvider(AIJob $job): array
     {
         $providerSlug = $job->provider ?? 'mock';
-        $payload      = $job->payload ?? [];
-        $prompt       = $payload['prompt'] ?? '';
+        $payload = $job->payload ?? [];
+        $prompt = $payload['prompt'] ?? '';
 
         // GitHub repo extraction
         if ($job->type === 'github_extract' && ! empty($payload['repo_url'])) {
@@ -450,8 +453,8 @@ class OrchestratorController extends Controller
 
         // Require a configured, active provider
         $config = AIProviderConfig::where('slug', $providerSlug)
-                                  ->where('is_active', true)
-                                  ->first();
+            ->where('is_active', true)
+            ->first();
 
         if (! $config || ! $config->api_key_encrypted) {
             throw new \RuntimeException("Provider '{$providerSlug}' is not configured or has no API key.");
@@ -474,8 +477,8 @@ class OrchestratorController extends Controller
 
         return $this->gateway->chat($config, $prompt, [
             'system_prompt' => $systemPrompt,
-            'max_tokens'    => 1200,
-            'temperature'   => 0.5,
+            'max_tokens' => 1200,
+            'temperature' => 0.5,
         ]);
     }
 
@@ -486,51 +489,51 @@ class OrchestratorController extends Controller
         $repo = $m[1] ?? null;
 
         if (! $repo) {
-            throw new \InvalidArgumentException('Invalid GitHub URL: ' . $repoUrl);
+            throw new \InvalidArgumentException('Invalid GitHub URL: '.$repoUrl);
         }
 
         // Fetch README via GitHub raw API (no auth needed for public repos)
         $readmeUrl = "https://raw.githubusercontent.com/{$repo}/HEAD/README.md";
-        $response  = Http::timeout(15)->get($readmeUrl);
+        $response = Http::timeout(15)->get($readmeUrl);
 
         $content = $response->successful()
             ? substr($response->body(), 0, 8000)
             : '(README not available)';
 
         return [
-            'repo'    => $repo,
-            'readme'  => $content,
+            'repo' => $repo,
+            'readme' => $content,
             'summary' => "Extracted README from {$repo}. Review and incorporate relevant curriculum ideas.",
-            'prompt'  => $prompt,
+            'prompt' => $prompt,
         ];
     }
 
     protected function mockGenerate(string $type, string $prompt, string $locale): array
     {
         $templates = [
-            'lesson_plan'  => "**Mock Lesson Plan** ({$locale})\n\nObjectives: ...\nMaterials: ...\nSteps: ...\n\nPrompt used: {$prompt}",
-            'activity'     => "**Mock Activity**\n\nTitle: Placeholder\nAge: 3–5\nDuration: 15 min\nInstructions: 1. Do this 2. Do that\n\nPrompt: {$prompt}",
-            'translation'  => "(Mock translation to {$locale}) " . $prompt,
+            'lesson_plan' => "**Mock Lesson Plan** ({$locale})\n\nObjectives: ...\nMaterials: ...\nSteps: ...\n\nPrompt used: {$prompt}",
+            'activity' => "**Mock Activity**\n\nTitle: Placeholder\nAge: 3–5\nDuration: 15 min\nInstructions: 1. Do this 2. Do that\n\nPrompt: {$prompt}",
+            'translation' => "(Mock translation to {$locale}) ".$prompt,
             'video_lesson' => "**Mock Video Script**\n\nScene 1: ...\nScene 2: ...\n\nNarration: {$prompt}",
-            'tts'          => "TTS audio would be generated from: {$prompt}",
-            'image'        => "Image prompt sent to generation API: {$prompt}",
-            'quiz'         => "**Mock Quiz**\n\nQ1: ...\nA) ... B) ... C) ...\nCorrect: A\n\nGenerated from: {$prompt}",
+            'tts' => "TTS audio would be generated from: {$prompt}",
+            'image' => "Image prompt sent to generation API: {$prompt}",
+            'quiz' => "**Mock Quiz**\n\nQ1: ...\nA) ... B) ... C) ...\nCorrect: A\n\nGenerated from: {$prompt}",
             'curriculum_review' => "**Curriculum Review**\n\nStrengths: ...\nGaps: ...\nRecommendations: ...\n\nContext: {$prompt}",
-            'github_extract'    => "GitHub extraction would fetch repo content for: {$prompt}",
+            'github_extract' => "GitHub extraction would fetch repo content for: {$prompt}",
         ];
 
         return [
-            'content'  => $templates[$type] ?? "Generated content for type '{$type}':\n\n{$prompt}",
+            'content' => $templates[$type] ?? "Generated content for type '{$type}':\n\n{$prompt}",
             'provider' => 'mock',
-            'locale'   => $locale,
+            'locale' => $locale,
         ];
     }
 
     protected function publishJobResult(AIJob $job): void
     {
-        $result  = $job->result ?? [];
+        $result = $job->result ?? [];
         $content = $result['content'] ?? null;
-        $type    = $result['type'] ?? 'text';
+        $type = $result['type'] ?? 'text';
 
         if (! $content || $job->type === 'github_extract') {
             return;
@@ -546,30 +549,30 @@ class OrchestratorController extends Controller
             $parsed = json_decode($content, true);
         }
 
-        $title = $parsed['title'] ?? ('AI Generated: ' . ucfirst($job->type) . ' #' . $job->id);
+        $title = $parsed['title'] ?? ('AI Generated: '.ucfirst($job->type).' #'.$job->id);
 
         $activityData = [
-            'title'               => $title,
-            'description'         => $parsed['description'] ?? $content,
-            'language'            => $job->locale,
-            'activity_type'       => match($job->type) {
-                'quiz'                    => 'quiz',
-                'video', 'video_lesson'   => 'video',
-                'image'                   => 'image',
-                'tts'                     => 'audio',
-                default                   => 'lesson',
+            'title' => $title,
+            'description' => $parsed['description'] ?? $content,
+            'language' => $job->locale,
+            'activity_type' => match ($job->type) {
+                'quiz' => 'quiz',
+                'video', 'video_lesson' => 'video',
+                'image' => 'image',
+                'tts' => 'audio',
+                default => 'lesson',
             },
-            'age_min'             => $parsed['age_min'] ?? 0,
-            'age_max'             => $parsed['age_max'] ?? 10,
-            'subject'             => $parsed['subject'] ?? null,
-            'age_group'           => $parsed['age_tier'] ?? $parsed['age_group'] ?? null,
-            'duration_minutes'    => $parsed['duration_minutes'] ?? null,
-            'difficulty'          => $parsed['difficulty'] ?? null,
-            'instructions'        => $parsed['instructions'] ?? null,
-            'materials_needed'    => isset($parsed['materials']) ? (array) $parsed['materials'] : null,
+            'age_min' => $parsed['age_min'] ?? 0,
+            'age_max' => $parsed['age_max'] ?? 10,
+            'subject' => $parsed['subject'] ?? null,
+            'age_group' => $parsed['age_tier'] ?? $parsed['age_group'] ?? null,
+            'duration_minutes' => $parsed['duration_minutes'] ?? null,
+            'difficulty' => $parsed['difficulty'] ?? null,
+            'instructions' => $parsed['instructions'] ?? null,
+            'materials_needed' => isset($parsed['materials']) ? (array) $parsed['materials'] : null,
             'learning_objectives' => isset($parsed['learning_objectives']) ? (array) $parsed['learning_objectives'] : null,
-            'is_muslim_only'      => $parsed['is_muslim_only'] ?? false,
-            'is_free'             => $parsed['is_free'] ?? true,
+            'is_muslim_only' => $parsed['is_muslim_only'] ?? false,
+            'is_free' => $parsed['is_free'] ?? true,
         ];
 
         // Attach generated media URL if present

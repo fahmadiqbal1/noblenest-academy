@@ -1,9 +1,14 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\AuthServiceProvider;
+use App\Providers\EventServiceProvider;
+use App\Providers\HorizonServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\AuthServiceProvider::class,
-    App\Providers\EventServiceProvider::class,
-    App\Providers\HorizonServiceProvider::class,
+    AppServiceProvider::class,
+    AuthServiceProvider::class,
+    EventServiceProvider::class,
+    HorizonServiceProvider::class,
     Laravel\Horizon\HorizonServiceProvider::class,
 ];

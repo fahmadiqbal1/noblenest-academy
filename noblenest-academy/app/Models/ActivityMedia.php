@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActivityMedia extends Model
 {
@@ -23,12 +24,12 @@ class ActivityMedia extends Model
     ];
 
     protected $casts = [
-        'order'            => 'integer',
-        'is_primary'       => 'boolean',
+        'order' => 'integer',
+        'is_primary' => 'boolean',
         'duration_seconds' => 'integer',
     ];
 
-    public function activity(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function activity(): BelongsTo
     {
         return $this->belongsTo(Activity::class);
     }

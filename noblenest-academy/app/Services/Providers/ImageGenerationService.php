@@ -29,7 +29,7 @@ class ImageGenerationService
 
     public function generate(AIProviderConfig $provider, string $prompt, array $options = []): array
     {
-        if (!$provider->api_key_encrypted) {
+        if (! $provider->api_key_encrypted) {
             throw new \RuntimeException('No API key configured for this provider.');
         }
 
@@ -43,7 +43,7 @@ class ImageGenerationService
                 default => $this->generateImageViaOpenAI($apiKey, $prompt, $options),
             };
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Image generation failed ({$driver}): " . $e->getMessage());
+            throw new \RuntimeException("Image generation failed ({$driver}): ".$e->getMessage());
         }
     }
 
@@ -54,25 +54,25 @@ class ImageGenerationService
     private function verifyViaStability(string $apiKey): array
     {
         try {
-            $response = Http::withHeaders(['Authorization' => 'Bearer ' . $apiKey])
+            $response = Http::withHeaders(['Authorization' => 'Bearer '.$apiKey])
                 ->acceptJson()->timeout(15)
                 ->get('https://api.stability.ai/v1/user/account');
 
             if ($response->successful()) {
                 return [
                     'status' => 'live',
-                    'message' => 'Stability AI connected. Account: ' . ($response->json('id') ?? 'OK')
+                    'message' => 'Stability AI connected. Account: '.($response->json('id') ?? 'OK'),
                 ];
             }
 
             return [
                 'status' => 'failed',
-                'message' => $this->formatHttpError($response->status(), $response->body())
+                'message' => $this->formatHttpError($response->status(), $response->body()),
             ];
         } catch (\Throwable $e) {
             return [
                 'status' => 'failed',
-                'message' => Str::limit($e->getMessage(), 180)
+                'message' => Str::limit($e->getMessage(), 180),
             ];
         }
     }
@@ -88,18 +88,18 @@ class ImageGenerationService
             if ($response->successful()) {
                 return [
                     'status' => 'live',
-                    'message' => 'OpenAI (DALL-E) connected'
+                    'message' => 'OpenAI (DALL-E) connected',
                 ];
             }
 
             return [
                 'status' => 'failed',
-                'message' => $this->formatHttpError($response->status(), $response->body())
+                'message' => $this->formatHttpError($response->status(), $response->body()),
             ];
         } catch (\Throwable $e) {
             return [
                 'status' => 'failed',
-                'message' => Str::limit($e->getMessage(), 180)
+                'message' => Str::limit($e->getMessage(), 180),
             ];
         }
     }
@@ -112,25 +112,25 @@ class ImageGenerationService
                 ->timeout(20)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
                     'contents' => [
-                        ['parts' => [['text' => 'OK']]]
+                        ['parts' => [['text' => 'OK']]],
                     ],
                 ]);
 
             if ($response->successful()) {
                 return [
                     'status' => 'live',
-                    'message' => 'Gemini (image generation) connected'
+                    'message' => 'Gemini (image generation) connected',
                 ];
             }
 
             return [
                 'status' => 'failed',
-                'message' => $this->formatHttpError($response->status(), $response->body())
+                'message' => $this->formatHttpError($response->status(), $response->body()),
             ];
         } catch (\Throwable $e) {
             return [
                 'status' => 'failed',
-                'message' => Str::limit($e->getMessage(), 180)
+                'message' => Str::limit($e->getMessage(), 180),
             ];
         }
     }
@@ -143,9 +143,9 @@ class ImageGenerationService
     {
         try {
             $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Accept' => 'application/json'
-                ])
+                'Authorization' => 'Bearer '.$apiKey,
+                'Accept' => 'application/json',
+            ])
                 ->timeout(60)
                 ->asMultipart()
                 ->post('https://api.stability.ai/v2beta/stable-image/generate/core', [
@@ -154,21 +154,21 @@ class ImageGenerationService
                     ['name' => 'aspect_ratio', 'contents' => $options['aspect_ratio'] ?? '16:9'],
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
             }
 
             Storage::disk('public')->makeDirectory('ai/images');
-            $path = 'ai/images/' . uniqid('img_', true) . '.png';
+            $path = 'ai/images/'.uniqid('img_', true).'.png';
             Storage::disk('public')->put($path, base64_decode($response->json('image')));
 
             return [
                 'type' => 'image',
                 'url' => Storage::disk('public')->url($path),
-                'content' => "Image generated via Stability AI: {$path}"
+                'content' => "Image generated via Stability AI: {$path}",
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Stability image generation failed: ' . $e->getMessage());
+            throw new \RuntimeException('Stability image generation failed: '.$e->getMessage());
         }
     }
 
@@ -186,17 +186,17 @@ class ImageGenerationService
                     'response_format' => 'url',
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
             }
 
             return [
                 'type' => 'image',
                 'url' => data_get($response->json(), 'data.0.url'),
-                'content' => 'Image generated via DALL-E'
+                'content' => 'Image generated via DALL-E',
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException('OpenAI image generation failed: ' . $e->getMessage());
+            throw new \RuntimeException('OpenAI image generation failed: '.$e->getMessage());
         }
     }
 
@@ -210,7 +210,7 @@ class ImageGenerationService
                 return $this->callGeminiImageModel($apiKey, $tryModel, $prompt, $options);
             } catch (\RuntimeException $e) {
                 $lastError = $e;
-                if (!Str::contains($e->getMessage(), ['404', 'not found', 'not supported'], true)) {
+                if (! Str::contains($e->getMessage(), ['404', 'not found', 'not supported'], true)) {
                     throw $e;
                 }
             }
@@ -226,7 +226,7 @@ class ImageGenerationService
                 ->timeout($options['timeout'] ?? 90)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", [
                     'contents' => [
-                        ['parts' => [['text' => $prompt]]]
+                        ['parts' => [['text' => $prompt]]],
                     ],
                     'generationConfig' => [
                         'responseModalities' => ['TEXT', 'IMAGE'],
@@ -234,8 +234,8 @@ class ImageGenerationService
                     ],
                 ]);
 
-            if (!$response->successful()) {
-                throw new \RuntimeException('Gemini image error: ' . $this->formatHttpError($response->status(), $response->body()));
+            if (! $response->successful()) {
+                throw new \RuntimeException('Gemini image error: '.$this->formatHttpError($response->status(), $response->body()));
             }
 
             $parts = data_get($response->json(), 'candidates.0.content.parts', []);
@@ -250,7 +250,7 @@ class ImageGenerationService
                 }
             }
 
-            if (!$imageData) {
+            if (! $imageData) {
                 throw new \RuntimeException('Gemini did not return image data');
             }
 
@@ -261,16 +261,16 @@ class ImageGenerationService
             };
 
             Storage::disk('public')->makeDirectory('ai/images');
-            $path = 'ai/images/' . Str::uuid() . ".{$ext}";
+            $path = 'ai/images/'.Str::uuid().".{$ext}";
             Storage::disk('public')->put($path, base64_decode($imageData));
 
             return [
                 'type' => 'image',
                 'url' => Storage::disk('public')->url($path),
-                'content' => "Image generated via Gemini ({$model}): {$path}"
+                'content' => "Image generated via Gemini ({$model}): {$path}",
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Gemini image model call failed: ' . $e->getMessage());
+            throw new \RuntimeException('Gemini image model call failed: '.$e->getMessage());
         }
     }
 

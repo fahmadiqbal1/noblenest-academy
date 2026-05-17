@@ -18,13 +18,14 @@ class StreakAtRisk
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public ChildProfile $child;
+
     public int $hoursRemaining;
 
     public function __construct(
         ChildProfile $child,
         int $hoursRemaining
     ) {
-        $this->child          = $child;
+        $this->child = $child;
         $this->hoursRemaining = $hoursRemaining;
     }
 }

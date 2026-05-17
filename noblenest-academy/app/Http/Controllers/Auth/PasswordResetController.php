@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use App\Models\User;
 
 class PasswordResetController extends Controller
 {
@@ -28,7 +28,7 @@ class PasswordResetController extends Controller
 
             Mail::send('emails.password-reset', ['token' => $token, 'email' => $request->email], function ($message) use ($request) {
                 $message->to($request->email)
-                        ->subject('Reset Your Password — NobleNest Academy');
+                    ->subject('Reset Your Password — NobleNest Academy');
             });
         }
 
@@ -39,8 +39,8 @@ class PasswordResetController extends Controller
     public function reset(Request $request)
     {
         $request->validate([
-            'token'    => 'required',
-            'email'    => 'required|email',
+            'token' => 'required',
+            'email' => 'required|email',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -48,7 +48,7 @@ class PasswordResetController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        if (! $record || ! Hash::check($request->token, $record->token)) {
             return back()->withErrors(['email' => 'Invalid or expired reset token.']);
         }
 

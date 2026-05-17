@@ -33,9 +33,9 @@ class StemPathwaySeeder extends Seeder
             unset($row['steps']);
             $row += [
                 'language' => 'en',
-                'is_free'  => true,
+                'is_free' => true,
                 'duration_minutes' => 15,
-                'emoji'    => '⚙️',
+                'emoji' => '⚙️',
             ];
 
             $activity = Activity::updateOrCreate(

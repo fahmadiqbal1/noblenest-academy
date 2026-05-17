@@ -37,6 +37,7 @@ class RequireParentPin
         }
 
         $request->session()->put('parent_pin_intended', $request->fullUrl());
+
         return redirect()->route('parent.pin.show');
     }
 }

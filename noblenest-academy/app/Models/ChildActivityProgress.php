@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * ChildActivityProgress Model
- * 
+ *
  * Tracks a child's progress through activities.
  * Separated from user-level progress for COPPA compliance.
  */
@@ -32,18 +33,18 @@ class ChildActivityProgress extends Model
     ];
 
     protected $casts = [
-        'score'        => 'integer',
-        'time_spent'   => 'integer',
-        'attempts'     => 'integer',
-        'trace_data'   => 'array',
-        'started_at'   => 'datetime',
+        'score' => 'integer',
+        'time_spent' => 'integer',
+        'attempts' => 'integer',
+        'trace_data' => 'array',
+        'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
     /**
      * The child profile this progress belongs to.
      */
-    public function childProfile(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function childProfile(): BelongsTo
     {
         return $this->belongsTo(ChildProfile::class);
     }
@@ -51,7 +52,7 @@ class ChildActivityProgress extends Model
     /**
      * The activity this progress is for.
      */
-    public function activity(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function activity(): BelongsTo
     {
         return $this->belongsTo(Activity::class);
     }
@@ -62,10 +63,11 @@ class ChildActivityProgress extends Model
     public function markStarted(): self
     {
         $this->update([
-            'status'     => 'in_progress',
+            'status' => 'in_progress',
             'started_at' => now(),
-            'attempts'   => $this->attempts + 1,
+            'attempts' => $this->attempts + 1,
         ]);
+
         return $this;
     }
 
@@ -75,11 +77,12 @@ class ChildActivityProgress extends Model
     public function markCompleted(?int $score = null, ?int $timeSpent = null): self
     {
         $this->update([
-            'status'       => 'completed',
+            'status' => 'completed',
             'completed_at' => now(),
-            'score'        => $score,
-            'time_spent'   => $timeSpent ?? $this->calculateTimeSpent(),
+            'score' => $score,
+            'time_spent' => $timeSpent ?? $this->calculateTimeSpent(),
         ]);
+
         return $this;
     }
 
@@ -88,9 +91,10 @@ class ChildActivityProgress extends Model
      */
     protected function calculateTimeSpent(): ?int
     {
-        if (!$this->started_at) {
+        if (! $this->started_at) {
             return null;
         }
+
         return (int) $this->started_at->diffInSeconds(now());
     }
 

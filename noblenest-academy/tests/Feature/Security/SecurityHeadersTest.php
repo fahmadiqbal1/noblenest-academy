@@ -48,7 +48,7 @@ class SecurityHeadersTest extends TestCase
             'CSP must include a nonce-* token'
         );
         $this->assertStringContainsString("default-src 'self'", $csp1);
-        $this->assertStringContainsString("frame-src https://js.stripe.com", $csp1);
+        $this->assertStringContainsString('frame-src https://js.stripe.com', $csp1);
         $this->assertStringContainsString("connect-src 'self' https://api.groq.com", $csp1);
 
         // Nonces should differ between requests.

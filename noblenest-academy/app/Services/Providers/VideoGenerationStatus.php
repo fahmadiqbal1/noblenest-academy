@@ -7,8 +7,8 @@ namespace App\Services\Providers;
  */
 enum VideoGenerationStatus: string
 {
-    case Queued     = 'queued';
+    case Queued = 'queued';
     case Processing = 'processing';
-    case Completed  = 'completed';
-    case Failed     = 'failed';
+    case Completed = 'completed';
+    case Failed = 'failed';
 }

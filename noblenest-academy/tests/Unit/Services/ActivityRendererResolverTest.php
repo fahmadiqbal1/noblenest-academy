@@ -17,7 +17,7 @@ class ActivityRendererResolverTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->resolver = new ActivityRendererResolver();
+        $this->resolver = new ActivityRendererResolver;
     }
 
     /** @test */
@@ -40,6 +40,7 @@ class ActivityRendererResolverTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider dragAndMatchTypes
      */
     public function it_maps_drag_and_match_types(string $type): void
@@ -57,6 +58,7 @@ class ActivityRendererResolverTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider guidedStepsTypes
      */
     public function it_maps_narrative_types_to_guided_steps(string $type): void
@@ -89,6 +91,7 @@ class ActivityRendererResolverTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider songMovementTypes
      */
     public function it_maps_song_and_movement_types(string $type): void
@@ -106,6 +109,7 @@ class ActivityRendererResolverTest extends TestCase
 
     /**
      * @test
+     *
      * @dataProvider videoTypes
      */
     public function it_maps_video_types(string $type): void
@@ -128,7 +132,7 @@ class ActivityRendererResolverTest extends TestCase
             ActivityRendererResolver::RENDERER_VIDEO_LESSON,
             $this->resolver->resolve($this->fake([
                 'activity_type' => 'unmapped-mystery-type',
-                'video_url'     => 'https://example.com/clip.mp4',
+                'video_url' => 'https://example.com/clip.mp4',
             ]))
         );
     }
@@ -176,7 +180,7 @@ class ActivityRendererResolverTest extends TestCase
      */
     private function fake(array $attrs): Activity
     {
-        $activity = new Activity();
+        $activity = new Activity;
         foreach ($attrs as $key => $value) {
             $activity->setAttribute($key, $value);
         }
@@ -184,7 +188,7 @@ class ActivityRendererResolverTest extends TestCase
         // takes the `relationLoaded('steps')` false path. Then we override the
         // steps() proxy by setting a relation cache shortcut.
         $activity->setRelation('steps', collect());
+
         return $activity;
     }
 }
-

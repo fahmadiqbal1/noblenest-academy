@@ -14,7 +14,7 @@ class ActivityFactory extends Factory
         $age_min = $this->faker->numberBetween(0, 10);
         $age_max = $this->faker->numberBetween($age_min, 12);
         $subjects = [
-            'sensory', 'motor', 'language', 'cognitive', 'social', 'emotional', 'creative', 'etiquette', 'literacy', 'math', 'problem_solving', 'science', 'art', 'coding', 'robotics', 'mindfulness', 'physical', 'chivalry', 'moral', 'cultural'
+            'sensory', 'motor', 'language', 'cognitive', 'social', 'emotional', 'creative', 'etiquette', 'literacy', 'math', 'problem_solving', 'science', 'art', 'coding', 'robotics', 'mindfulness', 'physical', 'chivalry', 'moral', 'cultural',
         ];
         $languages = ['en', 'fr', 'ru', 'zh', 'es', 'ko', 'ur', 'ar'];
         $activity_types = ['video', 'tracing', 'quiz', 'story', 'drawing', 'music', 'puzzle', 'collaborative', 'outdoor', 'roleplay', 'experiment'];
@@ -25,6 +25,7 @@ class ActivityFactory extends Factory
             'https://example.com/story.mp3',
             'https://example.com/art.jpg',
         ];
+
         return [
             'title' => $this->faker->sentence(3),
             'description' => $this->faker->sentence(12),

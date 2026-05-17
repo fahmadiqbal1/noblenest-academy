@@ -10,14 +10,15 @@ use App\Services\AIAssistantService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AIAssistantSuggestTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function suggestForChild_returns_parsed_array_and_never_leaks_pii(): void
+    #[Test]
+    public function suggest_for_child_returns_parsed_array_and_never_leaks_pii(): void
     {
         config(['services.groq.api_key' => 'test-key-abc']);
 
@@ -37,11 +38,11 @@ class AIAssistantSuggestTest extends TestCase
 
         $parent = User::factory()->create(['role' => 'Parent']);
         $child = ChildProfile::create([
-            'parent_id'           => $parent->id,
-            'name'                => 'Verysecret Childname',
-            'nickname'            => 'BabyBee',
-            'date_of_birth'       => now()->subYears(4),
-            'preferred_language'  => 'en',
+            'parent_id' => $parent->id,
+            'name' => 'Verysecret Childname',
+            'nickname' => 'BabyBee',
+            'date_of_birth' => now()->subYears(4),
+            'preferred_language' => 'en',
             'parental_consent_at' => now(),
         ]);
 
@@ -58,12 +59,13 @@ class AIAssistantSuggestTest extends TestCase
             $body = (string) $request->body();
             $this->assertStringNotContainsString('Verysecret Childname', $body);
             $this->assertStringNotContainsString('BabyBee', $body);
+
             return true;
         });
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function suggestForChild_caches_on_second_call(): void
+    #[Test]
+    public function suggest_for_child_caches_on_second_call(): void
     {
         config(['services.groq.api_key' => 'test-key-abc']);
 
@@ -75,10 +77,10 @@ class AIAssistantSuggestTest extends TestCase
 
         $parent = User::factory()->create(['role' => 'Parent']);
         $child = ChildProfile::create([
-            'parent_id'           => $parent->id,
-            'name'                => 'Kid',
-            'date_of_birth'       => now()->subYears(3),
-            'preferred_language'  => 'en',
+            'parent_id' => $parent->id,
+            'name' => 'Kid',
+            'date_of_birth' => now()->subYears(3),
+            'preferred_language' => 'en',
             'parental_consent_at' => now(),
         ]);
 
@@ -91,17 +93,17 @@ class AIAssistantSuggestTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function suggestForChild_returns_stub_when_no_api_key(): void
+    #[Test]
+    public function suggest_for_child_returns_stub_when_no_api_key(): void
     {
         config(['services.groq.api_key' => '']);
 
         $parent = User::factory()->create(['role' => 'Parent']);
         $child = ChildProfile::create([
-            'parent_id'           => $parent->id,
-            'name'                => 'Kid',
-            'date_of_birth'       => now()->subYears(3),
-            'preferred_language'  => 'en',
+            'parent_id' => $parent->id,
+            'name' => 'Kid',
+            'date_of_birth' => now()->subYears(3),
+            'preferred_language' => 'en',
             'parental_consent_at' => now(),
         ]);
 

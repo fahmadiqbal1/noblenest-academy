@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('child_profiles', function (Blueprint $table) {
             $table->enum('mood_current', ['calm', 'happy', 'tired', 'frustrated', 'excited', 'unknown'])
-                  ->default('unknown');
+                ->default('unknown');
             $table->timestamp('mood_captured_at')->nullable();
             $table->decimal('eli_weight', 3, 2)->default(1.00);
         });

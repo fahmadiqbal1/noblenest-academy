@@ -11,9 +11,10 @@ class AssessmentResponse extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['child_id', 'user_id', 'battery', 'answers', 'scores', 'completed_at'];
-    protected $casts    = [
-        'answers'      => 'array',
-        'scores'       => 'array',
+
+    protected $casts = [
+        'answers' => 'array',
+        'scores' => 'array',
         'completed_at' => 'datetime',
     ];
 }

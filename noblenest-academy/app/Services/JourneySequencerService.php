@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Activity;
-use App\Models\ChildProfile;
 use App\Models\ChildJourneyEnrollment;
+use App\Models\ChildProfile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,8 +20,11 @@ use Illuminate\Support\Facades\Cache;
 class JourneySequencerService
 {
     protected const MAX_SAME_SUBJECT = 2;
+
     protected const MAX_MESS_PER_DAY = 1;
+
     protected const MESS_COST_PER_DAY = 1;
+
     protected const MATERIALS_BUDGET_PER_WEEK = 300; // cents
 
     /**
@@ -39,7 +42,7 @@ class JourneySequencerService
             $journey = $enrollment->journey;
             $weeklyTheme = $journey->weeklyThemes()->where('week_number', $weekNumber)->first();
 
-            if (!$weeklyTheme) {
+            if (! $weeklyTheme) {
                 return collect();
             }
 
@@ -72,7 +75,7 @@ class JourneySequencerService
             // Find best day for this activity
             for ($day = 0; $day < $days; $day++) {
                 if ($this->canAssignToDay($activity, $day, $schedule, $dayMessCount, $weekMaterials)) {
-                    if (!isset($schedule[$day])) {
+                    if (! isset($schedule[$day])) {
                         $schedule[$day] = [];
                     }
 

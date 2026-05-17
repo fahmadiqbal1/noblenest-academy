@@ -41,6 +41,7 @@ class DatabaseSeeder extends Seeder
                 EmotionalRegulationSeeder::class,
                 ThematicJourneySeeder::class,
             ]);
+
             return;
         }
 
@@ -48,18 +49,18 @@ class DatabaseSeeder extends Seeder
 
         $users = [
             [
-                'name'               => 'Admin User',
-                'email'              => 'admin@noblenest.test',
-                'role'               => 'Admin',
-                'email_verified_at'  => now(),
-                'password'           => $defaultPassword,
+                'name' => 'Admin User',
+                'email' => 'admin@noblenest.test',
+                'role' => 'Admin',
+                'email_verified_at' => now(),
+                'password' => $defaultPassword,
             ],
             [
-                'name'               => 'Parent User',
-                'email'              => 'parent@noblenest.test',
-                'role'               => 'Parent',
-                'email_verified_at'  => now(),
-                'password'           => $defaultPassword,
+                'name' => 'Parent User',
+                'email' => 'parent@noblenest.test',
+                'role' => 'Parent',
+                'email_verified_at' => now(),
+                'password' => $defaultPassword,
             ],
         ];
 

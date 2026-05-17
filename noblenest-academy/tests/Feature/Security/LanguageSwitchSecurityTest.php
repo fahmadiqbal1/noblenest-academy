@@ -20,7 +20,7 @@ class LanguageSwitchSecurityTest extends TestCase
 
     /**
      * Test that valid language codes are accepted.
-     * 
+     *
      * @dataProvider validLanguageProvider
      */
     public function test_valid_language_codes_accepted(string $lang): void
@@ -34,7 +34,7 @@ class LanguageSwitchSecurityTest extends TestCase
 
     /**
      * Test that invalid language codes are rejected.
-     * 
+     *
      * @dataProvider invalidLanguageProvider
      */
     public function test_invalid_language_codes_rejected(string $lang): void
@@ -43,7 +43,7 @@ class LanguageSwitchSecurityTest extends TestCase
 
         // Should return 400 Bad Request or 404 Not Found (both indicate rejection)
         $this->assertContains($response->status(), [400, 404]);
-        
+
         // Only check session for non-empty strings (empty string route may not set session at all)
         if ($lang !== '') {
             $this->assertNotEquals($lang, session('lang'));
@@ -63,7 +63,7 @@ class LanguageSwitchSecurityTest extends TestCase
         ];
 
         foreach ($xssPayloads as $payload) {
-            $response = $this->get("/lang/" . urlencode($payload));
+            $response = $this->get('/lang/'.urlencode($payload));
             // Should return 400 Bad Request or 404 Not Found (both indicate rejection)
             $this->assertContains($response->status(), [400, 404]);
             $this->assertNotEquals($payload, session('lang'));
@@ -77,7 +77,7 @@ class LanguageSwitchSecurityTest extends TestCase
     {
         $longValue = str_repeat('a', 1000);
         $response = $this->get("/lang/{$longValue}");
-        
+
         $response->assertStatus(400);
         $this->assertNotEquals($longValue, session('lang'));
     }
@@ -89,13 +89,13 @@ class LanguageSwitchSecurityTest extends TestCase
     {
         return [
             'English' => ['en'],
-            'French'  => ['fr'],
+            'French' => ['fr'],
             'Russian' => ['ru'],
             'Chinese' => ['zh'],
             'Spanish' => ['es'],
-            'Korean'  => ['ko'],
-            'Urdu'    => ['ur'],
-            'Arabic'  => ['ar'],
+            'Korean' => ['ko'],
+            'Urdu' => ['ur'],
+            'Arabic' => ['ar'],
         ];
     }
 
@@ -105,13 +105,13 @@ class LanguageSwitchSecurityTest extends TestCase
     public static function invalidLanguageProvider(): array
     {
         return [
-            'German (not supported)'     => ['de'],
-            'Japanese (not supported)'   => ['ja'],
-            'Empty string'               => [''],
-            'Random string'              => ['xyz'],
-            'Number'                     => ['123'],
-            'Mixed case invalid'         => ['EN'],
-            'With spaces'                => ['e n'],
+            'German (not supported)' => ['de'],
+            'Japanese (not supported)' => ['ja'],
+            'Empty string' => [''],
+            'Random string' => ['xyz'],
+            'Number' => ['123'],
+            'Mixed case invalid' => ['EN'],
+            'With spaces' => ['e n'],
         ];
     }
 }

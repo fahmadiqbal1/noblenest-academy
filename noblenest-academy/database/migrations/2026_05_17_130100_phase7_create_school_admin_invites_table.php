@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Schema;
  * Admin issues a signed invite to a school_admin via email; the invite token
  * is single-use and expires (default 14 days).
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('school_admin_invites', function (Blueprint $table) {

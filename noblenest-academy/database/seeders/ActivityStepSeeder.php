@@ -12,27 +12,27 @@ class ActivityStepSeeder extends Seeder
     // Subject-based benefit notes for developmental context
     // ──────────────────────────────────────────────────────────────
     private array $benefits = [
-        'social'          => ['Builds social bonding and trust', 'Develops emotional connection', 'Encourages cooperative play', 'Strengthens communication skills', 'Fosters empathy and sharing'],
-        'motor'           => ['Develops gross motor coordination', 'Strengthens core muscles', 'Builds balance and spatial awareness', 'Encourages body confidence', 'Improves fine motor control'],
-        'sensory'         => ['Stimulates sensory processing', 'Develops tactile discrimination', 'Builds sensory vocabulary', 'Encourages curiosity and exploration', 'Regulates sensory responses'],
-        'art'             => ['Encourages creative expression', 'Develops fine motor skills', 'Builds colour and form recognition', 'Fosters imagination', 'Supports emotional literacy through art'],
-        'language'        => ['Expands vocabulary and expression', 'Builds narrative skills', 'Encourages verbal confidence', 'Develops listening comprehension', 'Supports early literacy'],
-        'literacy'        => ['Builds letter recognition', 'Develops phonemic awareness', 'Encourages a love of reading', 'Strengthens print awareness', 'Supports early writing'],
-        'numeracy'        => ['Builds number sense', 'Develops counting and comparison skills', 'Introduces mathematical thinking', 'Encourages pattern recognition', 'Builds problem-solving confidence'],
-        'science'         => ['Develops scientific curiosity', 'Builds observation and prediction skills', 'Encourages hypothesis testing', 'Develops analytical thinking', 'Fosters love of nature and discovery'],
-        'stem'            => ['Develops engineering thinking', 'Encourages design and iteration', 'Builds logical reasoning', 'Fosters problem-solving persistence', 'Introduces cause-and-effect concepts'],
-        'coding'          => ['Introduces computational thinking', 'Builds sequencing and logic', 'Encourages algorithmic reasoning', 'Develops debugging skills', 'Fosters creativity through technology'],
-        'quran'           => ['Connects to spiritual identity', 'Builds recitation confidence', 'Develops Arabic pronunciation', 'Encourages love of Quran', 'Strengthens memory and concentration'],
-        'arabic'          => ['Develops Arabic letter recognition', 'Builds bilingual language skills', 'Encourages Arabic vocabulary', 'Strengthens cultural connection', 'Supports Arabic reading readiness'],
-        'cultural'        => ['Builds cultural appreciation', 'Develops global curiosity', 'Encourages respect for diversity', 'Strengthens identity and belonging', 'Broadens worldview'],
-        'etiquette'       => ['Builds social confidence', 'Develops respectful communication', 'Encourages good manners', 'Teaches social boundaries', 'Fosters consideration for others'],
+        'social' => ['Builds social bonding and trust', 'Develops emotional connection', 'Encourages cooperative play', 'Strengthens communication skills', 'Fosters empathy and sharing'],
+        'motor' => ['Develops gross motor coordination', 'Strengthens core muscles', 'Builds balance and spatial awareness', 'Encourages body confidence', 'Improves fine motor control'],
+        'sensory' => ['Stimulates sensory processing', 'Develops tactile discrimination', 'Builds sensory vocabulary', 'Encourages curiosity and exploration', 'Regulates sensory responses'],
+        'art' => ['Encourages creative expression', 'Develops fine motor skills', 'Builds colour and form recognition', 'Fosters imagination', 'Supports emotional literacy through art'],
+        'language' => ['Expands vocabulary and expression', 'Builds narrative skills', 'Encourages verbal confidence', 'Develops listening comprehension', 'Supports early literacy'],
+        'literacy' => ['Builds letter recognition', 'Develops phonemic awareness', 'Encourages a love of reading', 'Strengthens print awareness', 'Supports early writing'],
+        'numeracy' => ['Builds number sense', 'Develops counting and comparison skills', 'Introduces mathematical thinking', 'Encourages pattern recognition', 'Builds problem-solving confidence'],
+        'science' => ['Develops scientific curiosity', 'Builds observation and prediction skills', 'Encourages hypothesis testing', 'Develops analytical thinking', 'Fosters love of nature and discovery'],
+        'stem' => ['Develops engineering thinking', 'Encourages design and iteration', 'Builds logical reasoning', 'Fosters problem-solving persistence', 'Introduces cause-and-effect concepts'],
+        'coding' => ['Introduces computational thinking', 'Builds sequencing and logic', 'Encourages algorithmic reasoning', 'Develops debugging skills', 'Fosters creativity through technology'],
+        'quran' => ['Connects to spiritual identity', 'Builds recitation confidence', 'Develops Arabic pronunciation', 'Encourages love of Quran', 'Strengthens memory and concentration'],
+        'arabic' => ['Develops Arabic letter recognition', 'Builds bilingual language skills', 'Encourages Arabic vocabulary', 'Strengthens cultural connection', 'Supports Arabic reading readiness'],
+        'cultural' => ['Builds cultural appreciation', 'Develops global curiosity', 'Encourages respect for diversity', 'Strengthens identity and belonging', 'Broadens worldview'],
+        'etiquette' => ['Builds social confidence', 'Develops respectful communication', 'Encourages good manners', 'Teaches social boundaries', 'Fosters consideration for others'],
         'islamic_studies' => ['Connects to Islamic values', 'Builds understanding of faith practices', 'Develops character through Islamic teachings', 'Encourages reflection and gratitude', 'Strengthens spiritual foundation'],
-        'character'       => ['Builds moral reasoning', 'Encourages virtuous habits', 'Develops emotional regulation', 'Fosters kindness and empathy', 'Strengthens inner character'],
-        'math'            => ['Builds mathematical thinking', 'Develops problem-solving skills', 'Encourages logical reasoning', 'Introduces abstract concepts', 'Strengthens number confidence'],
-        'cognitive'       => ['Develops critical thinking', 'Builds memory and attention', 'Encourages creative problem-solving', 'Develops executive functioning', 'Fosters intellectual curiosity'],
-        'creative'        => ['Fosters imaginative thinking', 'Encourages self-expression', 'Builds creative confidence', 'Develops innovative ideas', 'Supports artistic exploration'],
-        'robotics'        => ['Introduces robotics concepts', 'Builds engineering and design skills', 'Encourages systematic thinking', 'Develops hands-on problem-solving', 'Fosters innovation mindset'],
-        'routine'         => ['Builds healthy daily habits', 'Develops time awareness', 'Encourages independence', 'Supports executive functioning', 'Fosters predictability and security'],
+        'character' => ['Builds moral reasoning', 'Encourages virtuous habits', 'Develops emotional regulation', 'Fosters kindness and empathy', 'Strengthens inner character'],
+        'math' => ['Builds mathematical thinking', 'Develops problem-solving skills', 'Encourages logical reasoning', 'Introduces abstract concepts', 'Strengthens number confidence'],
+        'cognitive' => ['Develops critical thinking', 'Builds memory and attention', 'Encourages creative problem-solving', 'Develops executive functioning', 'Fosters intellectual curiosity'],
+        'creative' => ['Fosters imaginative thinking', 'Encourages self-expression', 'Builds creative confidence', 'Develops innovative ideas', 'Supports artistic exploration'],
+        'robotics' => ['Introduces robotics concepts', 'Builds engineering and design skills', 'Encourages systematic thinking', 'Develops hands-on problem-solving', 'Fosters innovation mindset'],
+        'routine' => ['Builds healthy daily habits', 'Develops time awareness', 'Encourages independence', 'Supports executive functioning', 'Fosters predictability and security'],
     ];
 
     // ──────────────────────────────────────────────────────────────
@@ -64,6 +64,7 @@ class ActivityStepSeeder extends Seeder
                     ['title' => 'Spot It Game', 'instruction' => 'Find the letter in a book, on packaging, or around the home. Exclaim excitedly each time you spot it — "There it is!"', 'duration' => 60, 'benefit' => $benefitPool[4]],
                 ];
             }
+
             return [
                 ['title' => 'Warm Up', 'instruction' => 'Begin with the Bismillah together. This centres the mind and signals that we are learning something special.', 'duration' => 30, 'benefit' => $benefitPool[0]],
                 ['title' => 'Introduce the Concept', 'instruction' => 'Say the Arabic word, letter, or phrase clearly. Repeat it three times with your child, getting progressively quicker.', 'duration' => 90, 'benefit' => $benefitPool[1]],
@@ -128,6 +129,7 @@ class ActivityStepSeeder extends Seeder
                     ['title' => 'Find It in the Wild', 'instruction' => 'Go on a letter hunt — find it in books, cereal boxes, street signs, or t-shirts. Exclaim with delight each time: "There\'s our letter!"', 'duration' => 60, 'benefit' => $benefitPool[4]],
                 ];
             }
+
             return [
                 ['title' => 'Reading Time Ritual', 'instruction' => 'Snuggle together with the book or text. Run your finger under the title: "This story is called..." Let your child predict what it might be about from the cover.', 'duration' => 60, 'benefit' => $benefitPool[0]],
                 ['title' => 'Read Aloud Together', 'instruction' => 'Read with expression — change your voice for different characters, pause for effect, and point to pictures. Ask "What do you think will happen next?"', 'duration' => 240, 'benefit' => $benefitPool[1]],
@@ -343,13 +345,13 @@ class ActivityStepSeeder extends Seeder
             $firstSentence = preg_split('/(?<=[.!?:])\s+/', $item)[0] ?? $item;
             $title = strlen($firstSentence) <= 50
                 ? rtrim($firstSentence, '.,;: ')
-                : rtrim(mb_substr($firstSentence, 0, 47), ' ') . '…';
+                : rtrim(mb_substr($firstSentence, 0, 47), ' ').'…';
 
             $steps[] = [
-                'title'       => $title,
+                'title' => $title,
                 'instruction' => $item,
-                'duration'    => 120,
-                'benefit'     => $benefitPool[$i % count($benefitPool)],
+                'duration' => 120,
+                'benefit' => $benefitPool[$i % count($benefitPool)],
             ];
         }
 
@@ -363,10 +365,10 @@ class ActivityStepSeeder extends Seeder
     {
         $this->command->info('Seeding activity steps…');
 
-        $now    = now();
-        $batch  = [];
-        $total  = 0;
-        $chunk  = 100; // rows flushed per batch
+        $now = now();
+        $batch = [];
+        $total = 0;
+        $chunk = 100; // rows flushed per batch
 
         Activity::with('steps')
             ->orderBy('id')
@@ -378,9 +380,9 @@ class ActivityStepSeeder extends Seeder
                     }
 
                     $rawInstructions = $activity->getRawOriginal('instructions');
-                    $subject  = $activity->subject    ?? 'cognitive';
-                    $type     = $activity->activity_type ?? '';
-                    $ageTier  = $activity->age_tier   ?? '';
+                    $subject = $activity->subject ?? 'cognitive';
+                    $type = $activity->activity_type ?? '';
+                    $ageTier = $activity->age_tier ?? '';
 
                     // Get steps
                     if ($rawInstructions) {
@@ -391,17 +393,17 @@ class ActivityStepSeeder extends Seeder
 
                     foreach ($steps as $idx => $step) {
                         $batch[] = [
-                            'activity_id'      => $activity->id,
-                            'step_number'      => $idx + 1,
-                            'title'            => $step['title'],
-                            'instruction'      => $step['instruction'],
-                            'visual_url'       => null,
-                            'video_url'        => null,
-                            'audio_url'        => null,
+                            'activity_id' => $activity->id,
+                            'step_number' => $idx + 1,
+                            'title' => $step['title'],
+                            'instruction' => $step['instruction'],
+                            'visual_url' => null,
+                            'video_url' => null,
+                            'audio_url' => null,
                             'duration_seconds' => $step['duration'],
-                            'benefit_note'     => $step['benefit'],
-                            'created_at'       => $now,
-                            'updated_at'       => $now,
+                            'benefit_note' => $step['benefit'],
+                            'created_at' => $now,
+                            'updated_at' => $now,
                         ];
                     }
 
@@ -417,7 +419,7 @@ class ActivityStepSeeder extends Seeder
             });
 
         // Final flush
-        if (!empty($batch)) {
+        if (! empty($batch)) {
             DB::table('activity_steps')->insert($batch);
         }
 

@@ -28,22 +28,22 @@ class InstitutionalController extends Controller
     public function adminCreateInvite(Request $request)
     {
         $data = $request->validate([
-            'email'       => 'required|email|max:255',
+            'email' => 'required|email|max:255',
             'school_name' => 'required|string|max:255',
-            'seats'       => 'required|integer|min:1|max:10000',
+            'seats' => 'required|integer|min:1|max:10000',
         ]);
 
         $invite = SchoolAdminInvite::create([
-            'email'        => $data['email'],
-            'school_name'  => $data['school_name'],
-            'seats'        => $data['seats'],
+            'email' => $data['email'],
+            'school_name' => $data['school_name'],
+            'seats' => $data['seats'],
             'invite_token' => Str::random(48),
-            'expires_at'   => now()->addDays(self::INVITE_TTL_DAYS),
+            'expires_at' => now()->addDays(self::INVITE_TTL_DAYS),
         ]);
 
         return response()->json([
             'invite_id' => $invite->id,
-            'url'       => route('institutional.invite.show', ['token' => $invite->invite_token]),
+            'url' => route('institutional.invite.show', ['token' => $invite->invite_token]),
             'expires_at' => $invite->expires_at?->toIso8601String(),
         ], 201);
     }
@@ -78,19 +78,19 @@ class InstitutionalController extends Controller
         }
 
         $data = $request->validate([
-            'name'     => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $invite->email,
+            'name' => $data['name'],
+            'email' => $invite->email,
             'password' => Hash::make($data['password']),
-            'role'     => 'school_admin',
+            'role' => 'school_admin',
         ]);
 
         $invite->forceFill([
-            'accepted_at'         => now(),
+            'accepted_at' => now(),
             'accepted_by_user_id' => $user->id,
         ])->save();
 
@@ -111,7 +111,7 @@ class InstitutionalController extends Controller
             ->count();
 
         return view('institutional.dashboard', [
-            'invite'        => $invite,
+            'invite' => $invite,
             'assignedSeats' => $assignedSeats,
         ]);
     }
@@ -127,7 +127,7 @@ class InstitutionalController extends Controller
 
         // Placeholder — actual seat → child/student mapping ships Phase 8.
         return response()->json([
-            'status'  => 'queued',
+            'status' => 'queued',
             'message' => "Seat assignment for {$data['email']} queued (Phase 8 will deliver real linking).",
         ], 202);
     }

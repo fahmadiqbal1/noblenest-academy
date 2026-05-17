@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\DB;
 
 class StressAuditCommand extends Command
 {
-    protected $signature   = 'stress:audit {--json : Output as JSON}';
+    protected $signature = 'stress:audit {--json : Output as JSON}';
+
     protected $description = 'Audit the application stack for 5 000-user readiness';
 
     private array $results = [];
-    private int   $score   = 0;
-    private int   $maxScore = 0;
+
+    private int $score = 0;
+
+    private int $maxScore = 0;
 
     public function handle(): int
     {
@@ -48,7 +51,7 @@ class StressAuditCommand extends Command
     private function checkPHP(): void
     {
         $version = PHP_VERSION;
-        $ok      = version_compare($version, '8.2', '>=');
+        $ok = version_compare($version, '8.2', '>=');
         $this->record(
             'PHP Version',
             $ok ? 'pass' : 'warn',
@@ -60,13 +63,13 @@ class StressAuditCommand extends Command
     private function checkOPcache(): void
     {
         $enabled = function_exists('opcache_get_status') && opcache_get_status() !== false;
-        $status  = $enabled ? opcache_get_status() : [];
-        $jit     = $enabled && ($status['jit']['enabled'] ?? false);
+        $status = $enabled ? opcache_get_status() : [];
+        $jit = $enabled && ($status['jit']['enabled'] ?? false);
 
         $this->record(
             'OPcache',
             $enabled ? 'pass' : 'fail',
-            $enabled ? ('OPcache enabled' . ($jit ? ' + JIT' : ' (JIT off)')) : 'OPcache DISABLED',
+            $enabled ? ('OPcache enabled'.($jit ? ' + JIT' : ' (JIT off)')) : 'OPcache DISABLED',
             recommendation: 'Add to php.ini: opcache.enable=1, opcache.jit_buffer_size=64M, opcache.jit=1255'
         );
     }
@@ -89,14 +92,14 @@ class StressAuditCommand extends Command
                 recommendation: 'Set max_connections ≥ 500 in my.cnf. Use PgBouncer/ProxySQL for connection pooling at scale.'
             );
         } catch (\Throwable $e) {
-            $this->record('Database', 'fail', 'Cannot connect: ' . $e->getMessage());
+            $this->record('Database', 'fail', 'Cannot connect: '.$e->getMessage());
         }
     }
 
     private function checkSessionDriver(): void
     {
         $driver = config('session.driver');
-        $ok     = in_array($driver, ['redis', 'memcached'], true);
+        $ok = in_array($driver, ['redis', 'memcached'], true);
         $this->record(
             'Session Driver',
             $ok ? 'pass' : 'fail',
@@ -108,19 +111,19 @@ class StressAuditCommand extends Command
     private function checkCacheDriver(): void
     {
         $store = config('cache.default');
-        $ok    = in_array($store, ['redis', 'memcached'], true);
+        $ok = in_array($store, ['redis', 'memcached'], true);
         $this->record(
             'Cache Store',
             $ok ? 'pass' : 'warn',
             "CACHE_STORE={$store}",
-            recommendation: "Switch to CACHE_STORE=redis. File/database caches are serialised — Redis handles 100K+ ops/sec."
+            recommendation: 'Switch to CACHE_STORE=redis. File/database caches are serialised — Redis handles 100K+ ops/sec.'
         );
     }
 
     private function checkQueueDriver(): void
     {
         $driver = config('queue.default');
-        $ok     = in_array($driver, ['redis', 'sqs', 'beanstalkd'], true);
+        $ok = in_array($driver, ['redis', 'sqs', 'beanstalkd'], true);
         $this->record(
             'Queue Driver',
             $ok ? 'pass' : ($driver === 'sync' ? 'fail' : 'warn'),
@@ -131,14 +134,14 @@ class StressAuditCommand extends Command
 
     private function checkAppEnv(): void
     {
-        $env   = config('app.env');
+        $env = config('app.env');
         $debug = config('app.debug');
-        $ok    = $env === 'production' && ! $debug;
+        $ok = $env === 'production' && ! $debug;
         $this->record(
             'App Environment',
             $ok ? 'pass' : 'fail',
-            "APP_ENV={$env}, APP_DEBUG=" . ($debug ? 'true' : 'false'),
-            recommendation: "Set APP_ENV=production, APP_DEBUG=false. Debug mode serialises every exception — ~50 % slower."
+            "APP_ENV={$env}, APP_DEBUG=".($debug ? 'true' : 'false'),
+            recommendation: 'Set APP_ENV=production, APP_DEBUG=false. Debug mode serialises every exception — ~50 % slower.'
         );
     }
 
@@ -168,7 +171,7 @@ class StressAuditCommand extends Command
     {
         $files = glob(storage_path('framework/views/*.php'));
         $count = count($files ?: []);
-        $ok    = $count > 0;
+        $ok = $count > 0;
         $this->record(
             'View Cache',
             $ok ? 'pass' : 'warn',
@@ -180,25 +183,25 @@ class StressAuditCommand extends Command
     private function checkWebServer(): void
     {
         $server = $_SERVER['SERVER_SOFTWARE'] ?? (php_sapi_name() === 'cli' ? 'CLI (artisan serve)' : 'Unknown');
-        $isNginx    = stripos($server, 'nginx') !== false;
-        $isApache   = stripos($server, 'apache') !== false;
-        $isCli      = stripos($server, 'CLI') !== false;
+        $isNginx = stripos($server, 'nginx') !== false;
+        $isApache = stripos($server, 'apache') !== false;
+        $isCli = stripos($server, 'CLI') !== false;
 
         if ($isCli) {
             $this->record(
                 'Web Server',
                 'fail',
                 "Running via 'php artisan serve' — single-threaded",
-                recommendation: "Use Nginx + PHP-FPM (pm=dynamic, max_children=200+) or FrankenPHP. artisan serve is limited to ~10 req/s."
+                recommendation: 'Use Nginx + PHP-FPM (pm=dynamic, max_children=200+) or FrankenPHP. artisan serve is limited to ~10 req/s.'
             );
         } elseif ($isNginx) {
-            $this->record('Web Server', 'pass', "Nginx ✓");
+            $this->record('Web Server', 'pass', 'Nginx ✓');
         } elseif ($isApache) {
             $this->record(
                 'Web Server',
                 'warn',
                 'Apache — acceptable but not optimal',
-                recommendation: "Prefer Nginx + PHP-FPM for 5 000-user loads. Ensure mpm_event is enabled (not prefork)."
+                recommendation: 'Prefer Nginx + PHP-FPM for 5 000-user loads. Ensure mpm_event is enabled (not prefork).'
             );
         } else {
             $this->record('Web Server', 'warn', $server);
@@ -209,9 +212,9 @@ class StressAuditCommand extends Command
     {
         try {
             $activeConns = collect(DB::select("SHOW STATUS LIKE 'Threads_connected'"))->first()?->Value ?? 0;
-            $maxConns    = collect(DB::select("SHOW VARIABLES LIKE 'max_connections'"))->first()?->Value ?? 151;
-            $pct         = $maxConns > 0 ? round(($activeConns / $maxConns) * 100) : 0;
-            $status      = $pct < 50 ? 'pass' : ($pct < 80 ? 'warn' : 'fail');
+            $maxConns = collect(DB::select("SHOW VARIABLES LIKE 'max_connections'"))->first()?->Value ?? 151;
+            $pct = $maxConns > 0 ? round(($activeConns / $maxConns) * 100) : 0;
+            $status = $pct < 50 ? 'pass' : ($pct < 80 ? 'warn' : 'fail');
             $this->record(
                 'DB Connections',
                 $status,
@@ -228,10 +231,14 @@ class StressAuditCommand extends Command
     private function record(string $check, string $status, string $detail, string $recommendation = ''): void
     {
         $this->maxScore += 2;
-        $points = match($status) { 'pass' => 2, 'warn' => 1, 'fail' => 0, default => 0 };
+        $points = match ($status) {
+            'pass' => 2, 'warn' => 1, 'fail' => 0, default => 0
+        };
         $this->score += $points;
 
-        $icon  = match($status) { 'pass' => '✅', 'warn' => '⚠️ ', 'fail' => '❌', default => '❓' };
+        $icon = match ($status) {
+            'pass' => '✅', 'warn' => '⚠️ ', 'fail' => '❌', default => '❓'
+        };
         $label = str_pad($check, 22);
 
         $this->line("  {$icon}  {$label}  {$detail}");
@@ -244,18 +251,18 @@ class StressAuditCommand extends Command
 
     private function printSummary(): void
     {
-        $pct    = $this->maxScore > 0 ? round(($this->score / $this->maxScore) * 100) : 0;
-        $grade  = match(true) {
+        $pct = $this->maxScore > 0 ? round(($this->score / $this->maxScore) * 100) : 0;
+        $grade = match (true) {
             $pct >= 90 => ['🟢 PRODUCTION READY',  'green'],
             $pct >= 70 => ['🟡 NEEDS MINOR FIXES',  'yellow'],
             $pct >= 50 => ['🟠 NOT READY — FIX NOW', 'yellow'],
-            default    => ['🔴 CRITICAL — DO NOT DEPLOY', 'red'],
+            default => ['🔴 CRITICAL — DO NOT DEPLOY', 'red'],
         };
 
         $this->info('');
-        $this->info("  ─────────────────────────────────────────────");
+        $this->info('  ─────────────────────────────────────────────');
         $this->line("  Score: <fg={$grade[1]}>{$this->score} / {$this->maxScore} ({$pct} %)  {$grade[0]}</>");
-        $this->info("  ─────────────────────────────────────────────");
+        $this->info('  ─────────────────────────────────────────────');
         $this->info('');
         $this->info('  Run load tests:');
         $this->info('    cd tests/load && npm install');

@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Services\CurriculumHealthService;
 use App\Jobs\GenerateActivityMediaJob;
 use App\Models\Activity;
 use App\Models\AIJob;
 use App\Models\AIProviderConfig;
 use App\Services\AIProviderGateway;
+use App\Services\CurriculumHealthService;
 use Illuminate\Console\Command;
 
 class AutoGenerateCurriculumCommand extends Command
@@ -30,6 +30,7 @@ class AutoGenerateCurriculumCommand extends Command
 
         if ($gaps->isEmpty()) {
             $this->info('No gaps detected. Curriculum is fully covered.');
+
             return self::SUCCESS;
         }
 
@@ -40,6 +41,7 @@ class AutoGenerateCurriculumCommand extends Command
             );
             $this->newLine();
             $this->line($healthService->getGapReport());
+
             return self::SUCCESS;
         }
 
@@ -54,6 +56,7 @@ class AutoGenerateCurriculumCommand extends Command
 
         if (! $textProvider) {
             $this->error('No active text-capable AI provider found. Add one in the Orchestrator.');
+
             return self::FAILURE;
         }
 
@@ -62,7 +65,7 @@ class AutoGenerateCurriculumCommand extends Command
             ? AIProviderConfig::where('is_active', true)
                 ->where(function ($q) {
                     $q->whereJsonContains('capabilities', 'image')
-                      ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(extra_config, '$.driver')) IN ('gemini', 'stability', 'openai-image')");
+                        ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(extra_config, '$.driver')) IN ('gemini', 'stability', 'openai-image')");
                 })->first()
             : null;
 
@@ -71,9 +74,9 @@ class AutoGenerateCurriculumCommand extends Command
 
         foreach ($gaps->take($max) as $gap) {
             $prompt = "Create a single educational activity for children age {$gap['age']} in the '{$gap['skill']}' domain. "
-                . "Return JSON with keys: title, description, instructions (array of steps), materials_needed (array), "
-                . "learning_objectives (array), duration_minutes (integer), difficulty (easy/medium/hard). "
-                . "Make it engaging, age-appropriate, and hands-on.";
+                .'Return JSON with keys: title, description, instructions (array of steps), materials_needed (array), '
+                .'learning_objectives (array), duration_minutes (integer), difficulty (easy/medium/hard). '
+                .'Make it engaging, age-appropriate, and hands-on.';
 
             try {
                 $aiJob = AIJob::create([
@@ -90,6 +93,7 @@ class AutoGenerateCurriculumCommand extends Command
                 if (! $content || ! isset($content['title'])) {
                     $aiJob->update(['status' => 'failed', 'error_message' => 'Invalid response structure']);
                     $bar->advance();
+
                     continue;
                 }
 
@@ -115,10 +119,10 @@ class AutoGenerateCurriculumCommand extends Command
 
                 if ($withMedia && $imageProvider) {
                     GenerateActivityMediaJob::dispatch(
-                            $activity->id,
-                            'thumbnail',
-                            $imageProvider->id
-                        );
+                        $activity->id,
+                        'thumbnail',
+                        $imageProvider->id
+                    );
                 }
 
                 $generated++;

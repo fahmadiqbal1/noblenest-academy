@@ -13,15 +13,15 @@ class SubscriptionFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'     => User::factory(),
-            'plan'        => 'premium',
-            'provider'    => 'stripe',
-            'provider_id' => 'sub_' . $this->faker->lexify('??????????????????????????'),
-            'amount'      => 12.99,
-            'currency'    => 'USD',
-            'active'      => true,
-            'starts_at'   => now(),
-            'ends_at'     => now()->addMonth(),
+            'user_id' => User::factory(),
+            'plan' => 'premium',
+            'provider' => 'stripe',
+            'provider_id' => 'sub_'.$this->faker->lexify('??????????????????????????'),
+            'amount' => 12.99,
+            'currency' => 'USD',
+            'active' => true,
+            'starts_at' => now(),
+            'ends_at' => now()->addMonth(),
         ];
     }
 }

@@ -16,6 +16,7 @@ class GenerateStepMediaJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 2;
+
     public int $timeout = 180;
 
     public function __construct(
@@ -29,8 +30,9 @@ class GenerateStepMediaJob implements ShouldQueue
     {
         if ($this->stepType === 'activity') {
             $step = ActivityStep::find($this->stepId);
-            if (!$step) {
+            if (! $step) {
                 Log::warning('GenerateStepMediaJob: Activity step not found', ['id' => $this->stepId]);
+
                 return;
             }
             $pipeline->processActivityStep($step);
@@ -39,6 +41,6 @@ class GenerateStepMediaJob implements ShouldQueue
 
     public function tags(): array
     {
-        return ['animation', $this->stepType, 'step:' . $this->stepId];
+        return ['animation', $this->stepType, 'step:'.$this->stepId];
     }
 }

@@ -19,13 +19,14 @@ class MilestoneUnlocked
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public ChildProfile $child;
+
     public Milestone $milestone;
 
     public function __construct(
         ChildProfile $child,
         Milestone $milestone
     ) {
-        $this->child     = $child;
+        $this->child = $child;
         $this->milestone = $milestone;
     }
 }

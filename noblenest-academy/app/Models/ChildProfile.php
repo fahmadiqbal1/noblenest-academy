@@ -4,15 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * ChildProfile Model
- * 
+ *
  * Separated from User for COPPA compliance. Children do not have login credentials.
  * A Parent user manages one or more ChildProfile records.
- * 
+ *
  * @property int $id
  * @property int $parent_id
  * @property string $name
@@ -53,17 +55,17 @@ class ChildProfile extends Model
     ];
 
     protected $casts = [
-        'date_of_birth'       => 'date',
-        'is_muslim'           => 'boolean',
-        'preferences'         => 'array',
-        'learning_goals'      => 'array',
+        'date_of_birth' => 'date',
+        'is_muslim' => 'boolean',
+        'preferences' => 'array',
+        'learning_goals' => 'array',
         'parental_consent_at' => 'datetime',
     ];
 
     /**
      * The parent (User) who manages this child profile.
      */
-    public function parent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_id');
     }
@@ -73,9 +75,10 @@ class ChildProfile extends Model
      */
     public function getAgeMonthsAttribute(): ?int
     {
-        if (!$this->date_of_birth) {
+        if (! $this->date_of_birth) {
             return null;
         }
+
         return (int) $this->date_of_birth->diffInMonths(now());
     }
 
@@ -84,7 +87,7 @@ class ChildProfile extends Model
      */
     public function getAgeDisplayAttribute(): ?string
     {
-        if (!$this->date_of_birth) {
+        if (! $this->date_of_birth) {
             return null;
         }
 
@@ -92,14 +95,15 @@ class ChildProfile extends Model
         $months = (int) $this->date_of_birth->copy()->addYears($years)->diffInMonths(now());
 
         if ($years > 0) {
-            $display = $years . ' year' . ($years > 1 ? 's' : '');
+            $display = $years.' year'.($years > 1 ? 's' : '');
             if ($months > 0) {
-                $display .= ' ' . $months . ' month' . ($months > 1 ? 's' : '');
+                $display .= ' '.$months.' month'.($months > 1 ? 's' : '');
             }
+
             return $display;
         }
 
-        return $months . ' month' . ($months !== 1 ? 's' : '');
+        return $months.' month'.($months !== 1 ? 's' : '');
     }
 
     /**
@@ -114,11 +118,11 @@ class ChildProfile extends Model
         }
 
         return match (true) {
-            $months <= 12  => 'infant',      // 0-12 months
-            $months <= 36  => 'toddler',     // 13-36 months (1-3 years)
-            $months <= 60  => 'preschool',   // 37-60 months (3-5 years)
+            $months <= 12 => 'infant',      // 0-12 months
+            $months <= 36 => 'toddler',     // 13-36 months (1-3 years)
+            $months <= 60 => 'preschool',   // 37-60 months (3-5 years)
             $months <= 120 => 'school',      // 61-120 months (5-10 years)
-            default        => 'school',
+            default => 'school',
         };
     }
 
@@ -136,10 +140,10 @@ class ChildProfile extends Model
         $ageYears = $ageMonths / 12; // age_min/age_max stored in years
 
         $query = Activity::where('age_min', '<=', $ageYears)
-                         ->where('age_max', '>=', $ageYears);
+            ->where('age_max', '>=', $ageYears);
 
         // Hide Quran, Arabic & Islamic-studies activities unless child is in a Muslim household
-        if (!$this->is_muslim) {
+        if (! $this->is_muslim) {
             $query->whereNotIn('subject', ['quran', 'islamic_studies', 'arabic']);
         }
 
@@ -149,7 +153,7 @@ class ChildProfile extends Model
     /**
      * Activity progress for this child.
      */
-    public function activityProgress(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function activityProgress(): HasMany
     {
         return $this->hasMany(ChildActivityProgress::class);
     }
@@ -188,13 +192,13 @@ class ChildProfile extends Model
     public function scopeAgeBracket($query, string $bracket)
     {
         $ranges = [
-            'infant'    => [0, 12],
-            'toddler'   => [13, 36],
+            'infant' => [0, 12],
+            'toddler' => [13, 36],
             'preschool' => [37, 60],
-            'school'    => [61, 120],
+            'school' => [61, 120],
         ];
 
-        if (!isset($ranges[$bracket])) {
+        if (! isset($ranges[$bracket])) {
             return $query;
         }
 

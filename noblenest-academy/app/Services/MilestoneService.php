@@ -37,7 +37,7 @@ class MilestoneService
             if ($this->hasMet($child, $milestone)) {
                 $child->milestones()->syncWithoutDetaching([
                     $milestone->id => [
-                        'status'      => 'achieved',
+                        'status' => 'achieved',
                         'achieved_at' => now()->toDateTimeString(),
                     ],
                 ]);
@@ -50,7 +50,7 @@ class MilestoneService
 
         return [
             'milestones' => $newlyUnlocked,
-            'badges'     => $newBadges,
+            'badges' => $newBadges,
         ];
     }
 
@@ -76,8 +76,8 @@ class MilestoneService
             'emotional_regulation',
             'metacognition',
             'mental_arithmetic',
-            'focus_attention'       => 5,
-            default                 => 3,
+            'focus_attention' => 5,
+            default => 3,
         };
 
         // First: try matching by subject (traditional path)
@@ -145,10 +145,10 @@ class MilestoneService
             $criteria = $badge->criteria ?? [];
 
             $earned = match ($badge->badge_type) {
-                'streak'    => isset($criteria['days']) && $streak >= $criteria['days'],
-                'activity'  => isset($criteria['count']) && $totalCompleted >= $criteria['count'],
+                'streak' => isset($criteria['days']) && $streak >= $criteria['days'],
+                'activity' => isset($criteria['count']) && $totalCompleted >= $criteria['count'],
                 'milestone' => false,
-                default     => false,
+                default => false,
             };
 
             if ($earned) {

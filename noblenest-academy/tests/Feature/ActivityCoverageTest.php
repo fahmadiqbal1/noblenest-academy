@@ -33,7 +33,7 @@ class ActivityCoverageTest extends TestCase
         // A green test means at least 90% of activities meet the bar; the rest
         // are surfaced in the assertion message so the curriculum team has a
         // concrete TODO list.
-        $threshold     = 3;
+        $threshold = 3;
         $passingTarget = 0.9;
 
         $stepCounts = ActivityStep::query()
@@ -50,7 +50,7 @@ class ActivityCoverageTest extends TestCase
         }
 
         $covered = $total - count($under);
-        $ratio   = $covered / max(1, $total);
+        $ratio = $covered / max(1, $total);
 
         $this->assertGreaterThanOrEqual(
             $passingTarget,
@@ -58,7 +58,7 @@ class ActivityCoverageTest extends TestCase
             sprintf(
                 "%d/%d activities (%.0f%%) have at least %d steps; need ≥%.0f%%. Under-covered:\n  %s",
                 $covered, $total, $ratio * 100, $threshold, $passingTarget * 100,
-                implode("\n  ", array_slice($under, 0, 15)) . (count($under) > 15 ? "\n  …" : '')
+                implode("\n  ", array_slice($under, 0, 15)).(count($under) > 15 ? "\n  …" : '')
             )
         );
     }
@@ -74,10 +74,10 @@ class ActivityCoverageTest extends TestCase
         // Tier buckets in months (master prompt §3): baby 0–24, toddler 24–48,
         // preschool 48–72, school 72+. We allow overlap on tier edges.
         $tiers = [
-            'baby'      => [0,   24],
-            'toddler'   => [24,  48],
+            'baby' => [0,   24],
+            'toddler' => [24,  48],
             'preschool' => [48,  72],
-            'school'    => [72,  144],
+            'school' => [72,  144],
         ];
 
         $under = [];
@@ -92,7 +92,7 @@ class ActivityCoverageTest extends TestCase
         }
 
         $this->assertEmpty($under, sprintf(
-            "Age tiers below the 100-activity bar: %s",
+            'Age tiers below the 100-activity bar: %s',
             json_encode($under)
         ));
     }
@@ -108,7 +108,7 @@ class ActivityCoverageTest extends TestCase
         }
 
         $target = 0.95;                                   // ≥ 95% of titles translated
-        $field  = 'title';
+        $field = 'title';
         $totalActivities = Activity::count();
         $required = (int) ceil($totalActivities * $target);
 
@@ -132,7 +132,7 @@ class ActivityCoverageTest extends TestCase
             $this->markTestSkipped('No translations yet — run `php artisan activity:translate <locale>`.');
         }
 
-        $this->assertEmpty($under, "Locales below {$target} title coverage: " . json_encode($under));
+        $this->assertEmpty($under, "Locales below {$target} title coverage: ".json_encode($under));
     }
 
     /** @test */
@@ -158,7 +158,7 @@ class ActivityCoverageTest extends TestCase
             ->count();
 
         $covered = $total - $missingTotal;
-        $ratio   = $covered / max(1, $total);
+        $ratio = $covered / max(1, $total);
 
         // Same 90% bar; the emoji-scene fallback inside the player makes a
         // truly missing thumbnail non-fatal, but we want this trending toward 100%.
@@ -166,7 +166,7 @@ class ActivityCoverageTest extends TestCase
             0.9,
             $ratio,
             sprintf(
-                "%d/%d activities (%.0f%%) have a thumbnail; need ≥90%%. Missing sample: %s",
+                '%d/%d activities (%.0f%%) have a thumbnail; need ≥90%%. Missing sample: %s',
                 $covered, $total, $ratio * 100,
                 implode(', ', array_map(fn ($id) => "#$id", $missing))
             )

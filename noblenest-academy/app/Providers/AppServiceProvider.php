@@ -2,13 +2,25 @@
 
 namespace App\Providers;
 
+use App\Helpers\I18n;
+use App\Models\ChildProfile;
+use App\Models\User;
 use App\Services\AIAssistantService;
 use App\Services\AIProviderGateway;
+use App\Services\Providers\AnthropicTranslator;
 use App\Services\Providers\ChatProviderService;
 use App\Services\Providers\ImageGenerationService;
 use App\Services\Providers\MediaGenerationService;
+use App\Services\Providers\VideoAvatar\HeyGenAdapter;
+use App\Services\Providers\VideoAvatar\NullAdapter;
+use App\Services\Providers\VideoAvatar\SynthesiaAdapter;
+use App\Services\Providers\VideoAvatarProvider;
+use App\Services\Providers\Whisper\LocalWhisperAdapter;
+use App\Services\Providers\Whisper\OpenAIWhisperAdapter;
+use App\Services\Providers\WhisperAdapter;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -28,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
         // Without this, Laravel's base EventServiceProvider also auto-discovers
         // every listener, registering each one a SECOND time (double-firing —
         // e.g. ChildSkillState streaks incrementing by 2 per activity).
-        \Illuminate\Foundation\Support\Providers\EventServiceProvider::disableEventDiscovery();
+        EventServiceProvider::disableEventDiscovery();
 
         // Register AI Provider Gateway as singleton with its dependencies
         $this->app->singleton(AIProviderGateway::class, function ($app) {
@@ -45,21 +57,21 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Phase 6 — pluggable AI content pipeline providers.
-        $this->app->singleton(\App\Services\Providers\VideoAvatarProvider::class, function ($app) {
+        $this->app->singleton(VideoAvatarProvider::class, function ($app) {
             return match (config('services.video_avatar.driver', 'null')) {
-                'heygen'    => new \App\Services\Providers\VideoAvatar\HeyGenAdapter((string) config('services.heygen.api_key', '')),
-                'synthesia' => new \App\Services\Providers\VideoAvatar\SynthesiaAdapter((string) config('services.synthesia.api_key', '')),
-                default     => new \App\Services\Providers\VideoAvatar\NullAdapter(),
+                'heygen' => new HeyGenAdapter((string) config('services.heygen.api_key', '')),
+                'synthesia' => new SynthesiaAdapter((string) config('services.synthesia.api_key', '')),
+                default => new NullAdapter,
             };
         });
-        $this->app->singleton(\App\Services\Providers\WhisperAdapter::class, function ($app) {
+        $this->app->singleton(WhisperAdapter::class, function ($app) {
             return match (config('services.whisper.driver', 'local')) {
-                'openai' => new \App\Services\Providers\Whisper\OpenAIWhisperAdapter((string) config('services.whisper.api_key', '')),
-                default  => new \App\Services\Providers\Whisper\LocalWhisperAdapter(),
+                'openai' => new OpenAIWhisperAdapter((string) config('services.whisper.api_key', '')),
+                default => new LocalWhisperAdapter,
             };
         });
-        $this->app->singleton(\App\Services\Providers\AnthropicTranslator::class, function ($app) {
-            return new \App\Services\Providers\AnthropicTranslator((string) config('services.groq.api_key', ''));
+        $this->app->singleton(AnthropicTranslator::class, function ($app) {
+            return new AnthropicTranslator((string) config('services.groq.api_key', ''));
         });
     }
 
@@ -69,11 +81,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Bind {child} route parameter to ChildProfile model
-        Route::model('child', \App\Models\ChildProfile::class);
+        Route::model('child', ChildProfile::class);
 
         // Ensure global alias for I18n helper so Blade can call I18n::get()
-        if (!class_exists('I18n')) {
-            class_alias(\App\Helpers\I18n::class, 'I18n');
+        if (! class_exists('I18n')) {
+            class_alias(I18n::class, 'I18n');
         }
 
         // Force HTTPS in production or when APP_URL uses https
@@ -86,20 +98,22 @@ class AppServiceProvider extends ServiceProvider
         // to their role-appropriate dashboard instead of the marketing home page.
         RedirectIfAuthenticated::redirectUsing(function ($request) {
             $user = Auth::user();
-            if (!$user) {
+            if (! $user) {
                 return route('noble.home');
             }
+
             return match ($user->role) {
-                'Parent'       => route('parent.dashboard'),
-                'Admin'        => route('admin.analytics.index'),
-                default        => route('noble.home'),
+                'Parent' => route('parent.dashboard'),
+                'Admin' => route('admin.analytics.index'),
+                default => route('noble.home'),
             };
         });
 
         // Horizon dashboard: only admins can access /horizon
         Horizon::auth(function ($request) {
-            /** @var \App\Models\User|null $user */
+            /** @var User|null $user */
             $user = $request->user();
+
             return $user !== null && $user->hasRole('admin');
         });
 
@@ -114,7 +128,8 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('auth', function (Request $request) {
             $email = (string) $request->input('email', '');
-            return Limit::perMinute(5)->by($request->ip() . '|' . $email);
+
+            return Limit::perMinute(5)->by($request->ip().'|'.$email);
         });
 
         RateLimiter::for('register', function (Request $request) {
@@ -131,6 +146,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('password-reset', function (Request $request) {
             $email = (string) $request->input('email', $request->ip());
+
             return Limit::perHour(3)->by($email);
         });
 

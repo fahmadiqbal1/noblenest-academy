@@ -12,6 +12,7 @@ class CourseController extends Controller
     public function index()
     {
         $courses = Course::orderByDesc('created_at')->paginate(10);
+
         return view('admin.courses.index', compact('courses'));
     }
 
@@ -30,20 +31,21 @@ class CourseController extends Controller
 
     public function create()
     {
-        $course = new Course();
+        $course = new Course;
+
         return view('admin.courses.create', compact('course'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'       => 'required|string|max:255',
-            'slug'        => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'age_min'     => 'nullable|integer|min:0|max:18',
-            'age_max'     => 'nullable|integer|min:0|max:18|gte:age_min',
-            'color'       => 'nullable|string|max:20',
-            'emoji'       => 'nullable|string|max:10',
+            'age_min' => 'nullable|integer|min:0|max:18',
+            'age_max' => 'nullable|integer|min:0|max:18|gte:age_min',
+            'color' => 'nullable|string|max:20',
+            'emoji' => 'nullable|string|max:10',
         ]);
 
         if (empty($data['slug'])) {
@@ -55,7 +57,7 @@ class CourseController extends Controller
         $count = 0;
         while (Course::where('slug', $data['slug'])->exists()) {
             $count++;
-            $data['slug'] = $baseSlug . '-' . $count;
+            $data['slug'] = $baseSlug.'-'.$count;
         }
 
         $course = Course::create($data);
@@ -71,13 +73,13 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         $data = $request->validate([
-            'title'       => 'required|string|max:255',
-            'slug'        => 'required|string|max:255|unique:courses,slug,'.$course->id,
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:courses,slug,'.$course->id,
             'description' => 'nullable|string',
-            'age_min'     => 'nullable|integer|min:0|max:18',
-            'age_max'     => 'nullable|integer|min:0|max:18|gte:age_min',
-            'color'       => 'nullable|string|max:20',
-            'emoji'       => 'nullable|string|max:10',
+            'age_min' => 'nullable|integer|min:0|max:18',
+            'age_max' => 'nullable|integer|min:0|max:18|gte:age_min',
+            'color' => 'nullable|string|max:20',
+            'emoji' => 'nullable|string|max:10',
         ]);
 
         $course->update($data);
@@ -88,6 +90,7 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         $course->delete();
+
         return redirect()->route('admin.courses.index')->with('status', 'Course deleted');
     }
 }

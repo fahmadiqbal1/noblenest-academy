@@ -56,15 +56,15 @@ class ActivityRendererTest extends TestCase
 
         foreach ($types as $type) {
             $activity = Activity::create([
-                'title'         => "Test activity ({$type})",
-                'description'   => 'Resolver fixture.',
-                'age_min'       => 24,
-                'age_max'       => 36,
-                'subject'       => 'cognitive',
-                'language'      => 'en',
+                'title' => "Test activity ({$type})",
+                'description' => 'Resolver fixture.',
+                'age_min' => 24,
+                'age_max' => 36,
+                'subject' => 'cognitive',
+                'language' => 'en',
                 'activity_type' => $type,
-                'is_free'       => true,
-                'emoji'         => '🧪',
+                'is_free' => true,
+                'emoji' => '🧪',
                 'duration_minutes' => 10,
             ]);
 
@@ -94,5 +94,4 @@ class ActivityRendererTest extends TestCase
             );
         }
     }
-
 }

@@ -17,7 +17,7 @@ class ThemeActivity extends Model
 
     protected $casts = [
         'day_of_week' => 'integer',
-        'sort_order'  => 'integer',
+        'sort_order' => 'integer',
     ];
 
     public function weeklyTheme(): BelongsTo

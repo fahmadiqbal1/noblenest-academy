@@ -13,7 +13,7 @@ class CurriculumAIServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CurriculumAIService();
+        $this->service = new CurriculumAIService;
     }
 
     /**

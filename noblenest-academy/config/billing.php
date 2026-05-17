@@ -17,26 +17,26 @@
  */
 return [
     'currency_default' => env('BILLING_CURRENCY', 'USD'),
-    'trial_days'       => (int) env('BILLING_TRIAL_DAYS', 7),
+    'trial_days' => (int) env('BILLING_TRIAL_DAYS', 7),
 
     // automatic_tax flag passed through to Stripe Checkout Session.
-    'tax_enabled'      => (bool) env('STRIPE_TAX_ENABLED', true),
+    'tax_enabled' => (bool) env('STRIPE_TAX_ENABLED', true),
 
     'products' => [
         'individual' => [
-            'name'        => 'Noble Nest — Individual',
+            'name' => 'Noble Nest — Individual',
             'description' => 'Unlimited curriculum + STEM access for one child.',
-            'metadata'    => ['tier' => 'individual'],
+            'metadata' => ['tier' => 'individual'],
         ],
         'family' => [
-            'name'        => 'Noble Nest — Family',
+            'name' => 'Noble Nest — Family',
             'description' => 'Unlimited access for up to 4 children + family dashboard.',
-            'metadata'    => ['tier' => 'family'],
+            'metadata' => ['tier' => 'family'],
         ],
         'school' => [
-            'name'        => 'Noble Nest — School / Center',
+            'name' => 'Noble Nest — School / Center',
             'description' => 'Per-seat institutional licence with SSO and analytics.',
-            'metadata'    => ['tier' => 'school'],
+            'metadata' => ['tier' => 'school'],
         ],
     ],
 

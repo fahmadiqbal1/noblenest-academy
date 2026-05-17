@@ -32,18 +32,18 @@ class ActivityPlayerTest extends TestCase
     private function slugFixtures(): array
     {
         return [
-            'guided-steps'      => ['hands_on',     'What To Do'],          // guided-steps shell uses generic copy
-            'tracing-canvas'    => ['tracing',      'nn-tracing-canvas'],
-            'drawing-canvas'    => ['drawing',      'Drawing'],
-            'drag-and-match'    => ['matching',     'drag'],
-            'quiz'              => ['quiz',         'inlineQuiz'],
+            'guided-steps' => ['hands_on',     'What To Do'],          // guided-steps shell uses generic copy
+            'tracing-canvas' => ['tracing',      'nn-tracing-canvas'],
+            'drawing-canvas' => ['drawing',      'Drawing'],
+            'drag-and-match' => ['matching',     'drag'],
+            'quiz' => ['quiz',         'inlineQuiz'],
             'song-and-movement' => ['song',         'Listen'],
-            'video-lesson'      => ['video',        'video'],
-            'code-blocks'       => ['code',         'Blockly'],
-            'assessment'        => ['assessment',   'assessment'],
-            'pronunciation'     => ['pronunciation', 'SpeechRecognition'],
-            'python-sandbox'    => ['python',       'pyodide'],
-            'robotics-sim'      => ['robotics',     '🤖'],
+            'video-lesson' => ['video',        'video'],
+            'code-blocks' => ['code',         'Blockly'],
+            'assessment' => ['assessment',   'assessment'],
+            'pronunciation' => ['pronunciation', 'SpeechRecognition'],
+            'python-sandbox' => ['python',       'pyodide'],
+            'robotics-sim' => ['robotics',     '🤖'],
         ];
     }
 
@@ -51,32 +51,33 @@ class ActivityPlayerTest extends TestCase
     {
         // Use Admin role to bypass subscription middleware on /activities/{id}.
         $parent = User::factory()->create(['role' => 'Admin']);
-        $child  = ChildProfile::factory()
+        $child = ChildProfile::factory()
             ->for($parent, 'parent')
             ->create([
-                'date_of_birth'       => now()->subMonths(48),
+                'date_of_birth' => now()->subMonths(48),
                 'parental_consent_at' => now(),
             ]);
+
         return [$parent, $child];
     }
 
     private function makeActivity(string $activityType): Activity
     {
         return Activity::create([
-            'title'                 => "Player test ({$activityType})",
-            'description'           => 'Smoke fixture.',
-            'age_min'               => 3,
-            'age_max'               => 6,
-            'subject'               => 'cognitive',
-            'language'              => 'en',
-            'activity_type'         => $activityType,
-            'is_free'               => true,
-            'emoji'                 => '🧪',
-            'duration_minutes'      => 5,
-            'cognitive_domain'      => 'math',
+            'title' => "Player test ({$activityType})",
+            'description' => 'Smoke fixture.',
+            'age_min' => 3,
+            'age_max' => 6,
+            'subject' => 'cognitive',
+            'language' => 'en',
+            'activity_type' => $activityType,
+            'is_free' => true,
+            'emoji' => '🧪',
+            'duration_minutes' => 5,
+            'cognitive_domain' => 'math',
             'developmental_domains' => ['cognitive'],
-            'instructions'          => 'Practice the sound: hello',
-            'video_url'             => $activityType === 'video' ? 'https://example.com/x.mp4' : null,
+            'instructions' => 'Practice the sound: hello',
+            'video_url' => $activityType === 'video' ? 'https://example.com/x.mp4' : null,
         ]);
     }
 
@@ -97,7 +98,7 @@ class ActivityPlayerTest extends TestCase
 
             // Boot the player view headless via the activities.show route.
             $response = $this->actingAs($parent)
-                ->get('/activities/' . $activity->id . '?child=' . $child->id);
+                ->get('/activities/'.$activity->id.'?child='.$child->id);
 
             $response->assertOk();
             $response->assertSee($marker, false);
@@ -105,9 +106,9 @@ class ActivityPlayerTest extends TestCase
             // Dispatch completion + assert skill state created.
             $progress = ChildActivityProgress::create([
                 'child_profile_id' => $child->id,
-                'activity_id'      => $activity->id,
-                'score'            => 85,
-                'completed_at'     => now(),
+                'activity_id' => $activity->id,
+                'score' => 85,
+                'completed_at' => now(),
             ]);
             ActivityCompleted::dispatch($child, $activity, $progress, 0.85);
 

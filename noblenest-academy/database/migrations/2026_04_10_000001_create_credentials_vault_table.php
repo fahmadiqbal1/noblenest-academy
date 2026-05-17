@@ -33,7 +33,7 @@ return new class extends Migration
 
             // Unique constraint: only one active credential per provider+key
             $table->unique(['provider_slug', 'credential_key'], 'unique_active_credential')
-                  ->where('is_active', true);
+                ->where('is_active', true);
         });
 
         // Log table for audit trail

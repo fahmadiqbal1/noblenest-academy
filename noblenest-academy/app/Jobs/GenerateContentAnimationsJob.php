@@ -15,6 +15,7 @@ class GenerateContentAnimationsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 1;
+
     public int $timeout = 30;
 
     public function __construct(
@@ -28,13 +29,14 @@ class GenerateContentAnimationsJob implements ShouldQueue
     {
         if ($this->contentType === 'activity') {
             $activity = Activity::with('steps')->find($this->contentId);
-            if (!$activity) {
+            if (! $activity) {
                 Log::warning('GenerateContentAnimationsJob: Activity not found', ['id' => $this->contentId]);
+
                 return;
             }
 
             foreach ($activity->steps as $step) {
-                if (!$step->visual_url || !$step->audio_url) {
+                if (! $step->visual_url || ! $step->audio_url) {
                     GenerateStepMediaJob::dispatch('activity', $step->id);
                 }
             }
@@ -48,6 +50,6 @@ class GenerateContentAnimationsJob implements ShouldQueue
 
     public function tags(): array
     {
-        return ['animation-orchestrator', $this->contentType, 'content:' . $this->contentId];
+        return ['animation-orchestrator', $this->contentType, 'content:'.$this->contentId];
     }
 }

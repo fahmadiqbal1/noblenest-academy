@@ -22,8 +22,8 @@ class AssessmentController extends Controller
         $this->authorize('view', $child);
 
         $summary = $this->learningPathService->progressSummary($child);
-        $daily   = $this->learningPathService->buildDailyPath($child, 6);
-        $next    = $this->milestoneService->nextTargets($child);
+        $daily = $this->learningPathService->buildDailyPath($child, 6);
+        $next = $this->milestoneService->nextTargets($child);
 
         return view('assessment.index', compact('child', 'summary', 'daily', 'next'));
     }

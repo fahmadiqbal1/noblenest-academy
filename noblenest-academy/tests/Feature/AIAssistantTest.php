@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\ChildProfile;
+use App\Models\User;
 use App\Services\AIAssistantService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -91,7 +91,7 @@ class AIAssistantTest extends TestCase
     public function test_content_filter_blocks_inappropriate_responses(): void
     {
         $service = app(AIAssistantService::class);
-        
+
         // Use reflection to test protected method
         $reflection = new \ReflectionClass($service);
         $method = $reflection->getMethod('filterContent');
@@ -114,12 +114,12 @@ class AIAssistantTest extends TestCase
     public function test_content_filter_allows_safe_content(): void
     {
         $service = app(AIAssistantService::class);
-        
+
         $reflection = new \ReflectionClass($service);
         $method = $reflection->getMethod('filterContent');
         $method->setAccessible(true);
 
-        $safeContent = "Here are some great activities for learning letters and numbers!";
+        $safeContent = 'Here are some great activities for learning letters and numbers!';
         $filtered = $method->invoke($service, $safeContent);
 
         $this->assertEquals($safeContent, $filtered, 'Safe content should pass through unchanged');
@@ -131,7 +131,7 @@ class AIAssistantTest extends TestCase
     public function test_suggestions_are_age_appropriate(): void
     {
         $service = app(AIAssistantService::class);
-        
+
         $reflection = new \ReflectionClass($service);
         $method = $reflection->getMethod('generateSuggestions');
         $method->setAccessible(true);
@@ -139,11 +139,11 @@ class AIAssistantTest extends TestCase
         // Test infant suggestions (0-12 months)
         $infantSuggestions = $method->invoke($service, '', ['child_age' => 6]);
         $this->assertCount(3, $infantSuggestions);
-        
+
         // Test school-age suggestions (61+ months)
         $schoolSuggestions = $method->invoke($service, '', ['child_age' => 84]);
         $this->assertCount(3, $schoolSuggestions);
-        
+
         // Suggestions should be different for different age groups
         $this->assertNotEquals($infantSuggestions, $schoolSuggestions);
     }
@@ -155,15 +155,15 @@ class AIAssistantTest extends TestCase
     {
         // Create a child profile
         $child = ChildProfile::create([
-            'parent_id'          => $this->parent->id,
-            'name'               => 'Test Child',
-            'date_of_birth'      => now()->subMonths(36),
+            'parent_id' => $this->parent->id,
+            'name' => 'Test Child',
+            'date_of_birth' => now()->subMonths(36),
             'preferred_language' => 'fr',
         ]);
 
         $response = $this->actingAs($this->parent)
             ->postJson('/ai/assistant/message', [
-                'message'          => 'What should my child learn?',
+                'message' => 'What should my child learn?',
                 'child_profile_id' => $child->id,
             ]);
 
@@ -178,7 +178,7 @@ class AIAssistantTest extends TestCase
         // This tests the status endpoint if it exists
         // The endpoint shows if AI service is available
         $service = app(AIAssistantService::class);
-        
+
         // Without configured providers, should use mock
         $this->assertIsBool($service->isAvailable());
     }

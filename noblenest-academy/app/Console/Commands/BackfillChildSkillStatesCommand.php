@@ -4,10 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\ChildActivityProgress;
 use App\Models\ChildProfile;
-use App\Models\Activity;
 use App\Models\ChildSkillState;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class BackfillChildSkillStatesCommand extends Command
 {
@@ -17,8 +15,8 @@ class BackfillChildSkillStatesCommand extends Command
 
     public function handle(): int
     {
-        if (!$this->option('force')) {
-            if (!$this->confirm(
+        if (! $this->option('force')) {
+            if (! $this->confirm(
                 'This will backfill ChildSkillState from existing activity progress. Continue?',
                 true
             )) {
@@ -49,13 +47,14 @@ class BackfillChildSkillStatesCommand extends Command
                 // Group by (cognitive_domain, developmental_domain) combo
                 $grouped = $progress->groupBy(function ($p) {
                     $activity = $p->activity;
-                    if (!$activity) {
+                    if (! $activity) {
                         return null;
                     }
                     $cogDomain = $activity->cognitive_domain ?? 'unknown';
                     $devDomains = $activity->developmental_domains ?? ['unknown'];
                     // For simplicity, use first dev domain; in future, create state per dev domain
                     $devDomain = is_array($devDomains) ? ($devDomains[0] ?? 'unknown') : 'unknown';
+
                     return "{$cogDomain}::{$devDomain}";
                 })->filter();
 
@@ -77,25 +76,25 @@ class BackfillChildSkillStatesCommand extends Command
 
                     ChildSkillState::updateOrCreate(
                         [
-                            'child_profile_id'    => $child->id,
-                            'cognitive_domain'    => $cogDomain,
+                            'child_profile_id' => $child->id,
+                            'cognitive_domain' => $cogDomain,
                             'developmental_domain' => $devDomain,
                         ],
                         [
-                            'ema_score'            => max(0, min(1, $masteryScore)),
-                            'ema_confidence'      => min($total / 10, 1.0), // Confidence grows with attempts
-                            'streak_success'      => $recentSuccess,
-                            'streak_struggle'     => $recentStruggle,
-                            'total_attempts'      => $total,
+                            'ema_score' => max(0, min(1, $masteryScore)),
+                            'ema_confidence' => min($total / 10, 1.0), // Confidence grows with attempts
+                            'streak_success' => $recentSuccess,
+                            'streak_struggle' => $recentStruggle,
+                            'total_attempts' => $total,
                             'successful_attempts' => $successful,
-                            'last_updated'        => now(),
+                            'last_updated' => now(),
                         ]
                     );
                 }
             }
         });
 
-        $this->info("Backfill complete!");
+        $this->info('Backfill complete!');
         $this->info("  Children processed: {$childCount}");
         $this->info("  Skill states created/updated: {$stateCount}");
 

@@ -57,7 +57,7 @@ class ContentSafetyService
         if (config('content_safety.use_llm_classifier') && config('services.groq.api_key')) {
             $classification = $this->llmClassify($script, $locale);
             if ($classification !== null && $classification['safe'] === false) {
-                $this->reasons = ['llm:' . ($classification['reason'] ?? 'unsafe')];
+                $this->reasons = ['llm:'.($classification['reason'] ?? 'unsafe')];
                 $this->auditBlock();
 
                 return true;
@@ -83,7 +83,7 @@ class ContentSafetyService
         $lower = mb_strtolower($script);
         $hits = [];
         foreach ($blocklist as $word) {
-            if (preg_match('/\b' . preg_quote((string) $word, '/') . '\b/u', $lower)) {
+            if (preg_match('/\b'.preg_quote((string) $word, '/').'\b/u', $lower)) {
                 $hits[] = (string) $word;
             }
         }
@@ -98,13 +98,13 @@ class ContentSafetyService
             $resp = Http::withToken((string) config('services.groq.api_key'))
                 ->timeout(15)
                 ->post('https://api.groq.com/openai/v1/chat/completions', [
-                    'model'           => 'llama-3.3-70b-versatile',
-                    'temperature'     => 0.0,
-                    'max_tokens'      => 256,
+                    'model' => 'llama-3.3-70b-versatile',
+                    'temperature' => 0.0,
+                    'max_tokens' => 256,
                     'response_format' => ['type' => 'json_object'],
-                    'messages'        => [
+                    'messages' => [
                         ['role' => 'system', 'content' => 'You are a child-safety content classifier for an LMS serving children aged 0-10. Reply with a single JSON object {"safe": true|false, "reason": "<one short sentence>"}.'],
-                        ['role' => 'user', 'content' => "Locale: {$locale}\n\nScript:\n" . $script],
+                        ['role' => 'user', 'content' => "Locale: {$locale}\n\nScript:\n".$script],
                     ],
                 ]);
             if (! $resp->successful()) {
@@ -131,11 +131,11 @@ class ContentSafetyService
         try {
             AuditLogEntry::create([
                 'actor_user_id' => optional(auth()->user())->id,
-                'action'        => 'content_safety_block',
-                'target_type'   => 'script',
-                'target_id'     => null,
-                'ip'            => request()?->ip(),
-                'user_agent'    => substr((string) request()?->userAgent(), 0, 512),
+                'action' => 'content_safety_block',
+                'target_type' => 'script',
+                'target_id' => null,
+                'ip' => request()?->ip(),
+                'user_agent' => substr((string) request()?->userAgent(), 0, 512),
             ]);
         } catch (\Throwable $e) {
             Log::warning('ContentSafety audit log failed', ['error' => $e->getMessage()]);

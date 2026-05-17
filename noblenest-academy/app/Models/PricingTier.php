@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PricingTier extends Model
 {
@@ -27,11 +26,11 @@ class PricingTier extends Model
     ];
 
     protected $casts = [
-        'country_codes'  => 'array',
-        'features'       => 'array',
-        'price_monthly'  => 'decimal:2',
-        'price_yearly'   => 'decimal:2',
-        'is_active'      => 'boolean',
+        'country_codes' => 'array',
+        'features' => 'array',
+        'price_monthly' => 'decimal:2',
+        'price_yearly' => 'decimal:2',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -43,6 +42,7 @@ class PricingTier extends Model
         if ($this->interval === 'yearly') {
             return (float) $this->price_yearly;
         }
+
         return (float) $this->price_monthly;
     }
 }

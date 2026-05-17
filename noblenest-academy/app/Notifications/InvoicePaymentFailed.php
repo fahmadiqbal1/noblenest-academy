@@ -2,11 +2,10 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
  * Phase 5 — dunning notification when Stripe reports an invoice failure.
@@ -24,9 +23,9 @@ class InvoicePaymentFailed extends Notification implements ShouldQueue
 
     public function __construct(
         public readonly string $invoiceId,
-        public readonly int    $attemptCount = 1,
-        public readonly ?int   $amountCents  = null,
-        public readonly string $currency     = 'USD',
+        public readonly int $attemptCount = 1,
+        public readonly ?int $amountCents = null,
+        public readonly string $currency = 'USD',
     ) {}
 
     public function via($notifiable): array
@@ -40,7 +39,7 @@ class InvoicePaymentFailed extends Notification implements ShouldQueue
     {
         $portalUrl = route('billing.portal');
         $amount = $this->amountCents !== null
-            ? number_format($this->amountCents / 100, 2) . ' ' . strtoupper($this->currency)
+            ? number_format($this->amountCents / 100, 2).' '.strtoupper($this->currency)
             : 'your subscription payment';
 
         return (new MailMessage)
@@ -56,11 +55,11 @@ class InvoicePaymentFailed extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-            'type'           => 'invoice_payment_failed',
-            'invoice_id'     => $this->invoiceId,
-            'attempt_count'  => $this->attemptCount,
-            'amount_cents'   => $this->amountCents,
-            'currency'       => $this->currency,
+            'type' => 'invoice_payment_failed',
+            'invoice_id' => $this->invoiceId,
+            'attempt_count' => $this->attemptCount,
+            'amount_cents' => $this->amountCents,
+            'currency' => $this->currency,
             'billing_portal' => route('billing.portal'),
         ];
     }

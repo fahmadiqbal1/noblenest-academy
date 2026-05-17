@@ -25,10 +25,10 @@ class CulturalModulesSeeder extends Seeder
     public function run(): void
     {
         $sets = [
-            'cultural_japanese'    => $this->japanese(),
-            'cultural_chinese'     => $this->chinese(),
-            'cultural_scandinavian'=> $this->scandinavian(),
-            'cultural_islamic'     => $this->islamic(),
+            'cultural_japanese' => $this->japanese(),
+            'cultural_chinese' => $this->chinese(),
+            'cultural_scandinavian' => $this->scandinavian(),
+            'cultural_islamic' => $this->islamic(),
         ];
 
         foreach ($sets as $subject => $activities) {
@@ -41,10 +41,10 @@ class CulturalModulesSeeder extends Seeder
     private function seedActivity(string $subject, array $row): void
     {
         $payload = array_merge([
-            'subject'          => $subject,
-            'language'         => 'en',
-            'is_free'          => true,
-            'emoji'            => '🌏',
+            'subject' => $subject,
+            'language' => 'en',
+            'is_free' => true,
+            'emoji' => '🌏',
             'duration_minutes' => 15,
         ], $row);
 

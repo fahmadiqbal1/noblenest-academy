@@ -6,10 +6,12 @@ use App\Models\Activity;
 use App\Models\ActivityStep;
 use App\Models\AIProviderConfig;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AnimationPipelineService
 {
     private AIProviderGateway $gateway;
+
     private VideoGenerationService $tts;
 
     public function __construct(AIProviderGateway $gateway, VideoGenerationService $tts)
@@ -24,8 +26,9 @@ class AnimationPipelineService
     public function generateStepIllustration(string $title, string $instruction, string $context = ''): ?string
     {
         $provider = $this->getImageProvider();
-        if (!$provider) {
+        if (! $provider) {
             Log::warning('AnimationPipeline: No image provider configured.');
+
             return null;
         }
 
@@ -42,6 +45,7 @@ class AnimationPipelineService
                 'error' => $e->getMessage(),
                 'title' => $title,
             ]);
+
             return null;
         }
     }
@@ -57,6 +61,7 @@ class AnimationPipelineService
             Log::error('AnimationPipeline: TTS generation failed', [
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -67,9 +72,9 @@ class AnimationPipelineService
     public function processActivityStep(ActivityStep $step): void
     {
         $activity = $step->activity;
-        $context = ($activity->subject ?? '') . ' — ' . ($activity->age_group ?? '');
+        $context = ($activity->subject ?? '').' — '.($activity->age_group ?? '');
 
-        if (!$step->visual_url) {
+        if (! $step->visual_url) {
             $visualPath = $this->generateStepIllustration(
                 $step->title,
                 $step->instruction,
@@ -80,10 +85,10 @@ class AnimationPipelineService
             }
         }
 
-        if (!$step->audio_url) {
+        if (! $step->audio_url) {
             $narration = $step->instruction;
             if ($step->benefit_note) {
-                $narration .= ' ' . $step->benefit_note;
+                $narration .= ' '.$step->benefit_note;
             }
             $audioPath = $this->generateStepNarration($narration);
             if ($audioPath) {
@@ -98,12 +103,12 @@ class AnimationPipelineService
     private function buildImagePrompt(string $title, string $instruction, string $context): string
     {
         $base = "Create a warm, professional educational illustration for a children's learning activity. ";
-        $base .= "The illustration should be friendly, using bright, cheerful colors. ";
-        $base .= "Style: clean, modern, kid-friendly illustration quality, suitable for young learners. ";
-        $base .= "No text in the image. ";
+        $base .= 'The illustration should be friendly, using bright, cheerful colors. ';
+        $base .= 'Style: clean, modern, kid-friendly illustration quality, suitable for young learners. ';
+        $base .= 'No text in the image. ';
         $base .= "Topic: {$title}. ";
         $base .= "Context: {$context}. ";
-        $base .= "Depicting: " . \Illuminate\Support\Str::limit($instruction, 200);
+        $base .= 'Depicting: '.Str::limit($instruction, 200);
 
         return $base;
     }

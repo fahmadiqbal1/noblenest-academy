@@ -1,10 +1,10 @@
 <?php
 
+use App\Jobs\SendDailyDigestJob;
+use App\Models\Activity;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
-use App\Jobs\SendDailyDigestJob;
-use App\Models\Activity;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -25,7 +25,7 @@ Artisan::command('curriculum:export-json {--output=}', function () {
     ])->get()->toArray();
 
     file_put_contents($output, json_encode($activities, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    $this->info("Exported " . count($activities) . " activities to {$output}");
+    $this->info('Exported '.count($activities)." activities to {$output}");
 })->purpose('Export activities to JSON for the curriculum-ai PageIndex sidecar');
 
 Schedule::command('curriculum:export-json')->dailyAt('02:30');

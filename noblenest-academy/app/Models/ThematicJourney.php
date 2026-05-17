@@ -17,8 +17,8 @@ class ThematicJourney extends Model
 
     protected $casts = [
         'is_published' => 'boolean',
-        'total_weeks'  => 'integer',
-        'sort_order'   => 'integer',
+        'total_weeks' => 'integer',
+        'sort_order' => 'integer',
     ];
 
     /** Age tiers supported */

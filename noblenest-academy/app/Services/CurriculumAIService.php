@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +18,9 @@ use Illuminate\Support\Facades\Log;
 class CurriculumAIService
 {
     protected string $baseUrl;
+
     protected string $apiKey;
+
     protected int $timeout = 60;
 
     public function __construct()
@@ -29,19 +32,18 @@ class CurriculumAIService
     /**
      * Generate one or more activities with full Phase 2 metadata.
      *
-     * @param string $subject Activity subject (math, language, science, art, etc.)
-     * @param string $ageGroup Age tier (baby, toddler, preschool, school)
-     * @param string $language Language code (english, french, spanish, etc.)
-     * @param bool $isFree Whether to generate free-tier activities
-     * @param int $count Number of activities to generate
-     * @param array $targetCognitiveDomains Optional domains to prioritize
-     *
+     * @param  string  $subject  Activity subject (math, language, science, art, etc.)
+     * @param  string  $ageGroup  Age tier (baby, toddler, preschool, school)
+     * @param  string  $language  Language code (english, french, spanish, etc.)
+     * @param  bool  $isFree  Whether to generate free-tier activities
+     * @param  int  $count  Number of activities to generate
+     * @param  array  $targetCognitiveDomains  Optional domains to prioritize
      * @return array {
-     *     activities: [ActivityPayload[], ...],
-     *     model: string,
-     *     count: int,
-     *     validation: 'pydantic'
-     * }
+     *               activities: [ActivityPayload[], ...],
+     *               model: string,
+     *               count: int,
+     *               validation: 'pydantic'
+     *               }
      *
      * @throws \Exception If generation fails
      */
@@ -54,20 +56,20 @@ class CurriculumAIService
         array $targetCognitiveDomains = []
     ): array {
         $payload = [
-            'subject'                  => $subject,
-            'age_group'                => $ageGroup,
-            'language'                 => $language,
-            'is_free'                  => $isFree,
-            'count'                    => $count,
+            'subject' => $subject,
+            'age_group' => $ageGroup,
+            'language' => $language,
+            'is_free' => $isFree,
+            'count' => $count,
             'target_cognitive_domains' => $targetCognitiveDomains,
         ];
 
         try {
             Log::info('Calling curriculum-ai sidecar', [
-                'subject'   => $subject,
+                'subject' => $subject,
                 'age_group' => $ageGroup,
-                'language'  => $language,
-                'count'     => $count,
+                'language' => $language,
+                'count' => $count,
             ]);
 
             $response = $this->client()
@@ -76,21 +78,21 @@ class CurriculumAIService
                 ->json();
 
             // Validate response structure
-            if (!isset($response['activities']) || !is_array($response['activities'])) {
+            if (! isset($response['activities']) || ! is_array($response['activities'])) {
                 throw new \Exception('Invalid response structure from curriculum-ai sidecar: missing activities array');
             }
 
             Log::info('Successfully generated activities', [
-                'count'      => count($response['activities']),
+                'count' => count($response['activities']),
                 'validation' => $response['validation'] ?? 'unknown',
             ]);
 
             return $response;
-        } catch (\Illuminate\Http\Client\RequestException $e) {
+        } catch (RequestException $e) {
             Log::error('Curriculum AI sidecar error', [
-                'status'  => $e->response->status(),
+                'status' => $e->response->status(),
                 'message' => $e->getMessage(),
-                'body'    => $e->response->body(),
+                'body' => $e->response->body(),
             ]);
 
             throw new \Exception(
@@ -134,9 +136,9 @@ class CurriculumAIService
     {
         return Http::timeout($this->timeout)
             ->withHeaders([
-                'Accept'        => 'application/json',
-                'Content-Type'  => 'application/json',
-                'User-Agent'    => 'NoblaNestAcademy/1.0',
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'NoblaNestAcademy/1.0',
             ])
             ->when($this->apiKey, fn ($client) => $client->withHeader('Authorization', "Bearer {$this->apiKey}"));
     }

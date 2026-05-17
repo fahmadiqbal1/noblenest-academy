@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Events\ActivityCompleted;
 use App\Models\Activity;
-use App\Models\ChildProfile;
 use App\Models\ChildActivityProgress;
+use App\Models\ChildProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChildActivityController extends Controller
 {
-
     /**
      * List age-appropriate activities for a child.
      */
@@ -19,7 +19,7 @@ class ChildActivityController extends Controller
     {
         $this->authorize('view', $child);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         // Active subscription lookup
@@ -40,11 +40,11 @@ class ChildActivityController extends Controller
             });
         if ($ageYears !== null) {
             $query->where('age_min', '<=', $ageYears)
-                  ->where('age_max', '>=', $ageYears);
+                ->where('age_max', '>=', $ageYears);
         }
 
         // Gate Quran & Islamic-studies & Arabic activities to Muslim children only.
-        if (!$child->is_muslim) {
+        if (! $child->is_muslim) {
             $query->whereNotIn('subject', ['quran', 'islamic_studies', 'arabic']);
         }
 
@@ -53,21 +53,21 @@ class ChildActivityController extends Controller
         if ($request->filled('subject')) {
             $activeSubject = $request->input('subject');
             $subjectMap = [
-                'islamic'  => ['quran', 'arabic', 'islamic_studies'],
-                'stories'  => ['literacy', 'stories'],
+                'islamic' => ['quran', 'arabic', 'islamic_studies'],
+                'stories' => ['literacy', 'stories'],
                 'language' => ['language'],
-                'art'      => ['art'],
-                'motor'    => ['motor'],
-                'stem'     => ['stem', 'science', 'numeracy', 'coding'],
+                'art' => ['art'],
+                'motor' => ['motor'],
+                'stem' => ['stem', 'science', 'numeracy', 'coding'],
             ];
             $dbSubjects = $subjectMap[$activeSubject] ?? [$activeSubject];
             $query->whereIn('subject', $dbSubjects);
         }
 
         // Drip week and order calculations
-        $currentWeek    = $hasSubscription ? $subscription->currentWeek() : 0;
-        $maxOrder       = $hasSubscription ? $subscription->maxActivityOrder() : 0;
-        $totalWeeks     = 4;
+        $currentWeek = $hasSubscription ? $subscription->currentWeek() : 0;
+        $maxOrder = $hasSubscription ? $subscription->maxActivityOrder() : 0;
+        $totalWeeks = 4;
         $daysToNextWeek = 0;
 
         if ($hasSubscription && $currentWeek < $totalWeeks) {
@@ -96,15 +96,16 @@ class ChildActivityController extends Controller
             } else {
                 // Free: activities not in any module are always free;
                 // module activities past position 7 require premium.
-                $activity->locked = $pivotOrder !== null && !$activity->is_free && $pivotOrder > $freeMaxOrder;
+                $activity->locked = $pivotOrder !== null && ! $activity->is_free && $pivotOrder > $freeMaxOrder;
             }
 
             $activity->is_completed = in_array($activity->id, $completedIds);
+
             return $activity;
         });
 
         $completedCount = count($completedIds);
-        $nextActivity   = $activities->first(fn ($a) => !($a->locked ?? false) && !($a->is_completed ?? false));
+        $nextActivity = $activities->first(fn ($a) => ! ($a->locked ?? false) && ! ($a->is_completed ?? false));
 
         return view('child.activities', compact(
             'child', 'activities', 'hasSubscription',
@@ -123,7 +124,7 @@ class ChildActivityController extends Controller
         // Idempotent — only record once
         $progress = ChildActivityProgress::firstOrCreate([
             'child_profile_id' => $child->id,
-            'activity_id'      => $activity->id,
+            'activity_id' => $activity->id,
         ], [
             'completed_at' => now(),
         ]);
@@ -142,7 +143,7 @@ class ChildActivityController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'ok'  => true,
+                'ok' => true,
                 'new' => $wasNew,
             ]);
         }
@@ -153,7 +154,7 @@ class ChildActivityController extends Controller
     private function updateStreak(ChildProfile $child): void
     {
         $lastDate = $child->last_activity_date;
-        $today    = now()->toDateString();
+        $today = now()->toDateString();
 
         if ($lastDate === null || $lastDate < now()->subDays(2)->toDateString()) {
             // Reset streak

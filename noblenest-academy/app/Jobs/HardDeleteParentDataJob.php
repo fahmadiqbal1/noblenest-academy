@@ -21,9 +21,7 @@ class HardDeleteParentDataJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public int $userId)
-    {
-    }
+    public function __construct(public int $userId) {}
 
     public function handle(): void
     {
@@ -40,6 +38,7 @@ class HardDeleteParentDataJob implements ShouldQueue
                 targetId: $user->id,
                 meta: ['reason' => 'user_restored_before_window'],
             );
+
             return;
         }
 

@@ -7,9 +7,7 @@ use App\Models\ChildActivityProgress;
 use App\Models\ChildJourneyEnrollment;
 use App\Models\ChildProfile;
 use App\Models\ChildSkillState;
-use App\Models\ThematicJourney;
 use App\Models\ThemeActivity;
-use App\Services\EmotionalRegulationService;
 use Illuminate\Support\Collection;
 
 /**
@@ -47,16 +45,16 @@ class LearningPathService
     public function buildDailyPath(ChildProfile $child, int $limit = 6): Collection
     {
         $ageMonths = $child->age_months ?? 0;
-        $ageTier   = $this->ageTier($ageMonths);
+        $ageTier = $this->ageTier($ageMonths);
 
         // 1. Check for active thematic journey enrollment
         $journeyActivities = $this->buildThematicDailyPath($child, $ageTier);
 
         // Reserve slots for journey activities, fill the rest from general pool
-        $journeySlots  = min($journeyActivities->count(), (int) ceil($limit * 0.6));
-        $journeyPick   = $journeyActivities->take($journeySlots);
-        $journeyIds    = $journeyPick->pluck('id')->toArray();
-        $generalSlots  = $limit - $journeyPick->count();
+        $journeySlots = min($journeyActivities->count(), (int) ceil($limit * 0.6));
+        $journeyPick = $journeyActivities->take($journeySlots);
+        $journeyIds = $journeyPick->pluck('id')->toArray();
+        $generalSlots = $limit - $journeyPick->count();
 
         // 2. Activities the child has already completed
         $completedIds = ChildActivityProgress::where('child_profile_id', $child->id)
@@ -97,7 +95,7 @@ class LearningPathService
                 if ($skillState->isStruggling()) {
                     $score += 20;
                 } // Mastered (EMA >= 0.8): lower priority (challenge next)
-                elseif (!$skillState->isMastered()) {
+                elseif (! $skillState->isMastered()) {
                     // Middle ground: still need work
                     $score += 10;
                 }
@@ -167,20 +165,20 @@ class LearningPathService
             ->with('journey')
             ->first();
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             return collect();
         }
 
-        $journey     = $enrollment->journey;
+        $journey = $enrollment->journey;
         $currentWeek = $enrollment->current_week ?? 1;
-        $dayOfWeek   = (int) now()->format('N'); // 1=Mon, 7=Sun
+        $dayOfWeek = (int) now()->format('N'); // 1=Mon, 7=Sun
 
         // Get the weekly theme for the current week
         $weeklyTheme = $journey->weeklyThemes()
             ->where('week_number', $currentWeek)
             ->first();
 
-        if (!$weeklyTheme) {
+        if (! $weeklyTheme) {
             return collect();
         }
 
@@ -208,7 +206,7 @@ class LearningPathService
             ->where('activity_id', $activity->id)
             ->first();
 
-        if (!$progress || ($progress->attempts ?? 0) === 0) {
+        if (! $progress || ($progress->attempts ?? 0) === 0) {
             return 0.0; // Never attempted — needs presentation
         }
 
@@ -230,7 +228,7 @@ class LearningPathService
     public function subjectGaps(ChildProfile $child, ?int $ageMonths = null): array
     {
         $ageMonths = $ageMonths ?? $child->age_months ?? 0;
-        $tier      = $this->ageTier($ageMonths);
+        $tier = $this->ageTier($ageMonths);
 
         $subjectCounts = Activity::where('age_tier', $tier)
             ->selectRaw('subject, COUNT(*) as total')
@@ -262,7 +260,7 @@ class LearningPathService
     public function progressSummary(ChildProfile $child): array
     {
         $ageMonths = $child->age_months ?? 0;
-        $tier      = $this->ageTier($ageMonths);
+        $tier = $this->ageTier($ageMonths);
 
         $total = Activity::where('age_tier', $tier)->count();
         $completed = ChildActivityProgress::where('child_profile_id', $child->id)
@@ -294,18 +292,18 @@ class LearningPathService
             ->first();
 
         return [
-            'total'                    => $total,
-            'completed'                => $completed,
-            'pct'                      => $total > 0 ? round(($completed / $total) * 100) : 0,
-            'streak'                   => $child->streak_days ?? 0,
-            'subject_breakdown'        => $subjectBreakdown,
+            'total' => $total,
+            'completed' => $completed,
+            'pct' => $total > 0 ? round(($completed / $total) * 100) : 0,
+            'streak' => $child->streak_days ?? 0,
+            'subject_breakdown' => $subjectBreakdown,
             'cognitive_domain_breakdown' => $cognitiveDomainBreakdown,
-            'gaps'                     => $this->subjectGaps($child, $ageMonths),
-            'active_journey'           => $activeJourney ? [
-                'title'        => $activeJourney->journey->title ?? null,
-                'emoji'        => $activeJourney->journey->emoji ?? null,
+            'gaps' => $this->subjectGaps($child, $ageMonths),
+            'active_journey' => $activeJourney ? [
+                'title' => $activeJourney->journey->title ?? null,
+                'emoji' => $activeJourney->journey->emoji ?? null,
                 'current_week' => $activeJourney->current_week ?? 1,
-                'total_weeks'  => $activeJourney->journey->total_weeks ?? 0,
+                'total_weeks' => $activeJourney->journey->total_weeks ?? 0,
             ] : null,
         ];
     }
@@ -314,9 +312,9 @@ class LearningPathService
      * Get all ChildSkillState records for this child, indexed by cognitive_domain.
      * Used to make adaptive recommendations based on mastery and streaks.
      *
-     * @return \Illuminate\Support\Collection<string, ChildSkillState>
+     * @return Collection<string, ChildSkillState>
      */
-    private function getChildSkillStates(ChildProfile $child): \Illuminate\Support\Collection
+    private function getChildSkillStates(ChildProfile $child): Collection
     {
         return ChildSkillState::where('child_profile_id', $child->id)
             ->get()
@@ -329,7 +327,7 @@ class LearningPathService
             $ageMonths < 24 => 'baby',
             $ageMonths < 48 => 'toddler',
             $ageMonths < 72 => 'preschool',
-            default         => 'school',
+            default => 'school',
         };
     }
 }

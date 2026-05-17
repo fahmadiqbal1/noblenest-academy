@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -16,12 +17,12 @@ class AdminChildController extends Controller
         }
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name',     'like', '%'.$request->q.'%')
-                  ->orWhere('nickname','like', '%'.$request->q.'%');
+                $q->where('name', 'like', '%'.$request->q.'%')
+                    ->orWhere('nickname', 'like', '%'.$request->q.'%');
             });
         }
 
-        $children  = $query->latest()->paginate(30);
+        $children = $query->latest()->paginate(30);
         $languages = ChildProfile::distinct()->pluck('preferred_language')->sort()->values();
 
         return view('admin.children.index', compact('children', 'languages'));

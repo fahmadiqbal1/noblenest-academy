@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Creates child_profiles table separated from users for COPPA compliance.
      * Children do not have login credentials - only parents can access their profiles.
      */

@@ -17,8 +17,8 @@ class ChildJourneyEnrollment extends Model
 
     protected $casts = [
         'current_week' => 'integer',
-        'is_active'    => 'boolean',
-        'started_at'   => 'date',
+        'is_active' => 'boolean',
+        'started_at' => 'date',
         'completed_at' => 'date',
     ];
 

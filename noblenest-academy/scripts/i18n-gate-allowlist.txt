@@ -45,3 +45,11 @@ resources/views/partials/pwa-install-prompt.blade.php
 resources/views/quizzes/index.blade.php
 resources/views/quizzes/result.blade.php
 resources/views/quizzes/take.blade.php
+
+# Phase 3.1 followup (cont.) — Phase 5/7 MVP views added after the initial
+# extraction; English renders fine via lang/*.json fallback, key extraction queued.
+resources/views/institutional/
+resources/views/activities/players/pronunciation.blade.php
+resources/views/activities/players/python-sandbox.blade.php
+resources/views/activities/players/robotics-sim.blade.php
+resources/views/onboarding/

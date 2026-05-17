@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 class MediaGenerationService
 {
     const POLL_TIMEOUT = 300;  // 5 minutes
+
     const POLL_INTERVAL = 5;   // Check every 5 seconds
 
     public function verify(AIProviderConfig $provider, string $apiKey): array
@@ -32,7 +33,7 @@ class MediaGenerationService
 
     public function generateAudio(AIProviderConfig $provider, string $text, array $options = []): array
     {
-        if (!$provider->api_key_encrypted) {
+        if (! $provider->api_key_encrypted) {
             throw new \RuntimeException('No API key configured for this provider.');
         }
 
@@ -41,13 +42,13 @@ class MediaGenerationService
         try {
             return $this->generateAudioViaElevenLabs($apiKey, $text, $provider, $options);
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Audio generation failed: " . $e->getMessage());
+            throw new \RuntimeException('Audio generation failed: '.$e->getMessage());
         }
     }
 
     public function generateVideo(AIProviderConfig $provider, string $prompt, array $options = []): array
     {
-        if (!$provider->api_key_encrypted) {
+        if (! $provider->api_key_encrypted) {
             throw new \RuntimeException('No API key configured for this provider.');
         }
 
@@ -60,7 +61,7 @@ class MediaGenerationService
                 default => $this->generateVideoViaReplicate($apiKey, $provider->model, $prompt, $options),
             };
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Video generation failed ({$driver}): " . $e->getMessage());
+            throw new \RuntimeException("Video generation failed ({$driver}): ".$e->getMessage());
         }
     }
 
@@ -77,6 +78,7 @@ class MediaGenerationService
 
             if ($response->successful()) {
                 $tier = data_get($response->json(), 'subscription.tier', 'free');
+
                 return ['status' => 'live', 'message' => "ElevenLabs connected. Tier: {$tier}."];
             }
 
@@ -93,7 +95,7 @@ class MediaGenerationService
                 ->get('https://api.replicate.com/v1/account');
 
             if ($response->successful()) {
-                return ['status' => 'live', 'message' => 'Replicate connected. Account: ' . $response->json('username', 'verified')];
+                return ['status' => 'live', 'message' => 'Replicate connected. Account: '.$response->json('username', 'verified')];
             }
 
             return ['status' => 'failed', 'message' => $this->formatHttpError($response->status(), $response->body())];
@@ -106,9 +108,9 @@ class MediaGenerationService
     {
         try {
             $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'X-Runway-Version' => '2024-11-06',
-                ])
+                'Authorization' => 'Bearer '.$apiKey,
+                'X-Runway-Version' => '2024-11-06',
+            ])
                 ->acceptJson()->timeout(15)
                 ->get('https://api.dev.runwayml.com/v1/organizations');
 
@@ -133,10 +135,10 @@ class MediaGenerationService
 
         try {
             $response = Http::withHeaders([
-                    'xi-api-key' => $apiKey,
-                    'Accept' => 'audio/mpeg',
-                    'Content-Type' => 'application/json',
-                ])
+                'xi-api-key' => $apiKey,
+                'Accept' => 'audio/mpeg',
+                'Content-Type' => 'application/json',
+            ])
                 ->timeout(60)
                 ->post("https://api.elevenlabs.io/v1/text-to-speech/{$voiceId}", [
                     'text' => $text,
@@ -144,21 +146,21 @@ class MediaGenerationService
                     'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75],
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
             }
 
             Storage::disk('public')->makeDirectory('ai/tts');
-            $path = 'ai/tts/' . uniqid('tts_', true) . '.mp3';
+            $path = 'ai/tts/'.uniqid('tts_', true).'.mp3';
             Storage::disk('public')->put($path, $response->body());
 
             return [
                 'type' => 'audio',
                 'url' => Storage::disk('public')->url($path),
-                'content' => "Audio generated via ElevenLabs: {$path}"
+                'content' => "Audio generated via ElevenLabs: {$path}",
             ];
         } catch (\Throwable $e) {
-            throw new \RuntimeException('ElevenLabs TTS failed: ' . $e->getMessage());
+            throw new \RuntimeException('ElevenLabs TTS failed: '.$e->getMessage());
         }
     }
 
@@ -180,12 +182,12 @@ class MediaGenerationService
                     ],
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
             }
 
             $pollUrl = $response->json('urls.get');
-            if (!$pollUrl) {
+            if (! $pollUrl) {
                 throw new \RuntimeException('Replicate did not return poll URL');
             }
 
@@ -194,7 +196,7 @@ class MediaGenerationService
 
             return ['type' => 'video', 'url' => $url, 'content' => "Video generated via Replicate: {$url}"];
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Replicate video generation failed: ' . $e->getMessage());
+            throw new \RuntimeException('Replicate video generation failed: '.$e->getMessage());
         }
     }
 
@@ -214,7 +216,7 @@ class MediaGenerationService
                 }
 
                 if (in_array($status, ['failed', 'canceled'], true)) {
-                    throw new \RuntimeException("Replicate prediction {$status}: " . ($poll->json('error', 'Unknown error')));
+                    throw new \RuntimeException("Replicate prediction {$status}: ".($poll->json('error', 'Unknown error')));
                 }
             } catch (\Throwable $e) {
                 if (time() >= $deadline) {
@@ -223,16 +225,16 @@ class MediaGenerationService
             }
         }
 
-        throw new \RuntimeException("Replicate prediction timed out after " . self::POLL_TIMEOUT . "s");
+        throw new \RuntimeException('Replicate prediction timed out after '.self::POLL_TIMEOUT.'s');
     }
 
     private function generateVideoViaRunway(string $apiKey, string $prompt, array $options): array
     {
         try {
             $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'X-Runway-Version' => '2024-11-06',
-                ])
+                'Authorization' => 'Bearer '.$apiKey,
+                'X-Runway-Version' => '2024-11-06',
+            ])
                 ->acceptJson()->timeout(30)
                 ->post('https://api.dev.runwayml.com/v1/text_to_video', [
                     'model' => $options['model'] ?? 'gen4_turbo',
@@ -241,12 +243,12 @@ class MediaGenerationService
                     'ratio' => $options['ratio'] ?? '1280:720',
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new \RuntimeException($this->formatHttpError($response->status(), $response->body()));
             }
 
             $taskId = $response->json('id');
-            if (!$taskId) {
+            if (! $taskId) {
                 throw new \RuntimeException('RunwayML did not return task ID');
             }
 
@@ -255,7 +257,7 @@ class MediaGenerationService
 
             return ['type' => 'video', 'url' => $url, 'content' => "Video generated via RunwayML: {$url}"];
         } catch (\Throwable $e) {
-            throw new \RuntimeException('RunwayML video generation failed: ' . $e->getMessage());
+            throw new \RuntimeException('RunwayML video generation failed: '.$e->getMessage());
         }
     }
 
@@ -268,9 +270,9 @@ class MediaGenerationService
 
             try {
                 $poll = Http::withHeaders([
-                        'Authorization' => 'Bearer ' . $apiKey,
-                        'X-Runway-Version' => '2024-11-06',
-                    ])
+                    'Authorization' => 'Bearer '.$apiKey,
+                    'X-Runway-Version' => '2024-11-06',
+                ])
                     ->acceptJson()->timeout(20)
                     ->get("https://api.dev.runwayml.com/v1/tasks/{$taskId}");
 
@@ -281,7 +283,7 @@ class MediaGenerationService
                 }
 
                 if (in_array($status, ['FAILED', 'CANCELED'], true)) {
-                    throw new \RuntimeException("RunwayML task {$status}: " . ($poll->json('failure', 'Unknown error')));
+                    throw new \RuntimeException("RunwayML task {$status}: ".($poll->json('failure', 'Unknown error')));
                 }
             } catch (\Throwable $e) {
                 if (time() >= $deadline) {
@@ -290,7 +292,7 @@ class MediaGenerationService
             }
         }
 
-        throw new \RuntimeException("RunwayML task timed out after " . self::POLL_TIMEOUT . "s");
+        throw new \RuntimeException('RunwayML task timed out after '.self::POLL_TIMEOUT.'s');
     }
 
     // ============================================================================

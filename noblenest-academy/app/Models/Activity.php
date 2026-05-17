@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ActivityRendererResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -51,20 +52,20 @@ class Activity extends Model
     ];
 
     protected $casts = [
-        'age_min'               => 'integer',
-        'age_max'               => 'integer',
-        'duration_minutes'      => 'integer',
-        'is_rtl'                => 'boolean',
-        'is_free'               => 'boolean',
-        'like_count'            => 'integer',
-        'is_muslim_only'        => 'boolean',
-        'materials_needed'      => 'array',
-        'learning_objectives'   => 'array',
-        'skills_improved'       => 'array',
-        'learning_modalities'   => 'array',
+        'age_min' => 'integer',
+        'age_max' => 'integer',
+        'duration_minutes' => 'integer',
+        'is_rtl' => 'boolean',
+        'is_free' => 'boolean',
+        'like_count' => 'integer',
+        'is_muslim_only' => 'boolean',
+        'materials_needed' => 'array',
+        'learning_objectives' => 'array',
+        'skills_improved' => 'array',
+        'learning_modalities' => 'array',
         // Phase 2: Enhanced parental context fields
-        'safety_warnings'       => 'array',
-        'adaptations'           => 'array',
+        'safety_warnings' => 'array',
+        'adaptations' => 'array',
         'developmental_domains' => 'array',
     ];
 
@@ -74,7 +75,7 @@ class Activity extends Model
     public function modules()
     {
         return $this->belongsToMany(Module::class, 'activity_module')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     /**
@@ -83,8 +84,8 @@ class Activity extends Model
     public function lessons()
     {
         return $this->belongsToMany(Lesson::class, 'activity_lesson')
-                    ->withPivot('order')
-                    ->orderByPivot('order');
+            ->withPivot('order')
+            ->orderByPivot('order');
     }
 
     /**
@@ -101,7 +102,7 @@ class Activity extends Model
     public function scopeForAge($query, int $ageMonths)
     {
         return $query->where('age_min', '<=', $ageMonths)
-                     ->where('age_max', '>=', $ageMonths);
+            ->where('age_max', '>=', $ageMonths);
     }
 
     /**
@@ -176,6 +177,7 @@ class Activity extends Model
         } else {
             $row = $this->translations()->where('locale', $locale)->where('field', $field)->first();
         }
+
         return $row ? $row->value : ($this->{$field} ?? null);
     }
 
@@ -186,8 +188,9 @@ class Activity extends Model
     public function renderer(): string
     {
         if (! isset($this->cachedRenderer)) {
-            $this->cachedRenderer = app(\App\Services\ActivityRendererResolver::class)->resolve($this);
+            $this->cachedRenderer = app(ActivityRendererResolver::class)->resolve($this);
         }
+
         return $this->cachedRenderer;
     }
 

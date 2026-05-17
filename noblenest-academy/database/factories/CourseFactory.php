@@ -13,14 +13,15 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         $title = $this->faker->sentence(3);
+
         return [
-            'title'       => $title,
-            'slug'        => Str::slug($title),
+            'title' => $title,
+            'slug' => Str::slug($title),
             'description' => $this->faker->paragraph(),
-            'age_min'     => $this->faker->numberBetween(0, 5),
-            'age_max'     => $this->faker->numberBetween(6, 12),
-            'color'       => $this->faker->hexColor(),
-            'emoji'       => '📚',
+            'age_min' => $this->faker->numberBetween(0, 5),
+            'age_max' => $this->faker->numberBetween(6, 12),
+            'color' => $this->faker->hexColor(),
+            'emoji' => '📚',
         ];
     }
 }

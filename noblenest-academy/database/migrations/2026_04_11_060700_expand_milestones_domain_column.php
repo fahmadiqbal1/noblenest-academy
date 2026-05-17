@@ -23,6 +23,7 @@ return new class extends Migration
             Schema::table('milestones', function (Blueprint $table) {
                 $table->string('domain', 50)->default('cognitive')->change();
             });
+
             return;
         }
         DB::statement("ALTER TABLE milestones MODIFY COLUMN domain VARCHAR(50) DEFAULT 'cognitive'");

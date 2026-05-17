@@ -17,9 +17,9 @@ class SchoolAdminInvite extends Model
     ];
 
     protected $casts = [
-        'seats'        => 'integer',
-        'expires_at'   => 'datetime',
-        'accepted_at'  => 'datetime',
+        'seats' => 'integer',
+        'expires_at' => 'datetime',
+        'accepted_at' => 'datetime',
     ];
 
     public function isExpired(): bool

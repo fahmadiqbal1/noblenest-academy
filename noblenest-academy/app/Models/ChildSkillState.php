@@ -37,16 +37,16 @@ class ChildSkillState extends Model
     ];
 
     protected $casts = [
-        'ema_score'             => 'decimal:3',
-        'ema_confidence'        => 'decimal:3',
-        'streak_success'        => 'integer',
-        'streak_struggle'       => 'integer',
-        'max_streak_struggle'   => 'integer',
-        'total_attempts'        => 'integer',
-        'successful_attempts'   => 'integer',
-        'last_success'          => 'datetime',
-        'last_struggle'         => 'datetime',
-        'last_updated'          => 'datetime',
+        'ema_score' => 'decimal:3',
+        'ema_confidence' => 'decimal:3',
+        'streak_success' => 'integer',
+        'streak_struggle' => 'integer',
+        'max_streak_struggle' => 'integer',
+        'total_attempts' => 'integer',
+        'successful_attempts' => 'integer',
+        'last_success' => 'datetime',
+        'last_struggle' => 'datetime',
+        'last_updated' => 'datetime',
     ];
 
     // =========== Relationships ===========
@@ -61,6 +61,7 @@ class ChildSkillState extends Model
     public function scopeForChild($query, ChildProfile|int $child)
     {
         $childId = is_int($child) ? $child : $child->id;
+
         return $query->where('child_profile_id', $childId);
     }
 
@@ -101,11 +102,11 @@ class ChildSkillState extends Model
         $newConfidence = 1 - (0.9 ** $attempts);
 
         $this->update([
-            'ema_score'      => max(0, min(1, $newEMA)), // Clamp to [0, 1]
+            'ema_score' => max(0, min(1, $newEMA)), // Clamp to [0, 1]
             'ema_confidence' => max(0, min(1, $newConfidence)),
             'total_attempts' => $attempts,
             'successful_attempts' => $this->successful_attempts + ($newScore >= 0.8 ? 1 : 0),
-            'last_updated'   => now(),
+            'last_updated' => now(),
         ]);
     }
 
@@ -115,10 +116,10 @@ class ChildSkillState extends Model
     public function recordSuccess(): void
     {
         $this->update([
-            'streak_success'  => $this->streak_success + 1,
+            'streak_success' => $this->streak_success + 1,
             'streak_struggle' => 0,
-            'last_success'    => now(),
-            'last_updated'    => now(),
+            'last_success' => now(),
+            'last_updated' => now(),
         ]);
     }
 
@@ -131,11 +132,11 @@ class ChildSkillState extends Model
         $maxSoFar = max($this->max_streak_struggle, $newStreak);
 
         $this->update([
-            'streak_success'     => 0,
-            'streak_struggle'    => $newStreak,
+            'streak_success' => 0,
+            'streak_struggle' => $newStreak,
             'max_streak_struggle' => $maxSoFar,
-            'last_struggle'      => now(),
-            'last_updated'       => now(),
+            'last_struggle' => now(),
+            'last_updated' => now(),
         ]);
     }
 
@@ -171,6 +172,7 @@ class ChildSkillState extends Model
         if ($this->total_attempts === 0) {
             return 0.0;
         }
+
         return $this->successful_attempts / $this->total_attempts;
     }
 }

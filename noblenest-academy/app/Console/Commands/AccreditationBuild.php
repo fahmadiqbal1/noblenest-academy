@@ -42,7 +42,7 @@ class AccreditationBuild extends Command
         $csvPath = "{$sourceDir}/learning-outcomes.generated.csv";
         $this->writeLearningOutcomesCsv($csvPath);
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($out, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             $this->error("Cannot open {$out} for writing.");
 
@@ -62,19 +62,19 @@ class AccreditationBuild extends Command
         }
 
         $manifestJson = json_encode([
-            'product'   => 'Noble Nest Academy',
-            'version'   => 'v1',
-            'built_at'  => date('c'),
+            'product' => 'Noble Nest Academy',
+            'version' => 'v1',
+            'built_at' => date('c'),
             'submission_for' => ['Cognia', 'BAC'],
-            'files'     => $manifest,
-            'notes'     => 'PDF conversion deferred to Phase 10.1; reviewers can read markdown directly or convert via pandoc.',
+            'files' => $manifest,
+            'notes' => 'PDF conversion deferred to Phase 10.1; reviewers can read markdown directly or convert via pandoc.',
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         $zip->addFromString('MANIFEST.json', $manifestJson);
 
         $zip->close();
 
         $size = is_file($out) ? filesize($out) : 0;
-        $this->info("Built accreditation zip: {$out} ({$size} bytes, " . count($manifest) . ' docs)');
+        $this->info("Built accreditation zip: {$out} ({$size} bytes, ".count($manifest).' docs)');
 
         return self::SUCCESS;
     }
@@ -84,7 +84,7 @@ class AccreditationBuild extends Command
         $rows = [['age_tier', 'cognitive_domain', 'outcome', 'mastery_criterion']];
         // Static MVP seed — replace with DB read once outcome rubrics are normalized.
         $tiers = [
-            'baby (0-23m)'   => ['sensory', 'language', 'motor'],
+            'baby (0-23m)' => ['sensory', 'language', 'motor'],
             'toddler (2-3y)' => ['language', 'numeracy', 'motor'],
             'preschool (4-5y)' => ['literacy', 'numeracy', 'arts', 'social'],
             'school (6-10y)' => ['literacy', 'math', 'science', 'stem_coding', 'arts'],

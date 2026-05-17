@@ -106,7 +106,7 @@ class PolicyTest extends TestCase
         $owner = $this->parent();
         $child = ChildProfile::factory()->create(['parent_id' => $owner->id]);
         $record = ConsentReceipt::factory()->create([
-            'parent_user_id'   => $owner->id,
+            'parent_user_id' => $owner->id,
             'child_profile_id' => $child->id,
         ]);
 

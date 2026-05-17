@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -29,12 +31,13 @@ class AnalyticsController extends Controller
                 compact('coverage', 'topLiked', 'totalSkills', 'totalActivities'),
                 function ($m) {
                     $m->to(config('mail.admin_address', 'admin@noblenest.com'))
-                      ->subject('Monthly Curriculum Analytics Report');
+                        ->subject('Monthly Curriculum Analytics Report');
                 }
             );
+
             return back()->with('status', 'Report email queued successfully.');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Failed to send report: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send report: '.$e->getMessage());
         }
     }
 
@@ -43,12 +46,12 @@ class AnalyticsController extends Controller
         $topLiked = Activity::withCount('likes')->orderByDesc('likes_count')->take(10)->get();
 
         return response()->json($topLiked->map(fn ($a) => [
-            'id'       => $a->id,
-            'title'    => $a->title,
-            'subject'  => $a->subject,
-            'age_min'  => $a->age_min,
-            'age_max'  => $a->age_max,
-            'likes'    => $a->likes_count,
+            'id' => $a->id,
+            'title' => $a->title,
+            'subject' => $a->subject,
+            'age_min' => $a->age_min,
+            'age_max' => $a->age_max,
+            'likes' => $a->likes_count,
         ]));
     }
 
@@ -68,19 +71,19 @@ class AnalyticsController extends Controller
         $coverage = [];
         foreach ($subjects as $subject) {
             $activities = Activity::where('subject', $subject)->get();
-            $ages       = $activities->flatMap(fn ($a) => [$a->age_min, $a->age_max]);
+            $ages = $activities->flatMap(fn ($a) => [$a->age_min, $a->age_max]);
             $coverage[] = [
-                'skill'    => $subject,
-                'count'    => $activities->count(),
-                'age_min'  => $ages->min(),
-                'age_max'  => $ages->max(),
+                'skill' => $subject,
+                'count' => $activities->count(),
+                'age_min' => $ages->min(),
+                'age_max' => $ages->max(),
             ];
         }
 
         $topLiked = collect(); // no likes relation yet; placeholder
 
-        $totalSkills      = $subjects->count();
-        $totalActivities  = Activity::count();
+        $totalSkills = $subjects->count();
+        $totalActivities = Activity::count();
 
         $monthlyCompletions = $this->queryMonthlyCompletions();
 
@@ -94,7 +97,7 @@ class AnalyticsController extends Controller
      * Any other driver (e.g. SQLite in tests) — timestamps are grouped in PHP,
      * avoiding driver-specific raw SQL.
      */
-    private function queryMonthlyCompletions(): \Illuminate\Support\Collection
+    private function queryMonthlyCompletions(): Collection
     {
         if (DB::getDriverName() === 'mysql') {
             return DB::table('activity_user_progress')
@@ -109,7 +112,7 @@ class AnalyticsController extends Controller
         return DB::table('activity_user_progress')
             ->whereNotNull('completed_at')
             ->pluck('completed_at')
-            ->map(fn ($ts) => \Illuminate\Support\Carbon::parse($ts)->format('Y-m'))
+            ->map(fn ($ts) => Carbon::parse($ts)->format('Y-m'))
             ->countBy()
             ->sortKeys()
             ->map(fn ($count, $month) => (object) ['month' => $month, 'completions' => $count])

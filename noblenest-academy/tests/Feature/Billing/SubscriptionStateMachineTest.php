@@ -5,6 +5,7 @@ namespace Tests\Feature\Billing;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\User;
+use Database\Seeders\PricingTierSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +16,7 @@ class SubscriptionStateMachineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\PricingTierSeeder::class);
+        $this->seed(PricingTierSeeder::class);
     }
 
     /** @test */
@@ -24,8 +25,8 @@ class SubscriptionStateMachineTest extends TestCase
         $user = User::factory()->create();
         $sub = Subscription::factory()->create([
             'user_id' => $user->id,
-            'status'  => 'active',
-            'plan'    => 'individual',
+            'status' => 'active',
+            'plan' => 'individual',
         ]);
 
         $this->assertTrue($sub->isActive());
@@ -48,7 +49,7 @@ class SubscriptionStateMachineTest extends TestCase
         $user = User::factory()->create();
         $sub = Subscription::factory()->create([
             'user_id' => $user->id,
-            'status'  => 'active',
+            'status' => 'active',
         ]);
 
         $sub->pause();
@@ -68,8 +69,8 @@ class SubscriptionStateMachineTest extends TestCase
         $user = User::factory()->create();
         $sub = Subscription::factory()->create([
             'user_id' => $user->id,
-            'status'  => 'active',
-            'plan'    => 'individual',
+            'status' => 'active',
+            'plan' => 'individual',
             'ends_at' => now()->addDays(15),
         ]);
 

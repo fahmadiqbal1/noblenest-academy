@@ -43,13 +43,13 @@ class AuditLogEntry extends Model
     ): self {
         return self::create([
             'actor_user_id' => $actorUserId,
-            'action'        => $action,
-            'target_type'   => $targetType,
-            'target_id'     => $targetId,
-            'ip'            => $ip ? substr($ip, 0, 45) : null,
-            'user_agent'    => $userAgent ? substr($userAgent, 0, 512) : null,
-            'meta'          => $meta,
-            'created_at'    => now(),
+            'action' => $action,
+            'target_type' => $targetType,
+            'target_id' => $targetId,
+            'ip' => $ip ? substr($ip, 0, 45) : null,
+            'user_agent' => $userAgent ? substr($userAgent, 0, 512) : null,
+            'meta' => $meta,
+            'created_at' => now(),
         ]);
     }
 }

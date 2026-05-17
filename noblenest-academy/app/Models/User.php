@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
     /**
@@ -65,9 +67,9 @@ class User extends Authenticatable
      * Get child profiles managed by this parent user.
      * This is the COPPA-compliant way to manage children.
      */
-    public function childProfiles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function childProfiles(): HasMany
     {
-        return $this->hasMany(\App\Models\ChildProfile::class, 'parent_id');
+        return $this->hasMany(ChildProfile::class, 'parent_id');
     }
 
     // ------------------------------------------------------------------
@@ -77,9 +79,9 @@ class User extends Authenticatable
     /**
      * @deprecated Use childProfiles() instead for COPPA compliance
      */
-    public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function children(): HasMany
     {
-        return $this->hasMany(\App\Models\User::class, 'parent_id');
+        return $this->hasMany(User::class, 'parent_id');
     }
 
     // ------------------------------------------------------------------
@@ -99,9 +101,9 @@ class User extends Authenticatable
     /**
      * Get subscriptions for this user.
      */
-    public function subscriptions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function subscriptions(): HasMany
     {
-        return $this->hasMany(\App\Models\Subscription::class);
+        return $this->hasMany(Subscription::class);
     }
 
     /**
@@ -114,5 +116,4 @@ class User extends Authenticatable
             ->where('ends_at', '>', now())
             ->exists();
     }
-
 }

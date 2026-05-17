@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Module;
-use App\Models\Course;
 use App\Models\Activity;
+use App\Models\Course;
+use App\Models\Module;
 use Illuminate\Http\Request;
 
 class ModuleController extends Controller
@@ -12,6 +13,7 @@ class ModuleController extends Controller
     public function index()
     {
         $modules = Module::with('course')->orderBy('course_id')->orderBy('order')->paginate(20);
+
         return view('admin.modules.index', compact('modules'));
     }
 
@@ -19,6 +21,7 @@ class ModuleController extends Controller
     {
         $courses = Course::all();
         $activities = Activity::all();
+
         return view('admin.modules.create', compact('courses', 'activities'));
     }
 
@@ -33,9 +36,10 @@ class ModuleController extends Controller
             'activities.*' => 'exists:activities,id',
         ]);
         $module = Module::create($data);
-        if (!empty($data['activities'])) {
+        if (! empty($data['activities'])) {
             $module->activities()->sync($data['activities']);
         }
+
         return redirect()->route('admin.modules.index')->with('status', 'Module created.');
     }
 
@@ -44,6 +48,7 @@ class ModuleController extends Controller
         $courses = Course::all();
         $activities = Activity::all();
         $selected = $module->activities->pluck('id')->toArray();
+
         return view('admin.modules.edit', compact('module', 'courses', 'activities', 'selected'));
     }
 
@@ -59,6 +64,7 @@ class ModuleController extends Controller
         ]);
         $module->update($data);
         $module->activities()->sync($data['activities'] ?? []);
+
         return redirect()->route('admin.modules.index')->with('status', 'Module updated.');
     }
 
@@ -66,7 +72,7 @@ class ModuleController extends Controller
     {
         $module->activities()->detach();
         $module->delete();
+
         return redirect()->route('admin.modules.index')->with('status', 'Module deleted.');
     }
 }
-

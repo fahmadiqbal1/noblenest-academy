@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,10 +22,10 @@ class PaymentWebhookSecurityTest extends TestCase
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
-                    'id'             => 'cs_test_123',
+                    'id' => 'cs_test_123',
                     'customer_email' => 'test@example.com',
-                    'amount_total'   => 10000,
-                    'currency'       => 'usd',
+                    'amount_total' => 10000,
+                    'currency' => 'usd',
                 ],
             ],
         ]);
@@ -46,10 +45,10 @@ class PaymentWebhookSecurityTest extends TestCase
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
-                    'id'             => 'cs_test_123',
+                    'id' => 'cs_test_123',
                     'customer_email' => 'test@example.com',
-                    'amount_total'   => 10000,
-                    'currency'       => 'usd',
+                    'amount_total' => 10000,
+                    'currency' => 'usd',
                 ],
             ],
         ]);
@@ -68,7 +67,7 @@ class PaymentWebhookSecurityTest extends TestCase
     public function test_malformed_payload_rejected(): void
     {
         $response = $this->post('/webhook/stripe', [], [
-            'Content-Type'     => 'application/json',
+            'Content-Type' => 'application/json',
             'Stripe-Signature' => 't=1234567890,v1=invalid',
         ]);
 
@@ -84,9 +83,9 @@ class PaymentWebhookSecurityTest extends TestCase
     {
         // Create a signature with a very old timestamp
         $timestamp = time() - 86400; // 24 hours ago
-        
+
         $response = $this->call('POST', '/webhook/stripe', [], [], [], [
-            'HTTP_CONTENT_TYPE'     => 'application/json',
+            'HTTP_CONTENT_TYPE' => 'application/json',
             'HTTP_STRIPE_SIGNATURE' => "t={$timestamp},v1=fake_signature",
         ], '{}');
 

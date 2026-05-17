@@ -24,11 +24,10 @@ use Illuminate\Support\Facades\Log;
 class AnthropicTranslator
 {
     private const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-    private const GROQ_MODEL    = 'llama-3.3-70b-versatile';
 
-    public function __construct(private readonly ?string $apiKey = null)
-    {
-    }
+    private const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+    public function __construct(private readonly ?string $apiKey = null) {}
 
     /**
      * Translate a single string. Returns the source text unchanged when:
@@ -55,10 +54,10 @@ class AnthropicTranslator
                 ->acceptJson()
                 ->timeout(60)
                 ->post(self::GROQ_ENDPOINT, [
-                    'model'       => self::GROQ_MODEL,
+                    'model' => self::GROQ_MODEL,
                     'temperature' => 0.1,
-                    'max_tokens'  => 2048,
-                    'messages'    => [
+                    'max_tokens' => 2048,
+                    'messages' => [
                         [
                             'role' => 'system',
                             'content' => "You are a professional translator. Translate the user's text from {$sourceName} to {$targetName}. Preserve any :placeholder tokens, HTML, and markdown verbatim. Reply with ONLY the translated text — no commentary, no quotes, no code fences.",
@@ -72,17 +71,20 @@ class AnthropicTranslator
                     'status' => $response->status(),
                     'target' => $targetLang,
                 ]);
+
                 return $text;
             }
 
             $out = (string) data_get($response->json(), 'choices.0.message.content', '');
             $out = trim($out);
+
             return $out !== '' ? $out : $text;
         } catch (\Throwable $e) {
             Log::warning('AnthropicTranslator failed', [
                 'target' => $targetLang,
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
+
             return $text;
         }
     }

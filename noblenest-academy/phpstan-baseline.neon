@@ -443,9 +443,3 @@ parameters:
 			identifier: larastan.noEnvCallsOutsideOfConfig
 			count: 1
 			path: app/Services/SecureCredentialsManager.php
-
-		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$providerSlug \(string\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/Services/SecureCredentialsManager.php

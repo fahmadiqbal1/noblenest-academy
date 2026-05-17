@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AIJob extends Model
 {
@@ -26,13 +27,13 @@ class AIJob extends Model
     ];
 
     protected $casts = [
-        'payload'      => 'array',
-        'result'       => 'array',
-        'started_at'   => 'datetime',
+        'payload' => 'array',
+        'result' => 'array',
+        'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

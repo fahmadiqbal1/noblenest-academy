@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\ConsentReceiptFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ConsentReceipt extends Model
 {
-    /** @use HasFactory<\Database\Factories\ConsentReceiptFactory> */
+    /** @use HasFactory<ConsentReceiptFactory> */
     use HasFactory;
 
     protected $fillable = [

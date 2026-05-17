@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PublicMetadataTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function home_page_exposes_route_specific_metadata(): void
     {
         $response = $this->get('/');
@@ -19,10 +20,10 @@ class PublicMetadataTest extends TestCase
         $response->assertOk();
         $response->assertSee('<title>NobleNest Global Academy | Family-First Learning Platform</title>', false);
         $response->assertSee('content="Explore NobleNest Global Academy: a family-first learning platform with adaptive courses, onboarding guidance, and AI support for parents, students, teachers, and admins."', false);
-        $response->assertSee('content="' . asset('og-home.png') . '"', false);
+        $response->assertSee('content="'.asset('og-home.png').'"', false);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function auth_pages_expose_route_specific_metadata(): void
     {
         $loginResponse = $this->get('/login');
@@ -30,14 +31,14 @@ class PublicMetadataTest extends TestCase
 
         $loginResponse->assertOk();
         $loginResponse->assertSee('<title>Login | NobleNest Global Academy</title>', false);
-        $loginResponse->assertSee('content="' . asset('og-login.png') . '"', false);
+        $loginResponse->assertSee('content="'.asset('og-login.png').'"', false);
 
         $registerResponse->assertOk();
         $registerResponse->assertSee('<title>Create Your Account | NobleNest Global Academy</title>', false);
-        $registerResponse->assertSee('content="' . asset('og-register.png') . '"', false);
+        $registerResponse->assertSee('content="'.asset('og-register.png').'"', false);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function generated_social_preview_assets_exist(): void
     {
         $this->assertFileExists(public_path('og-home.png'));

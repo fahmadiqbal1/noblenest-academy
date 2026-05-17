@@ -49,30 +49,35 @@ class ContentGenerateCommand extends Command
         }
         if (! is_file($path)) {
             $this->error("CSV not found: {$path}");
+
             return self::FAILURE;
         }
 
         $rows = $this->readCsv($path);
         $headers = array_keys($rows[0] ?? []);
-        $this->info(sprintf("Loaded %d rows from %s", count($rows), $path));
-        $this->line('Headers: ' . implode(', ', $headers));
+        $this->info(sprintf('Loaded %d rows from %s', count($rows), $path));
+        $this->line('Headers: '.implode(', ', $headers));
 
         $required = ['title', 'description', 'age_min', 'age_max', 'subject', 'activity_type', 'duration_minutes'];
         foreach ($required as $col) {
             if (! in_array($col, $headers, true)) {
                 $this->error("CSV missing required column: {$col}");
+
                 return self::FAILURE;
             }
         }
 
-        $created = 0; $updated = 0; $skipped = 0; $errors = 0;
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        $errors = 0;
 
         foreach ($rows as $i => $row) {
             try {
                 $this->processRow($row, $created, $updated, $skipped);
             } catch (\Throwable $e) {
                 $errors++;
-                $this->warn(sprintf("Row %d (%s): %s", $i + 2, $row['title'] ?? '(no title)', $e->getMessage()));
+                $this->warn(sprintf('Row %d (%s): %s', $i + 2, $row['title'] ?? '(no title)', $e->getMessage()));
             }
         }
 
@@ -100,7 +105,9 @@ class ContentGenerateCommand extends Command
         }
         $headers = array_map(fn ($h) => trim($h, "\"'\xEF\xBB\xBF \t"), $headers);
         while (($cells = fgetcsv($fh, escape: '\\')) !== false) {
-            if (count($cells) === 1 && trim((string) $cells[0]) === '') continue;
+            if (count($cells) === 1 && trim((string) $cells[0]) === '') {
+                continue;
+            }
             $row = [];
             foreach ($headers as $i => $h) {
                 $row[$h] = $cells[$i] ?? null;
@@ -108,29 +115,30 @@ class ContentGenerateCommand extends Command
             $rows[] = $row;
         }
         fclose($fh);
+
         return $rows;
     }
 
     private function processRow(array $row, int &$created, int &$updated, int &$skipped): void
     {
         $payload = [
-            'title'                   => $this->str($row, 'title'),
-            'description'             => $this->str($row, 'description'),
-            'age_min'                 => (int) $row['age_min'],
-            'age_max'                 => (int) $row['age_max'],
-            'subject'                 => $this->str($row, 'subject'),
-            'language'                => $this->str($row, 'language') ?: 'en',
-            'activity_type'           => $this->str($row, 'activity_type'),
-            'emoji'                   => $this->str($row, 'emoji') ?: '🌟',
-            'duration_minutes'        => (int) ($row['duration_minutes'] ?? 10),
-            'is_free'                 => filter_var($row['is_free'] ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true,
-            'benefit_explanation'     => $this->str($row, 'benefit_explanation'),
+            'title' => $this->str($row, 'title'),
+            'description' => $this->str($row, 'description'),
+            'age_min' => (int) $row['age_min'],
+            'age_max' => (int) $row['age_max'],
+            'subject' => $this->str($row, 'subject'),
+            'language' => $this->str($row, 'language') ?: 'en',
+            'activity_type' => $this->str($row, 'activity_type'),
+            'emoji' => $this->str($row, 'emoji') ?: '🌟',
+            'duration_minutes' => (int) ($row['duration_minutes'] ?? 10),
+            'is_free' => filter_var($row['is_free'] ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true,
+            'benefit_explanation' => $this->str($row, 'benefit_explanation'),
             'instructions_for_parent' => $this->str($row, 'instructions_for_parent'),
-            'thumbnail_url'           => $this->str($row, 'thumbnail_url') ?: null,
-            'learning_objectives'     => $this->jsonArray($row, 'learning_objectives'),
-            'materials_needed'        => $this->jsonArray($row, 'materials_needed'),
-            'safety_warnings'         => $this->jsonArray($row, 'safety_warnings'),
-            'skills_improved'         => $this->jsonArray($row, 'skills_improved'),
+            'thumbnail_url' => $this->str($row, 'thumbnail_url') ?: null,
+            'learning_objectives' => $this->jsonArray($row, 'learning_objectives'),
+            'materials_needed' => $this->jsonArray($row, 'materials_needed'),
+            'safety_warnings' => $this->jsonArray($row, 'safety_warnings'),
+            'skills_improved' => $this->jsonArray($row, 'skills_improved'),
         ];
 
         if ($payload['title'] === '' || $payload['subject'] === '' || $payload['activity_type'] === '') {
@@ -139,6 +147,7 @@ class ContentGenerateCommand extends Command
 
         if ($this->option('dry-run')) {
             $created++;
+
             return;
         }
 
@@ -151,6 +160,7 @@ class ContentGenerateCommand extends Command
 
             if ($existing && ! $this->option('force')) {
                 $skipped++;
+
                 return;
             }
 
@@ -164,7 +174,9 @@ class ContentGenerateCommand extends Command
             for ($n = 1; $n <= 8; $n++) {
                 $title = $this->str($row, "step_{$n}_title");
                 $instr = $this->str($row, "step_{$n}_instruction");
-                if ($title === '' && $instr === '') continue;
+                if ($title === '' && $instr === '') {
+                    continue;
+                }
                 ActivityStep::updateOrCreate(
                     ['activity_id' => $activity->id, 'step_number' => $n],
                     ['title' => $title ?: "Step {$n}", 'instruction' => $instr]
@@ -173,11 +185,15 @@ class ContentGenerateCommand extends Command
 
             // Per-locale translations: column names like `ar_title`, `fr_description`.
             foreach (self::SUPPORTED_LOCALES as $locale) {
-                if ($locale === 'en') continue;
+                if ($locale === 'en') {
+                    continue;
+                }
                 foreach (['title', 'description', 'instructions_for_parent', 'benefit_explanation'] as $field) {
                     $key = "{$locale}_{$field}";
                     $val = $this->str($row, $key);
-                    if ($val === '') continue;
+                    if ($val === '') {
+                        continue;
+                    }
                     ActivityTranslation::updateOrCreate(
                         ['activity_id' => $activity->id, 'locale' => $locale, 'field' => $field],
                         ['value' => $val]
@@ -195,12 +211,16 @@ class ContentGenerateCommand extends Command
     private function jsonArray(array $row, string $key): array
     {
         $raw = $this->str($row, $key);
-        if ($raw === '') return [];
+        if ($raw === '') {
+            return [];
+        }
         // Accept JSON arrays or pipe-separated strings ("a|b|c").
         if (str_starts_with($raw, '[')) {
             $decoded = json_decode($raw, true);
+
             return is_array($decoded) ? $decoded : [];
         }
+
         return array_values(array_filter(array_map('trim', explode('|', $raw))));
     }
 }

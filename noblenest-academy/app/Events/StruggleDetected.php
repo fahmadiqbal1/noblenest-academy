@@ -19,7 +19,9 @@ class StruggleDetected
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public ChildProfile $child;
+
     public string $cognitiveDomain;
+
     public int $streakLength;
 
     public function __construct(
@@ -27,8 +29,8 @@ class StruggleDetected
         string $cognitiveDomain,
         int $streakLength
     ) {
-        $this->child           = $child;
+        $this->child = $child;
         $this->cognitiveDomain = $cognitiveDomain;
-        $this->streakLength    = $streakLength;
+        $this->streakLength = $streakLength;
     }
 }

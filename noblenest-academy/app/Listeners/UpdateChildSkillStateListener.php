@@ -3,8 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\ActivityCompleted;
-use App\Models\ChildSkillState;
 use App\Jobs\RecomputeLearningPathJob;
+use App\Models\ChildSkillState;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -32,11 +32,12 @@ class UpdateChildSkillStateListener implements ShouldQueue
     public function handle(ActivityCompleted $event): void
     {
         // Skip if activity lacks cognitive domain info
-        if (!$event->activity->cognitive_domain) {
+        if (! $event->activity->cognitive_domain) {
             Log::warning('ActivityCompleted: activity lacks cognitive_domain, skipping skill state update', [
                 'activity_id' => $event->activity->id,
-                'child_id'    => $event->child->id,
+                'child_id' => $event->child->id,
             ]);
+
             return;
         }
 
@@ -52,12 +53,12 @@ class UpdateChildSkillStateListener implements ShouldQueue
         // Find or create ChildSkillState for this cognitive/developmental domain combo
         $skillState = ChildSkillState::firstOrCreate(
             [
-                'child_profile_id'    => $event->child->id,
-                'cognitive_domain'    => $event->activity->cognitive_domain,
+                'child_profile_id' => $event->child->id,
+                'cognitive_domain' => $event->activity->cognitive_domain,
                 'developmental_domain' => $devDomain,
             ],
             [
-                'ema_score'    => 0.5,  // Default: unknown
+                'ema_score' => 0.5,  // Default: unknown
                 'ema_confidence' => 0.0, // No confidence yet
             ]
         );
@@ -73,13 +74,13 @@ class UpdateChildSkillStateListener implements ShouldQueue
         }
 
         Log::info('Updated ChildSkillState', [
-            'child_id'               => $event->child->id,
-            'cognitive_domain'       => $event->activity->cognitive_domain,
-            'developmental_domain'   => $devDomain,
-            'mastery_score'          => $event->masteryScore,
-            'ema_score'              => $skillState->ema_score,
-            'streak_success'         => $skillState->streak_success,
-            'streak_struggle'        => $skillState->streak_struggle,
+            'child_id' => $event->child->id,
+            'cognitive_domain' => $event->activity->cognitive_domain,
+            'developmental_domain' => $devDomain,
+            'mastery_score' => $event->masteryScore,
+            'ema_score' => $skillState->ema_score,
+            'streak_success' => $skillState->streak_success,
+            'streak_struggle' => $skillState->streak_struggle,
         ]);
 
         // Queue job to recalculate learning path based on updated skill state

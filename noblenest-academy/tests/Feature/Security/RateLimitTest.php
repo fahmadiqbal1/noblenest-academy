@@ -30,7 +30,7 @@ class RateLimitTest extends TestCase
     public function test_sixth_login_attempt_within_a_minute_is_rate_limited(): void
     {
         User::factory()->create([
-            'email'    => 'victim@example.com',
+            'email' => 'victim@example.com',
             'password' => Hash::make('correct-password'),
         ]);
 
@@ -52,11 +52,11 @@ class RateLimitTest extends TestCase
         $last = null;
         for ($i = 1; $i <= 4; $i++) {
             $last = $this->post('/register', [
-                'name'                  => "User {$i}",
-                'email'                 => "user{$i}@example.com",
-                'password'              => 'password123',
+                'name' => "User {$i}",
+                'email' => "user{$i}@example.com",
+                'password' => 'password123',
                 'password_confirmation' => 'password123',
-                'role'                  => 'Parent',
+                'role' => 'Parent',
             ]);
             if ($last->status() === 429) {
                 break;

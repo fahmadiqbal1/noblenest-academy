@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Parent;
 use App\Http\Controllers\Controller;
 use App\Models\ChildProfile;
 use App\Models\Milestone;
-use Illuminate\Support\Facades\Auth;
 
 class MilestoneController extends Controller
 {
@@ -23,13 +22,14 @@ class MilestoneController extends Controller
                     ->where('milestone_id', $milestone->id)
                     ->wherePivot('is_completed', true)
                     ->exists();
+
                 return $milestone;
             });
 
         return view('parent.milestones', compact('child', 'milestones'));
     }
 
-    public function toggle(ChildProfile $child, \App\Models\Milestone $milestone)
+    public function toggle(ChildProfile $child, Milestone $milestone)
     {
         $this->authorize('view', $child);
 
@@ -39,8 +39,8 @@ class MilestoneController extends Controller
 
         if ($existing) {
             $child->milestones()->updateExistingPivot($milestone->id, [
-                'is_completed' => !$existing->pivot->is_completed,
-                'completed_at' => !$existing->pivot->is_completed ? now() : null,
+                'is_completed' => ! $existing->pivot->is_completed,
+                'completed_at' => ! $existing->pivot->is_completed ? now() : null,
             ]);
         } else {
             $child->milestones()->attach($milestone->id, [

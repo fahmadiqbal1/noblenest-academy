@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Activity;
+use App\Models\AIJob;
 use App\Models\AIProviderConfig;
 use App\Models\ChildProfile;
 use Illuminate\Support\Facades\Cache;
@@ -10,13 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * AI Assistant Service for Noble Nest Academy
- * 
+ *
  * Provides child-safe, age-appropriate AI-powered assistance.
  * Uses the AIProviderGateway for actual LLM communication.
  */
 class AIAssistantService
 {
     protected AIProviderGateway $gateway;
+
     protected ?AIProviderConfig $provider = null;
 
     /**
@@ -76,9 +79,9 @@ PROMPT;
 
     /**
      * Send a chat message and get AI response.
-     * 
-     * @param string $userMessage The user's message
-     * @param array $context Additional context (child_age, language, etc.)
+     *
+     * @param  string  $userMessage  The user's message
+     * @param  array  $context  Additional context (child_age, language, etc.)
      * @return array Response with 'reply', 'provider', 'suggestions'
      */
     public function chat(string $userMessage, array $context = []): array
@@ -86,14 +89,14 @@ PROMPT;
         $provider = $this->getProvider();
 
         // Fallback to mock if no provider configured
-        if (!$provider) {
+        if (! $provider) {
             return $this->mockResponse($userMessage, $context);
         }
 
         try {
             // Build context-aware prompt
             $prompt = $this->buildPrompt($userMessage, $context);
-            
+
             $response = $this->gateway->chat($provider, $prompt, [
                 'system_prompt' => self::SYSTEM_PROMPT,
                 'temperature' => 0.7,
@@ -128,27 +131,27 @@ PROMPT;
     {
         $contextParts = [];
 
-        if (!empty($context['child_age'])) {
+        if (! empty($context['child_age'])) {
             $contextParts[] = "Child's age: {$context['child_age']} months";
         }
 
-        if (!empty($context['language'])) {
+        if (! empty($context['language'])) {
             $contextParts[] = "Preferred language: {$context['language']}";
         }
 
-        if (!empty($context['interests'])) {
-            $contextParts[] = "Child's interests: " . implode(', ', (array) $context['interests']);
+        if (! empty($context['interests'])) {
+            $contextParts[] = "Child's interests: ".implode(', ', (array) $context['interests']);
         }
 
-        if (!empty($context['recent_activities'])) {
-            $contextParts[] = "Recent activities completed: " . implode(', ', (array) $context['recent_activities']);
+        if (! empty($context['recent_activities'])) {
+            $contextParts[] = 'Recent activities completed: '.implode(', ', (array) $context['recent_activities']);
         }
 
-        $contextString = !empty($contextParts) 
-            ? "[Context: " . implode('; ', $contextParts) . "]\n\n"
+        $contextString = ! empty($contextParts)
+            ? '[Context: '.implode('; ', $contextParts)."]\n\n"
             : '';
 
-        return $contextString . $userMessage;
+        return $contextString.$userMessage;
     }
 
     /**
@@ -167,6 +170,7 @@ PROMPT;
         foreach ($blockedPatterns as $pattern) {
             if (preg_match($pattern, $content)) {
                 Log::warning('AI response filtered for inappropriate content');
+
                 return "I'm sorry, but I can only help with educational questions and activities. Let me suggest some fun learning activities instead!";
             }
         }
@@ -180,7 +184,7 @@ PROMPT;
     protected function generateSuggestions(string $userMessage, array $context): array
     {
         $age = $context['child_age'] ?? null;
-        
+
         $suggestions = [
             'Show me a weekly learning plan',
             'Recommend activities for {skill} skills',
@@ -224,12 +228,12 @@ PROMPT;
     protected function mockResponse(string $userMessage, array $context): array
     {
         $age = $context['child_age'] ?? null;
-        $ageInfo = $age !== null ? "Based on your child's age ({$age} months), " : "";
+        $ageInfo = $age !== null ? "Based on your child's age ({$age} months), " : '';
 
         $response = "Hello! I'm your Noble Nest Academy assistant. {$ageInfo}I'd love to help you find the perfect learning activities. ";
-        
-        if (!empty($userMessage)) {
-            $response .= "You asked about: \"" . mb_substr($userMessage, 0, 100) . "\". ";
+
+        if (! empty($userMessage)) {
+            $response .= 'You asked about: "'.mb_substr($userMessage, 0, 100).'". ';
         }
 
         $response .= "To give you personalized recommendations, please tell me your child's age and interests. I can suggest activities in literacy, numeracy, STEM, arts, social-emotional learning, and physical development!";
@@ -262,7 +266,7 @@ PROMPT;
      * Called by ProcessContentBatchJob when an AI provider is available.
      */
     public function generateBatch(
-        \App\Models\AIJob $job,
+        AIJob $job,
         string $subject,
         string $ageTier,
         int $count,
@@ -271,14 +275,14 @@ PROMPT;
     ): void {
         // Age-tier specific safety requirements for prompt
         $safetyGuidance = match ($ageTier) {
-            'baby'     => 'CRITICAL: Every activity MUST include safety_warnings about choking hazards and parent_involvement MUST be "collaborative".',
-            'toddler'  => 'Include safety_warnings if the activity involves water, scissors, or objects smaller than a golf ball.',
-            'preschool'=> 'Note safety_warnings for any sharp items, hot surfaces, or situations requiring close adult supervision.',
-            'school'   => 'Include safety_warnings if the activity involves tools, cooking, or outdoor hazards.',
-            default    => '',
+            'baby' => 'CRITICAL: Every activity MUST include safety_warnings about choking hazards and parent_involvement MUST be "collaborative".',
+            'toddler' => 'Include safety_warnings if the activity involves water, scissors, or objects smaller than a golf ball.',
+            'preschool' => 'Note safety_warnings for any sharp items, hot surfaces, or situations requiring close adult supervision.',
+            'school' => 'Include safety_warnings if the activity involves tools, cooking, or outdoor hazards.',
+            default => '',
         };
 
-        $cognitiveOptions  = implode(', ', [
+        $cognitiveOptions = implode(', ', [
             'attention', 'working_memory', 'inhibitory_control', 'cognitive_flexibility',
             'pattern_recognition', 'spatial_reasoning', 'sequential_thinking', 'metacognition', 'subitizing',
         ]);
@@ -311,52 +315,52 @@ PROMPT;
 
             $result = $this->chat($prompt, [
                 'language' => $language,
-                'subject'  => $subject,
+                'subject' => $subject,
             ]);
 
             // Robust JSON parsing — strip markdown fences if AI wraps in them
-            $raw    = trim($result['reply'] ?? '');
-            $raw    = preg_replace('/^```(?:json)?\s*/i', '', $raw);
-            $raw    = preg_replace('/\s*```$/', '', $raw);
+            $raw = trim($result['reply'] ?? '');
+            $raw = preg_replace('/^```(?:json)?\s*/i', '', $raw);
+            $raw = preg_replace('/\s*```$/', '', $raw);
             $parsed = json_decode($raw, true);
 
-            if (!is_array($parsed)) {
+            if (! is_array($parsed)) {
                 // Log and create a placeholder — do not crash the job
-                \Illuminate\Support\Facades\Log::warning('AIAssistantService: JSON parse failed in generateBatch', [
-                    'job_id'  => $job->id,
+                Log::warning('AIAssistantService: JSON parse failed in generateBatch', [
+                    'job_id' => $job->id,
                     'subject' => $subject,
-                    'i'       => $i,
-                    'raw'     => substr($raw, 0, 500),
+                    'i' => $i,
+                    'raw' => substr($raw, 0, 500),
                 ]);
                 $parsed = [];
             }
 
             try {
-                \App\Models\Activity::create([
-                    'title'               => $parsed['title']               ?? "{$subject} Activity {$i} ({$ageTier})",
-                    'description'         => $parsed['description']         ?? null,
-                    'instructions'        => $parsed['instructions']        ?? null,
-                    'duration_minutes'    => (int) ($parsed['duration_minutes'] ?? 15),
-                    'mess_level'          => in_array($parsed['mess_level'] ?? '', ['low', 'medium', 'high'])
+                Activity::create([
+                    'title' => $parsed['title'] ?? "{$subject} Activity {$i} ({$ageTier})",
+                    'description' => $parsed['description'] ?? null,
+                    'instructions' => $parsed['instructions'] ?? null,
+                    'duration_minutes' => (int) ($parsed['duration_minutes'] ?? 15),
+                    'mess_level' => in_array($parsed['mess_level'] ?? '', ['low', 'medium', 'high'])
                                                 ? $parsed['mess_level'] : 'low',
-                    'safety_warnings'     => $parsed['safety_warnings']     ?? [],
-                    'adaptations'         => $parsed['adaptations']         ?? null,
-                    'cognitive_domain'    => $parsed['cognitive_domain']    ?? null,
+                    'safety_warnings' => $parsed['safety_warnings'] ?? [],
+                    'adaptations' => $parsed['adaptations'] ?? null,
+                    'cognitive_domain' => $parsed['cognitive_domain'] ?? null,
                     'developmental_domains' => $parsed['developmental_domains'] ?? [],
-                    'materials_cost'      => in_array($parsed['materials_cost'] ?? '', ['free', 'low', 'medium'])
+                    'materials_cost' => in_array($parsed['materials_cost'] ?? '', ['free', 'low', 'medium'])
                                                 ? $parsed['materials_cost'] : 'free',
-                    'parent_involvement'  => in_array($parsed['parent_involvement'] ?? '', ['independent', 'guided', 'collaborative'])
+                    'parent_involvement' => in_array($parsed['parent_involvement'] ?? '', ['independent', 'guided', 'collaborative'])
                                                 ? $parsed['parent_involvement'] : 'guided',
-                    'subject'             => $subject,
-                    'language'            => $language,
-                    'is_free'             => $isFree,
-                    'published'           => false,
-                    'source_job_id'       => $job->id,
+                    'subject' => $subject,
+                    'language' => $language,
+                    'is_free' => $isFree,
+                    'published' => false,
+                    'source_job_id' => $job->id,
                 ]);
             } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('AIAssistantService: Activity::create failed in generateBatch', [
+                Log::error('AIAssistantService: Activity::create failed in generateBatch', [
                     'job_id' => $job->id,
-                    'error'  => $e->getMessage(),
+                    'error' => $e->getMessage(),
                     'parsed' => $parsed,
                 ]);
             }
@@ -368,7 +372,8 @@ PROMPT;
     // ==================================================================
 
     private const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-    private const GROQ_MODEL    = 'llama-3.3-70b-versatile';
+
+    private const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
     /**
      * Suggest 3 next-best activities for a child. Cached per child for 1h.
@@ -395,14 +400,14 @@ PROMPT;
 
             $rawPayload = [
                 'child' => [
-                    'name'                => $child->name,
-                    'nickname'            => $child->nickname,
-                    'age_months'          => $child->age_months,
-                    'age_tier'            => $child->age_tier,
-                    'preferred_language'  => $child->preferred_language,
+                    'name' => $child->name,
+                    'nickname' => $child->nickname,
+                    'age_months' => $child->age_months,
+                    'age_tier' => $child->age_tier,
+                    'preferred_language' => $child->preferred_language,
                     'parental_consent_at' => $child->parental_consent_at,
                 ],
-                'skill_state'     => $skill, // placeholder — wire ChildSkillState in a later phase
+                'skill_state' => $skill, // placeholder — wire ChildSkillState in a later phase
                 'recent_progress' => $recent,
             ];
 
@@ -413,14 +418,14 @@ PROMPT;
                     ->timeout(15)
                     ->acceptJson()
                     ->post(self::GROQ_ENDPOINT, [
-                        'model'    => self::GROQ_MODEL,
+                        'model' => self::GROQ_MODEL,
                         'messages' => [
                             [
                                 'role' => 'system',
-                                'content' => "Suggest 3 next-best activities for a child given their skill state. "
-                                    . "Do NOT include the child's name or any PII in your response. "
-                                    . 'Respond with ONLY a JSON array of objects with keys: title (string), why (string), activity_id (integer or null). '
-                                    . 'Return no prose, no markdown fences.',
+                                'content' => 'Suggest 3 next-best activities for a child given their skill state. '
+                                    ."Do NOT include the child's name or any PII in your response. "
+                                    .'Respond with ONLY a JSON array of objects with keys: title (string), why (string), activity_id (integer or null). '
+                                    .'Return no prose, no markdown fences.',
                             ],
                             [
                                 'role' => 'user',
@@ -428,12 +433,12 @@ PROMPT;
                             ],
                         ],
                         'temperature' => 0.4,
-                        'max_tokens'  => 400,
+                        'max_tokens' => 400,
                     ]);
 
                 $content = (string) data_get($resp->json(), 'choices.0.message.content', '');
                 $content = trim(preg_replace('/^```(?:json)?|```$/m', '', $content) ?? '');
-                $parsed  = json_decode($content, true);
+                $parsed = json_decode($content, true);
 
                 if (! is_array($parsed)) {
                     return $this->stubSuggestions();
@@ -446,17 +451,19 @@ PROMPT;
                     }
                     $out[] = [
                         'title' => (string) ($row['title'] ?? 'Suggested activity'),
-                        'why'   => (string) ($row['why']   ?? ''),
+                        'why' => (string) ($row['why'] ?? ''),
                         'activity_id' => isset($row['activity_id']) && is_numeric($row['activity_id'])
                             ? (int) $row['activity_id'] : null,
                     ];
                 }
+
                 return $out ?: $this->stubSuggestions();
             } catch (\Throwable $e) {
                 Log::warning('AIAssistantService::suggestForChild failed', [
                     'child_id' => $child->id,
-                    'error'    => $e->getMessage(),
+                    'error' => $e->getMessage(),
                 ]);
+
                 return $this->stubSuggestions();
             }
         });
@@ -465,7 +472,7 @@ PROMPT;
     /**
      * Strip PII keys (recursively) from the payload before sending to Groq.
      *
-     * @param array<mixed> $payload
+     * @param  array<mixed>  $payload
      * @return array<mixed>
      */
     public static function scrubPII(array $payload): array
@@ -489,6 +496,7 @@ PROMPT;
                 }
                 $out[$k] = is_array($v) ? $walk($v) : $v;
             }
+
             return $out;
         };
 

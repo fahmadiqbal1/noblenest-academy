@@ -36,9 +36,7 @@ class ProduceLocalizedVideoJob implements ShouldQueue
     /** @var array<int,int> */
     public array $backoff = [30, 120, 300];
 
-    public function __construct(public readonly int $activityId)
-    {
-    }
+    public function __construct(public readonly int $activityId) {}
 
     public function handle(
         ContentSafetyService $safety,
@@ -61,7 +59,7 @@ class ProduceLocalizedVideoJob implements ShouldQueue
 
         if ($safety->containsUnsafeContent($script, 'en')) {
             Log::warning('ProduceLocalizedVideoJob: content blocked by safety filter', [
-                'id'      => $activity->id,
+                'id' => $activity->id,
                 'reasons' => $safety->reasons(),
             ]);
 
@@ -86,7 +84,7 @@ class ProduceLocalizedVideoJob implements ShouldQueue
                 $result = $avatar->generate($localizedScript, $locale);
             } catch (\Throwable $e) {
                 Log::warning('ProduceLocalizedVideoJob: avatar provider failed', [
-                    'id'    => $activity->id,
+                    'id' => $activity->id,
                     'locale' => $locale,
                     'error' => $e->getMessage(),
                 ]);
@@ -101,12 +99,12 @@ class ProduceLocalizedVideoJob implements ShouldQueue
             $media = ActivityMedia::updateOrCreate(
                 [
                     'activity_id' => $activity->id,
-                    'modality'    => "video:{$locale}",
+                    'modality' => "video:{$locale}",
                 ],
                 [
                     'media_type' => 'video',
-                    'url'        => $result->videoUrl,
-                    'label'      => "Video ({$locale})",
+                    'url' => $result->videoUrl,
+                    'label' => "Video ({$locale})",
                     'is_primary' => $locale === 'en',
                 ],
             );

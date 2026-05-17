@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Schema;
  * Existing `status` column is an enum that doesn't include 'paused'.
  * We widen to string and add a paused_at timestamp so we can resume cleanly.
  */
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // Widen the legacy enum to a plain string so we can store the Phase 7
@@ -23,7 +24,7 @@ return new class extends Migration {
         if ($driver === 'mysql' || $driver === 'mariadb') {
             try {
                 DB::statement("ALTER TABLE subscriptions MODIFY status VARCHAR(32) NOT NULL DEFAULT 'active'");
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Older drivers may use slightly different syntax — ignore.
             }
         } elseif ($driver === 'sqlite') {

@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
 
 /**
  * Secure Credentials Manager — Encrypted storage + rotation for API keys
@@ -30,6 +30,7 @@ use Carbon\Carbon;
 class SecureCredentialsManager
 {
     const ROTATION_WARNING_DAYS = 30;
+
     const CREDENTIAL_TYPES = [
         // AI Providers
         'openai' => ['api_key', 'org_id'],
@@ -57,8 +58,9 @@ class SecureCredentialsManager
         string $plainValue,
         ?string $rotatedBy = null
     ): bool {
-        if (!$this->isValidProvider($providerSlug)) {
+        if (! $this->isValidProvider($providerSlug)) {
             Log::warning('Invalid provider for credential storage', ['provider' => $providerSlug]);
+
             return false;
         }
 
@@ -99,6 +101,7 @@ class SecureCredentialsManager
             return false;
         } catch (\Throwable $e) {
             Log::error('Failed to store credential', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -119,6 +122,7 @@ class SecureCredentialsManager
 
                 if ($row) {
                     $this->logAccess($providerSlug, $credentialKey);
+
                     return Crypt::decryptString($row->encrypted_value);
                 }
             }
@@ -127,6 +131,7 @@ class SecureCredentialsManager
             return $this->getFromEnv($providerSlug, $credentialKey);
         } catch (\Throwable $e) {
             Log::error('Failed to retrieve credential', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -136,7 +141,7 @@ class SecureCredentialsManager
      */
     public function needsRotation(string $providerSlug, string $credentialKey): bool
     {
-        if (!$this->tableExists()) {
+        if (! $this->tableExists()) {
             return false;  // Can't check if table doesn't exist
         }
 
@@ -147,7 +152,7 @@ class SecureCredentialsManager
                 ->where('is_active', true)
                 ->first();
 
-            if (!$row) {
+            if (! $row) {
                 return false;
             }
 
@@ -163,9 +168,9 @@ class SecureCredentialsManager
     /**
      * List all credentials (for audit purposes, returns only metadata, not actual values)
      */
-    public function listCredentials(string $providerSlug = null): array
+    public function listCredentials(?string $providerSlug = null): array
     {
-        if (!$this->tableExists()) {
+        if (! $this->tableExists()) {
             return [];
         }
 
@@ -183,12 +188,13 @@ class SecureCredentialsManager
                 'rotated_by',
                 \DB::raw('DATEDIFF(NOW(), rotated_at) as days_since_rotation')
             )
-            ->orderBy('rotated_at', 'desc')
-            ->get()
-            ->map(fn($row) => (array) $row)
-            ->toArray();
+                ->orderBy('rotated_at', 'desc')
+                ->get()
+                ->map(fn ($row) => (array) $row)
+                ->toArray();
         } catch (\Throwable $e) {
             Log::error('Failed to list credentials', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
@@ -198,7 +204,7 @@ class SecureCredentialsManager
      */
     public function deactivateCredential(string $providerSlug, string $credentialKey): bool
     {
-        if (!$this->tableExists()) {
+        if (! $this->tableExists()) {
             return false;
         }
 
@@ -209,9 +215,11 @@ class SecureCredentialsManager
                 ->update(['is_active' => false, 'updated_at' => now()]);
 
             Log::info('Credential deactivated', ['provider' => $providerSlug, 'key' => $credentialKey]);
+
             return true;
         } catch (\Throwable $e) {
             Log::error('Failed to deactivate credential', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -239,6 +247,7 @@ class SecureCredentialsManager
         // Map provider + key to .env variable name
         // e.g., openai + api_key → OPENAI_API_KEY
         $envKey = Str::upper("{$provider}_{$key}");
+
         return env($envKey);
     }
 

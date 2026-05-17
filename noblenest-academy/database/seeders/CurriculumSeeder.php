@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Activity;
 use App\Models\Course;
 use App\Models\Module;
+use Illuminate\Database\Seeder;
 
 /**
  * Generates ~2,200 activities (≈20 per module × 12 modules × 11 courses)
@@ -731,6 +731,7 @@ class CurriculumSeeder extends Seeder
                 return $types;
             }
         }
+
         return ['quiz', 'story', 'matching', 'drawing'];
     }
 
@@ -741,7 +742,7 @@ class CurriculumSeeder extends Seeder
         foreach ($courses as $course) {
             foreach ($course->modules as $module) {
                 $titles = $this->templates[$module->title] ?? null;
-                if (!$titles) {
+                if (! $titles) {
                     continue;
                 }
 
@@ -751,18 +752,18 @@ class CurriculumSeeder extends Seeder
                 foreach ($titles as $order => $title) {
                     $type = $types[$order % count($types)];
                     $activity = Activity::create([
-                        'title'               => $title,
-                        'description'         => "A fun {$type} activity for ages {$course->age_min}–{$course->age_max}: {$title}.",
-                        'age_min'             => $course->age_min,
-                        'age_max'             => $course->age_max,
-                        'subject'             => $subject,
-                        'activity_type'       => $type,
-                        'duration_minutes'    => rand(5, 25),
-                        'difficulty'          => ['easy', 'medium', 'medium', 'hard'][rand(0, 3)],
-                        'language'            => 'en',
-                        'is_free'             => $order < 7,
-                        'emoji'               => $course->emoji,
-                        'materials_needed'    => json_encode(['Paper', 'Colours']),
+                        'title' => $title,
+                        'description' => "A fun {$type} activity for ages {$course->age_min}–{$course->age_max}: {$title}.",
+                        'age_min' => $course->age_min,
+                        'age_max' => $course->age_max,
+                        'subject' => $subject,
+                        'activity_type' => $type,
+                        'duration_minutes' => rand(5, 25),
+                        'difficulty' => ['easy', 'medium', 'medium', 'hard'][rand(0, 3)],
+                        'language' => 'en',
+                        'is_free' => $order < 7,
+                        'emoji' => $course->emoji,
+                        'materials_needed' => json_encode(['Paper', 'Colours']),
                         'learning_objectives' => json_encode(["Develop {$subject} skills", "Practice {$type} activities"]),
                     ]);
 

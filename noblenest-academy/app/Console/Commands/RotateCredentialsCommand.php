@@ -15,6 +15,7 @@ use Illuminate\Console\Command;
 class RotateCredentialsCommand extends Command
 {
     protected $signature = 'credentials:rotate {provider} {key} {value}';
+
     protected $description = 'Rotate an API credential to a new value';
 
     public function handle(SecureCredentialsManager $manager): int
@@ -26,14 +27,16 @@ class RotateCredentialsCommand extends Command
         $this->info("Rotating credential: {$provider}/{$key}");
 
         if ($manager->storeCredential($provider, $key, $value, auth()->user()?->email ?? 'CLI')) {
-            $this->info("✓ Credential rotated successfully");
+            $this->info('✓ Credential rotated successfully');
             $this->line("  Provider: {$provider}");
             $this->line("  Key: {$key}");
-            $this->line("  Rotated at: " . now()->toDateTimeString());
+            $this->line('  Rotated at: '.now()->toDateTimeString());
+
             return self::SUCCESS;
         }
 
-        $this->error("✗ Failed to rotate credential");
+        $this->error('✗ Failed to rotate credential');
+
         return self::FAILURE;
     }
 }

@@ -34,8 +34,8 @@ class SecurityHeaders
         $response->headers->set(
             'Permissions-Policy',
             'camera=(), microphone=(self), geolocation=(), '
-            . 'payment=(self "https://js.stripe.com" "https://www.paypal.com"), '
-            . 'interest-cohort=()'
+            .'payment=(self "https://js.stripe.com" "https://www.paypal.com"), '
+            .'interest-cohort=()'
         );
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         // credentialless lets us load Pyodide / cross-origin CDN scripts
@@ -54,10 +54,10 @@ class SecurityHeaders
         $csp = implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' 'strict-dynamic' "
-                . 'https://cdn.jsdelivr.net https://js.stripe.com https://www.paypal.com',
+                .'https://cdn.jsdelivr.net https://js.stripe.com https://www.paypal.com',
             "connect-src 'self' https://api.groq.com https://api.heygen.com "
-                . 'https://api.synthesia.io https://api.openai.com '
-                . 'https://api.stripe.com https://api-m.paypal.com',
+                .'https://api.synthesia.io https://api.openai.com '
+                .'https://api.stripe.com https://api-m.paypal.com',
             "img-src 'self' data: https:",
             "style-src 'self' 'unsafe-inline'",
             "font-src 'self' data:",

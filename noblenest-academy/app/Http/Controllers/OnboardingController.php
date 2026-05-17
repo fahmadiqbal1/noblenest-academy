@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\ChildProfile;
 use App\Models\ConsentReceipt;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +23,7 @@ use Illuminate\Support\Facades\Hash;
 class OnboardingController extends Controller
 {
     private const SUPPORTED = ['en', 'ar', 'fr', 'ur', 'ru', 'zh', 'es', 'ko'];
+
     private const CONSENT_DOC_VERSION = '2026-05';
 
     // ------------------------------------------------------------------
@@ -58,10 +61,10 @@ class OnboardingController extends Controller
     public function storeStep1(Request $request)
     {
         $data = $request->validate([
-            'preferred_language' => 'required|in:' . implode(',', self::SUPPORTED),
+            'preferred_language' => 'required|in:'.implode(',', self::SUPPORTED),
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $user->update(['preferred_language' => $data['preferred_language']]);
         session(['lang' => $data['preferred_language']]);
@@ -80,16 +83,16 @@ class OnboardingController extends Controller
     public function storeStep2(Request $request)
     {
         $data = $request->validate([
-            'name'         => 'required|string|max:120',
+            'name' => 'required|string|max:120',
             'country_code' => 'nullable|string|size:2',
-            'parent_pin'   => ['required', 'regex:/^\d{4}$/'],
+            'parent_pin' => ['required', 'regex:/^\d{4}$/'],
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $user->update([
-            'name'            => $data['name'],
-            'country_code'    => strtoupper((string) ($data['country_code'] ?? '')) ?: null,
+            'name' => $data['name'],
+            'country_code' => strtoupper((string) ($data['country_code'] ?? '')) ?: null,
             'parent_pin_hash' => Hash::make($data['parent_pin']),
         ]);
 
@@ -116,9 +119,9 @@ class OnboardingController extends Controller
         // their first child in step 4.
         session([
             'onboarding.consent_signed_at' => now()->toIso8601String(),
-            'onboarding.consent_ip'        => substr((string) $request->ip(), 0, 45),
-            'onboarding.consent_ua'        => substr((string) $request->userAgent(), 0, 512),
-            'onboarding.consent_version'   => self::CONSENT_DOC_VERSION,
+            'onboarding.consent_ip' => substr((string) $request->ip(), 0, 45),
+            'onboarding.consent_ua' => substr((string) $request->userAgent(), 0, 512),
+            'onboarding.consent_version' => self::CONSENT_DOC_VERSION,
         ]);
 
         return redirect()->route('onboarding.step4');
@@ -135,40 +138,40 @@ class OnboardingController extends Controller
     public function storeStep4(Request $request)
     {
         $data = $request->validate([
-            'child_name'    => 'required|string|max:100',
+            'child_name' => 'required|string|max:100',
             'date_of_birth' => 'required|date|before:today',
-            'gender'        => 'nullable|in:male,female,other',
+            'gender' => 'nullable|in:male,female,other',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
-        $dob       = Carbon::parse($data['date_of_birth']);
+        $dob = Carbon::parse($data['date_of_birth']);
         $ageMonths = (int) $dob->diffInMonths(now());
-        $ageTier   = $this->ageTier($ageMonths);
+        $ageTier = $this->ageTier($ageMonths);
 
         $child = ChildProfile::create([
-            'parent_id'                   => $user->id,
-            'name'                        => $data['child_name'],
-            'date_of_birth'               => $data['date_of_birth'],
-            'gender'                      => $data['gender'] ?? null,
-            'age_tier'                    => $ageTier,
-            'preferred_language'          => $user->preferred_language ?? 'en',
-            'parental_consent_at'         => now(),
-            'parental_consent_ip'         => substr((string) $request->ip(), 0, 45),
+            'parent_id' => $user->id,
+            'name' => $data['child_name'],
+            'date_of_birth' => $data['date_of_birth'],
+            'gender' => $data['gender'] ?? null,
+            'age_tier' => $ageTier,
+            'preferred_language' => $user->preferred_language ?? 'en',
+            'parental_consent_at' => now(),
+            'parental_consent_ip' => substr((string) $request->ip(), 0, 45),
             'parental_consent_user_agent' => substr((string) $request->userAgent(), 0, 255),
         ]);
 
         ConsentReceipt::create([
-            'parent_user_id'   => $user->id,
+            'parent_user_id' => $user->id,
             'child_profile_id' => $child->id,
             'document_version' => session('onboarding.consent_version', self::CONSENT_DOC_VERSION),
-            'ip'               => session('onboarding.consent_ip', substr((string) $request->ip(), 0, 45)),
-            'user_agent'       => session('onboarding.consent_ua', substr((string) $request->userAgent(), 0, 512)),
-            'signed_at'        => session('onboarding.consent_signed_at')
+            'ip' => session('onboarding.consent_ip', substr((string) $request->ip(), 0, 45)),
+            'user_agent' => session('onboarding.consent_ua', substr((string) $request->userAgent(), 0, 512)),
+            'signed_at' => session('onboarding.consent_signed_at')
                                     ? Carbon::parse(session('onboarding.consent_signed_at'))
                                     : now(),
-            'withdrawn_at'     => null,
+            'withdrawn_at' => null,
         ]);
 
         session()->forget([
@@ -192,15 +195,15 @@ class OnboardingController extends Controller
 
         $tier = $child->age_tier ?? $this->ageTier((int) ($child->age_months ?? 0));
 
-        $samples = \App\Models\Activity::query()
+        $samples = Activity::query()
             ->where('published', true)
             ->limit(3)
             ->get(['id', 'title', 'description']);
 
         return view('onboarding.step5', [
-            'step'    => 5,
-            'child'   => $child,
-            'tier'    => $tier,
+            'step' => 5,
+            'child' => $child,
+            'tier' => $tier,
             'samples' => $samples,
         ]);
     }
@@ -211,11 +214,11 @@ class OnboardingController extends Controller
             abort(403);
         }
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $user->update(['is_onboarded' => true]);
 
-        $first = \App\Models\Activity::where('published', true)->first();
+        $first = Activity::where('published', true)->first();
         if ($first) {
             return redirect()->route('activities.show', $first)
                 ->with('status', __('onboarding.welcome_message'));
@@ -246,7 +249,7 @@ class OnboardingController extends Controller
             $ageMonths < 24 => 'baby',
             $ageMonths < 48 => 'toddler',
             $ageMonths < 72 => 'preschool',
-            default         => 'school',
+            default => 'school',
         };
     }
 
@@ -279,6 +282,7 @@ class OnboardingController extends Controller
                 return $base;
             }
         }
+
         return null;
     }
 }

@@ -14,8 +14,7 @@ final class VideoGenerationResult
         public readonly ?string $videoUrl,
         public readonly VideoGenerationStatus $status,
         public readonly ?string $error = null,
-    ) {
-    }
+    ) {}
 
     public static function completed(string $jobId, string $videoUrl): self
     {

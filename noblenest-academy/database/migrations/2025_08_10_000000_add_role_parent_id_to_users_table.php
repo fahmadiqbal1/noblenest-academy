@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'role')) {
+            if (! Schema::hasColumn('users', 'role')) {
                 $table->string('role', 32)->default('Parent')->after('password');
             }
-            if (!Schema::hasColumn('users', 'parent_id')) {
+            if (! Schema::hasColumn('users', 'parent_id')) {
                 $table->foreignId('parent_id')
                     ->nullable()
                     ->after('remember_token')

@@ -23,9 +23,9 @@ class Badge extends Model
     ];
 
     protected $casts = [
-        'is_active'      => 'boolean',
+        'is_active' => 'boolean',
         'required_value' => 'integer',
-        'criteria'       => 'array',
+        'criteria' => 'array',
     ];
 
     public function childProfiles(): BelongsToMany

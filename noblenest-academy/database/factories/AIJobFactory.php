@@ -18,17 +18,17 @@ class AIJobFactory extends Factory
     public function definition(): array
     {
         return [
-            'type'              => $this->faker->randomElement(static::$types),
-            'status'            => 'queued',
-            'provider'          => 'mock',
-            'locale'            => $this->faker->randomElement(['en', 'ar', 'fr']),
-            'user_id'           => User::factory(),
-            'payload'           => ['prompt' => $this->faker->sentence()],
-            'result'            => null,
+            'type' => $this->faker->randomElement(static::$types),
+            'status' => 'queued',
+            'provider' => 'mock',
+            'locale' => $this->faker->randomElement(['en', 'ar', 'fr']),
+            'user_id' => User::factory(),
+            'payload' => ['prompt' => $this->faker->sentence()],
+            'result' => null,
             'moderation_status' => 'pending',
-            'error_message'     => null,
-            'started_at'        => null,
-            'completed_at'      => null,
+            'error_message' => null,
+            'started_at' => null,
+            'completed_at' => null,
         ];
     }
 
@@ -45,9 +45,9 @@ class AIJobFactory extends Factory
     public function completed(): static
     {
         return $this->state(fn () => [
-            'status'       => 'completed',
-            'result'       => ['content' => 'Generated content'],
-            'started_at'   => now()->subMinutes(2),
+            'status' => 'completed',
+            'result' => ['content' => 'Generated content'],
+            'started_at' => now()->subMinutes(2),
             'completed_at' => now(),
         ]);
     }
@@ -55,20 +55,20 @@ class AIJobFactory extends Factory
     public function failed(): static
     {
         return $this->state(fn () => [
-            'status'        => 'failed',
+            'status' => 'failed',
             'error_message' => 'Provider returned 500',
-            'started_at'    => now()->subMinutes(1),
-            'completed_at'  => now(),
+            'started_at' => now()->subMinutes(1),
+            'completed_at' => now(),
         ]);
     }
 
     public function pendingModeration(): static
     {
         return $this->state(fn () => [
-            'status'            => 'completed',
+            'status' => 'completed',
             'moderation_status' => 'pending',
-            'result'            => ['content' => 'Awaiting review'],
-            'completed_at'      => now(),
+            'result' => ['content' => 'Awaiting review'],
+            'completed_at' => now(),
         ]);
     }
 }

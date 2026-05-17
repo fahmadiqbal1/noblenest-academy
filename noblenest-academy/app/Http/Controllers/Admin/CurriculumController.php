@@ -1,11 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Activity;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class CurriculumController extends Controller
 {
@@ -21,6 +21,7 @@ class CurriculumController extends Controller
         $allActivities = Activity::orderBy('age_min')->get();
         $activities = $query->orderBy('subject')->get();
         $subjects = $activities->groupBy('subject');
+
         return view('admin.activities.curriculum', [
             'subjects' => $subjects,
             'allActivities' => $allActivities,
@@ -36,6 +37,7 @@ class CurriculumController extends Controller
         $activity = Activity::findOrFail($request->activity_id);
         $activity->subject = $request->subject;
         $activity->save();
+
         return redirect()->back()->with('status', 'Activity assigned to subject!');
     }
 
@@ -50,6 +52,7 @@ class CurriculumController extends Controller
             $activity->subject = null;
             $activity->save();
         }
+
         return redirect()->back()->with('status', 'Activity removed from subject!');
     }
 
@@ -63,6 +66,7 @@ class CurriculumController extends Controller
         $activity = Activity::findOrFail($request->activity_id);
         $activity->subject = $request->subject;
         $activity->save();
+
         return response()->json(['success' => true]);
     }
 
@@ -77,6 +81,7 @@ class CurriculumController extends Controller
             $activity->subject = null;
             $activity->save();
         }
+
         return response()->json(['success' => true]);
     }
 
@@ -87,7 +92,9 @@ class CurriculumController extends Controller
         $coverage = [];
         foreach ($skills as $skill) {
             $activities = Activity::where('skill', $skill)->get();
-            $ages = $activities->map(function($a){ return [$a->age_min, $a->age_max]; })->flatten();
+            $ages = $activities->map(function ($a) {
+                return [$a->age_min, $a->age_max];
+            })->flatten();
             $coverage[] = [
                 'skill' => $skill,
                 'count' => $activities->count(),
@@ -97,6 +104,7 @@ class CurriculumController extends Controller
         }
         $totalSkills = $skills->count();
         $totalActivities = Activity::count();
+
         return view('admin.activities.analytics', compact('coverage', 'totalSkills', 'totalActivities'));
     }
 
@@ -107,7 +115,9 @@ class CurriculumController extends Controller
         $coverage = [];
         foreach ($skills as $skill) {
             $activities = Activity::where('skill', $skill)->get();
-            $ages = $activities->map(function($a){ return [$a->age_min, $a->age_max]; })->flatten();
+            $ages = $activities->map(function ($a) {
+                return [$a->age_min, $a->age_max];
+            })->flatten();
             $coverage[] = [
                 'skill' => $skill,
                 'count' => $activities->count(),
@@ -119,9 +129,9 @@ class CurriculumController extends Controller
         $totalSkills = $skills->count();
         $totalActivities = Activity::count();
         // Send email to admin(s)
-        Mail::send('admin.activities.report_email', compact('coverage', 'topLiked', 'totalSkills', 'totalActivities'), function($m) {
+        Mail::send('admin.activities.report_email', compact('coverage', 'topLiked', 'totalSkills', 'totalActivities'), function ($m) {
             $m->to(config('mail.admin_address', 'admin@noblenest.com'))
-              ->subject('Monthly Curriculum Analytics Report');
+                ->subject('Monthly Curriculum Analytics Report');
         });
     }
 }

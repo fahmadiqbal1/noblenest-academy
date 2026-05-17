@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\Subscription;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ActivityManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function activities_can_be_listed_and_filtered()
     {
         Activity::factory()->create([
@@ -37,9 +38,9 @@ class ActivityManagementTest extends TestCase
         // Create an authenticated user with an active subscription
         $user = User::factory()->create(['role' => 'Parent']);
         Subscription::factory()->create([
-            'user_id'  => $user->id,
-            'active'   => true,
-            'ends_at'  => now()->addMonth(),
+            'user_id' => $user->id,
+            'active' => true,
+            'ends_at' => now()->addMonth(),
         ]);
         $this->actingAs($user);
 

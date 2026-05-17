@@ -22,10 +22,10 @@ class Milestone extends Model
     ];
 
     protected $casts = [
-        'is_active'      => 'boolean',
+        'is_active' => 'boolean',
         'age_months_min' => 'integer',
         'age_months_max' => 'integer',
-        'sort_order'     => 'integer',
+        'sort_order' => 'integer',
     ];
 
     public function childProfiles(): BelongsToMany

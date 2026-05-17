@@ -15,16 +15,16 @@ class ChildProfileFactory extends Factory
         $ageMonths = $this->faker->numberBetween(0, 120);
 
         return [
-            'parent_id'          => User::factory(),
-            'name'               => $this->faker->firstName(),
-            'nickname'           => $this->faker->optional(0.5)->firstName(),
-            'date_of_birth'      => now()->subMonths($ageMonths)->startOfDay(),
-            'gender'             => $this->faker->randomElement(['male', 'female']),
-            'is_muslim'          => $this->faker->boolean(70),
+            'parent_id' => User::factory(),
+            'name' => $this->faker->firstName(),
+            'nickname' => $this->faker->optional(0.5)->firstName(),
+            'date_of_birth' => now()->subMonths($ageMonths)->startOfDay(),
+            'gender' => $this->faker->randomElement(['male', 'female']),
+            'is_muslim' => $this->faker->boolean(70),
             'preferred_language' => $this->faker->randomElement(['en', 'ar', 'fr', 'ur']),
-            'avatar_url'         => null,
-            'preferences'        => [],
-            'learning_goals'     => [],
+            'avatar_url' => null,
+            'preferences' => [],
+            'learning_goals' => [],
         ];
     }
 

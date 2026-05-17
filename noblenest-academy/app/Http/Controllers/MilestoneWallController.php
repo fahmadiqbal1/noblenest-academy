@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChildProfile;
+use App\Models\Milestone;
 use Illuminate\Http\Request;
 
 class MilestoneWallController extends Controller
@@ -10,10 +12,10 @@ class MilestoneWallController extends Controller
     {
         $domain = $request->query('domain');
 
-        $achievements = \App\Models\ChildProfile::join('child_achievements', 'child_profiles.id', '=', 'child_achievements.child_profile_id')
+        $achievements = ChildProfile::join('child_achievements', 'child_profiles.id', '=', 'child_achievements.child_profile_id')
             ->join('milestones', function ($join) {
                 $join->on('child_achievements.achievable_id', '=', 'milestones.id')
-                     ->where('child_achievements.achievable_type', '=', \App\Models\Milestone::class);
+                    ->where('child_achievements.achievable_type', '=', Milestone::class);
             })
             ->when($domain, fn ($q) => $q->where('milestones.domain', $domain))
             ->select('child_achievements.*')
@@ -23,8 +25,9 @@ class MilestoneWallController extends Controller
 
         // Eager load achievable and child
         $achievements->getCollection()->transform(function ($item) {
-            $item->achievable = \App\Models\Milestone::find($item->achievable_id);
-            $item->child = \App\Models\ChildProfile::find($item->child_profile_id);
+            $item->achievable = Milestone::find($item->achievable_id);
+            $item->child = ChildProfile::find($item->child_profile_id);
+
             return $item;
         });
 

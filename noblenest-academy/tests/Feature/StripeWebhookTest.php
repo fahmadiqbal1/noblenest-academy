@@ -40,7 +40,7 @@ class StripeWebhookTest extends TestCase
 
         $response = $this->withHeaders([
             'Stripe-Signature' => 'totally-fake-signature',
-            'Content-Type'     => 'application/json',
+            'Content-Type' => 'application/json',
         ])->post('/webhook/stripe', ['type' => 'checkout.session.completed']);
 
         $response->assertStatus(400);
@@ -53,7 +53,7 @@ class StripeWebhookTest extends TestCase
 
         $response = $this->withHeaders([
             'Stripe-Signature' => 't=123,v1=abc',
-            'Content-Type'     => 'application/json',
+            'Content-Type' => 'application/json',
         ])->post('/webhook/stripe', ['type' => 'checkout.session.completed']);
 
         $response->assertStatus(500);

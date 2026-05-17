@@ -55,6 +55,7 @@ class RequireParentalConsent
                 return null;
             }
         }
+
         return null;
     }
 }

@@ -28,8 +28,8 @@ class WeeklyTheme extends Model
     public function themeActivities(): HasMany
     {
         return $this->hasMany(ThemeActivity::class, 'weekly_theme_id')
-                    ->orderBy('day_of_week')
-                    ->orderBy('time_of_day')
-                    ->orderBy('sort_order');
+            ->orderBy('day_of_week')
+            ->orderBy('time_of_day')
+            ->orderBy('sort_order');
     }
 }

@@ -16,7 +16,7 @@ class BadgeSeeder extends Seeder
             ['slug' => 'ten-activities',    'name' => 'Explorer',             'emoji' => '🔍', 'badge_type' => 'milestone', 'criteria' => ['activities_completed' => 10]],
             ['slug' => 'twenty-five-activities', 'name' => 'Adventurer',     'emoji' => '🗺️', 'badge_type' => 'milestone', 'criteria' => ['activities_completed' => 25]],
             ['slug' => 'fifty-activities',  'name' => 'Super Learner',        'emoji' => '⭐', 'badge_type' => 'milestone', 'criteria' => ['activities_completed' => 50]],
-            ['slug' => 'hundred-activities','name' => 'Knowledge Hero',       'emoji' => '🏆', 'badge_type' => 'milestone', 'criteria' => ['activities_completed' => 100]],
+            ['slug' => 'hundred-activities', 'name' => 'Knowledge Hero',       'emoji' => '🏆', 'badge_type' => 'milestone', 'criteria' => ['activities_completed' => 100]],
             // Streak badges
             ['slug' => 'streak-3',  'name' => '3-Day Streak!',   'emoji' => '🔥', 'badge_type' => 'streak', 'criteria' => ['streak_days' => 3]],
             ['slug' => 'streak-7',  'name' => 'Week Warrior',    'emoji' => '🦁', 'badge_type' => 'streak', 'criteria' => ['streak_days' => 7]],

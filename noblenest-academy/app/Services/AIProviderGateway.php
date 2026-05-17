@@ -43,7 +43,7 @@ class AIProviderGateway
         }
 
         // No API key stored
-        if (!$provider->api_key_encrypted) {
+        if (! $provider->api_key_encrypted) {
             return [
                 'status' => 'unchecked',
                 'message' => 'No API key stored yet.',
@@ -91,18 +91,17 @@ class AIProviderGateway
         return $this->chatService->chat($provider, $prompt, $options);
     }
 
-
     protected function normalizeBaseUrl(?string $baseUrl, string $driver = 'openai'): string
     {
         $default = match ($driver) {
-            'anthropic'    => 'https://api.anthropic.com/v1',
-            'gemini'       => 'https://generativelanguage.googleapis.com/v1beta',
-            'stability'    => 'https://api.stability.ai',
-            'elevenlabs'   => 'https://api.elevenlabs.io',
-            'replicate'    => 'https://api.replicate.com/v1',
-            'runway'       => 'https://api.dev.runwayml.com/v1',
+            'anthropic' => 'https://api.anthropic.com/v1',
+            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
+            'stability' => 'https://api.stability.ai',
+            'elevenlabs' => 'https://api.elevenlabs.io',
+            'replicate' => 'https://api.replicate.com/v1',
+            'runway' => 'https://api.dev.runwayml.com/v1',
             'openai-image' => 'https://api.openai.com/v1',
-            default        => 'https://api.openai.com/v1',
+            default => 'https://api.openai.com/v1',
         };
 
         $baseUrl = rtrim($baseUrl ?: $default, '/');
@@ -115,6 +114,7 @@ class AIProviderGateway
             if (! Str::contains(parse_url($baseUrl, PHP_URL_PATH) ?: '', '/v1beta')) {
                 $baseUrl .= '/v1beta';
             }
+
             return $baseUrl;
         }
 
@@ -144,27 +144,42 @@ class AIProviderGateway
             $provider->model,
         ])));
 
-        if (Str::contains($haystack, ['anthropic', 'claude'])) { return 'anthropic'; }
-        if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) { return 'gemini'; }
-        if (Str::contains($haystack, ['stability.ai', 'stable-diffusion', 'stable-image'])) { return 'stability'; }
-        if (Str::contains($haystack, ['elevenlabs', 'eleven_labs', 'eleven-labs'])) { return 'elevenlabs'; }
-        if (Str::contains($haystack, ['replicate.com', 'replicate'])) { return 'replicate'; }
-        if (Str::contains($haystack, ['runwayml', 'runway'])) { return 'runway'; }
-        if (Str::contains($haystack, ['dall-e', 'dalle', 'openai-image'])) { return 'openai-image'; }
+        if (Str::contains($haystack, ['anthropic', 'claude'])) {
+            return 'anthropic';
+        }
+        if (Str::contains($haystack, ['gemini', 'google', 'generativelanguage'])) {
+            return 'gemini';
+        }
+        if (Str::contains($haystack, ['stability.ai', 'stable-diffusion', 'stable-image'])) {
+            return 'stability';
+        }
+        if (Str::contains($haystack, ['elevenlabs', 'eleven_labs', 'eleven-labs'])) {
+            return 'elevenlabs';
+        }
+        if (Str::contains($haystack, ['replicate.com', 'replicate'])) {
+            return 'replicate';
+        }
+        if (Str::contains($haystack, ['runwayml', 'runway'])) {
+            return 'runway';
+        }
+        if (Str::contains($haystack, ['dall-e', 'dalle', 'openai-image'])) {
+            return 'openai-image';
+        }
+
         return 'openai';
     }
 
     protected function defaultModelFor(string $driver): string
     {
         return match ($driver) {
-            'anthropic'    => 'claude-3-5-haiku-latest',
-            'gemini'       => 'gemini-1.5-flash',
-            'stability'    => 'core',
-            'elevenlabs'   => 'eleven_multilingual_v2',
-            'replicate'    => 'minimax/video-01',
-            'runway'       => 'gen4_turbo',
+            'anthropic' => 'claude-3-5-haiku-latest',
+            'gemini' => 'gemini-1.5-flash',
+            'stability' => 'core',
+            'elevenlabs' => 'eleven_multilingual_v2',
+            'replicate' => 'minimax/video-01',
+            'runway' => 'gen4_turbo',
             'openai-image' => 'dall-e-3',
-            default        => 'gpt-4o-mini',
+            default => 'gpt-4o-mini',
         };
     }
 

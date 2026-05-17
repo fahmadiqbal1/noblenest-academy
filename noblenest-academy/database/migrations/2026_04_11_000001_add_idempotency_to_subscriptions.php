@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('subscriptions', function (Blueprint $table) {
             // Idempotency key to prevent duplicate webhook processing
             $table->string('idempotency_key', 255)->nullable()->unique()->after('provider_id')
-                  ->comment('Stripe session ID or provider transaction ID — prevents replay attacks');
+                ->comment('Stripe session ID or provider transaction ID — prevents replay attacks');
 
             // Compound index for fast deduplication lookups in webhook handler
             $table->index(['provider', 'provider_id'], 'subscriptions_provider_lookup_idx');

@@ -2,6 +2,8 @@
 
 namespace App\Services\Providers;
 
+use App\Services\Providers\Exceptions\MissingProviderCredentialException;
+
 /**
  * Phase 6 — speech-to-text / subtitle generation contract.
  *
@@ -16,7 +18,7 @@ interface WhisperAdapter
      *
      * Implementations MUST return a syntactically-valid WEBVTT document.
      *
-     * @throws \App\Services\Providers\Exceptions\MissingProviderCredentialException
+     * @throws MissingProviderCredentialException
      */
     public function transcribeToVtt(string $mediaUrl, string $locale): string;
 }

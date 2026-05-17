@@ -16,11 +16,11 @@ class InviteTest extends TestCase
     public function valid_invite_token_resolves_and_shows_signup_form(): void
     {
         $invite = SchoolAdminInvite::create([
-            'email'        => 'principal@school.example',
-            'school_name'  => 'Greenwood Primary',
-            'seats'        => 25,
+            'email' => 'principal@school.example',
+            'school_name' => 'Greenwood Primary',
+            'seats' => 25,
             'invite_token' => Str::random(48),
-            'expires_at'   => now()->addDays(7),
+            'expires_at' => now()->addDays(7),
         ]);
 
         $response = $this->get(route('institutional.invite.show', ['token' => $invite->invite_token]));
@@ -34,11 +34,11 @@ class InviteTest extends TestCase
     public function expired_invite_token_is_rejected(): void
     {
         $invite = SchoolAdminInvite::create([
-            'email'        => 'late@school.example',
-            'school_name'  => 'Sunset Academy',
-            'seats'        => 10,
+            'email' => 'late@school.example',
+            'school_name' => 'Sunset Academy',
+            'seats' => 10,
             'invite_token' => Str::random(48),
-            'expires_at'   => now()->subDay(),
+            'expires_at' => now()->subDay(),
         ]);
 
         $response = $this->get(route('institutional.invite.show', ['token' => $invite->invite_token]));
@@ -50,12 +50,12 @@ class InviteTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'school_admin']);
         SchoolAdminInvite::create([
-            'email'               => $admin->email,
-            'school_name'         => 'Riverside School',
-            'seats'               => 40,
-            'invite_token'        => Str::random(48),
-            'expires_at'          => now()->addMonth(),
-            'accepted_at'         => now(),
+            'email' => $admin->email,
+            'school_name' => 'Riverside School',
+            'seats' => 40,
+            'invite_token' => Str::random(48),
+            'expires_at' => now()->addMonth(),
+            'accepted_at' => now(),
             'accepted_by_user_id' => $admin->id,
         ]);
 
@@ -70,16 +70,16 @@ class InviteTest extends TestCase
     public function accepting_invite_creates_school_admin_user_and_marks_accepted(): void
     {
         $invite = SchoolAdminInvite::create([
-            'email'        => 'newadmin@school.example',
-            'school_name'  => 'Maple Heights',
-            'seats'        => 50,
+            'email' => 'newadmin@school.example',
+            'school_name' => 'Maple Heights',
+            'seats' => 50,
             'invite_token' => Str::random(48),
-            'expires_at'   => now()->addDays(7),
+            'expires_at' => now()->addDays(7),
         ]);
 
         $response = $this->post(route('institutional.invite.accept', ['token' => $invite->invite_token]), [
-            'name'                  => 'New Admin',
-            'password'              => 'Password1!',
+            'name' => 'New Admin',
+            'password' => 'Password1!',
             'password_confirmation' => 'Password1!',
         ]);
 

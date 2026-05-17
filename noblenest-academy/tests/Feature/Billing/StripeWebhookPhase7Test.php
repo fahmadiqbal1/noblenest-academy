@@ -28,7 +28,7 @@ class StripeWebhookPhase7Test extends TestCase
 
         $response = $this->withHeaders([
             'Stripe-Signature' => 't=1,v1=deadbeef',
-            'Content-Type'     => 'application/json',
+            'Content-Type' => 'application/json',
         ])->post('/webhook/stripe', ['type' => 'customer.subscription.deleted']);
 
         $response->assertStatus(400);
@@ -41,17 +41,17 @@ class StripeWebhookPhase7Test extends TestCase
 
         $user = User::factory()->create();
         $sub = Subscription::factory()->create([
-            'user_id'     => $user->id,
-            'provider'    => 'stripe',
+            'user_id' => $user->id,
+            'provider' => 'stripe',
             'provider_id' => 'sub_phase7_test_001',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         [$payload, $sigHeader] = $this->signedStripePayload([
-            'id'              => 'evt_phase7_canceled_001',
-            'object'          => 'event',
-            'type'            => 'customer.subscription.deleted',
-            'data'            => ['object' => ['id' => 'sub_phase7_test_001', 'status' => 'canceled']],
+            'id' => 'evt_phase7_canceled_001',
+            'object' => 'event',
+            'type' => 'customer.subscription.deleted',
+            'data' => ['object' => ['id' => 'sub_phase7_test_001', 'status' => 'canceled']],
         ]);
 
         $response = $this->call(
@@ -76,20 +76,20 @@ class StripeWebhookPhase7Test extends TestCase
 
         $user = User::factory()->create();
         Subscription::factory()->create([
-            'user_id'     => $user->id,
-            'provider'    => 'stripe',
+            'user_id' => $user->id,
+            'provider' => 'stripe',
             'provider_id' => 'sub_phase7_dedupe_001',
-            'status'      => 'active',
+            'status' => 'active',
         ]);
 
         [$payload, $sigHeader] = $this->signedStripePayload([
-            'id'     => 'evt_phase7_dedupe_xyz',
+            'id' => 'evt_phase7_dedupe_xyz',
             'object' => 'event',
-            'type'   => 'customer.subscription.updated',
-            'data'   => ['object' => [
-                'id'                  => 'sub_phase7_dedupe_001',
-                'status'              => 'past_due',
-                'current_period_end'  => time() + 86400,
+            'type' => 'customer.subscription.updated',
+            'data' => ['object' => [
+                'id' => 'sub_phase7_dedupe_001',
+                'status' => 'past_due',
+                'current_period_end' => time() + 86400,
             ]],
         ]);
 
@@ -119,7 +119,7 @@ class StripeWebhookPhase7Test extends TestCase
     {
         $payload = json_encode($event, JSON_UNESCAPED_SLASHES);
         $timestamp = time();
-        $signed = $timestamp . '.' . $payload;
+        $signed = $timestamp.'.'.$payload;
         $sig = hash_hmac('sha256', $signed, self::SECRET);
 
         return [$payload, "t={$timestamp},v1={$sig}"];

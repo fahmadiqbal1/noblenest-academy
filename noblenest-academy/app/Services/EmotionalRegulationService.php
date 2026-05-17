@@ -16,6 +16,7 @@ use Illuminate\Support\Collection;
 class EmotionalRegulationService
 {
     protected const STRUGGLE_THRESHOLD = 2;  // Struggle streak >= 2
+
     protected const TIME_SINCE_SUCCESS = 120; // Minutes since last success
 
     /**
@@ -77,7 +78,7 @@ class EmotionalRegulationService
             $ageMonths < 24 => 'baby',
             $ageMonths < 48 => 'toddler',
             $ageMonths < 72 => 'preschool',
-            default         => 'school',
+            default => 'school',
         };
     }
 }

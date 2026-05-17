@@ -26,11 +26,11 @@ class AssessmentScoringService
 
     private const CLUSTER_LABELS = [
         'cognitive_logic' => 'Problem-solver',
-        'creative'        => 'Maker / artist',
-        'social'          => 'Connector',
-        'kinetic'         => 'Mover / athlete',
-        'naturalist'      => 'Naturalist / explorer',
-        'linguistic'      => 'Storyteller / writer',
+        'creative' => 'Maker / artist',
+        'social' => 'Connector',
+        'kinetic' => 'Mover / athlete',
+        'naturalist' => 'Naturalist / explorer',
+        'linguistic' => 'Storyteller / writer',
     ];
 
     /**
@@ -49,10 +49,14 @@ class AssessmentScoringService
 
         foreach ($answers as $sequence => $optionIdx) {
             $q = $questions->get((int) $sequence);
-            if (! $q) continue;
+            if (! $q) {
+                continue;
+            }
             $options = $q->options;
             $option = $options[(int) $optionIdx] ?? null;
-            if (! $option || ! isset($option['dimensions'])) continue;
+            if (! $option || ! isset($option['dimensions'])) {
+                continue;
+            }
             foreach ($option['dimensions'] as $dim => $points) {
                 if (isset($scores[$dim])) {
                     $scores[$dim] += (int) $points;
@@ -70,12 +74,13 @@ class AssessmentScoringService
     public function persist(?int $childId, ?int $userId, array $answers): AssessmentResponse
     {
         $result = $this->score($answers);
+
         return AssessmentResponse::create([
-            'child_id'     => $childId,
-            'user_id'      => $userId,
-            'battery'      => 'discovery',
-            'answers'      => $answers,
-            'scores'       => $result['scores'],
+            'child_id' => $childId,
+            'user_id' => $userId,
+            'battery' => 'discovery',
+            'answers' => $answers,
+            'scores' => $result['scores'],
             'completed_at' => now(),
         ]);
     }

@@ -1,18 +1,20 @@
 <?php
+
 require 'vendor/autoload.php';
 $app = require_once 'bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\Activity;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 
-$total         = Activity::count();
-$noInstruct    = Activity::whereNull('instructions')->count();
-$withInstruct  = Activity::whereNotNull('instructions')->count();
-$noSteps       = Activity::doesntHave('steps')->count();
-$hasSteps      = Activity::has('steps')->count();
-$totalSteps    = DB::table('activity_steps')->count();
+$total = Activity::count();
+$noInstruct = Activity::whereNull('instructions')->count();
+$withInstruct = Activity::whereNotNull('instructions')->count();
+$noSteps = Activity::doesntHave('steps')->count();
+$hasSteps = Activity::has('steps')->count();
+$totalSteps = DB::table('activity_steps')->count();
 
 echo "=== Activity Content Audit ===\n";
 echo "Total activities:         $total\n";
@@ -24,7 +26,7 @@ echo "Total activity_steps rows: $totalSteps\n";
 
 // Sample 5 with instructions
 echo "\n--- Sample 3 activities WITH instructions ---\n";
-Activity::whereNotNull('instructions')->limit(3)->get(['id','title','instructions'])->each(function($a) {
+Activity::whereNotNull('instructions')->limit(3)->get(['id', 'title', 'instructions'])->each(function ($a) {
     $val = $a->getRawOriginal('instructions');
     echo "  [{$a->id}] {$a->title}: ".substr($val, 0, 100)."\n";
 });
@@ -36,4 +38,4 @@ Activity::whereNull('instructions')
     ->groupBy('subject')
     ->orderByDesc('cnt')
     ->get()
-    ->each(fn($r) => print("  {$r->subject}: {$r->cnt}\n"));
+    ->each(fn ($r) => print ("  {$r->subject}: {$r->cnt}\n"));

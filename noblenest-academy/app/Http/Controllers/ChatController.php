@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChildProfile;
+use App\Models\User;
 use App\Services\AIAssistantService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,14 +11,12 @@ use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
 {
-    public function __construct(protected AIAssistantService $aiService)
-    {
-    }
+    public function __construct(protected AIAssistantService $aiService) {}
 
     public function message(Request $request)
     {
         $data = $request->validate([
-            'message'         => 'required|string|max:1000',
+            'message' => 'required|string|max:1000',
             'child_profile_id' => 'nullable|integer|exists:child_profiles,id',
         ]);
 
@@ -27,16 +27,16 @@ class ChatController extends Controller
         $response = $this->aiService->chat($userMsg, $context);
 
         Log::info('AI assistant request', [
-            'user_id'   => Auth::id(),
-            'msg_len'   => mb_strlen($userMsg),
-            'provider'  => $response['provider'] ?? 'unknown',
-            'ip'        => $request->ip(),
+            'user_id' => Auth::id(),
+            'msg_len' => mb_strlen($userMsg),
+            'provider' => $response['provider'] ?? 'unknown',
+            'ip' => $request->ip(),
         ]);
 
         return response()->json([
-            'reply'       => $response['reply'],
-            'provider'    => $response['provider'],
-            'model'       => $response['model'] ?? null,
+            'reply' => $response['reply'],
+            'provider' => $response['provider'],
+            'model' => $response['model'] ?? null,
             'suggestions' => $response['suggestions'],
         ]);
     }
@@ -50,9 +50,9 @@ class ChatController extends Controller
         $user = Auth::user();
 
         // Get child profile context if specified
-        if (!empty($data['child_profile_id']) && $user) {
-            /** @var \App\Models\User $user */
-            $childProfile = \App\Models\ChildProfile::where('parent_id', $user->id)
+        if (! empty($data['child_profile_id']) && $user) {
+            /** @var User $user */
+            $childProfile = ChildProfile::where('parent_id', $user->id)
                 ->find($data['child_profile_id']);
 
             if ($childProfile) {
@@ -76,8 +76,8 @@ class ChatController extends Controller
     public function status()
     {
         return response()->json([
-            'available'    => $this->aiService->isAvailable(),
-            'provider'     => $this->aiService->getProviderName(),
+            'available' => $this->aiService->isAvailable(),
+            'provider' => $this->aiService->getProviderName(),
         ]);
     }
 }

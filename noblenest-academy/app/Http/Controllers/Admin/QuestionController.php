@@ -1,10 +1,10 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Quiz;
 use App\Models\Question;
-use App\Models\Option;
+use App\Models\Quiz;
 use Illuminate\Http\Request;
 
 class QuestionController extends Controller
@@ -25,7 +25,7 @@ class QuestionController extends Controller
             'options.*.is_correct' => 'boolean',
         ]);
         $question = $quiz->questions()->create($data);
-        if (!empty($data['options'])) {
+        if (! empty($data['options'])) {
             foreach ($data['options'] as $opt) {
                 $question->options()->create([
                     'option_text' => $opt['option_text'],
@@ -33,12 +33,14 @@ class QuestionController extends Controller
                 ]);
             }
         }
+
         return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Question added.');
     }
 
     public function edit(Quiz $quiz, Question $question)
     {
         $question->load('options');
+
         return view('admin.questions.edit', compact('quiz', 'question'));
     }
 
@@ -57,9 +59,9 @@ class QuestionController extends Controller
         // Update or create options
         $existing = $question->options->keyBy('id');
         $ids = [];
-        if (!empty($data['options'])) {
+        if (! empty($data['options'])) {
             foreach ($data['options'] as $opt) {
-                if (!empty($opt['id']) && $existing->has($opt['id'])) {
+                if (! empty($opt['id']) && $existing->has($opt['id'])) {
                     $existing[$opt['id']]->update([
                         'option_text' => $opt['option_text'],
                         'is_correct' => $opt['is_correct'] ?? false,
@@ -76,13 +78,14 @@ class QuestionController extends Controller
         }
         // Delete removed options
         $question->options()->whereNotIn('id', $ids)->delete();
+
         return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Question updated.');
     }
 
     public function destroy(Quiz $quiz, Question $question)
     {
         $question->delete();
+
         return redirect()->route('admin.quizzes.edit', $quiz)->with('status', 'Question deleted.');
     }
 }
-

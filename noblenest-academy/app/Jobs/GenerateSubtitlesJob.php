@@ -25,9 +25,7 @@ class GenerateSubtitlesJob implements ShouldQueue
     /** @var array<int,int> */
     public array $backoff = [30, 120, 300];
 
-    public function __construct(public readonly int $mediaId, public readonly string $locale)
-    {
-    }
+    public function __construct(public readonly int $mediaId, public readonly string $locale) {}
 
     public function handle(WhisperAdapter $whisper): void
     {
@@ -43,8 +41,8 @@ class GenerateSubtitlesJob implements ShouldQueue
         } catch (\Throwable $e) {
             Log::warning('GenerateSubtitlesJob: whisper failed', [
                 'media_id' => $media->id,
-                'locale'   => $this->locale,
-                'error'    => $e->getMessage(),
+                'locale' => $this->locale,
+                'error' => $e->getMessage(),
             ]);
 
             return;
@@ -56,12 +54,12 @@ class GenerateSubtitlesJob implements ShouldQueue
         ActivityMedia::updateOrCreate(
             [
                 'activity_id' => $media->activity_id,
-                'modality'    => "subtitle:{$this->locale}",
+                'modality' => "subtitle:{$this->locale}",
             ],
             [
                 'media_type' => 'subtitle',
-                'url'        => Storage::disk('local')->url($path),
-                'label'      => "Subtitles ({$this->locale})",
+                'url' => Storage::disk('local')->url($path),
+                'label' => "Subtitles ({$this->locale})",
                 'is_primary' => false,
             ],
         );

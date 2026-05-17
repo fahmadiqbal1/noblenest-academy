@@ -21,8 +21,8 @@ return new class extends Migration
         Schema::create('activity_translations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')
-                  ->constrained('activities')
-                  ->cascadeOnDelete();
+                ->constrained('activities')
+                ->cascadeOnDelete();
             $table->string('locale', 8);                  // e.g. 'en', 'ar', 'zh-Hans'
             $table->string('field', 64);                  // e.g. 'title', 'description', 'instructions_for_parent'
             $table->text('value');

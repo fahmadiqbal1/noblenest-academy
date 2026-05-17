@@ -19,13 +19,14 @@ class ParentDisengaged
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public User $parent;
+
     public int $daysInactive;
 
     public function __construct(
         User $parent,
         int $daysInactive
     ) {
-        $this->parent       = $parent;
+        $this->parent = $parent;
         $this->daysInactive = $daysInactive;
     }
 }

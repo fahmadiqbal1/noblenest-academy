@@ -17,6 +17,7 @@ class PollHeyGenVideoJob implements ShouldQueue
     use Queueable;
 
     public int $tries = 1;
+
     public int $timeout = 30;
 
     public function __construct(
@@ -30,19 +31,22 @@ class PollHeyGenVideoJob implements ShouldQueue
     {
         if ($this->attempt > 10) {
             $this->updateJobStatus('video_timeout');
+
             return;
         }
 
         $result = $videoService->pollHeyGenVideo($this->videoId);
 
-        if ($result['status'] === 'completed' && !empty($result['video_url'])) {
+        if ($result['status'] === 'completed' && ! empty($result['video_url'])) {
             Activity::where('id', $this->activityId)->update(['video_url' => $result['video_url']]);
             $this->updateJobStatus('completed');
+
             return;
         }
 
         if ($result['status'] === 'failed') {
             $this->updateJobStatus('video_failed');
+
             return;
         }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -22,11 +23,11 @@ class AdminUserController extends Controller
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%'.$request->q.'%')
-                  ->orWhere('email', 'like', '%'.$request->q.'%');
+                    ->orWhere('email', 'like', '%'.$request->q.'%');
             });
         }
 
-        $users      = $query->latest()->paginate(30);
+        $users = $query->latest()->paginate(30);
         $roleCounts = User::selectRaw('role, count(*) as total')->groupBy('role')->pluck('total', 'role');
 
         return view('admin.users.index', compact('users', 'roleFilter', 'roleCounts'));

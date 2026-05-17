@@ -34,7 +34,7 @@ return new class extends Migration
             $table->text('theme_description')->nullable();
             $table->string('theme_emoji', 10)->default('📅');
             $table->string('big_idea', 255)->nullable()
-                  ->comment('The overarching concept for the week, e.g. "Water connects everything on Earth"');
+                ->comment('The overarching concept for the week, e.g. "Water connects everything on Earth"');
             $table->timestamps();
 
             $table->unique(['journey_id', 'week_number']);

@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Log;
 class HeyGenAdapter implements VideoAvatarProvider
 {
     private const ENDPOINT_GENERATE = 'https://api.heygen.com/v2/video/generate';
-    private const ENDPOINT_STATUS   = 'https://api.heygen.com/v1/video_status.get';
+
+    private const ENDPOINT_STATUS = 'https://api.heygen.com/v1/video_status.get';
 
     /** HeyGen advertises broad locale support; restrict to our 8-locale set. */
     private const SUPPORTED_LOCALES = ['en', 'fr', 'ru', 'zh', 'es', 'ko', 'ur', 'ar'];
@@ -29,8 +30,7 @@ class HeyGenAdapter implements VideoAvatarProvider
         private readonly ?string $apiKey = null,
         private readonly ?string $defaultAvatarId = null,
         private readonly ?string $defaultVoiceId = null,
-    ) {
-    }
+    ) {}
 
     public function generate(string $script, string $locale, ?string $voiceId = null): VideoGenerationResult
     {
@@ -42,11 +42,11 @@ class HeyGenAdapter implements VideoAvatarProvider
             ->post(self::ENDPOINT_GENERATE, [
                 'video_inputs' => [[
                     'character' => [
-                        'type'      => 'avatar',
+                        'type' => 'avatar',
                         'avatar_id' => $this->defaultAvatarId ?? (string) config('services.heygen.default_avatar_id', ''),
                     ],
                     'voice' => [
-                        'type'     => 'text',
+                        'type' => 'text',
                         'input_text' => $script,
                         'voice_id' => $voiceId ?? $this->defaultVoiceId ?? (string) config('services.heygen.default_voice_id', ''),
                     ],
@@ -59,10 +59,11 @@ class HeyGenAdapter implements VideoAvatarProvider
         if (! $response->successful()) {
             Log::warning('HeyGenAdapter::generate non-200', [
                 'status' => $response->status(),
-                'body'   => substr((string) $response->body(), 0, 500),
+                'body' => substr((string) $response->body(), 0, 500),
             ]);
-            $jobId = 'heygen-failed-' . substr(sha1($script . $locale), 0, 12);
-            return VideoGenerationResult::failed($jobId, 'HeyGen API error: ' . $response->status());
+            $jobId = 'heygen-failed-'.substr(sha1($script.$locale), 0, 12);
+
+            return VideoGenerationResult::failed($jobId, 'HeyGen API error: '.$response->status());
         }
 
         $jobId = (string) data_get($response->json(), 'data.video_id', '');
@@ -90,9 +91,9 @@ class HeyGenAdapter implements VideoAvatarProvider
 
         return match ($heygenStatus) {
             'completed', 'success' => VideoGenerationStatus::Completed,
-            'failed', 'error'      => VideoGenerationStatus::Failed,
-            'pending', 'waiting'   => VideoGenerationStatus::Queued,
-            default                => VideoGenerationStatus::Processing,
+            'failed', 'error' => VideoGenerationStatus::Failed,
+            'pending', 'waiting' => VideoGenerationStatus::Queued,
+            default => VideoGenerationStatus::Processing,
         };
     }
 
@@ -107,6 +108,7 @@ class HeyGenAdapter implements VideoAvatarProvider
         if ($key === '') {
             throw MissingProviderCredentialException::forProvider('heygen', 'HEYGEN_API_KEY');
         }
+
         return $key;
     }
 }

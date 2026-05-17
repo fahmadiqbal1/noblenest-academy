@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\ChildActivityProgress;
+use App\Models\ChildProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class ActivityController extends Controller
 {
@@ -17,7 +19,7 @@ class ActivityController extends Controller
         // Filtering
         if ($request->filled('age')) {
             $query->where('age_min', '<=', $request->age)
-                  ->where('age_max', '>=', $request->age);
+                ->where('age_max', '>=', $request->age);
         }
         if ($request->filled('subject')) {
             $query->where('subject', $request->subject);
@@ -51,8 +53,9 @@ class ActivityController extends Controller
     {
         $child = null;
         if ($request->filled('child')) {
-            $child = \App\Models\ChildProfile::find((int) $request->input('child'));
+            $child = ChildProfile::find((int) $request->input('child'));
         }
+
         return view('activities.show', compact('activity', 'child'));
     }
 
@@ -67,9 +70,10 @@ class ActivityController extends Controller
         if ($decoded === null) {
             return response()->json(['message' => 'Invalid image data.'], 422);
         }
-        $path = 'tracings/' . ($user ? $user->id : 'guest') . '/' . $activity->id . '_' . time() . '.png';
+        $path = 'tracings/'.($user ? $user->id : 'guest').'/'.$activity->id.'_'.time().'.png';
         Storage::disk('public')->put($path, $decoded);
         $this->recordProgress($request, $activity);
+
         return response()->json(['message' => 'Tracing saved!']);
     }
 
@@ -84,9 +88,10 @@ class ActivityController extends Controller
             return response()->json(['message' => 'Invalid image data.'], 422);
         }
         $user = $request->user();
-        $path = 'drawings/' . ($user ? $user->id : 'guest') . '/' . $activity->id . '_' . time() . '.png';
+        $path = 'drawings/'.($user ? $user->id : 'guest').'/'.$activity->id.'_'.time().'.png';
         Storage::disk('public')->put($path, $decoded);
         $this->recordProgress($request, $activity);
+
         return response()->json(['message' => 'Drawing saved!']);
     }
 
@@ -105,11 +110,12 @@ class ActivityController extends Controller
         return $this->showTyped($activity, 'puzzle');
     }
 
-    private function showTyped(Activity $activity, string $type): \Illuminate\View\View
+    private function showTyped(Activity $activity, string $type): View
     {
         if ($activity->activity_type !== $type) {
             abort(404);
         }
+
         return view("activities.{$type}", compact('activity'));
     }
 
@@ -117,6 +123,7 @@ class ActivityController extends Controller
     {
         $activity = Activity::findOrFail($id);
         $this->recordProgress($request, $activity);
+
         return response()->json(['message' => 'Puzzle marked as complete!']);
     }
 
@@ -127,16 +134,17 @@ class ActivityController extends Controller
     {
         $child = null;
         if ($request->filled('child')) {
-            $child = \App\Models\ChildProfile::find((int) $request->input('child'));
+            $child = ChildProfile::find((int) $request->input('child'));
         }
 
         // Allow any activity with a video_url, not just those typed as 'video'.
-        if (!$activity->video_url && !$activity->media_url) {
+        if (! $activity->video_url && ! $activity->media_url) {
             // Fall back to the show page if no video content
             return redirect()->route('activities.show', $activity)->with('info', 'No video available for this activity.');
         }
 
         $activity->loadMissing('steps');
+
         return view('activities.video', compact('activity', 'child'));
     }
 
@@ -148,13 +156,13 @@ class ActivityController extends Controller
     {
         $child = null;
         if ($request->filled('child')) {
-            $child = \App\Models\ChildProfile::find((int) $request->input('child'));
+            $child = ChildProfile::find((int) $request->input('child'));
         }
 
         $activity->loadMissing('steps');
 
         // Need steps or slide_content to show anything
-        if ($activity->steps->isEmpty() && !$activity->media_url) {
+        if ($activity->steps->isEmpty() && ! $activity->media_url) {
             return redirect()->route('activities.show', $activity)->with('info', 'No slides available yet — check back soon!');
         }
 
@@ -167,7 +175,7 @@ class ActivityController extends Controller
      */
     private function decodeVerifiedPng(?string $dataUrl): ?string
     {
-        if (!$dataUrl || !str_starts_with($dataUrl, 'data:image/png;base64,')) {
+        if (! $dataUrl || ! str_starts_with($dataUrl, 'data:image/png;base64,')) {
             return null;
         }
         $b64 = substr($dataUrl, strlen('data:image/png;base64,'));
@@ -179,6 +187,7 @@ class ActivityController extends Controller
         if (substr($bytes, 0, 8) !== "\x89PNG\r\n\x1a\n") {
             return null;
         }
+
         return $bytes;
     }
 
@@ -188,7 +197,7 @@ class ActivityController extends Controller
     private function recordProgress(Request $request, Activity $activity): void
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return;
         }
         DB::table('activity_user_progress')->updateOrInsert(

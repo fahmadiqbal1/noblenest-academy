@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'age')) {
+            if (! Schema::hasColumn('users', 'age')) {
                 $table->unsignedTinyInteger('age')->nullable();
             }
-            if (!Schema::hasColumn('users', 'preferred_language')) {
+            if (! Schema::hasColumn('users', 'preferred_language')) {
                 $table->string('preferred_language', 10)->nullable();
             }
         });

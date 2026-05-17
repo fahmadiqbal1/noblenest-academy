@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AIProviderConfig extends Model
 {
@@ -31,14 +32,14 @@ class AIProviderConfig extends Model
     ];
 
     protected $casts = [
-        'is_active'    => 'boolean',
+        'is_active' => 'boolean',
         'capabilities' => 'array',
         'extra_config' => 'array',
         'last_checked_at' => 'datetime',
         'last_live_at' => 'datetime',
     ];
 
-    public function jobs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function jobs(): HasMany
     {
         return $this->hasMany(AIJob::class, 'provider', 'slug');
     }

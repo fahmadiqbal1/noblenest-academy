@@ -19,6 +19,7 @@ class SitemapController extends Controller
     public function __invoke(): Response
     {
         $xml = Cache::remember('sitemap.xml', 3600, fn () => $this->build());
+
         return response($xml, 200, ['Content-Type' => 'application/xml']);
     }
 
@@ -34,21 +35,22 @@ class SitemapController extends Controller
             ['loc' => '/privacy',   'priority' => '0.3', 'change' => 'yearly'],
         ];
 
-        $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' . "\n";
+        $out = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+        $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'."\n";
         foreach ($urls as $u) {
-            $loc = rtrim($base, '/') . $u['loc'];
+            $loc = rtrim($base, '/').$u['loc'];
             $out .= "  <url>\n";
-            $out .= "    <loc>" . htmlspecialchars($loc, ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n";
+            $out .= '    <loc>'.htmlspecialchars($loc, ENT_XML1 | ENT_QUOTES, 'UTF-8')."</loc>\n";
             $out .= "    <changefreq>{$u['change']}</changefreq>\n";
             $out .= "    <priority>{$u['priority']}</priority>\n";
             foreach (self::LOCALES as $locale) {
-                $alt = $locale === 'en' ? $loc : rtrim($base, '/') . "/lang/{$locale}";
-                $out .= "    <xhtml:link rel=\"alternate\" hreflang=\"{$locale}\" href=\"" . htmlspecialchars($alt, ENT_XML1 | ENT_QUOTES, 'UTF-8') . "\"/>\n";
+                $alt = $locale === 'en' ? $loc : rtrim($base, '/')."/lang/{$locale}";
+                $out .= "    <xhtml:link rel=\"alternate\" hreflang=\"{$locale}\" href=\"".htmlspecialchars($alt, ENT_XML1 | ENT_QUOTES, 'UTF-8')."\"/>\n";
             }
             $out .= "  </url>\n";
         }
-        $out .= '</urlset>' . "\n";
+        $out .= '</urlset>'."\n";
+
         return $out;
     }
 }

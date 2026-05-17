@@ -2,6 +2,8 @@
 
 namespace App\Services\Providers;
 
+use App\Services\Providers\Exceptions\MissingProviderCredentialException;
+
 /**
  * Phase 6 — pluggable provider for avatar/talking-head video generation.
  *
@@ -15,8 +17,8 @@ interface VideoAvatarProvider
     /**
      * Submit a script for video generation.
      *
-     * @throws \App\Services\Providers\Exceptions\MissingProviderCredentialException
-     *         when the selected real-provider adapter is missing its API key.
+     * @throws MissingProviderCredentialException
+     *                                            when the selected real-provider adapter is missing its API key.
      */
     public function generate(string $script, string $locale, ?string $voiceId = null): VideoGenerationResult;
 

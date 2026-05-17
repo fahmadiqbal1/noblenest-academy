@@ -24,52 +24,52 @@ class PricingService
 {
     private const FALLBACK_TIERS = [
         'GLOBAL_SOUTH' => [
-            'region_label'  => 'Global South',
+            'region_label' => 'Global South',
             'country_codes' => ['NG', 'GH', 'KE', 'TZ', 'ET', 'ZM', 'UG', 'RW', 'SN', 'CI', 'CM', 'MZ', 'BO', 'PE', 'EC', 'PY', 'VN', 'MM', 'KH', 'LA'],
             'price_monthly' => 2.99,
-            'price_yearly'  => 29.99,
+            'price_yearly' => 29.99,
             'currency_code' => 'USD',
         ],
         'SOUTH_ASIA' => [
-            'region_label'  => 'South Asia',
+            'region_label' => 'South Asia',
             'country_codes' => ['PK', 'BD', 'LK', 'NP'],
             'price_monthly' => 2.99,
-            'price_yearly'  => 28.70,
+            'price_yearly' => 28.70,
             'currency_code' => 'USD',
         ],
         'INDIA' => [
-            'region_label'  => 'India',
+            'region_label' => 'India',
             'country_codes' => ['IN'],
             'price_monthly' => 2.99,
-            'price_yearly'  => 28.70,
+            'price_yearly' => 28.70,
             'currency_code' => 'USD',
         ],
         'SEA' => [
-            'region_label'  => 'Southeast Asia',
+            'region_label' => 'Southeast Asia',
             'country_codes' => ['ID', 'MY', 'PH', 'TH', 'SG'],
             'price_monthly' => 3.99,
-            'price_yearly'  => 38.30,
+            'price_yearly' => 38.30,
             'currency_code' => 'USD',
         ],
         'EUROPE' => [
-            'region_label'  => 'Europe',
+            'region_label' => 'Europe',
             'country_codes' => ['GB', 'DE', 'FR', 'IT', 'ES', 'PL', 'NL', 'BE', 'SE', 'NO', 'DK', 'FI', 'PT', 'CZ', 'HU', 'RO', 'GR', 'RU', 'TR'],
             'price_monthly' => 4.99,
-            'price_yearly'  => 47.90,
+            'price_yearly' => 47.90,
             'currency_code' => 'USD',
         ],
         'MENA' => [
-            'region_label'  => 'Middle East & North Africa',
+            'region_label' => 'Middle East & North Africa',
             'country_codes' => ['SA', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'EG', 'MA', 'TN', 'DZ', 'IQ', 'SY', 'YE', 'LY'],
             'price_monthly' => 6.99,
-            'price_yearly'  => 67.10,
+            'price_yearly' => 67.10,
             'currency_code' => 'USD',
         ],
         'GLOBAL' => [
-            'region_label'  => 'Global',
+            'region_label' => 'Global',
             'country_codes' => [],
             'price_monthly' => 4.99,
-            'price_yearly'  => 47.90,
+            'price_yearly' => 47.90,
             'currency_code' => 'USD',
         ],
     ];
@@ -80,6 +80,7 @@ class PricingService
     public function resolve(Request $request): array
     {
         $country = $this->detectCountry($request);
+
         return $this->tierForCountry($country);
     }
 
@@ -150,7 +151,7 @@ class PricingService
     public function resolveCountryFromRequest(Request $request): ?string
     {
         if ($request->hasSession()) {
-            $cached  = $request->session()->get('resolved_country');
+            $cached = $request->session()->get('resolved_country');
             $expires = $request->session()->get('resolved_country_expires_at');
             if ($cached !== null && $expires !== null && $expires > time()) {
                 return $cached ?: null;
@@ -203,10 +204,10 @@ class PricingService
         $amount = round(max(0.0, $perDayDelta * $daysRemaining), 2);
 
         return [
-            'amount'         => $amount,
-            'currency'       => $newTier->currency_code ?? 'USD',
+            'amount' => $amount,
+            'currency' => $newTier->currency_code ?? 'USD',
             'days_remaining' => $daysRemaining,
-            'cycle_days'     => $cycleDays,
+            'cycle_days' => $cycleDays,
         ];
     }
 
