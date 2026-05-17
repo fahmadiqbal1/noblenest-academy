@@ -180,6 +180,26 @@ Route::middleware(['auth'])->group(function () {
 Route::post('/webhook/stripe', [\App\Http\Controllers\PaymentController::class, 'stripeWebhook'])->name('webhook.stripe');
 
 // ============================================================================
+// PAYMENTS — PayPal (Phase 7 scaffold; live keys injected Phase 12/13)
+// ============================================================================
+Route::middleware(['auth'])->group(function () {
+    Route::post('/checkout/paypal/create', [\App\Http\Controllers\PayPalController::class, 'create'])->name('paypal.create');
+    Route::post('/checkout/paypal/{orderId}/capture', [\App\Http\Controllers\PayPalController::class, 'capture'])->name('paypal.capture');
+});
+Route::post('/webhook/paypal', [\App\Http\Controllers\PayPalController::class, 'webhook'])->name('webhook.paypal');
+
+// ============================================================================
+// INSTITUTIONAL LICENSING — Phase 7 MVP
+// ============================================================================
+Route::get('/institutional/invite/{token}', [\App\Http\Controllers\InstitutionalController::class, 'showInvite'])->name('institutional.invite.show');
+Route::post('/institutional/invite/{token}', [\App\Http\Controllers\InstitutionalController::class, 'acceptInvite'])->name('institutional.invite.accept');
+
+Route::middleware(['auth', 'role:school_admin'])->group(function () {
+    Route::get('/school/dashboard', [\App\Http\Controllers\InstitutionalController::class, 'dashboard'])->name('school.dashboard');
+    Route::post('/school/seats', [\App\Http\Controllers\InstitutionalController::class, 'assignSeats'])->name('school.seats.assign');
+});
+
+// ============================================================================
 // NOTIFICATIONS
 // ============================================================================
 Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
@@ -269,4 +289,7 @@ Route::middleware(['auth', 'role:Admin'])->prefix('admin')->name('admin.')->grou
 
     // Horizon dashboard (admin only)
     Route::get('horizon', fn () => redirect('/horizon'))->name('horizon');
+
+    // Phase 7 — Institutional invites (admin-only).
+    Route::post('institutional/invite', [\App\Http\Controllers\InstitutionalController::class, 'adminCreateInvite'])->name('institutional.invite.create');
 });

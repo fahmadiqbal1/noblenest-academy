@@ -13,6 +13,18 @@ class PricingController extends Controller
     {
         $tier = $this->pricing->resolve($request);
 
-        return view('pricing', compact('tier'));
+        // Phase 7: surface PPP-adjusted spec plans alongside the legacy region tier.
+        $country = $this->pricing->resolveCountryFromRequest($request);
+        $planKeys = ['freemium', 'individual', 'family', 'annual', 'institutional'];
+        $plans = [];
+        foreach ($planKeys as $key) {
+            try {
+                $plans[$key] = $this->pricing->resolveTier($key, $country);
+            } catch (\RuntimeException $e) {
+                $plans[$key] = null;
+            }
+        }
+
+        return view('pricing', compact('tier', 'plans', 'country'));
     }
 }

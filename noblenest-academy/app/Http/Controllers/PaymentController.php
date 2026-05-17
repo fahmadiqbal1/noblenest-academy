@@ -221,16 +221,18 @@ class PaymentController extends Controller
 
     private function webhookAlreadyProcessed(string $eventId): bool
     {
-        return DB::table('stripe_webhook_events')->where('event_id', $eventId)->exists();
+        return DB::table('stripe_webhook_events')->where('stripe_event_id', $eventId)->exists();
     }
 
     private function recordWebhookProcessed(string $eventId, string $type): void
     {
         DB::table('stripe_webhook_events')->insertOrIgnore([
-            'event_id'   => $eventId,
-            'type'       => $type,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'stripe_event_id' => $eventId,
+            'type'            => $type,
+            'payload'         => json_encode(['recorded' => true]),
+            'processed_at'    => now(),
+            'created_at'      => now(),
+            'updated_at'      => now(),
         ]);
     }
 
@@ -261,11 +263,22 @@ class PaymentController extends Controller
     private function handleSubscriptionUpdated($event): void
     {
         $sub = $event->data->object;
+        $statusMap = [
+            'active'    => Subscription::STATUS_ACTIVE,
+            'trialing'  => Subscription::STATUS_ACTIVE,
+            'past_due'  => Subscription::STATUS_PAST_DUE,
+            'unpaid'    => Subscription::STATUS_PAST_DUE,
+            'canceled'  => Subscription::STATUS_CANCELED,
+            'paused'    => Subscription::STATUS_PAUSED,
+        ];
+        $mapped = $statusMap[$sub->status] ?? Subscription::STATUS_ACTIVE;
+
         Subscription::where('provider', 'stripe')
             ->where('provider_id', $sub->id)
             ->update([
                 'ends_at' => $sub->current_period_end ? Carbon::createFromTimestamp($sub->current_period_end) : null,
                 'active'  => in_array($sub->status, ['active', 'trialing'], true),
+                'status'  => $mapped,
             ]);
     }
 
@@ -275,8 +288,9 @@ class PaymentController extends Controller
         Subscription::where('provider', 'stripe')
             ->where('provider_id', $sub->id)
             ->update([
-                'active'      => false,
-                'cancelled_at'=> now(),
+                'active'       => false,
+                'status'       => Subscription::STATUS_CANCELED,
+                'canceled_at'  => now(),
             ]);
     }
 
@@ -304,6 +318,12 @@ class PaymentController extends Controller
             'customer'     => $customerId,
             'attempt'      => $invoice->attempt_count ?? null,
         ]);
+
+        if ($subId = $invoice->subscription ?? null) {
+            Subscription::where('provider', 'stripe')
+                ->where('provider_id', $subId)
+                ->update(['status' => Subscription::STATUS_PAST_DUE]);
+        }
 
         // Phase 5: dunning notification (queued).
         if ($customerId) {
