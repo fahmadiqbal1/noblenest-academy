@@ -4,6 +4,9 @@
  * Fonts: Baloo 2 (display/kid) · Nunito (body/parent) · Inter (adult surfaces)
  */
 
+/* ─── Alpine.js x-cloak (hide elements until Alpine initializes) ─────────── */
+[x-cloak] { display: none !important; }
+
 /* ─── Self-hosted Fonts ──────────────────────────────────────────────────── */
 /*
  * Font files must be placed in resources/fonts/ and published to public/fonts/

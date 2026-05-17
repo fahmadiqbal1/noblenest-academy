@@ -59,7 +59,7 @@
         </div>
         <div class="bg-white/80 border-[2px] border-[var(--color-border)] rounded-[var(--radius-card)] p-4 transition-transform duration-[var(--duration-base)] hover:-translate-y-1 shadow-[var(--shadow-clay)]">
           <p class="text-xs font-extrabold uppercase tracking-widest text-[var(--color-primary)] font-[var(--font-display)] mb-1">{{ __('marketing.home_languages') }}</p>
-          <p class="text-3xl font-bold text-[var(--color-text)] font-[var(--font-display)] leading-none">6</p>
+          <p class="text-3xl font-bold text-[var(--color-text)] font-[var(--font-display)] leading-none">{{ count(\App\Helpers\I18n::availableLanguages()) }}</p>
           <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ __('marketing.home_languages_desc') }}</p>
         </div>
         <div class="bg-white/80 border-[2px] border-[var(--color-border)] rounded-[var(--radius-card)] p-4 transition-transform duration-[var(--duration-base)] hover:-translate-y-1 shadow-[var(--shadow-clay)]">
