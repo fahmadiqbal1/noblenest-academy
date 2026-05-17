@@ -17,9 +17,19 @@
     $lang = session('lang', auth()->user()?->preferred_language ?? 'en');
     $isRTL = in_array($lang, ['ar', 'ur'], true);
     $sampleSrc = $activity->sample_image ?? null;
+
+    // Phase 4 polish: optional stroke-order JSON guide.
+    // Checks both $activity->stroke_order_url and $activity->meta['stroke_order_json_url'].
+    $strokeOrderUrl = $activity->stroke_order_url ?? null;
+    if (!$strokeOrderUrl) {
+        $meta = $activity->meta ?? null;
+        if (is_array($meta) && !empty($meta['stroke_order_json_url'])) {
+            $strokeOrderUrl = (string) $meta['stroke_order_json_url'];
+        }
+    }
 @endphp
 
-<x-ui.card padding="md" class="space-y-3">
+<x-ui.card padding="md" class="space-y-3" dir="auto">
     <div class="text-sm text-[var(--color-text-muted)] text-center">
         Trace inside the box. Use the buttons to clear or save your work.
     </div>
@@ -93,8 +103,63 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     var status = document.getElementById('nn-tracing-status');
 
+    // Phase 4 polish: optional stroke-order JSON guide overlay.
+    // Expected shape: { "strokes": [ [[x,y],[x,y],...], ... ] } in canvas
+    // coordinates. We draw each stroke as a dotted gray guide path, and
+    // expose a coarse overlap % via the status line after Save.
+    var guideStrokes = null;
+    var strokeOrderUrl = @json($strokeOrderUrl);
+    if (strokeOrderUrl) {
+        fetch(strokeOrderUrl, { credentials: 'omit' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data || !Array.isArray(data.strokes)) return;
+                guideStrokes = data.strokes;
+                drawGuides();
+            })
+            .catch(function () {});
+    }
+
+    function drawGuides() {
+        if (!guideStrokes) return;
+        var ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.strokeStyle = 'rgba(124, 58, 237, 0.45)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 6]);
+        guideStrokes.forEach(function (stroke) {
+            if (!Array.isArray(stroke) || stroke.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(stroke[0][0], stroke[0][1]);
+            for (var i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i][0], stroke[i][1]);
+            ctx.stroke();
+        });
+        ctx.restore();
+    }
+
+    function computeOverlapPercent() {
+        if (!guideStrokes || pad.isEmpty()) return null;
+        try {
+            var ctx = canvas.getContext('2d');
+            var img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            var inked = 0;
+            for (var i = 3; i < img.length; i += 4) if (img[i] > 16) inked++;
+            // Rough heuristic: pixel-coverage vs an estimated guide budget.
+            var budget = 0;
+            guideStrokes.forEach(function (s) {
+                for (var j = 1; j < s.length; j++) {
+                    var dx = s[j][0] - s[j-1][0], dy = s[j][1] - s[j-1][1];
+                    budget += Math.sqrt(dx*dx + dy*dy) * 4;
+                }
+            });
+            if (budget <= 0) return null;
+            return Math.min(100, Math.round((inked / budget) * 100));
+        } catch (_) { return null; }
+    }
+
     document.getElementById('nn-tracing-clear').addEventListener('click', function () {
         pad.clear();
+        drawGuides();
         if (status) status.textContent = '';
     });
     document.getElementById('nn-tracing-save').addEventListener('click', function () {
@@ -102,10 +167,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (status) status.textContent = 'Trace something first!';
             return;
         }
-        // Phase 2 inline scaffold: a no-op success acknowledgement.
-        // Real progress save flows through `activities.tracing` POST endpoint;
-        // wiring it in this inline path is a later iteration.
-        if (status) status.textContent = 'Saved locally — tap "Play the full tracing canvas" to upload progress.';
+        var overlap = computeOverlapPercent();
+        var msg = 'Saved locally — tap "Play the full tracing canvas" to upload progress.';
+        if (overlap !== null) msg = 'Stroke overlap: ' + overlap + '%. ' + msg;
+        if (status) status.textContent = msg;
     });
 });
 </script>

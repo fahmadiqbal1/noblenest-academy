@@ -35,6 +35,10 @@ class ActivityRendererResolver
     public const RENDERER_VIDEO_LESSON      = 'video-lesson';
     public const RENDERER_CODE_BLOCKS       = 'code-blocks';
     public const RENDERER_ASSESSMENT        = 'assessment';
+    // Phase 4 MVP additions
+    public const RENDERER_PRONUNCIATION     = 'pronunciation';
+    public const RENDERER_PYTHON_SANDBOX    = 'python-sandbox';
+    public const RENDERER_ROBOTICS_SIM      = 'robotics-sim';
 
     /**
      * Every canonical renderer slug. Used by the feature test that iterates
@@ -52,6 +56,9 @@ class ActivityRendererResolver
         self::RENDERER_VIDEO_LESSON,
         self::RENDERER_CODE_BLOCKS,
         self::RENDERER_ASSESSMENT,
+        self::RENDERER_PRONUNCIATION,
+        self::RENDERER_PYTHON_SANDBOX,
+        self::RENDERER_ROBOTICS_SIM,
     ];
 
     /**
@@ -92,6 +99,14 @@ class ActivityRendererResolver
         'assessment'     => self::RENDERER_ASSESSMENT,
         'iq'             => self::RENDERER_ASSESSMENT,
         'personality'    => self::RENDERER_ASSESSMENT,
+
+        // Phase 4 MVP players
+        'pronunciation'  => self::RENDERER_PRONUNCIATION,
+        'speech'         => self::RENDERER_PRONUNCIATION,
+        'python'         => self::RENDERER_PYTHON_SANDBOX,
+        'python-sandbox' => self::RENDERER_PYTHON_SANDBOX,
+        'robotics'       => self::RENDERER_ROBOTICS_SIM,
+        'robotics-sim'   => self::RENDERER_ROBOTICS_SIM,
 
         // Default narrative shapes → guided-steps
         'hands_on'       => self::RENDERER_GUIDED_STEPS,
