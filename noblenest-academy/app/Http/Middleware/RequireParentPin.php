@@ -22,10 +22,17 @@ class RequireParentPin
     {
         $user = $request->user();
 
-        // If the parent never set a PIN, bypass (they were created pre-Phase-5
-        // or onboarding hasn't reached step 2 yet).
-        if (! $user || empty($user->parent_pin_hash)) {
-            return $next($request);
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
+        // Fail closed: a parent with no PIN must SET one before reaching
+        // sensitive routes (privacy export/erase, billing). The PIN screen
+        // handles first-time setup — never bypass the gate here.
+        if (empty($user->parent_pin_hash)) {
+            $request->session()->put('parent_pin_intended', $request->fullUrl());
+
+            return redirect()->route('parent.pin.show');
         }
 
         $verifiedAt = $request->session()->get('parent_pin_verified_at');

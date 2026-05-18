@@ -40,6 +40,19 @@ class ParentPinController extends Controller
         $user = Auth::user();
         $key = 'parent-pin:'.$user->id;
 
+        // First-time setup: a parent with no PIN sets it here. This is the
+        // recovery path that lets RequireParentPin fail closed without
+        // permanently locking legacy / incomplete-onboarding users out.
+        if (empty($user->parent_pin_hash)) {
+            $user->forceFill(['parent_pin_hash' => Hash::make($request->input('pin'))])->save();
+            RateLimiter::clear($key);
+            $request->session()->put('parent_pin_verified_at', Carbon::now()->toIso8601String());
+            $intended = $request->session()->pull('parent_pin_intended');
+
+            return redirect($intended ?: route('parent.dashboard'))
+                ->with('status', __('Parent PIN set.'));
+        }
+
         if (RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
             $seconds = RateLimiter::availableIn($key);
 
@@ -48,7 +61,9 @@ class ParentPinController extends Controller
             ])->withInput();
         }
 
-        if (! $user->parent_pin_hash || ! Hash::check($request->input('pin'), $user->parent_pin_hash)) {
+        // $user->parent_pin_hash is guaranteed non-empty here (the no-PIN
+        // case returned above via first-time setup).
+        if (! Hash::check($request->input('pin'), $user->parent_pin_hash)) {
             RateLimiter::hit($key, self::DECAY_SECONDS);
 
             return back()->withErrors(['pin' => __('Incorrect PIN.')])->withInput();

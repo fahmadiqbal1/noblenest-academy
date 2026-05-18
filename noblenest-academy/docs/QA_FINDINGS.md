@@ -137,6 +137,35 @@ correct for the nested resource).
 `$child->share_card_url` (column removed in Phase 1 → always null). Share cards
 are on the SPEC kill list. **Fix:** removed the three dead Blade fragments.
 
+### S1 — Parental-consent gate failed OPEN on unknown age (Critical, COPPA) ✅
+
+`RequireParentalConsent` did `if ($ageMonths === null || $ageMonths >= 156)
+return $next()` — a child with no parseable DOB (age indeterminate) was
+granted access to child-facing routes **without** recorded parental consent.
+For a 0–10 product this is a direct COPPA violation. **Fix:** fail closed —
+only skip the consent gate when age is *known* and ≥ ~13y; unknown age now
+requires `parental_consent_at`. **Test:** `tests/Feature/Security/CoppaFailClosedTest.php`.
+
+### S2 — Parent-PIN gate bypassed for users with no PIN (High) ✅
+
+`RequireParentPin` did `if (empty($user->parent_pin_hash)) return $next()` —
+any parent who never set a PIN (legacy / incomplete onboarding) reached
+privacy export/erase with no second factor. **Fix:** fail closed — redirect to
+the PIN screen; `ParentPinController::verify()` now sets the PIN on first
+submission (the recovery path so failing closed never permanently locks a user
+out). View copy updated for set-mode. **Test:** same file.
+
+### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
+
+Audited every route-model-bound `{child}`/`{activity}`/`{milestone}` endpoint
+(`Parent/ChildController`, `Child/DashboardController`, `ChildActivityController`,
+`Parent/MilestoneController`, `AssessmentController`). All enforce ownership via
+`ChildProfilePolicy` (`view`/`update`/`delete` check `parent_id === user.id`) or
+explicit `authorizeChild()`. A parent can only act on their own children — no
+cross-parent IDOR. Role middleware casing (`Admin`/`Parent` PascalCase vs
+`school_admin` snake) is internally consistent (`InstitutionalController`
+assigns `school_admin`, routes match) — style nit, not a defect.
+
 ---
 
 ## Open items NOT addressed in this pass (carry into the full QA matrix)

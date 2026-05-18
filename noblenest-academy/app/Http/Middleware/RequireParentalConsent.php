@@ -30,8 +30,13 @@ class RequireParentalConsent
 
         // Compute age in months. ChildProfile may carry either `date_of_birth`
         // or `age_months` — handle both.
+        //
+        // COPPA: this MUST fail closed. If age cannot be determined we treat
+        // the profile as a minor requiring consent — never grant access to an
+        // unknown-age child without recorded parental consent. Only a child
+        // proven to be >= ~13y skips the consent gate.
         $ageMonths = $this->ageInMonths($child);
-        if ($ageMonths === null || $ageMonths >= 156) {
+        if ($ageMonths !== null && $ageMonths >= 156) {
             return $next($request);
         }
 

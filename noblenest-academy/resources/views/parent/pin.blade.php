@@ -13,7 +13,7 @@
       </div>
 
       @if(! $has_pin)
-        <x-ui.alert tone="warning" class="mb-4">{{ __('You have not set a parent PIN yet. Please complete onboarding.') }}</x-ui.alert>
+        <x-ui.alert tone="warning" class="mb-4">{{ __('Set a 4-digit parent PIN to continue. You will use it to confirm sensitive actions.') }}</x-ui.alert>
       @endif
 
       <form action="{{ route('parent.pin.verify') }}" method="POST" novalidate>
