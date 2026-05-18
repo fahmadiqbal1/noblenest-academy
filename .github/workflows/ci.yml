@@ -167,12 +167,32 @@ jobs:
     name: Accessibility + Lighthouse
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: noblenest_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: pdo_sqlite, sqlite3, bcmath, gd, intl, mbstring, zip, pcntl
+          extensions: pdo_mysql, redis, bcmath, gd, intl, mbstring, zip, imagick, pcntl
           coverage: none
           tools: composer:v2
       - uses: actions/cache@v4
@@ -192,33 +212,38 @@ jobs:
           chrome-version: stable
       - run: npm ci
       - run: npm run build
-      - name: Prepare app (sqlite + seeded demo)
+      - name: Prepare app (mysql + seeded demo)
         run: |
           cp .env.example .env
-          sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|' .env
+          sed -i 's|^APP_ENV=.*|APP_ENV=local|' .env
+          sed -i 's|^APP_DEBUG=.*|APP_DEBUG=false|' .env
           sed -i 's|^APP_URL=.*|APP_URL=http://localhost:8000|' .env
-          # sqlite uses a file path; drop any host/db lines that would override it
-          touch database/database.sqlite
+          sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=mysql|' .env
+          sed -i 's|^DB_HOST=.*|DB_HOST=127.0.0.1|' .env
+          sed -i 's|^DB_PORT=.*|DB_PORT=3306|' .env
+          sed -i 's|^DB_DATABASE=.*|DB_DATABASE=noblenest_test|' .env
+          sed -i 's|^DB_USERNAME=.*|DB_USERNAME=root|' .env
+          sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=root|' .env
           php artisan key:generate --force
           php artisan migrate:fresh --seed --force
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-      - name: Serve app
+      - name: Serve + axe + Lighthouse (single step — serve must outlive the run)
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: |
+          set -e
           php artisan serve --host=127.0.0.1 --port=8000 > /tmp/serve.log 2>&1 &
+          SERVE_PID=$!
+          trap 'kill $SERVE_PID 2>/dev/null || true' EXIT
           for i in $(seq 1 30); do
             if curl -fsS http://localhost:8000/health >/dev/null 2>&1; then
-              echo "App up after ${i}s"; break
+              echo "App up after ${i}s"; UP=1; break
             fi
             sleep 1
           done
-          curl -fsS http://localhost:8000/health || (echo "App failed to boot:"; cat /tmp/serve.log; exit 1)
-      - name: Accessibility (axe WCAG 2.1 AA)
-        env:
-          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
-        run: npm run a11y
-      - name: Lighthouse (perf/a11y/best-practices/seo budgets)
-        env:
-          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
-        run: npm run lighthouse
+          if [ -z "${UP:-}" ]; then
+            echo "App failed to boot. serve.log:"; cat /tmp/serve.log
+            curl -sS http://localhost:8000/ | head -50 || true
+            exit 1
+          fi
+          npm run a11y
+          npm run lighthouse
