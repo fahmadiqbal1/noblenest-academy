@@ -4,9 +4,10 @@ name: CI
 # Laravel app lives at noblenest-academy/ (outer repo root contains .github/).
 # Baseline to protect: 290 passed / 0 failed / 4 skipped, phpstan exit 0.
 #
-# Infra-heavy gates (Dusk browser, pa11y, Lighthouse, schema-squash) are
-# deferred — see docs/AUDIT.md (Phase 3.1/8.1/11.1 followups). Re-add them
-# here once a seeded preview server + Chrome runner are wired.
+# a11y (axe WCAG 2.1 AA) + Lighthouse now run on every push/PR via the
+# `a11y-lighthouse` job (seeded sqlite app served by `php artisan serve`,
+# Chrome via browser-actions/setup-chrome). Dusk browser + schema-squash
+# remain deferred — see docs/AUDIT.md.
 
 on:
   push:
@@ -161,3 +162,63 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash scripts/i18n-string-gate.sh --strict
+
+  a11y-lighthouse:
+    name: Accessibility + Lighthouse
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, sqlite3, bcmath, gd, intl, mbstring, zip, pcntl
+          coverage: none
+          tools: composer:v2
+      - uses: actions/cache@v4
+        with:
+          path: noblenest-academy/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('noblenest-academy/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+      - run: composer install --no-progress --prefer-dist --no-interaction
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: noblenest-academy/package-lock.json
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: stable
+      - run: npm ci
+      - run: npm run build
+      - name: Prepare app (sqlite + seeded demo)
+        run: |
+          cp .env.example .env
+          sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|' .env
+          sed -i 's|^APP_URL=.*|APP_URL=http://localhost:8000|' .env
+          # sqlite uses a file path; drop any host/db lines that would override it
+          touch database/database.sqlite
+          php artisan key:generate --force
+          php artisan migrate:fresh --seed --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+      - name: Serve app
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/serve.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/health >/dev/null 2>&1; then
+              echo "App up after ${i}s"; break
+            fi
+            sleep 1
+          done
+          curl -fsS http://localhost:8000/health || (echo "App failed to boot:"; cat /tmp/serve.log; exit 1)
+      - name: Accessibility (axe WCAG 2.1 AA)
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: npm run a11y
+      - name: Lighthouse (perf/a11y/best-practices/seo budgets)
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: npm run lighthouse
