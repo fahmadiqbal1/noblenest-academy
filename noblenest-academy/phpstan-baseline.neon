@@ -163,19 +163,7 @@ parameters:
 			path: app/Http/Controllers/ChildActivityController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/ChildActivityController.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:currentWeek\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/ChildActivityController.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:maxActivityOrder\(\)\.$#'
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:entitled\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: app/Http/Controllers/ChildActivityController.php
@@ -215,6 +203,12 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/MilestoneWallController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:entitled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/Parent/DashboardController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Milestone\:\:\$completed\.$#'
@@ -365,6 +359,12 @@ parameters:
 			identifier: larastan.relationExistence
 			count: 1
 			path: app/Models/Course.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:entitled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/User.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\QuizAnswer\:\:\$attempt\.$#'

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\PricingService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -48,7 +49,7 @@ class Subscription extends Model
      * through this scope. Do not query the legacy `active` boolean
      * directly; it is kept only as a denormalised mirror of `status`.
      */
-    public function scopeEntitled($query)
+    public function scopeEntitled(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_ACTIVE)
             ->where('ends_at', '>', now());
