@@ -39,6 +39,7 @@ class ActivityFactory extends Factory
             'is_rtl' => function (array $attributes) {
                 return in_array($attributes['language'], ['ur', 'ar']);
             },
+            'published' => true,
         ];
     }
 }

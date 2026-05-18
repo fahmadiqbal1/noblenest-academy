@@ -13,8 +13,12 @@ use Illuminate\Support\Facades\Log;
 /**
  * Phase 7 — PayPal v2 Orders scaffold endpoints.
  *
- * In MVP the service returns stub responses when PayPal creds are absent,
- * so these endpoints are safe to expose immediately.
+ * v1 launch decision (C4): PayPal is NOT a supported payment path. The
+ * capture/webhook flow does not activate a Subscription, so taking a real
+ * PayPal payment would charge the customer and grant nothing. Until PayPal
+ * is fully wired (subscription activation + live credentials + UI), these
+ * endpoints fail closed with HTTP 503 instead of returning a fake "success"
+ * stub. Stripe is the supported v1 subscription path.
  */
 class PayPalController extends Controller
 {
@@ -23,8 +27,30 @@ class PayPalController extends Controller
         protected PricingService $pricing,
     ) {}
 
+    /**
+     * Fail closed unless PayPal is fully configured AND finished.
+     * Returns null when the request may proceed.
+     */
+    private function unavailable(): ?JsonResponse
+    {
+        if ($this->paypal->isStubMode()) {
+            Log::warning('PayPal endpoint hit while unconfigured — refusing to take a payment that activates nothing (C4).');
+
+            return response()->json([
+                'error' => 'paypal_unavailable',
+                'message' => 'PayPal is not available. Please pay with card.',
+            ], 503);
+        }
+
+        return null;
+    }
+
     public function create(Request $request): JsonResponse
     {
+        if ($blocked = $this->unavailable()) {
+            return $blocked;
+        }
+
         $data = $request->validate([
             'plan' => 'required|string|max:40',
             'country' => 'nullable|string|size:2',
@@ -54,6 +80,10 @@ class PayPalController extends Controller
 
     public function capture(Request $request, string $orderId): JsonResponse
     {
+        if ($blocked = $this->unavailable()) {
+            return $blocked;
+        }
+
         $result = $this->paypal->captureOrder($orderId);
 
         DB::table('paypal_transactions')
@@ -70,6 +100,12 @@ class PayPalController extends Controller
 
     public function webhook(Request $request)
     {
+        if ($this->paypal->isStubMode()) {
+            Log::warning('PayPal webhook received while unconfigured — ignoring (C4).');
+
+            return response('PayPal unavailable', 503);
+        }
+
         $payload = $request->getContent();
         $headers = collect($request->headers->all())
             ->mapWithKeys(fn (array $v, string $k) => [strtolower($k) => (string) ($v[0] ?? '')])

@@ -41,6 +41,19 @@ class Subscription extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Canonical entitlement predicate — the SINGLE source of truth for
+     * "this subscription currently grants access". Every gate (middleware,
+     * User::hasActiveSubscription, dashboards, activity feed) MUST go
+     * through this scope. Do not query the legacy `active` boolean
+     * directly; it is kept only as a denormalised mirror of `status`.
+     */
+    public function scopeEntitled($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE)
+            ->where('ends_at', '>', now());
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Phase 7 — state machine helpers.
     // ─────────────────────────────────────────────────────────────────────────
@@ -67,7 +80,10 @@ class Subscription extends Model
 
     public function markPastDue(): void
     {
-        $this->forceFill(['status' => self::STATUS_PAST_DUE])->save();
+        $this->forceFill([
+            'status' => self::STATUS_PAST_DUE,
+            'active' => false,
+        ])->save();
     }
 
     public function cancel(): void
@@ -83,6 +99,7 @@ class Subscription extends Model
     {
         $this->forceFill([
             'status' => self::STATUS_PAUSED,
+            'active' => false,
             'paused_at' => now(),
         ])->save();
     }

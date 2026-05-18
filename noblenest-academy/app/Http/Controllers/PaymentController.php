@@ -225,16 +225,23 @@ class PaymentController extends Controller
         Log::info('Stripe webhook received', ['type' => $event->type, 'event_id' => $event->id]);
 
         try {
-            match ($event->type) {
-                'checkout.session.completed' => $this->handleCheckoutCompleted($event),
-                'customer.subscription.updated' => $this->handleSubscriptionUpdated($event),
-                'customer.subscription.deleted' => $this->handleSubscriptionDeleted($event),
-                'invoice.payment_succeeded' => $this->handleInvoicePaid($event),
-                'invoice.payment_failed' => $this->handleInvoiceFailed($event),
-                'customer.updated' => $this->handleCustomerUpdated($event),
-                default => Log::info("Stripe webhook unhandled type: {$event->type}"),
-            };
-            $this->recordWebhookProcessed($event->id, $event->type);
+            // One DB transaction per event: the handler's writes (customer
+            // id + subscription upsert) and the processed-marker commit
+            // together or not at all. A partial failure rolls back fully
+            // and is NOT marked processed, so Stripe's retry re-applies it
+            // cleanly — no "paid but no access" orphan state.
+            DB::transaction(function () use ($event) {
+                match ($event->type) {
+                    'checkout.session.completed' => $this->handleCheckoutCompleted($event),
+                    'customer.subscription.updated' => $this->handleSubscriptionUpdated($event),
+                    'customer.subscription.deleted' => $this->handleSubscriptionDeleted($event),
+                    'invoice.payment_succeeded' => $this->handleInvoicePaid($event),
+                    'invoice.payment_failed' => $this->handleInvoiceFailed($event),
+                    'customer.updated' => $this->handleCustomerUpdated($event),
+                    default => Log::info("Stripe webhook unhandled type: {$event->type}"),
+                };
+                $this->recordWebhookProcessed($event->id, $event->type);
+            });
         } catch (\Throwable $e) {
             Log::error('Stripe webhook handler crashed', ['event_id' => $event->id, 'error' => $e->getMessage()]);
 
@@ -406,6 +413,10 @@ class PaymentController extends Controller
         $now = Carbon::now();
         $endsAt = $now->copy()->addMonths($months);
 
+        // status MUST be reset alongside active: on the updateOrCreate
+        // UPDATE path (a previously canceled/paused customer re-subscribing)
+        // a stale status would make Subscription::scopeEntitled() deny a
+        // user who just paid. See C2.
         Subscription::updateOrCreate(
             [
                 'user_id' => $user->id,
@@ -418,6 +429,7 @@ class PaymentController extends Controller
                 'starts_at' => $now,
                 'ends_at' => $endsAt,
                 'active' => true,
+                'status' => Subscription::STATUS_ACTIVE,
             ]
         );
     }

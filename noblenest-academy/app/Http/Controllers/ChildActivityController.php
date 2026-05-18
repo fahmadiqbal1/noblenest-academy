@@ -24,8 +24,7 @@ class ChildActivityController extends Controller
 
         // Active subscription lookup
         $subscription = $user->subscriptions()
-            ->where('active', true)
-            ->where('ends_at', '>', now())
+            ->entitled()
             ->first();
 
         $hasSubscription = $subscription !== null;
@@ -35,6 +34,7 @@ class ChildActivityController extends Controller
         $lang = $child->preferred_language ?: 'en';
         $query = Activity::query()
             ->with('modules')
+            ->where('published', true)
             ->where(function ($q) use ($lang) {
                 $q->where('language', $lang)->orWhereNull('language');
             });
