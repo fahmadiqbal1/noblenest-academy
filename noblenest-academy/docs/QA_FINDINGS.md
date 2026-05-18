@@ -155,6 +155,24 @@ the PIN screen; `ParentPinController::verify()` now sets the PIN on first
 submission (the recovery path so failing closed never permanently locks a user
 out). View copy updated for set-mode. **Test:** same file.
 
+### P0 — Activity player: VERIFIED FUNCTIONAL (no fix needed)
+
+Historical claim "player shows nothing for 99% of activities" is **resolved**
+(Phase 2/4). `ActivityRendererResolver` always returns one of 12 canonical
+renderers (guided-steps fallback — never blank); all 12 player partials exist;
+`show.blade.php` dispatches `@include('activities.players.'.$activity->renderer())`.
+Smoke: all **3,814 seeded activities** resolve to a canonical renderer with
+**0 failures**; `ActivityPlayerTest` (60 assertions) covers every renderer.
+
+### D1 — `migrate:fresh --seed` produced an unusable demo (High) ✅
+
+`DemoChildrenSeeder` existed but was wired into **no** `DatabaseSeeder` block,
+so the demo had 0 child profiles — the parent/child dashboard and
+activity-player journey could not be exercised at all (Definition-of-Done #5).
+**Fix:** wired `DemoChildrenSeeder` + `DemoOrchestratorSeeder` into the
+LOCAL/TESTING-only block (never production). Re-seed now yields 8 parents /
+11 children / 4 AI jobs. **Test:** `tests/Feature/DemoSeedUsableTest.php`.
+
 ### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
 
 Audited every route-model-bound `{child}`/`{activity}`/`{milestone}` endpoint

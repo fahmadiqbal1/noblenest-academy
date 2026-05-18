@@ -94,6 +94,12 @@ class DatabaseSeeder extends Seeder
 
             // ── Cross-curricular thematic journeys (depends on all above) ───
             ThematicJourneySeeder::class,       // 16 journeys × 4 weeks × 10 activity slots
+
+            // ── Demo data (LOCAL/TESTING ONLY — Password1! accounts) ────────
+            // Without these the demo parent has zero children and the
+            // child dashboard / activity-player journey cannot be exercised.
+            DemoChildrenSeeder::class,          // demo families + child profiles
+            DemoOrchestratorSeeder::class,      // demo AI jobs for the Admin
         ]);
     }
 }
