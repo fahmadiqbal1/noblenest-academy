@@ -58,12 +58,6 @@
                     </x-ui.badge>
                 </div>
             </div>
-            @if($child->share_card_url)
-            <a href="{{ $child->share_card_url }}" target="_blank" rel="noopener"
-               class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-sm)] border-2 border-white/60 text-white text-sm font-bold hover:bg-white/20 transition-colors focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-1 min-h-[2.25rem]">
-                <x-ui.icon name="share-2" class="w-4 h-4" aria-hidden="true" />Share
-            </a>
-            @endif
         </div>
     </div>
 </div>

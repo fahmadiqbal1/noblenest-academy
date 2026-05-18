@@ -178,11 +178,6 @@
                     @endif
                 </div>
             </div>
-            @if(isset($item->childProfile->share_card_url) && $item->childProfile->share_card_url)
-            <x-ui.button variant="ghost" href="{{ $item->childProfile->share_card_url }}" target="_blank" rel="noopener" size="sm" icon="share-2">
-                Share
-            </x-ui.button>
-            @endif
         </div>
         @endforeach
     </div>
@@ -229,11 +224,6 @@
         <x-ui.button variant="secondary" href="{{ route('parent.milestones') }}" icon="trophy" class="justify-start">
             View Milestones
         </x-ui.button>
-        @if($children->isNotEmpty())
-        <x-ui.button variant="secondary" href="{{ route('parent.share-card', $children->first()) }}" icon="share-2" class="justify-start">
-            Share Card
-        </x-ui.button>
-        @endif
     </div>
 </x-ui.section>
 @endsection

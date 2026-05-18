@@ -23,6 +23,7 @@ class Activity extends Model
         'emoji',
         'is_free',
         'published',
+        'source_job_id',
         'like_count',
         'duration_minutes',
         'difficulty',

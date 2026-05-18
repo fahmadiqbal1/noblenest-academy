@@ -11,7 +11,7 @@
     </form>
     <hr>
     <h2>Questions</h2>
-    <a href="{{ route('admin.questions.create', $quiz) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 mb-3">Add Question</a>
+    <a href="{{ route('admin.quizzes.questions.create', $quiz) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-violet-600 text-white hover:bg-violet-700 mb-3">Add Question</a>
     @if($quiz->questions->isEmpty())
         <div class="flex items-start gap-3 p-4 rounded-lg border bg-sky-50 border-sky-200 text-sky-800">No questions yet.</div>
     @else
@@ -37,8 +37,8 @@
                     @endforeach
                 </td>
                 <td>
-                    <a href="{{ route('admin.questions.edit', [$quiz, $question]) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm bg-amber-500 text-gray-900 hover:bg-amber-600">Edit</a>
-                    <form action="{{ route('admin.questions.destroy', [$quiz, $question]) }}" method="POST" style="display:inline-block">
+                    <a href="{{ route('admin.quizzes.questions.edit', [$quiz, $question]) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm bg-amber-500 text-gray-900 hover:bg-amber-600">Edit</a>
+                    <form action="{{ route('admin.quizzes.questions.destroy', [$quiz, $question]) }}" method="POST" style="display:inline-block">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-sm bg-red-600 text-white hover:bg-red-700" onclick="return confirm('Delete this question?')">Delete</button>

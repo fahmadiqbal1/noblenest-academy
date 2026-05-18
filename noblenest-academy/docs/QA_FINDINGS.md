@@ -107,6 +107,36 @@ reference; `index.blade.php:37` contained invalid PHP
 **Fix:** deleted the dead directory. SPEC's minimal institutional path is
 `InstitutionalController` (invite flow), unaffected.
 
+### C7 — AI content-batch pipeline dead: `activities.source_job_id` missing (Critical) ✅
+
+`ProcessContentBatchJob` and `AIAssistantService` write `'source_job_id'` when
+creating AI activities, but the column never existed **and** it was not in
+`Activity::$fillable` — the job link was silently dropped on create. Then
+`ContentBatchController::preview()`/`publish()` ran
+`Activity::where('source_job_id', $job->id)` → "Unknown column" 500. Admin AI
+content generation→preview→publish was entirely non-functional. Found by the
+schema↔code reconciliation scan (same class as C1/C6).
+
+**Fix:** migration `2026_05_18_000003_add_source_job_id_to_activities_table`
+(nullable FK to `ai_jobs`, `nullOnDelete`, indexed); added to `Activity`
+`$fillable`. **Test:** `tests/Feature/ContentBatchPipelineTest.php`.
+
+### W1 — Admin quiz-question builder 500'd on every action (High) ✅
+
+`admin/quizzes/edit.blade.php` and `admin/questions/{create,edit}.blade.php`
+called `route('admin.questions.*')`, but the nested-resource routes are
+`admin.quizzes.questions.*`. Every Add/Edit/Delete-Question button threw
+`Route [admin.questions.create] not defined` → 500. Admin could not manage
+quiz questions at all. **Fix:** corrected the route names (params already
+correct for the nested resource).
+
+### W2 — Dead share-card UI (kill-list leftover) (Medium) ✅
+
+`parent/dashboard.blade.php` (×2) and `child/activities.blade.php` referenced
+`route('parent.share-card')` (deleted route → 500 if rendered) and
+`$child->share_card_url` (column removed in Phase 1 → always null). Share cards
+are on the SPEC kill list. **Fix:** removed the three dead Blade fragments.
+
 ---
 
 ## Open items NOT addressed in this pass (carry into the full QA matrix)

@@ -2,7 +2,7 @@
 @section('content')
 <div class="container">
     <h1>Edit Question</h1>
-    <form action="{{ route('admin.questions.update', [$quiz, $question]) }}" method="POST">
+    <form action="{{ route('admin.quizzes.questions.update', [$quiz, $question]) }}" method="POST">
         @csrf
         @method('PUT')
         @include('admin.questions._form', ['question' => $question])
