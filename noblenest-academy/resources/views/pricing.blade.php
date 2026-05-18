@@ -111,7 +111,7 @@
     <div class="absolute top-4 end-4">
       <x-ui.badge tone="success" variant="solid">{{ __('billing.plan_save_20') }}</x-ui.badge>
     </div>
-    <p class="text-xs font-extrabold uppercase tracking-widest text-emerald-600 mb-1">{{ __('billing.plan_annual') }}</p>
+    <p class="text-xs font-extrabold uppercase tracking-widest text-emerald-700 mb-1">{{ __('billing.plan_annual') }}</p>
     <div class="flex items-end gap-1 mb-1">
       <span class="text-5xl font-bold text-[var(--color-text)] font-[var(--font-display)]">${{ $tier['price_yearly'] }}</span>
       <span class="text-[var(--color-text-muted)] mb-1">{{ __('billing.plan_per_year_short') }}</span>
@@ -165,7 +165,7 @@
           <th class="text-left p-4 font-bold text-[var(--color-text)]">{{ __('billing.pricing_col_feature') }}</th>
           <th class="p-4 font-bold text-[var(--color-text)] text-center">{{ __('billing.pricing_col_free') }}</th>
           <th class="p-4 font-bold text-[var(--color-brand-600)] text-center">{{ __('billing.pricing_col_monthly') }}</th>
-          <th class="p-4 font-bold text-emerald-600 text-center">{{ __('billing.pricing_col_annual') }}</th>
+          <th class="p-4 font-bold text-emerald-700 text-center">{{ __('billing.pricing_col_annual') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-[var(--color-border)]">

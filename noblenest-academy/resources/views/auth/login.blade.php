@@ -93,6 +93,7 @@
             <button
               type="button"
               @click="showPw = !showPw"
+              aria-label="{{ __('auth.show_password') }}"
               :aria-label="showPw ? '{{ __('auth.hide_password') }}' : '{{ __('auth.show_password') }}'"
               class="px-4 border-[2px] border-[var(--color-border)] border-s-0 rounded-e-[var(--radius-sm)] bg-[var(--color-surface-strong)] text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-brand-50)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2"
             >

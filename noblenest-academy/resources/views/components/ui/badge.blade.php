@@ -8,7 +8,7 @@
     $tones = [
         'neutral'      => ['solid' => 'bg-gray-700 text-white',             'soft' => 'bg-gray-100 text-gray-700',               'outline' => 'border border-gray-400 text-gray-700'],
         'brand'        => ['solid' => 'bg-[var(--color-brand-600)] text-white', 'soft' => 'bg-[var(--color-brand-100)] text-[var(--color-brand-700)]', 'outline' => 'border border-[var(--color-brand-400)] text-[var(--color-brand-700)]'],
-        'success'      => ['solid' => 'bg-emerald-600 text-white',           'soft' => 'bg-emerald-50 text-emerald-700',          'outline' => 'border border-emerald-400 text-emerald-700'],
+        'success'      => ['solid' => 'bg-emerald-700 text-white',           'soft' => 'bg-emerald-50 text-emerald-800',          'outline' => 'border border-emerald-500 text-emerald-800'],
         'warning'      => ['solid' => 'bg-amber-500 text-white',             'soft' => 'bg-amber-50 text-amber-700',              'outline' => 'border border-amber-400 text-amber-700'],
         'danger'       => ['solid' => 'bg-[var(--color-coral-500)] text-white', 'soft' => 'bg-[var(--color-coral-50)] text-[var(--color-coral-700)]', 'outline' => 'border border-[var(--color-coral-400)] text-[var(--color-coral-700)]'],
         'info'         => ['solid' => 'bg-blue-600 text-white',              'soft' => 'bg-blue-50 text-blue-700',                'outline' => 'border border-blue-400 text-blue-700'],

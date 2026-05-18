@@ -130,7 +130,7 @@
     </a>
     <a href="/admin/activities" class="block focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2 rounded-[var(--radius-card)]">
       <x-ui.card variant="clay" padding="md" class="text-center">
-        <p class="text-3xl font-bold text-emerald-600">{{ $activityCount }}</p>
+        <p class="text-3xl font-bold text-emerald-700">{{ $activityCount }}</p>
         <p class="text-sm text-[var(--color-text-muted)] mt-1">{{ __('marketing.home_activities') }}</p>
       </x-ui.card>
     </a>
@@ -287,8 +287,8 @@
     @foreach([
       ['value' => '50K+',  'label' => 'Children Learning',  'color' => 'text-[var(--color-primary)]'],
       ['value' => '120+',  'label' => 'Countries',           'color' => 'text-violet-600'],
-      ['value' => '4.9★', 'label' => 'Parent Rating',       'color' => 'text-[var(--color-accent-500)]'],
-      ['value' => '8',     'label' => 'Languages',           'color' => 'text-emerald-600'],
+      ['value' => '4.9★', 'label' => 'Parent Rating',       'color' => 'text-[var(--color-accent-700)]'],
+      ['value' => '8',     'label' => 'Languages',           'color' => 'text-emerald-700'],
     ] as $stat)
     <x-ui.card variant="clay" padding="md">
       <p class="text-3xl font-bold {{ $stat['color'] }} font-[var(--font-display)]">{{ $stat['value'] }}</p>
@@ -328,7 +328,7 @@
       ['quote' => 'The teacher marketplace is fantastic. My son\'s tutor is from Indonesia and he loves the sessions.', 'author' => 'Li Wei', 'country' => 'China', 'stars' => 5],
     ] as $t)
     <x-ui.card variant="clay" padding="md">
-      <div class="flex gap-0.5 mb-3" aria-label="{{ $t['stars'] }} stars">
+      <div class="flex gap-0.5 mb-3" role="img" aria-label="{{ $t['stars'] }} stars">
         @for($i = 0; $i < $t['stars']; $i++)
           <x-ui.icon name="star" class="w-4 h-4 text-amber-400 fill-amber-400" />
         @endfor
@@ -358,15 +358,6 @@
     >
       View Pricing
     </x-ui.button>
-  </div>
-  {{-- WhatsApp share --}}
-  <div class="mt-8">
-    <a href="https://wa.me/?text={{ urlencode('My kids are learning on NobleNest Academy – world-class early education in 8 languages! Try it free: ' . url('/')) }}"
-       class="inline-flex items-center gap-2 rounded-full bg-emerald-500 hover:bg-emerald-400 transition-colors text-white text-sm font-semibold px-5 py-2.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
-       target="_blank" rel="noopener noreferrer">
-      <x-ui.icon name="share-2" class="w-4 h-4" />
-      Share on WhatsApp
-    </a>
   </div>
 </section>
 
