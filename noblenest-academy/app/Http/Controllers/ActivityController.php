@@ -192,7 +192,17 @@ class ActivityController extends Controller
     }
 
     /**
-     * Persist activity completion to both progress tables.
+     * Persist activity completion to BOTH progress stores — this dual-write
+     * is intentional, not a bug (see docs/QA_FINDINGS.md "Progress tables"):
+     *
+     *   - activity_user_progress  : keyed by user_id. The analytics grain
+     *     (AnalyticsController monthly-completions / most-active). Covers
+     *     activities opened without a child context (parent/preview).
+     *   - child_activity_progress : keyed by child_profile_id. The product
+     *     grain — drives the child dashboard, drip unlocks, skill states.
+     *
+     * They answer different questions and are deliberately not merged;
+     * collapsing them would force an analytics rewrite for no user benefit.
      */
     private function recordProgress(Request $request, Activity $activity): void
     {

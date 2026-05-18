@@ -173,6 +173,39 @@ activity-player journey could not be exercised at all (Definition-of-Done #5).
 LOCAL/TESTING-only block (never production). Re-seed now yields 8 parents /
 11 children / 4 AI jobs. **Test:** `tests/Feature/DemoSeedUsableTest.php`.
 
+### Q1 — Guest quiz submission 500'd (High) ✅
+
+`/quizzes/{quiz}/submit` is a public route; `QuizController::submit()` inserts
+`user_id = null` for guests, but `quiz_attempts.user_id` was NOT NULL + FK
+cascade → every guest submission 500'd (same class as C1/C6/C7). **Fix:**
+migration `2026_05_18_000004` makes `user_id` nullable with `nullOnDelete`
+(anonymous attempts allowed; GDPR erase anonymises history). **Test:**
+`tests/Feature/DataIntegrityTest.php`.
+
+### Progress tables — RECONCILED (documented, by design)
+
+`activity_user_progress` (user grain → analytics) and `child_activity_progress`
+(child grain → product flows/drip/skill-state) are a **deliberate dual-write**,
+not orphaned schema. `ActivityController::recordProgress()` writes both; the
+distinction is now documented in code + here. Merging would force an analytics
+rewrite for no user benefit — kept separate intentionally.
+
+### Cascade integrity — VERIFIED ✅
+
+FK + GDPR-job cascade audited and tested (`DataIntegrityTest`): force-deleting
+a parent cascades `child_profiles` via FK; the GDPR `HardDeleteParentDataJob`
+force-deletes `child_profiles` + `child_activity_progress` with no orphans;
+soft-delete preserves data until the 30-day job (intended). `child_skill_states`,
+`consent_receipts`, `quiz_attempts` all carry correct FK cascade/nullOnDelete.
+
+### Q2/Q3 — Quiz scoring & idempotency (Medium, TRACKED — functional tranche)
+
+`QuizController::submit()`: (Q2) `short`/`long` answers are stored but never
+scored yet still inflate `$total`, so an essay quiz reports a misleading "0%"
+instead of "pending review"; (Q3) no double-submit guard — reload creates
+duplicate `QuizAttempt` rows. Owner: functional-flows tranche. Logged, not yet
+fixed (Medium; no data loss / no 500).
+
 ### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
 
 Audited every route-model-bound `{child}`/`{activity}`/`{milestone}` endpoint
