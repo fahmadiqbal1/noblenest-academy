@@ -234,15 +234,18 @@ jobs:
           php artisan serve --host=127.0.0.1 --port=8000 > /tmp/serve.log 2>&1 &
           SERVE_PID=$!
           trap 'kill $SERVE_PID 2>/dev/null || true' EXIT
+          # Probe the homepage (200), NOT /health — /health treats Redis +
+          # config-cache as CRITICAL and 503s in this lightweight CI context
+          # even though the app serves fine.
           for i in $(seq 1 30); do
-            if curl -fsS http://localhost:8000/health >/dev/null 2>&1; then
+            if curl -fsS -o /dev/null http://localhost:8000/; then
               echo "App up after ${i}s"; UP=1; break
             fi
             sleep 1
           done
           if [ -z "${UP:-}" ]; then
             echo "App failed to boot. serve.log:"; cat /tmp/serve.log
-            curl -sS http://localhost:8000/ | head -50 || true
+            curl -sS http://localhost:8000/ | head -30 || true
             exit 1
           fi
           npm run a11y

@@ -1,8 +1,12 @@
 {{-- Phase 6 — schema.org structured data for the marketing surface. --}}
 <script type="application/ld+json">
+{{-- '@'.'context' / '@'.'type': the literal @context/@type tokens are
+     parsed by Blade as the @context / @php-style directives and leak raw
+     PHP into the JSON-LD. Splitting the token keeps Blade out while
+     json_encode still emits the correct "@context"/"@type" keys. --}}
 {!! json_encode([
-    '@context' => 'https://schema.org',
-    '@type'    => 'EducationalOrganization',
+    '@'.'context' => 'https://schema.org',
+    '@'.'type'    => 'EducationalOrganization',
     'name'     => 'Noble Nest Global Academy',
     'url'      => config('app.url') ?? url('/'),
     'logo'     => asset('brand/noblenest-logo.svg'),
@@ -15,7 +19,7 @@
     ])),
     'inLanguage' => ['en', 'fr', 'ru', 'zh', 'es', 'ko', 'ur', 'ar'],
     'audience'   => [
-        '@type'       => 'PeopleAudience',
+        '@'.'type'       => 'PeopleAudience',
         'suggestedMinAge' => 0,
         'suggestedMaxAge' => 10,
     ],
