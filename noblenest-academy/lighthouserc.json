@@ -13,7 +13,8 @@
                     "width": 375,
                     "height": 812,
                     "deviceScaleFactor": 3
-                }
+                },
+                "chromeFlags": "--no-sandbox --disable-dev-shm-usage --disable-gpu --headless=new"
             },
             "numberOfRuns": 1
         },
