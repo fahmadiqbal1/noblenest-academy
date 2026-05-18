@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Models\Subscription;
-use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,8 +21,7 @@ class EnsureSubscriptionActive
         }
 
         $subscription = Subscription::where('user_id', $user->id)
-            ->where('active', true)
-            ->where('ends_at', '>', Carbon::now())
+            ->entitled()
             ->first();
 
         if (! $subscription) {

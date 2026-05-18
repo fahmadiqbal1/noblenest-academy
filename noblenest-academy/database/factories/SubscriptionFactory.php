@@ -20,6 +20,7 @@ class SubscriptionFactory extends Factory
             'amount' => 12.99,
             'currency' => 'USD',
             'active' => true,
+            'status' => Subscription::STATUS_ACTIVE,
             'starts_at' => now(),
             'ends_at' => now()->addMonth(),
         ];

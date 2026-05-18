@@ -31,6 +31,7 @@ class User extends Authenticatable
         'is_onboarded',
         'terms_accepted_at',
         'parent_pin_hash',
+        'stripe_customer_id',
     ];
 
     /**
@@ -112,8 +113,7 @@ class User extends Authenticatable
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()
-            ->where('active', true)
-            ->where('ends_at', '>', now())
+            ->entitled()
             ->exists();
     }
 }

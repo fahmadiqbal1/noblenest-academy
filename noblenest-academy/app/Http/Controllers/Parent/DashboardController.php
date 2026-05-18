@@ -20,8 +20,7 @@ class DashboardController extends Controller
 
         // Active subscription check
         $subscription = $user->subscriptions()
-            ->where('active', true)
-            ->where('ends_at', '>', now())
+            ->entitled()
             ->first();
 
         $hasSubscription = $subscription !== null;

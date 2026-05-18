@@ -14,7 +14,7 @@ class ActivityController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Activity::query();
+        $query = Activity::query()->where('published', true);
 
         // Filtering
         if ($request->filled('age')) {

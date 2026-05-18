@@ -26,9 +26,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Resolve & apply request locale (user pref → session → header → config)
         $middleware->appendToGroup('web', SetLocale::class);
 
-        // Exclude Stripe webhook from CSRF verification
+        // Payment provider webhooks are server-to-server and signature-verified
+        // in their controllers — they must bypass CSRF (a missing exemption
+        // 419s every legitimate webhook).
         $middleware->validateCsrfTokens(except: [
             'webhook/stripe',
+            'webhook/paypal',
         ]);
 
         // Register route middleware aliases
