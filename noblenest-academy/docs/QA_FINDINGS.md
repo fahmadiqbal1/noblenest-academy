@@ -262,13 +262,36 @@ the result view shows "pending review" instead of a misleading "0%". Q3:
 - No Bootstrap-class remnants found — the historical "mixed CSS" concern is
   already resolved (verified, not assumed).
 
-### a11y / Lighthouse — ESCALATED (operator/CI-gated, cannot run here)
+### a11y / Lighthouse — WIRED INTO CI ✅ (axe blocking & green; Lighthouse report-only)
 
-`npm run a11y` (axe-cli) and `npm run lighthouse` (lhci) require a running
-server + headless-browser binaries not available in this environment. They are
-already tracked in `docs/LAUNCH_READINESS.md` §6–7 as CI/human gates. Not
-silently passed — flagged for the operator to run in CI/staging before launch.
-RTL (ur/ar) was delivered in Phase 3 (`LocaleTest`, 13 tests, green).
+Now a real CI job (`a11y-lighthouse`): a seeded MySQL app served by
+`php artisan serve`, Chrome via `browser-actions/setup-chrome`.
+
+**axe (WCAG 2.1 AA) — HARD blocking gate, currently 0 violations** on all 5
+audited URLs. Real violations the gate caught and that were fixed: star-rating
+`aria-prohibited-attr` (→ `role="img"`), password-toggle/`role=radio`
+`button-name`/`aria-required-attr` (static ARIA fallbacks for Alpine binds),
+`color-contrast` (emerald/accent → 700 shades; `ui.badge` success-solid →
+emerald-700). Also caught a real Blade bug (org JSON-LD `@context`/`@type`
+parsed as Blade directives → raw PHP leaked) and a SPEC scope violation
+(homepage "Share on WhatsApp" viral CTA = W3, removed).
+
+**Lighthouse — runs every push, uploads a public report, NON-BLOCKING.**
+Accessibility category scores 1.0; performance ≈0.84, best-practices ≈0.93,
+SEO ≈0.92 under `php artisan serve`. The dev server sends no gzip / no
+cache-control, so `uses-text-compression`, `uses-long-cache-ttl` and the
+LCP/Speed-Index knock-on are **CI-harness artifacts**, not product defects
+(prod nginx+php-fpm handles them). Genuine items already fixed regardless:
+`/robots.txt` + `/sitemap.xml` were unrouted (now routed; SitemapController
+existed all along), fonts now self-hosted in CI (`npm run fonts`) to kill the
+`/fonts/*.woff2` 404 console errors.
+
+**Tracked pre-launch (operator):** run Lighthouse against staging nginx to
+validate the real perf/best-practices/SEO budgets (the only environment where
+those numbers are meaningful). Per the zero-defect rule this is escalated and
+documented, not hidden, and no gate/threshold was weakened — Lighthouse is
+introduced report-first on brownfield code; axe stays a true blocking gate.
+RTL (ur/ar) delivered in Phase 3 (`LocaleTest`, 13 tests, green).
 
 ### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
 
