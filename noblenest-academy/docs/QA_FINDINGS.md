@@ -206,6 +206,23 @@ instead of "pending review"; (Q3) no double-submit guard — reload creates
 duplicate `QuizAttempt` rows. Owner: functional-flows tranche. Logged, not yet
 fixed (Medium; no data loss / no 500).
 
+### AI sidecar / API pipeline — DECISION: KEEP (already degrades) ✅
+
+The earlier "sidecar unwired" assumption was wrong. It IS wired:
+`OrchestratorController::fillGaps` calls the Python sidecar
+(`http://127.0.0.1:8001/fill-gaps`) inside try/catch and **falls back to the
+PHP gateway** on failure; `CurriculumAIService` reads
+`config('services.curriculum_ai.base_url')` (safe `?? localhost` default) with
+a `/health` probe; `AIAssistantService` falls back to `mockResponse()` when no
+provider is configured. `ChatController::message` validates input (required,
+≤1000, child_profile_id must exist + parent-scoped — IDOR-safe) and returns
+JSON. **Decision: keep the sidecar — no delete; degradation already correct.**
+Verified by test: `/ai/assistant/message` returns 200 mock JSON with no
+provider, and 422 (not 500) on malformed/oversized input.
+**Test:** `tests/Feature/AiAssistantDegradationTest.php`.
+Observation (Low, logged): `/ai/assistant/message` is unauthenticated but
+rate-limited (`throttle:ai-assistant`) — acceptable; revisit if abused.
+
 ### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
 
 Audited every route-model-bound `{child}`/`{activity}`/`{milestone}` endpoint
