@@ -100,6 +100,15 @@ class Activity extends Model
     }
 
     /**
+     * Like rows for this activity. Required by AnalyticsController::mostLiked
+     * (`Activity::withCount('likes')`); its absence 500'd that admin tab.
+     */
+    public function likes()
+    {
+        return $this->hasMany(ActivityLike::class);
+    }
+
+    /**
      * Scope for activities appropriate for a given age (in months).
      */
     public function scopeForAge($query, int $ageMonths)

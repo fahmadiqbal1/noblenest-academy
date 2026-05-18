@@ -223,6 +223,27 @@ provider, and 422 (not 500) on malformed/oversized input.
 Observation (Low, logged): `/ai/assistant/message` is unauthenticated but
 rate-limited (`throttle:ai-assistant`) — acceptable; revisit if abused.
 
+### A1 — Admin "most-liked" analytics tab 500'd (High) ✅
+
+`AnalyticsController::mostLiked()` calls `Activity::withCount('likes')` but
+`Activity` had no `likes()` relation (only a denormalised `like_count` column
++ a separate `ActivityLike` table) → `/admin/analytics/most-liked` threw
+"Call to undefined method Activity::likes()". Found by the new admin
+route-smoke test. **Fix:** added `Activity::likes()` hasMany → `ActivityLike`.
+
+### Admin tabs — SMOKE-PROVEN ✅
+
+New `tests/Feature/AdminTabsSmokeTest.php` GETs all 17 parameterless admin
+tabs as a seeded Admin and asserts non-5xx / non-redirect (the W1/A1 class).
+All pass; `admin.dashboard` correctly redirects to analytics.
+
+### Q2/Q3 — Quiz scoring & double-submit (Medium) ✅ (was tracked)
+
+Q2: essay (`short`/`long`) answers no longer inflate the auto-graded `$total`;
+the result view shows "pending review" instead of a misleading "0%". Q3:
+`QuizController::submit` reuses a same-user attempt created in the last 10s
+(reload no longer duplicates). **Test:** `tests/Feature/QuizScoringTest.php`.
+
 ### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
 
 Audited every route-model-bound `{child}`/`{activity}`/`{milestone}` endpoint

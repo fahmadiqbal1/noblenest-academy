@@ -3,9 +3,14 @@
 <div class="container py-4">
     <h1>Quiz Results: {{ $quiz->title }}</h1>
     <div class="flex items-start gap-3 p-4 rounded-lg border bg-sky-50 border-sky-200 text-sky-800 mb-4">
-        You scored <strong>{{ $score }}</strong> out of <strong>{{ $total }}</strong>.
         @if($total > 0)
-            <span class="ms-2">({{ round($score/$total*100) }}%)</span>
+            You scored <strong>{{ $score }}</strong> out of <strong>{{ $total }}</strong>
+            <span class="ms-2">({{ round($score/$total*100) }}%)</span> on the auto-graded questions.
+        @else
+            Your answers were submitted.
+        @endif
+        @if(($ungraded ?? 0) > 0)
+            <span class="ms-2">{{ $ungraded }} open-ended {{ \Illuminate\Support\Str::plural('answer', $ungraded) }} pending review.</span>
         @endif
     </div>
     <h3>Review</h3>
