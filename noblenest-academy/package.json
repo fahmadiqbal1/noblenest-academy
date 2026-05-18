@@ -6,7 +6,7 @@
         "build": "vite build",
         "dev": "vite",
         "fonts": "bash scripts/fetch-fonts.sh",
-        "a11y": "axe http://localhost:8000/ http://localhost:8000/login http://localhost:8000/pricing http://localhost:8000/register http://localhost:8000/forgot-password --tags wcag2a,wcag2aa,wcag21a,wcag21aa --exit --quiet",
+        "a11y": "axe http://localhost:8000/ http://localhost:8000/login http://localhost:8000/pricing http://localhost:8000/register http://localhost:8000/forgot-password --tags wcag2a,wcag2aa,wcag21a,wcag21aa --exit",
         "a11y:legacy": "pa11y-ci",
         "lighthouse": "lhci autorun",
         "launch:checks": "npm run fonts && npm run build && npm run a11y && npm run lighthouse"
