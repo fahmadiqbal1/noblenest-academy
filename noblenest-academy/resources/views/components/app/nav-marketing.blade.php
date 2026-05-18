@@ -28,10 +28,10 @@
             {{-- Actions --}}
             <div class="flex items-center gap-2 ml-auto">
                 <x-app.locale-switcher />
-                <a href="/login" class="hidden sm:inline-flex items-center px-4 py-2 rounded-[var(--radius-sm)] border-[2px] border-[var(--color-border)] text-sm font-bold text-[var(--color-text)] hover:border-[var(--color-brand-400)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2">
+                <a href="{{ route('login') }}" class="hidden sm:inline-flex items-center px-4 py-2 rounded-[var(--radius-sm)] border-[2px] border-[var(--color-border)] text-sm font-bold text-[var(--color-text)] hover:border-[var(--color-brand-400)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand-600)] focus-visible:outline-offset-2">
                     Sign In
                 </a>
-                <x-ui.button as="a" href="/register" variant="primary" size="sm">Get Started</x-ui.button>
+                <x-ui.button as="a" href="{{ route('register') }}" variant="primary" size="sm">Get Started</x-ui.button>
             </div>
         </nav>
     </div>

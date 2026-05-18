@@ -244,6 +244,32 @@ the result view shows "pending review" instead of a misleading "0%". Q3:
 `QuizController::submit` reuses a same-user attempt created in the last 10s
 (reload no longer duplicates). **Test:** `tests/Feature/QuizScoringTest.php`.
 
+### F1 — Hardcoded hrefs bypassing route() (Medium) ✅
+
+`nav-parent.blade.php` (×3: /children, /profile) and `nav-marketing.blade.php`
+(×2: /login, /register) used literal hrefs and `request()->is()` active-state.
+**Fix:** routed through `route()` + `routeIs()`.
+
+### Deployment reliability — VERIFIED ✅
+
+- `npm run build` exits 0 (Vite green; only the known cosmetic
+  `/fonts/*.woff2` runtime-resolve warning — fonts are a tracked human action
+  in `docs/LAUNCH_READINESS.md`, not a code defect).
+- `php artisan route:cache` succeeds → no closure routes (closure routes
+  break production route caching).
+- `php artisan view:cache` succeeds → **every Blade compiles** (no syntax
+  errors anywhere; also re-validates all views touched this pass).
+- No Bootstrap-class remnants found — the historical "mixed CSS" concern is
+  already resolved (verified, not assumed).
+
+### a11y / Lighthouse — ESCALATED (operator/CI-gated, cannot run here)
+
+`npm run a11y` (axe-cli) and `npm run lighthouse` (lhci) require a running
+server + headless-browser binaries not available in this environment. They are
+already tracked in `docs/LAUNCH_READINESS.md` §6–7 as CI/human gates. Not
+silently passed — flagged for the operator to run in CI/staging before launch.
+RTL (ur/ar) was delivered in Phase 3 (`LocaleTest`, 13 tests, green).
+
 ### S0 — IDOR sweep: VERIFIED SAFE (no fix needed)
 
 Audited every route-model-bound `{child}`/`{activity}`/`{milestone}` endpoint
