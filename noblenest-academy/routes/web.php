@@ -32,6 +32,7 @@ use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -61,6 +62,15 @@ Route::view('/for-schools', 'pages.for-schools')->name('for-schools'); // Phase 
 
 Route::get('/milestones', [MilestoneWallController::class, 'index'])->name('milestones.wall');
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
+
+// SEO: sitemap + robots (SitemapController existed but was never routed —
+// /robots.txt 404'd, failing the Lighthouse SEO `robots-txt` audit).
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', function () {
+    $body = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /parent\nDisallow: /child\n\nSitemap: ".url('/sitemap.xml')."\n";
+
+    return response($body, 200, ['Content-Type' => 'text/plain']);
+})->name('robots');
 
 // Phase 1 — admin-only style guide (visual regression baseline).
 Route::get('/_styleguide', fn () => view('_styleguide'))

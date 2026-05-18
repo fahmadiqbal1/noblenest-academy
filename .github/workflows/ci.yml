@@ -211,6 +211,9 @@ jobs:
         with:
           chrome-version: stable
       - run: npm ci
+      # Self-host fonts so the <link rel=preload> /fonts/*.woff2 don't 404 —
+      # those console errors were failing the Lighthouse best-practices audit.
+      - run: npm run fonts
       - run: npm run build
       - name: Prepare app (mysql + seeded demo)
         run: |
