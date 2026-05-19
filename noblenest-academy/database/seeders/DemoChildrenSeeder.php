@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\ChildProfile;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -183,9 +184,33 @@ class DemoChildrenSeeder extends Seeder
             foreach ($family['children'] as $childData) {
                 ChildProfile::firstOrCreate(
                     ['parent_id' => $parent->id, 'name' => $childData['name']],
-                    array_merge($childData, ['parent_id' => $parent->id])
+                    array_merge($childData, [
+                        'parent_id' => $parent->id,
+                        // Demo: pre-grant parental consent so child-facing routes
+                        // (activities, dashboard, assessment) render out of the box.
+                        'parental_consent_at' => now(),
+                    ])
                 );
             }
+
+            // Demo: every demo parent gets an ACTIVE subscription so the
+            // subscription.active gate doesn't paywall the activity feed.
+            // Real customers go through the Stripe checkout flow; this seed
+            // is gated to local/testing in DatabaseSeeder (production block
+            // does NOT call DemoChildrenSeeder).
+            Subscription::firstOrCreate(
+                ['user_id' => $parent->id, 'provider' => 'demo'],
+                [
+                    'plan' => 'family',
+                    'provider_id' => 'demo_'.$parent->id,
+                    'amount' => 0,
+                    'currency' => 'USD',
+                    'active' => true,
+                    'status' => Subscription::STATUS_ACTIVE,
+                    'starts_at' => now(),
+                    'ends_at' => now()->addYear(),
+                ]
+            );
         }
     }
 }

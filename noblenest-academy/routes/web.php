@@ -33,7 +33,9 @@ use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SitemapController;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================================
@@ -121,6 +123,49 @@ Route::post('/theme-toggle', function () {
 Route::post('/ai/assistant/message', [ChatController::class, 'message'])
     ->middleware('throttle:ai-assistant')
     ->name('ai.assistant.message');
+
+// ============================================================================
+// DEV / DEMO HELPERS — LOCAL & TESTING ONLY (never registered in production)
+// ----------------------------------------------------------------------------
+// One-click toggles so a demo parent can flip the subscription.active gate
+// on/off without going through Stripe. The whole group is wrapped in an
+// env() guard so the routes literally do not exist on prod.
+// ============================================================================
+if (app()->environment('local', 'testing')) {
+    Route::middleware(['auth'])->prefix('dev')->name('dev.')->group(function () {
+        Route::get('/activate-subscription', function () {
+            $u = Auth::user();
+            Subscription::updateOrCreate(
+                ['user_id' => $u->id, 'provider' => 'demo'],
+                [
+                    'plan' => 'family',
+                    'provider_id' => 'demo_'.$u->id,
+                    'amount' => 0,
+                    'currency' => 'USD',
+                    'active' => true,
+                    'status' => Subscription::STATUS_ACTIVE,
+                    'starts_at' => now(),
+                    'ends_at' => now()->addYear(),
+                ]
+            );
+
+            return redirect()->route('activities.index')
+                ->with('status', 'DEMO: Family plan activated (local only — no Stripe charge).');
+        })->name('activate-subscription');
+
+        Route::get('/deactivate-subscription', function () {
+            $u = Auth::user();
+            Subscription::where('user_id', $u->id)->update([
+                'active' => false,
+                'status' => Subscription::STATUS_CANCELED,
+                'canceled_at' => now(),
+            ]);
+
+            return redirect()->route('parent.dashboard')
+                ->with('status', 'DEMO: subscription canceled (local only).');
+        })->name('deactivate-subscription');
+    });
+}
 
 // ============================================================================
 // ONBOARDING (Parent) — Phase 5 rebuild planned
