@@ -1,8 +1,24 @@
 {{-- Step Player Component — Animated visual slideshow for guided activity walkthrough --}}
-{{-- Usage: <x-step-player :steps="$steps" subject="social" activityEmoji="🎯" /> --}}
-@props(['steps', 'subject' => 'default', 'activityEmoji' => '🎯'])
+{{-- Usage (either form works):
+       <x-step-player :steps="$activity->steps" subject="social" activityEmoji="🎯" />
+       <x-step-player :activity="$activity" />
+     Accepting either prevents the "Undefined $steps" 500 when a caller
+     passes :activity instead. Explicit attributes always win over derived. --}}
+@props([
+    'steps' => null,
+    'activity' => null,
+    'child' => null,
+    'subject' => null,
+    'activityEmoji' => null,
+])
 
 @php
+    if ($steps === null && $activity) {
+        $steps = $activity->steps ?? collect();
+    }
+    $steps = $steps ?? collect();
+    $subject = $subject ?? ($activity?->subject ?? 'default');
+    $activityEmoji = $activityEmoji ?? ($activity?->emoji ?? '🎯');
     $allSteps = $steps->sortBy('step_number')->values();
 
     // Subject-specific gradient palettes

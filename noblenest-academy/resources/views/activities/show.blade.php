@@ -185,19 +185,10 @@
     </x-ui.card>
     @endif
 
-    {{-- ── Step player ── --}}
-    @if($activity->steps && $activity->steps->count())
-    <x-ui.card variant="clay" padding="md" class="mb-4">
-        <h2 class="font-bold text-[var(--color-text)] mb-3 flex items-center gap-2">
-            <span aria-hidden="true">🎬</span> Guided Walkthrough
-        </h2>
-        <x-step-player
-            :steps="$activity->steps"
-            :subject="$activity->subject ?? 'default'"
-            :activityEmoji="$activity->emoji ?? '🎯'"
-        />
-    </x-ui.card>
-    @endif
+    {{-- Step player is rendered by the player-dispatch (guided-steps
+         partial) below. The previous hardcoded "Guided Walkthrough" card
+         duplicated that render and crashed with "Undefined $steps" via
+         mismatched props between the two callers. --}}
 
     {{-- ── Materials ── --}}
     @if(is_array($activity->materials_needed) && count((array)$activity->materials_needed))

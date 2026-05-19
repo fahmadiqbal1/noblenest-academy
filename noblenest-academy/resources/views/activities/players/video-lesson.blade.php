@@ -40,15 +40,18 @@
             </details>
         @endif
     @else
-        <x-ui.button
-            variant="primary"
-            href="{{ route('activities.video', $activity) . ($childQuery ?? '') }}"
-            icon="play"
-            size="lg"
-            class="w-full justify-center"
-        >
-            Watch Video 🎬
-        </x-ui.button>
+        {{-- No video file uploaded for this activity. Don't dead-end the
+             user on a "Watch Video" CTA that goes nowhere — fall through
+             to the step-player so the guided walkthrough still works. --}}
+        @if($activity->steps && $activity->steps->count() > 0)
+            <x-step-player :activity="$activity" :child="$child ?? null" />
+        @else
+            <x-ui.card variant="clay" padding="lg" class="text-center space-y-3">
+                <div class="text-5xl" aria-hidden="true">{{ $activity->emoji ?: '🎬' }}</div>
+                <h3 class="font-display font-bold text-xl text-[var(--color-text)]">Video coming soon</h3>
+                <p class="text-sm text-[var(--color-text-muted)] max-w-md mx-auto">{{ $activity->description ?: "We're producing the lesson video for this activity. Use the instructions above to guide your play in the meantime." }}</p>
+            </x-ui.card>
+        @endif
     @endif
 
     <div class="text-center">
