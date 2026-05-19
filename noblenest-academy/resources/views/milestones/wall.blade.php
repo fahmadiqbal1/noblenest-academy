@@ -1,6 +1,6 @@
-@extends('layouts.parent')
+@extends('layouts.marketing')
 @section('meta_title', 'Milestone Wall – NobleNest Community')
-@section('meta_description', 'Celebrate children's milestones together. A community wall of learning achievements from families worldwide.')
+@section('meta_description', "Celebrate children's milestones together. A community wall of learning achievements from families worldwide.")
 
 @section('content')
 <div class="container py-5" style="max-width:900px">

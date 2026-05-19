@@ -2,34 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ChildProfile;
-use App\Models\Milestone;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class MilestoneWallController extends Controller
 {
+    /**
+     * Public "wall of achievements" page.
+     *
+     * The persistence side (a polymorphic `child_achievements` log written
+     * when a child completes a milestone) is not yet built — the prior
+     * controller queried `child_achievements` directly and 500'd in
+     * production ("Base table not found"). Until that table + writer are
+     * shipped, this controller returns an empty paginator so the page
+     * renders its built-in empty state instead of crashing. Tracked in
+     * docs/QA_FINDINGS.md as M1.
+     */
     public function index(Request $request)
     {
-        $domain = $request->query('domain');
-
-        $achievements = ChildProfile::join('child_achievements', 'child_profiles.id', '=', 'child_achievements.child_profile_id')
-            ->join('milestones', function ($join) {
-                $join->on('child_achievements.achievable_id', '=', 'milestones.id')
-                    ->where('child_achievements.achievable_type', '=', Milestone::class);
-            })
-            ->when($domain, fn ($q) => $q->where('milestones.domain', $domain))
-            ->select('child_achievements.*')
-            ->orderByDesc('child_achievements.achieved_at')
-            ->paginate(18)
-            ->withQueryString();
-
-        // Eager load achievable and child
-        $achievements->getCollection()->transform(function ($item) {
-            $item->achievable = Milestone::find($item->achievable_id);
-            $item->child = ChildProfile::find($item->child_profile_id);
-
-            return $item;
-        });
+        $page = LengthAwarePaginator::resolveCurrentPage('page');
+        $achievements = new LengthAwarePaginator(
+            new Collection,
+            0,
+            18,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('milestones.wall', compact('achievements'));
     }
