@@ -5,28 +5,31 @@ namespace App\Http\Controllers\Parent;
 use App\Http\Controllers\Controller;
 use App\Models\ChildProfile;
 use App\Models\Milestone;
+use Illuminate\Support\Facades\Auth;
 
 class MilestoneController extends Controller
 {
-    public function index(ChildProfile $child)
+    /**
+     * Parent milestones hub.
+     *
+     * The route `/parent/milestones` has no {child} param, so the prior
+     * `index(ChildProfile $child)` signature received an empty Eloquent
+     * instance, failed the policy check, and 403'd on every click of the
+     * dashboard's "View Milestones" CTA. Redirect to a place that actually
+     * shows milestones: the first child's dashboard if one exists, or the
+     * add-child flow if not.
+     */
+    public function index()
     {
-        $this->authorize('view', $child);
+        $parent = Auth::user();
+        $first = ChildProfile::where('parent_id', $parent->id)->first();
 
-        // Milestones appropriate for this child's age, joined with completion status
-        $milestones = Milestone::where('age_months_min', '<=', $child->age_months ?? 0)
-            ->where('age_months_max', '>=', ($child->age_months ?? 0) - 12)
-            ->orderBy('age_months_min')
-            ->get()
-            ->map(function ($milestone) use ($child) {
-                $milestone->completed = $child->milestones()
-                    ->where('milestone_id', $milestone->id)
-                    ->wherePivot('is_completed', true)
-                    ->exists();
+        if (! $first) {
+            return redirect()->route('children.create')
+                ->with('status', __('Add a child to start tracking milestones.'));
+        }
 
-                return $milestone;
-            });
-
-        return view('parent.milestones', compact('child', 'milestones'));
+        return redirect()->route('child.dashboard', $first);
     }
 
     public function toggle(ChildProfile $child, Milestone $milestone)

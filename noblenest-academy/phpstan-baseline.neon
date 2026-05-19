@@ -187,12 +187,6 @@ parameters:
 			path: app/Http/Controllers/Parent/DashboardController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Milestone\:\:\$completed\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Parent/MilestoneController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Relations\\Pivot\:\:\$is_completed\.$#'
 			identifier: property.notFound
 			count: 2
