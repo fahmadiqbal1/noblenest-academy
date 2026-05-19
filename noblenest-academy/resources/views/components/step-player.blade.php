@@ -21,6 +21,18 @@
     $activityEmoji = $activityEmoji ?? ($activity?->emoji ?? '🎯');
     $allSteps = $steps->sortBy('step_number')->values();
 
+    // Lever 1 — runtime browser TTS. Map the learner's locale to a BCP-47
+    // tag so SpeechSynthesis reads each step aloud in the right language at
+    // $0 (no stored audio, no per-file moderation — step text is already
+    // moderated upstream). Falls back to silent auto-advance if the browser
+    // has no speechSynthesis or no voice for the language.
+    $ttsLocale = $child?->preferred_language
+        ?? ($activity?->language ?? app()->getLocale());
+    $bcp47 = [
+        'en' => 'en-US', 'fr' => 'fr-FR', 'ru' => 'ru-RU', 'zh' => 'zh-CN',
+        'es' => 'es-ES', 'ko' => 'ko-KR', 'ur' => 'ur-PK', 'ar' => 'ar-SA',
+    ][$ttsLocale] ?? 'en-US';
+
     // Subject-specific gradient palettes
     $subjectPalettes = [
         'quran'          => ['from' => '#064E3B', 'to' => '#10B981'],
@@ -331,6 +343,15 @@
             <x-ui.icon name="skip-forward" />
         </button>
 
+        <button class="nn-sp-btn" @click="toggleVoice()"
+                x-show="voiceSupported"
+                :aria-pressed="voiceEnabled"
+                :aria-label="voiceEnabled ? 'Mute narration' : 'Unmute narration'"
+                :title="voiceEnabled ? 'Narration on — tap to mute' : 'Narration off — tap to unmute'">
+            <x-ui.icon name="volume-2" x-show="voiceEnabled" />
+            <x-ui.icon name="volume-x" x-show="!voiceEnabled" />
+        </button>
+
         <div class="nn-sp-progress"
              role="progressbar"
              aria-label="Progress through steps"
@@ -376,6 +397,11 @@ function stepPlayer() {
         playing: false,
         autoAdvanceTimer: null,
 
+        // Lever 1 — runtime browser TTS ($0, no stored audio)
+        speechLang: @json($bcp47),
+        voiceEnabled: true,
+        voiceSupported: (typeof window !== 'undefined' && 'speechSynthesis' in window),
+
         get currentStep() {
             return this.steps[this.currentIndex] || null;
         },
@@ -389,15 +415,25 @@ function stepPlayer() {
             return filled + hollow;
         },
 
-        init() {},
+        init() {
+            try { this.voiceEnabled = localStorage.getItem('nn-voice') !== 'off'; } catch (e) {}
+        },
 
         goTo(i) {
+            this.cancelSpeech();
             this.currentIndex = i;
             if (this.playing) this.playCurrentStep();
         },
 
         togglePlay() {
             this.playing ? this.pause() : this.play();
+        },
+
+        toggleVoice() {
+            this.voiceEnabled = !this.voiceEnabled;
+            try { localStorage.setItem('nn-voice', this.voiceEnabled ? 'on' : 'off'); } catch (e) {}
+            if (!this.voiceEnabled) this.cancelSpeech();
+            else if (this.playing) this.playCurrentStep();
         },
 
         play() {
@@ -408,19 +444,59 @@ function stepPlayer() {
         pause() {
             this.playing = false;
             clearTimeout(this.autoAdvanceTimer);
+            this.cancelSpeech();
             if (this.$refs.audio) this.$refs.audio.pause();
+        },
+
+        cancelSpeech() {
+            if (this.voiceSupported) {
+                try { window.speechSynthesis.cancel(); } catch (e) {}
+            }
+        },
+
+        // Speak the step with the Web Speech API in the learner's language.
+        // Resolves via onend OR a safety timeout (some engines never fire
+        // onend), so playback never stalls.
+        speak(step) {
+            this.cancelSpeech();
+            const text = [step.title, step.instruction].filter(Boolean).join('. ');
+            if (!text) { this.scheduleAutoAdvance(step.duration_seconds); return; }
+            let advanced = false;
+            const go = () => { if (!advanced) { advanced = true; if (this.playing) this.next(); } };
+            try {
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = this.speechLang;
+                u.rate = 0.95;
+                const v = window.speechSynthesis.getVoices()
+                    .find(x => x.lang && x.lang.toLowerCase().startsWith(this.speechLang.slice(0, 2)));
+                if (v) u.voice = v;
+                u.onend = go;
+                u.onerror = go;
+                window.speechSynthesis.speak(u);
+                // Safety net: ~180 wpm, min the configured duration.
+                const est = Math.max((step.duration_seconds || 8), Math.ceil(text.split(/\s+/).length / 3) + 2);
+                clearTimeout(this.autoAdvanceTimer);
+                this.autoAdvanceTimer = setTimeout(go, est * 1000);
+            } catch (e) {
+                this.scheduleAutoAdvance(step.duration_seconds);
+            }
         },
 
         playCurrentStep() {
             if (!this.playing) return;
             const step = this.currentStep;
             if (!step) { this.pause(); return; }
+            this.cancelSpeech();
 
             if (step.audio_url && this.$refs.audio) {
+                // Pre-generated audio file wins when present (premium tier).
                 this.$refs.audio.src = '/storage/' + step.audio_url;
                 this.$refs.audio.play().catch(() => {
                     this.scheduleAutoAdvance(step.duration_seconds);
                 });
+            } else if (this.voiceEnabled && this.voiceSupported) {
+                // Lever 1: free runtime narration, all 8 languages.
+                this.speak(step);
             } else {
                 this.scheduleAutoAdvance(step.duration_seconds);
             }
